@@ -1,0 +1,1014 @@
+openapi: 3.0.3
+info:
+  title: Smart Exam Backend API
+  version: 0.1.0
+  description: |
+    Smart Exam の Backend API 定義。
+    要件定義書（../要件定義書.md）をベースに、結果保管・不正解再実施・科目別フィルタ・解答用紙生成/印刷・採点済み用紙アップロード+AI解析を対象とする。
+servers:
+  - url: https://{api_domain}
+    variables:
+      api_domain:
+        default: example.com
+
+tags:
+  - name: Catalog
+    description: 科目/テスト/問題の参照
+  - name: Attempts
+    description: オンライン実施と結果保管
+  - name: AnswerSheets
+    description: 解答用紙（印刷用）
+  - name: Files
+    description: S3 署名付きURL
+  - name: GradedSheets
+    description: 採点済み用紙とAI解析
+  - name: Explanations
+    description: AI 解説生成
+  - name: Words
+    description: 単語（Q/A）マスタ
+  - name: WordTests
+    description: 単語テスト（漢字テスト）
+  - name: WordTestAttempts
+    description: 単語テストの正誤登録（提出）
+
+paths:
+  /v1/subjects:
+    get:
+      tags: [Catalog]
+      summary: 科目一覧取得
+      operationId: getSubjects
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSubjectsResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/tests:
+    get:
+      tags: [Catalog]
+      summary: テスト一覧取得（科目別フィルタ）
+      operationId: getTests
+      parameters:
+        - in: query
+          name: subjectid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTestsResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/tests/{testid}/questions:
+    get:
+      tags: [Catalog]
+      summary: 問題一覧取得
+      operationId: getQuestions
+      parameters:
+        - $ref: '#/components/parameters/TestId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetQuestionsResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/attempts:
+    post:
+      tags: [Attempts]
+      summary: テスト実施開始
+      operationId: createAttempt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAttemptRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAttemptResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/attempts/{attemptid}/submit:
+    post:
+      tags: [Attempts]
+      summary: 解答提出（正誤結果を保管）
+      operationId: submitAttempt
+      parameters:
+        - $ref: '#/components/parameters/AttemptId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAttemptRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitAttemptResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/tests/{testid}/results:
+    get:
+      tags: [Attempts]
+      summary: テスト結果取得（正誤表示）
+      operationId: getTestResults
+      parameters:
+        - $ref: '#/components/parameters/TestId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTestResultsResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/tests/{testid}/wrongquestions:
+    get:
+      tags: [Attempts]
+      summary: 不正解問題取得（再実施用）
+      operationId: getWrongQuestions
+      parameters:
+        - $ref: '#/components/parameters/TestId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWrongQuestionsResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/answersheets:
+    post:
+      tags: [AnswerSheets]
+      summary: 解答用紙作成（手動選択→印刷用）
+      operationId: createAnswerSheet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnswerSheetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAnswerSheetResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/files/presigndownload:
+    post:
+      tags: [Files]
+      summary: S3 ダウンロード用 署名付きURL発行
+      operationId: presignDownload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresignDownloadRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignDownloadResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/files/presignupload:
+    post:
+      tags: [Files]
+      summary: S3 アップロード用 署名付きURL発行（採点済み用紙など）
+      operationId: presignUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresignUploadRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignUploadResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/gradedsheets:
+    post:
+      tags: [GradedSheets]
+      summary: 採点済み用紙登録（AI解析開始）
+      operationId: createGradedSheet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGradedSheetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGradedSheetResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/gradedsheets/{gradedsheetid}:
+    get:
+      tags: [GradedSheets]
+      summary: 採点済み用紙の解析結果取得
+      operationId: getGradedSheet
+      parameters:
+        - $ref: '#/components/parameters/GradedSheetId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetGradedSheetResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/questions/{questionid}/explanations:
+    post:
+      tags: [Explanations]
+      summary: 解説生成（疑似問題生成はしない）
+      operationId: createExplanation
+      parameters:
+        - $ref: '#/components/parameters/QuestionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExplanationRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateExplanationResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/words:
+    post:
+      tags: [Words]
+      summary: 単語（Q/A）登録
+      operationId: createWord
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWordRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWordResponse'
+        default:
+          $ref: '#/components/responses/Error'
+    get:
+      tags: [Words]
+      summary: 単語一覧取得
+      operationId: getWords
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWordsResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/words/{wordid}:
+    delete:
+      tags: [Words]
+      summary: 単語削除
+      operationId: deleteWord
+      parameters:
+        - $ref: '#/components/parameters/WordId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteWordResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/wordtests:
+    post:
+      tags: [WordTests]
+      summary: 単語テスト作成（指定数）
+      operationId: createWordTest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWordTestRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWordTestResponse'
+        default:
+          $ref: '#/components/responses/Error'
+    get:
+      tags: [WordTests]
+      summary: 作成済み単語テスト一覧取得
+      operationId: getWordTests
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWordTestsResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/wordtests/{wordtestid}:
+    delete:
+      tags: [WordTests]
+      summary: 単語テスト削除
+      operationId: deleteWordTest
+      parameters:
+        - $ref: '#/components/parameters/WordTestId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteWordTestResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/wordtests/{wordtestid}/pdf:
+    get:
+      tags: [WordTests]
+      summary: 単語テストPDFダウンロードURL取得
+      operationId: getWordTestPdf
+      parameters:
+        - $ref: '#/components/parameters/WordTestId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignDownloadResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/wordtestattempts:
+    post:
+      tags: [WordTestAttempts]
+      summary: 単語テスト実施開始（正誤登録用 attempt 作成）
+      operationId: createWordTestAttempt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWordTestAttemptRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWordTestAttemptResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /v1/wordtestattempts/{wordtestattemptid}/submit:
+    post:
+      tags: [WordTestAttempts]
+      summary: 単語テストの正誤提出
+      operationId: submitWordTestAttempt
+      parameters:
+        - $ref: '#/components/parameters/WordTestAttemptId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitWordTestAttemptRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitWordTestAttemptResponse'
+        default:
+          $ref: '#/components/responses/Error'
+
+components:
+  parameters:
+    TestId:
+      in: path
+      name: testid
+      required: true
+      schema:
+        type: string
+    AttemptId:
+      in: path
+      name: attemptid
+      required: true
+      schema:
+        type: string
+    GradedSheetId:
+      in: path
+      name: gradedsheetid
+      required: true
+      schema:
+        type: string
+    QuestionId:
+      in: path
+      name: questionid
+      required: true
+      schema:
+        type: string
+    WordId:
+      in: path
+      name: wordid
+      required: true
+      schema:
+        type: string
+    WordTestId:
+      in: path
+      name: wordtestid
+      required: true
+      schema:
+        type: string
+    WordTestAttemptId:
+      in: path
+      name: wordtestattemptid
+      required: true
+      schema:
+        type: string
+
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Invalid request
+            details:
+              type: object
+              additionalProperties: true
+
+    Subject:
+      type: object
+      required: [subject_id, name]
+      properties:
+        subject_id:
+          type: string
+        name:
+          type: string
+
+    Test:
+      type: object
+      required: [test_id, subject_id, title, question_count]
+      properties:
+        test_id:
+          type: string
+        subject_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        question_count:
+          type: integer
+          format: int32
+
+    Question:
+      type: object
+      required: [question_id, test_id, subject_id, number]
+      properties:
+        question_id:
+          type: string
+        test_id:
+          type: string
+        subject_id:
+          type: string
+        number:
+          type: integer
+          format: int32
+        prompt_s3_key:
+          type: string
+          nullable: true
+
+    AnswerResult:
+      type: object
+      required: [question_id, number, is_correct]
+      properties:
+        question_id:
+          type: string
+        number:
+          type: integer
+          format: int32
+        is_correct:
+          type: boolean
+
+    Attempt:
+      type: object
+      required: [attempt_id, test_id, subject_id, status, started_at]
+      properties:
+        attempt_id:
+          type: string
+        test_id:
+          type: string
+        subject_id:
+          type: string
+        status:
+          type: string
+          enum: [IN_PROGRESS, SUBMITTED]
+        started_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    GetSubjectsResponse:
+      type: object
+      required: [subjects]
+      properties:
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subject'
+
+    GetTestsResponse:
+      type: object
+      required: [tests]
+      properties:
+        tests:
+          type: array
+          items:
+            $ref: '#/components/schemas/Test'
+
+    GetQuestionsResponse:
+      type: object
+      required: [questions]
+      properties:
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+
+    CreateAttemptRequest:
+      type: object
+      required: [test_id]
+      properties:
+        test_id:
+          type: string
+
+    CreateAttemptResponse:
+      type: object
+      required: [attempt]
+      properties:
+        attempt:
+          $ref: '#/components/schemas/Attempt'
+
+    SubmitAttemptRequest:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerResult'
+
+    SubmitAttemptResponse:
+      type: object
+      required: [attempt]
+      properties:
+        attempt:
+          $ref: '#/components/schemas/Attempt'
+
+    GetTestResultsResponse:
+      type: object
+      required: [test_id, latest_attempt_id, results]
+      properties:
+        test_id:
+          type: string
+        latest_attempt_id:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerResult'
+
+    GetWrongQuestionsResponse:
+      type: object
+      required: [test_id, wrong_questions]
+      properties:
+        test_id:
+          type: string
+        wrong_questions:
+          type: array
+          items:
+            type: object
+            required: [question_id, number]
+            properties:
+              question_id:
+                type: string
+              number:
+                type: integer
+                format: int32
+
+    CreateAnswerSheetRequest:
+      type: object
+      required: [test_id, question_ids]
+      properties:
+        test_id:
+          type: string
+        question_ids:
+          type: array
+          items:
+            type: string
+
+    AnswerSheet:
+      type: object
+      required: [answer_sheet_id, test_id, subject_id, question_ids, pdf_s3_key]
+      properties:
+        answer_sheet_id:
+          type: string
+        test_id:
+          type: string
+        subject_id:
+          type: string
+        question_ids:
+          type: array
+          items:
+            type: string
+        pdf_s3_key:
+          type: string
+
+    CreateAnswerSheetResponse:
+      type: object
+      required: [answer_sheet]
+      properties:
+        answer_sheet:
+          $ref: '#/components/schemas/AnswerSheet'
+
+    PresignDownloadRequest:
+      type: object
+      required: [s3_key]
+      properties:
+        s3_key:
+          type: string
+
+    PresignDownloadResponse:
+      type: object
+      required: [url, expires_in]
+      properties:
+        url:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
+
+    PresignUploadRequest:
+      type: object
+      required: [purpose, content_type, file_name]
+      properties:
+        purpose:
+          type: string
+          enum: [GRADED_SHEET]
+        content_type:
+          type: string
+          example: image/jpeg
+        file_name:
+          type: string
+
+    PresignUploadResponse:
+      type: object
+      required: [upload, s3_key, expires_in]
+      properties:
+        upload:
+          type: object
+          required: [url, method, headers]
+          properties:
+            url:
+              type: string
+            method:
+              type: string
+              enum: [PUT]
+            headers:
+              type: object
+              additionalProperties:
+                type: string
+        s3_key:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
+
+    AiProvider:
+      type: string
+      enum: [BEDROCK, OPENAI, GOOGLE]
+
+    CreateGradedSheetRequest:
+      type: object
+      required: [test_id, image_s3_key, ai_provider]
+      properties:
+        test_id:
+          type: string
+        image_s3_key:
+          type: string
+        ai_provider:
+          $ref: '#/components/schemas/AiProvider'
+
+    GradedSheet:
+      type: object
+      required: [graded_sheet_id, test_id, subject_id, image_s3_key, status]
+      properties:
+        graded_sheet_id:
+          type: string
+        test_id:
+          type: string
+        subject_id:
+          type: string
+        image_s3_key:
+          type: string
+        status:
+          type: string
+          enum: [UPLOADED, ANALYZING, DONE, FAILED]
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerResult'
+          nullable: true
+
+    CreateGradedSheetResponse:
+      type: object
+      required: [graded_sheet]
+      properties:
+        graded_sheet:
+          $ref: '#/components/schemas/GradedSheet'
+
+    GetGradedSheetResponse:
+      type: object
+      required: [graded_sheet]
+      properties:
+        graded_sheet:
+          $ref: '#/components/schemas/GradedSheet'
+
+    CreateExplanationRequest:
+      type: object
+      required: [ai_provider]
+      properties:
+        ai_provider:
+          $ref: '#/components/schemas/AiProvider'
+        context:
+          type: object
+          additionalProperties: true
+
+    CreateExplanationResponse:
+      type: object
+      required: [question_id, explanation]
+      properties:
+        question_id:
+          type: string
+        explanation:
+          type: object
+          required: [text]
+          properties:
+            text:
+              type: string
+
+    WordType:
+      type: string
+      enum: [KANJI]
+
+    Word:
+      type: object
+      required: [word_id, question, answer, answer_hiragana, word_type]
+      properties:
+        word_id:
+          type: string
+        question:
+          type: string
+        answer:
+          type: string
+        answer_hiragana:
+          type: string
+          description: PDF出力時に太字（bold）にする対象
+        word_type:
+          $ref: '#/components/schemas/WordType'
+
+    CreateWordRequest:
+      type: object
+      required: [question, answer, answer_hiragana, word_type]
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+        answer_hiragana:
+          type: string
+        word_type:
+          $ref: '#/components/schemas/WordType'
+
+    CreateWordResponse:
+      type: object
+      required: [word]
+      properties:
+        word:
+          $ref: '#/components/schemas/Word'
+
+    GetWordsResponse:
+      type: object
+      required: [words]
+      properties:
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/Word'
+
+    DeleteWordResponse:
+      type: object
+      required: [word_id]
+      properties:
+        word_id:
+          type: string
+
+    WordTest:
+      type: object
+      required: [word_test_id, word_type, count, word_ids]
+      properties:
+        word_test_id:
+          type: string
+        word_type:
+          $ref: '#/components/schemas/WordType'
+        count:
+          type: integer
+          format: int32
+        word_ids:
+          type: array
+          items:
+            type: string
+        pdf_s3_key:
+          type: string
+          nullable: true
+
+    WordTestAnswerResult:
+      type: object
+      required: [word_id, is_correct]
+      properties:
+        word_id:
+          type: string
+        is_correct:
+          type: boolean
+
+    WordTestAttempt:
+      type: object
+      required: [word_test_attempt_id, word_test_id, status, started_at]
+      properties:
+        word_test_attempt_id:
+          type: string
+        word_test_id:
+          type: string
+        status:
+          type: string
+          enum: [IN_PROGRESS, SUBMITTED]
+        started_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreateWordTestAttemptRequest:
+      type: object
+      required: [word_test_id]
+      properties:
+        word_test_id:
+          type: string
+
+    CreateWordTestAttemptResponse:
+      type: object
+      required: [word_test_attempt]
+      properties:
+        word_test_attempt:
+          $ref: '#/components/schemas/WordTestAttempt'
+
+    SubmitWordTestAttemptRequest:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTestAnswerResult'
+
+    SubmitWordTestAttemptResponse:
+      type: object
+      required: [word_test_attempt]
+      properties:
+        word_test_attempt:
+          $ref: '#/components/schemas/WordTestAttempt'
+
+    CreateWordTestRequest:
+      type: object
+      required: [word_type, count]
+      properties:
+        word_type:
+          $ref: '#/components/schemas/WordType'
+        count:
+          type: integer
+          format: int32
+
+    CreateWordTestResponse:
+      type: object
+      required: [word_test]
+      properties:
+        word_test:
+          $ref: '#/components/schemas/WordTest'
+
+    GetWordTestsResponse:
+      type: object
+      required: [word_tests]
+      properties:
+        word_tests:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTest'
+
+    DeleteWordTestResponse:
+      type: object
+      required: [word_test_id]
+      properties:
+        word_test_id:
+          type: string
