@@ -27,6 +27,10 @@ resource "aws_lambda_function" "api" {
   filename         = data.archive_file.lambda_dummy.output_path
   source_code_hash = data.archive_file.lambda_dummy.output_base64sha256
 
+  lifecycle {
+    ignore_changes = [source_code_hash]
+  }
+
   timeout     = 30
   memory_size = 1024
 
