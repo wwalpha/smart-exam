@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useWordTestStore } from '@/stores'
 
 export function useWordTestPage() {
-  const datas = useWordTestStore((s) => s.wordtest.datas)
+  const lists = useWordTestStore((s) => s.wordtest.lists)
   const status = useWordTestStore((s) => s.wordtest.status)
   const fetchWordTests = useWordTestStore((s) => s.fetchWordTests)
   const hasRequestedRef = useRef(false)
@@ -18,7 +18,7 @@ export function useWordTestPage() {
   }, [fetchWordTests])
 
   return {
-    datas,
+    lists,
     isLoading: status.isLoading,
     error: status.error,
   }

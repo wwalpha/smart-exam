@@ -5,7 +5,7 @@ import { useWordTestPage } from '@/hooks/wordtest'
 import { SUBJECT_LABEL } from '@/lib/Consts'
 
 export function WordTestPage() {
-  const { datas, error } = useWordTestPage()
+  const { lists, error } = useWordTestPage()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   return (
@@ -46,7 +46,7 @@ export function WordTestPage() {
               </tr>
             </thead>
             <tbody>
-              {datas.length === 0 ? (
+              {lists.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -56,7 +56,7 @@ export function WordTestPage() {
                   </td>
                 </tr>
               ) : (
-                datas.map((test) => (
+                lists.map((test) => (
                   <tr key={test.id} className="odd:bg-white/40">
                     <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
                       {test.name}

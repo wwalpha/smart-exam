@@ -3,8 +3,8 @@ import type {
   ApplyWordTestGradingResponse,
   CreateWordTestRequest,
   CreateWordTestResponse,
-  GetWordTestRequest,
-  GetWordTestResponse,
+  GetWordTestDetailRequest,
+  GetWordTestDetailResponse,
   ListWordTestsRequest,
   ListWordTestsResponse,
 } from '@typings/wordtest'
@@ -21,9 +21,9 @@ export async function listWordTests(
 }
 
 export async function getWordTest(
-  request: GetWordTestRequest,
-): Promise<GetWordTestResponse> {
-  return apiRequest<GetWordTestResponse>({
+  request: GetWordTestDetailRequest,
+): Promise<GetWordTestDetailResponse> {
+  return apiRequest<GetWordTestDetailResponse>({
     method: 'GET',
     path: `/api/wordtests/${request.wordTestId}`,
   })
@@ -40,11 +40,12 @@ export async function createWordTest(
 }
 
 export async function applyWordTestGrading(
+  wordTestId: string,
   request: ApplyWordTestGradingRequest,
 ): Promise<ApplyWordTestGradingResponse> {
   return apiRequest<ApplyWordTestGradingResponse, ApplyWordTestGradingRequest>({
     method: 'POST',
-    path: `/api/wordtests/${request.wordTestId}/grading`,
+    path: `/api/wordtests/${wordTestId}/grading`,
     body: request,
   })
 }

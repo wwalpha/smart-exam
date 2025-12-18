@@ -1,28 +1,27 @@
-import { useMemo } from 'react'
 import { useWordTestStore } from '@/stores'
-import type { WordTestGradingValue } from '@typings/wordtest'
+import type { GradingData } from '@typings/wordtest'
 import { useWordTestDetailPage } from '@/hooks/wordtest/useWordTestDetailPage'
 
 export function useWordTestGradingPage(wordTestId: string | undefined) {
-  const { wordTest } = useWordTestDetailPage(wordTestId)
-  const gradings = useWordTestStore((s) => s.wordtest.gradings)
+  const { summary, detail } = useWordTestDetailPage(wordTestId)
   const applyWordTestGrading = useWordTestStore((s) => s.applyWordTestGrading)
 
-  // 採点結果は store に保存し、再表示時も初期値として復元できるようにする
-  const grading = useMemo(() => {
-    if (!wordTestId) return undefined
-    return gradings[wordTestId]
-  }, [gradings, wordTestId])
+  const grading = (() => {
+    if (!detail) return undefined
+    const derived = detail.items.map((x) => x.grading)
+    return derived.every((x) => x !== undefined) ? derived : undefined
+  })()
 
-  const applyGrading = async (newGrading: WordTestGradingValue[]): Promise<void> => {
+  const applyGrading = async (datas: GradingData[]): Promise<void> => {
     if (!wordTestId) return
 
     // 採点の永続化は UI から直接 API を叩かず、store action に集約する
-    await applyWordTestGrading(wordTestId, newGrading)
+    await applyWordTestGrading(wordTestId, datas)
   }
 
   return {
-    wordTest,
+    summary,
+    detail,
     grading,
     applyGrading,
   }

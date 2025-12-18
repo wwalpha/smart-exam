@@ -1,12 +1,15 @@
 import { http, HttpResponse } from 'msw'
 import type {
   WordTest,
-  WordTestDetail,
-  WordTestGradingValue,
+  GradingValue,
   WordTestItem,
   WordTestSubject,
 } from '@typings/wordtest'
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts'
+
+type WordTestWithItems = WordTest & {
+  items: WordTestItem[]
+}
 
 function newId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -32,7 +35,7 @@ function clone_seed_items(subject: WordTestSubject): WordTestItem[] {
   return subject_definitions[subject].seed_items.map((x) => ({ ...x }))
 }
 
-let wordTests: WordTestDetail[] = [
+let wordTests: WordTestWithItems[] = [
   {
     id: 'wt_1',
     name: `${SUBJECT_LABEL[SUBJECT.society]} 単語テスト 1`,
@@ -51,7 +54,7 @@ let wordTests: WordTestDetail[] = [
   },
 ]
 
-function toSummary(wordTest: WordTestDetail): WordTest {
+function toSummary(wordTest: WordTestWithItems): WordTest {
   return {
     id: wordTest.id,
     name: wordTest.name,
@@ -60,8 +63,6 @@ function toSummary(wordTest: WordTestDetail): WordTest {
     is_graded: wordTest.is_graded,
   }
 }
-
-let wordTestGradings: Record<string, WordTestGradingValue[]> = {}
 
 export const handlers = [
   http.get('/api/wordtests', () => {
@@ -80,7 +81,7 @@ export const handlers = [
     const nextIndex =
       wordTests.filter((x) => x.subject === body.subject).length + 1
 
-    const newItem: WordTestDetail = {
+    const newItem: WordTestWithItems = {
       id: newId(),
       subject: body.subject,
       name: `${SUBJECT_LABEL[body.subject]} 単語テスト ${nextIndex}`,
@@ -105,8 +106,8 @@ export const handlers = [
     }
 
     return HttpResponse.json({
-      wordTest: found,
-      grading: wordTestGradings[wordTestId] ?? null,
+      id: found.id,
+      items: found.items,
     })
   }),
 
@@ -119,17 +120,24 @@ export const handlers = [
     }
 
     const body = (await request.json()) as {
-      wordTestId?: string
-      grading?: WordTestGradingValue[]
+      results?: Array<{ qid?: string; grading?: GradingValue }>
     }
 
-    if (!body.wordTestId || !Array.isArray(body.grading)) {
+    if (!Array.isArray(body.results)) {
       return new HttpResponse(null, { status: 400 })
     }
 
-    wordTestGradings = {
-      ...wordTestGradings,
-      [wordTestId]: body.grading,
+    const gradingByQid = new Map<string, GradingValue>()
+    for (const x of body.results) {
+      if (!x?.qid || x.grading === undefined) {
+        return new HttpResponse(null, { status: 400 })
+      }
+      gradingByQid.set(x.qid, x.grading)
+    }
+
+    const nextGrading = found.items.map((item) => gradingByQid.get(item.qid))
+    if (nextGrading.some((x) => x === undefined)) {
+      return new HttpResponse(null, { status: 400 })
     }
 
     wordTests = wordTests.map((x) => {
@@ -137,7 +145,7 @@ export const handlers = [
 
       const nextItems = x.items.map((item, index) => ({
         ...item,
-        grading: body.grading?.[index],
+        grading: nextGrading[index],
       }))
 
       return {

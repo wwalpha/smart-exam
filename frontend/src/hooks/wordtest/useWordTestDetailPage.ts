@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react'
 import { useWordTestStore } from '@/stores'
 
 export function useWordTestDetailPage(wordTestId: string | undefined) {
+  const lists = useWordTestStore((s) => s.wordtest.lists)
   const details = useWordTestStore((s) => s.wordtest.details)
-  const gradings = useWordTestStore((s) => s.wordtest.gradings)
   const fetchWordTest = useWordTestStore((s) => s.fetchWordTest)
   const hasRequestedRef = useRef(false)
 
-  const wordTest = wordTestId ? details[wordTestId] : undefined
-  const grading = wordTestId ? gradings[wordTestId] : undefined
+  const summary = wordTestId ? lists.find((x) => x.id === wordTestId) : undefined
+  const detail = wordTestId ? details[wordTestId] : undefined
 
   useEffect(() => {
     if (!wordTestId) return
@@ -25,5 +25,5 @@ export function useWordTestDetailPage(wordTestId: string | undefined) {
     void fetchWordTest(wordTestId)
   }, [details, fetchWordTest, wordTestId])
 
-  return { wordTest, grading }
+  return { summary, detail }
 }

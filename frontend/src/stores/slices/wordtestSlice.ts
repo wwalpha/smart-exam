@@ -1,36 +1,45 @@
 import type { StateCreator } from 'zustand'
 import type { WordTestSlice } from '@typings/store'
-import type { WordTest, WordTestDetail } from '@typings/wordtest'
+import type { GradingData } from '@typings/wordtest'
 import * as wordtestApi from '@/services/wordtestApi'
 
 // 単語テスト機能の Zustand slice
 export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSlice> = (
   set,
+  get,
 ) => {
-  const toSummary = (wordTest: WordTestDetail): WordTest => {
-    return {
-      id: wordTest.id,
-      name: wordTest.name,
-      subject: wordTest.subject,
-      created_at: wordTest.created_at,
-      is_graded: wordTest.is_graded,
-    }
+  type WordTestFeatureState = WordTestSlice['wordtest']
+  type WordTestFeaturePatch = Omit<Partial<WordTestFeatureState>, 'status'> & {
+    status?: Partial<WordTestFeatureState['status']>
+  }
+
+  const getWordTest = (): WordTestFeatureState => get().wordtest
+
+  const updateWordTest = (patch: WordTestFeaturePatch) => {
+    const current = getWordTest()
+    set({
+      wordtest: {
+        ...current,
+        ...patch,
+        status: patch.status
+          ? {
+              ...current.status,
+              ...patch.status,
+            }
+          : current.status,
+      },
+    })
   }
 
   const setStatus = (next: Partial<WordTestSlice['wordtest']['status']>) => {
-    set((state) => ({
-      wordtest: {
-        ...state.wordtest,
-        status: {
-          ...state.wordtest.status,
-          ...next,
-        },
-      },
-    }))
+    updateWordTest({ status: next })
   }
 
   const withWordTestStatus = async <T>(
-    fn: () => Promise<T>,
+    fn: (helpers: {
+      getWordTest: () => WordTestFeatureState
+      updateWordTest: (patch: WordTestFeaturePatch) => void
+    }) => Promise<T>,
     errorMessage: string,
     options?: {
       fallback?: T
@@ -39,7 +48,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
   ): Promise<T> => {
     setStatus({ isLoading: true, error: null })
     try {
-      return await fn()
+      return await fn({ getWordTest, updateWordTest })
     } catch (error) {
       setStatus({ error: errorMessage })
       if (options?.rethrow) throw error
@@ -51,9 +60,8 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
 
   return {
     wordtest: {
-      datas: [],
+      lists: [],
       details: {},
-      gradings: {},
       status: {
         isLoading: false,
         error: null,
@@ -61,15 +69,10 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     },
     fetchWordTests: async () => {
       await withWordTestStatus(
-        async () => {
+        async ({ updateWordTest }) => {
           // 一覧はサーバー（MSW）側を正として置き換える
           const response = await wordtestApi.listWordTests()
-          set((state) => ({
-            wordtest: {
-              ...state.wordtest,
-              datas: response.datas,
-            },
-          }))
+          updateWordTest({ lists: response.datas })
         },
         '単語テスト一覧の取得に失敗しました。',
       )
@@ -77,42 +80,19 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     
     fetchWordTest: async (wordTestId) => {
       return await withWordTestStatus(
-        async () => {
+        async ({ getWordTest, updateWordTest }) => {
           const response = await wordtestApi.getWordTest({ wordTestId })
 
-          set((state) => {
-            const summary = toSummary(response.wordTest)
+          const current = getWordTest()
+          // 詳細取得は items（問題/答え）を含むため、details に保持する
+          const nextDetails = {
+            ...current.details,
+            [response.id]: response,
+          }
 
-            // 一覧はサマリのみ保持する
-            const nextDatas = state.wordtest.datas.some((x) => x.id === summary.id)
-              ? state.wordtest.datas.map((x) => (x.id === summary.id ? summary : x))
-              : [summary, ...state.wordtest.datas]
+          updateWordTest({ details: nextDetails })
 
-            // 詳細取得は items（問題/答え）を含むため、details に保持する
-            const nextDetails = {
-              ...state.wordtest.details,
-              [response.wordTest.id]: response.wordTest,
-            }
-
-            // 採点が返る API のため、存在する場合のみ store の採点を更新する
-            const nextGradings = response.grading
-              ? {
-                  ...state.wordtest.gradings,
-                  [response.wordTest.id]: response.grading,
-                }
-              : state.wordtest.gradings
-
-            return {
-              wordtest: {
-                ...state.wordtest,
-                datas: nextDatas,
-                details: nextDetails,
-                gradings: nextGradings,
-              },
-            }
-          })
-
-          return response.wordTest
+          return response
         },
         '単語テストの取得に失敗しました。',
         { fallback: null },
@@ -121,15 +101,11 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
 
     createWordTest: async (subject) => {
       return await withWordTestStatus(
-        async () => {
+        async ({ getWordTest, updateWordTest }) => {
           // 作成結果を即時に store に反映し、画面のリロード無しで一覧へ反映する
           const response = await wordtestApi.createWordTest({ subject })
-          set((state) => ({
-            wordtest: {
-              ...state.wordtest,
-              datas: [response.wordTest, ...state.wordtest.datas],
-            },
-          }))
+          const current = getWordTest()
+          updateWordTest({ lists: [response.wordTest, ...current.lists] })
           return response
         },
         '単語テストの作成に失敗しました。',
@@ -137,51 +113,55 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
       )
     },
 
-    applyWordTestGrading: async (wordTestId, grading) => {
+    applyWordTestGrading: async (wordTestId, datas) => {
       await withWordTestStatus(
-        async () => {
+        async ({ getWordTest, updateWordTest }) => {
+          const existingDetail = getWordTest().details[wordTestId] ?? null
+
+          if (!existingDetail) {
+            throw new Error('wordtest detail not found')
+          }
+
+          const gradingByQid = new Map<string, GradingData['grading']>(
+            datas.map((x) => [x.qid, x.grading]),
+          )
+
+          const nextGrading = existingDetail.items.map((item) => gradingByQid.get(item.qid))
+          if (nextGrading.some((x) => x === undefined)) {
+            throw new Error('grading is missing for some items')
+          }
+
           // 採点は「反映する」操作で API に送信し、結果は store に保持して画面遷移しても復元できるようにする
-          await wordtestApi.applyWordTestGrading({
-            wordTestId,
-            grading,
-          })
+          await wordtestApi.applyWordTestGrading(wordTestId, { results: datas })
 
-          set((state) => {
-            const nextDatas = state.wordtest.datas.map((x) =>
-              x.id === wordTestId
-                ? {
-                    ...x,
-                    is_graded: true,
-                  }
-                : x,
-            )
+          const current = getWordTest()
 
-            const existingDetail = state.wordtest.details[wordTestId]
-            const nextDetails = existingDetail
+          const nextLists = current.lists.map((x) =>
+            x.id === wordTestId
               ? {
-                  ...state.wordtest.details,
-                  [wordTestId]: {
-                    ...existingDetail,
-                    is_graded: true,
-                    items: existingDetail.items.map((item, index) => ({
-                      ...item,
-                      grading: grading[index],
-                    })),
-                  },
+                  ...x,
+                  is_graded: true,
                 }
-              : state.wordtest.details
+              : x,
+          )
 
-            return {
-              wordtest: {
-                ...state.wordtest,
-                datas: nextDatas,
-                details: nextDetails,
-                gradings: {
-                  ...state.wordtest.gradings,
-                  [wordTestId]: grading,
+          const currentDetail = current.details[wordTestId]
+          const nextDetails = currentDetail
+            ? {
+                ...current.details,
+                [wordTestId]: {
+                  ...currentDetail,
+                  items: currentDetail.items.map((item) => ({
+                    ...item,
+                    grading: gradingByQid.get(item.qid),
+                  })),
                 },
-              },
-            }
+              }
+            : current.details
+
+          updateWordTest({
+            lists: nextLists,
+            details: nextDetails,
           })
         },
         '採点結果の反映に失敗しました。',

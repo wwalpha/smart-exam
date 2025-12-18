@@ -4,9 +4,9 @@ import { GRADING_LABEL, GRADING_VALUE, SUBJECT_LABEL } from '@/lib/Consts'
 
 export function WordTestDetailPage() {
   const { wordtestid } = useParams()
-  const { wordTest, grading } = useWordTestDetailPage(wordtestid)
+  const { summary, detail } = useWordTestDetailPage(wordtestid)
 
-  if (!wordTest) {
+  if (!detail) {
     return (
       <div className="space-y-4">
         <div className="space-y-1">
@@ -25,13 +25,17 @@ export function WordTestDetailPage() {
     )
   }
 
+  const subjectLabel = summary
+    ? `${summary.name}（${SUBJECT_LABEL[summary.subject]}）`
+    : `ID: ${detail.id}`
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold text-stone-900">詳細</h1>
           <p className="text-sm text-stone-700">
-            {wordTest.name}（{SUBJECT_LABEL[wordTest.subject]}）
+            {subjectLabel}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -42,7 +46,7 @@ export function WordTestDetailPage() {
             一覧へ戻る
           </Link>
           <Link
-            to={`/wordtest/${wordTest.id}/grading`}
+            to={`/wordtest/${detail.id}/grading`}
             className="inline-flex items-center rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800"
           >
             採点へ
@@ -52,7 +56,7 @@ export function WordTestDetailPage() {
 
       <section className="rounded-lg border border-amber-200 bg-white/70 p-4">
         <h2 className="text-sm font-semibold text-stone-900">問題一覧</h2>
-        {wordTest.items.length === 0 ? (
+        {detail.items.length === 0 ? (
           <div className="mt-4 text-sm text-stone-700">まだ問題が登録されていません。</div>
         ) : (
           <div className="mt-4 overflow-x-auto">
@@ -71,8 +75,8 @@ export function WordTestDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {wordTest.items.map((item, index) => {
-                  const value = item.grading ?? grading?.[index]
+                {detail.items.map((item) => {
+                  const value = item.grading
                   const isGraded = value !== undefined
                   const label = isGraded ? GRADING_LABEL[value] : '未採点'
                   const labelClassName = isGraded
