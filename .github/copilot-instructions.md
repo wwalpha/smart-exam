@@ -62,7 +62,8 @@
 ### 2. TypeScript
 - すべてのファイルで TypeScript を使用してください。
 - `any` 型の使用は避け、適切な型定義を行ってください。
-- 型定義は `frontend/src/typings` ディレクトリへ集約してください。
+- 型定義は `frontend/typings` ディレクトリへ集約してください。
+- `frontend/src` 配下の import は相対パス（`./`, `../`）を使用せず、alias import を使用してください（例: `@/...`, `@typings/...`）。
 
 ### 3. スタイリング & UI
 - UI コンポーネントライブラリとして **shadcn/ui** を使用してください。
@@ -70,8 +71,18 @@
 
 ### 4. 状態管理 & API
 - グローバルな状態管理には **Zustand** を使用してください。
+- Zustand store は slice 方式で実装してください（例: `createXxxSlice` を定義し、`create()` で結合する）。
 - API 呼び出しは Zustand 側に集約し、コンポーネントから直接呼び出さないでください。
 - API の Request / Response 型は、たとえ空であっても必ずペアで定義してください。
+- Zustand ストアは `frontend/src/stores` ディレクトリへ集約してください。
+- store の `create()` による定義は `frontend/src/stores/index.ts` に集約し、各画面/機能は `@/stores` から import してください。
+
+### 4.1 型定義
+- store が扱う state / action / 戻り値の型は省略せず、正しく型を定義してください（戻り値の型も明示）。
+
+### 4.2 ES Modules（書き方統一）
+- `frontend/src` 配下は default export を使わず、named export で統一してください。
+- 型の import は `import type` を使用してください。
 
 ### 5. ディレクトリ構造 & ユーティリティ
 - 機能ごとにディレクトリを分ける "Features" ディレクトリ構成を推奨します（例: `src/features/auth`, `src/features/exam`）。
