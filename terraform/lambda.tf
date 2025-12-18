@@ -2,7 +2,7 @@
 # CloudWatch Log Group for Lambda.
 # ----------------------------------------------------------------------------------------------
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/${var.lambda_function_name}"
+  name              = "/aws/lambda/${local.lambda_function_name}"
   retention_in_days = 30
 }
 
@@ -11,15 +11,15 @@ resource "aws_cloudwatch_log_group" "lambda" {
 # ----------------------------------------------------------------------------------------------
 data "archive_file" "lambda_dummy" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_dummy"
-  output_path = "${path.module}/.terraform/lambda_dummy.zip"
+  source_dir  = "${path.module}/dummy"
+  output_path = "${path.module}/.terraform/dummy.zip"
 }
 
 # ----------------------------------------------------------------------------------------------
 # Lambda function (uses Terraform-generated dummy artifact).
 # ----------------------------------------------------------------------------------------------
 resource "aws_lambda_function" "api" {
-  function_name = var.lambda_function_name
+  function_name = local.lambda_function_name
   role          = aws_iam_role.lambda.arn
   runtime       = "nodejs20.x"
   handler       = "index.handler"
@@ -32,11 +32,6 @@ resource "aws_lambda_function" "api" {
 
   environment {
     variables = {
-      AWS_REGION = data.aws_region.current.name
-
-      COGNITO_USER_POOL_ID  = aws_cognito_user_pool.auth.id
-      COGNITO_APP_CLIENT_ID = aws_cognito_user_pool_client.auth.id
-
       FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
 
       SUBJECTS_TABLE           = aws_dynamodb_table.subjects.name

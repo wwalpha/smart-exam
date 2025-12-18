@@ -1,5 +1,7 @@
 # ----------------------------------------------------------------------------------------------
-# NOTE
+# Fixed names for API Gateway and Lambda.
 # ----------------------------------------------------------------------------------------------
-# Resources are defined per service in dedicated *.tf files (e.g. s3.tf, dynamodb.tf, lambda.tf).
-# Keep this file empty to avoid a monolithic configuration.
+locals {
+  lambda_function_name = "${var.project_name}_${var.env}_api"
+  api_name             = "${var.project_name}_${var.env}_http_api"
+}

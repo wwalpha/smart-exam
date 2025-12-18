@@ -2,7 +2,7 @@
 # API Gateway HTTP API.
 # ----------------------------------------------------------------------------------------------
 resource "aws_apigatewayv2_api" "http" {
-  name          = var.api_name
+  name          = local.api_name
   protocol_type = "HTTP"
 }
 

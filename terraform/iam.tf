@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 # IAM role for Lambda.
 # ----------------------------------------------------------------------------------------------
 resource "aws_iam_role" "lambda" {
-  name               = "${var.project_name}_${var.environment}_lambda"
+  name               = "${var.project_name}_${var.env}_lambda"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
@@ -105,7 +105,7 @@ data "aws_iam_policy_document" "lambda_with_bedrock" {
 # IAM inline policy attachment for Lambda.
 # ----------------------------------------------------------------------------------------------
 resource "aws_iam_role_policy" "lambda" {
-  name   = "${var.project_name}_${var.environment}_lambda"
+  name   = "${var.project_name}_${var.env}_lambda"
   role   = aws_iam_role.lambda.id
   policy = data.aws_iam_policy_document.lambda_with_bedrock.json
 }

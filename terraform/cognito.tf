@@ -2,7 +2,7 @@
 # Cognito user pool for authentication.
 # ----------------------------------------------------------------------------------------------
 resource "aws_cognito_user_pool" "auth" {
-  name = "${var.project_name}_${var.environment}_user_pool"
+  name = "${var.project_name}_${var.env}_user_pool"
 
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
@@ -20,7 +20,7 @@ resource "aws_cognito_user_pool" "auth" {
 # Cognito user pool client for frontend applications.
 # ----------------------------------------------------------------------------------------------
 resource "aws_cognito_user_pool_client" "auth" {
-  name         = "${var.project_name}_${var.environment}_app_client"
+  name         = "${var.project_name}_${var.env}_app_client"
   user_pool_id = aws_cognito_user_pool.auth.id
 
   generate_secret = false

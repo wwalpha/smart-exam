@@ -27,6 +27,15 @@
 - `terraform apply`
 
 ## Lambda アーティファクト
-この Terraform は、`terraform/lambda_dummy/` を `archive_file` でZIP化して Lambda にデプロイします（ダミー実装）。
+この Terraform は、`terraform/dummy/` を `archive_file` でZIP化して Lambda にデプロイします（ダミー実装）。
 
 実アプリの Lambda をデプロイしたい場合は、`aws_lambda_function.api` の `filename` / `source_code_hash` / `handler` をビルド成果物に合わせて差し替えてください。
+
+## デフォルト値
+- `project_name`: `smartexam`
+- `env`: `dev`
+
+## 固定値
+以下はパラメータではなく固定値です（[terraform/locals.tf](terraform/locals.tf)）。
+- Lambda 関数名: `smartexam_dev_api`
+- HTTP API 名: `smartexam_dev_http_api`
