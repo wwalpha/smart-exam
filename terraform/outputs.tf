@@ -1,0 +1,49 @@
+# ----------------------------------------------------------------------------------------------
+# S3 bucket name for application files.
+# ----------------------------------------------------------------------------------------------
+output "files_bucket_name" {
+  description = "S3 bucket name for application files."
+  value       = aws_s3_bucket.files.bucket
+}
+
+# ----------------------------------------------------------------------------------------------
+# API Gateway HTTP API endpoint.
+# ----------------------------------------------------------------------------------------------
+output "http_api_endpoint" {
+  description = "API Gateway HTTP API endpoint."
+  value       = aws_apigatewayv2_api.http.api_endpoint
+}
+
+# ----------------------------------------------------------------------------------------------
+# All DynamoDB table names created for the app.
+# ----------------------------------------------------------------------------------------------
+output "dynamodb_table_names" {
+  description = "All DynamoDB table names created for the app."
+  value = {
+    subjects           = aws_dynamodb_table.subjects.name
+    tests              = aws_dynamodb_table.tests.name
+    questions          = aws_dynamodb_table.questions.name
+    attempts           = aws_dynamodb_table.attempts.name
+    answer_sheets      = aws_dynamodb_table.answer_sheets.name
+    graded_sheets      = aws_dynamodb_table.graded_sheets.name
+    words              = aws_dynamodb_table.words.name
+    word_tests         = aws_dynamodb_table.word_tests.name
+    word_test_attempts = aws_dynamodb_table.word_test_attempts.name
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# Cognito user pool id.
+# ----------------------------------------------------------------------------------------------
+output "cognito_user_pool_id" {
+  description = "Cognito user pool id."
+  value       = aws_cognito_user_pool.auth.id
+}
+
+# ----------------------------------------------------------------------------------------------
+# Cognito user pool app client id.
+# ----------------------------------------------------------------------------------------------
+output "cognito_user_pool_client_id" {
+  description = "Cognito user pool app client id."
+  value       = aws_cognito_user_pool_client.auth.id
+}
