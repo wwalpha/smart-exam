@@ -1,22 +1,18 @@
 import { Link, useParams } from 'react-router-dom'
-import { useMemo } from 'react'
-import { useWordTestStore } from '@/stores'
+import { useWordTestDetail } from '@/hooks/wordtest'
 
 export function WordTestDetailPage() {
   const { wordtestid } = useParams()
-  const wordTests = useWordTestStore((s) => s.wordTests)
-
-  const wordTest = useMemo(() => {
-    if (!wordtestid) return null
-    return wordTests.find((x) => x.id === wordtestid) ?? null
-  }, [wordTests, wordtestid])
+  const { wordTest, isNotFound } = useWordTestDetail(wordtestid)
 
   if (!wordTest) {
     return (
       <div className="space-y-4">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold text-stone-900">詳細</h1>
-          <p className="text-sm text-stone-700">対象の単語テストが見つかりません。</p>
+          <p className="text-sm text-stone-700">
+            {isNotFound ? '対象の単語テストが見つかりません。' : '読み込み中...'}
+          </p>
         </div>
         <Link
           to="/wordtest"

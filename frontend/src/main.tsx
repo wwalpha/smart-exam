@@ -4,10 +4,21 @@ import { BrowserRouter } from 'react-router-dom'
 import '@/index.css'
 import { App } from '@/App'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>,
-)
+async function prepareApp(): Promise<void> {
+  if (import.meta.env.DEV) {
+    const { worker } = await import('@/mocks/browser')
+    await worker.start({
+      onUnhandledRequest: 'bypass',
+    })
+  }
+}
+
+void prepareApp().then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </StrictMode>,
+  )
+})

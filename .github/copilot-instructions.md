@@ -85,10 +85,20 @@
 - 型の import は `import type` を使用してください。
 
 ### 5. ディレクトリ構造 & ユーティリティ
-- 機能ごとにディレクトリを分ける "Features" ディレクトリ構成を推奨します（例: `src/features/auth`, `src/features/exam`）。
+- 画面（ルーティング単位）は `frontend/src/pages` 配下へ配置してください（例: `src/pages/auth`, `src/pages/exam`）。
+- Custom Hook は `frontend/src/hooks` 配下に集約し、必要に応じて機能（責務）ごとにサブフォルダを切ってください（例: `src/hooks/wordtest`）。
 - 共通コンポーネントは `src/components/ui` (shadcn/ui) または `src/components/common` に配置してください。
 - utility 関数は `src/utils` のフォルダに集約してください。
 - 変換やフォーマット処理は `src/utils` 配下の共通関数へ切り出し、各コンポーネントから再利用してください。
+
+#### 5.1 フォルダ構造（再発防止）
+- `frontend/src/pages`: 画面（ルーティング単位）
+- `frontend/src/hooks`: UI から切り出したロジック（Custom Hook）
+- `frontend/src/stores`: Zustand store（slice）
+- `frontend/src/services`: API クライアント/サービス層（HTTP 呼び出し）
+- `frontend/src/mocks`: API mock（MSW など）
+- `frontend/src/components`: 共通 UI
+- `frontend/typings`: 型定義（Request/Response、Slice 型など）
 
 ### 6. フック (Hooks)
 - React Hooks のルール（トップレベルでの呼び出しなど）を厳守してください。
@@ -98,6 +108,23 @@
 ### 7. コメント
 - 日本語コメントは対象のソースコード行の直上に記載してください（行末コメントは避けてください）。
 - `import` 文に対してはコメントを付与しないでください。
+
+#### 7.0 行レベルコメント（再発防止）
+- 非自明な分岐・副作用・ワークアラウンド（例: `useEffect` の多重実行防止、API の制約回避）には、対象行の直上に 1 行の日本語コメントを付与してください。
+- 原則として「何をしているか」ではなく「なぜ必要か」を説明してください。
+
+#### 7.1 適用範囲（再発防止）
+- このコメントルールは `frontend/src` 配下の手書きコードに適用します。
+- `frontend/dist` などの自動生成ファイル（ビルド成果物）は編集・整形・コメント修正の対象外です。
+
+#### 7.2 書き方（再発防止）
+- 原則として「コードで意図が伝わる」状態を優先し、不要なコメントは書かないでください。
+- コメントが必要な場合は `//` の日本語コメントを「対象行の直上」に 1 行で付けてください。
+- 行末コメント（例: `const x = 1 // ...`）は禁止です。
+
+### 8. ストアと型定義
+- Zustand Slice の型定義（`XxxSlice`）は `frontend/typings` ディレクトリに配置してください（`src` 配下に置かない）。
+- コンポーネントから直接 `useStore` を呼び出してロジックを書くのではなく、カスタムフック（`useXxx`）を作成してロジックを分離してください。
 
 ## Backend (Node.js)
 

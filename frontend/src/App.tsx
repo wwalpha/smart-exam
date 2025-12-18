@@ -1,8 +1,8 @@
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Route, Routes } from 'react-router-dom'
-import { WordTestPage } from '@/features/wordtest/WordTestPage'
-import { WordTestDetailPage } from '@/features/wordtest/WordTestDetailPage'
-import { WordTestGradingPage } from '@/features/wordtest/WordTestGradingPage'
+import { WordTestPage } from '@/pages/wordtest/WordTestPage'
+import { WordTestDetailPage } from '@/pages/wordtest/WordTestDetailPage'
+import { WordTestGradingPage } from '@/pages/wordtest/WordTestGradingPage'
 
 export function App() {
   const sidebarItems = [

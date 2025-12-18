@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useWordTestStore } from '@/stores'
-import { WordTestCreateDialog } from '@/features/wordtest/WordTestCreateDialog'
+import { WordTestCreateDialog } from '@/pages/wordtest/WordTestCreateDialog'
+import { useWordTestList } from '@/hooks/wordtest'
 
 export function WordTestPage() {
-  const wordTests = useWordTestStore((s) => s.wordTests)
+  const { wordTests } = useWordTestList()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   return (

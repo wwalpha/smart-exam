@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { WordTestSubject } from '@typings/wordtest'
-import { useWordTestStore } from '@/stores'
+import { useWordTestCreate } from '@/hooks/wordtest'
 
 type WordTestCreateDialogProps = {
   open: boolean
@@ -11,7 +11,7 @@ export function WordTestCreateDialog({
   open,
   onClose,
 }: WordTestCreateDialogProps) {
-  const createWordTest = useWordTestStore((s) => s.createWordTest)
+  const { createWordTest } = useWordTestCreate()
   const [subject, setSubject] = useState<WordTestSubject | null>(null)
 
   if (!open) return null
@@ -87,8 +87,10 @@ export function WordTestCreateDialog({
             className="rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               if (!subject) return
-              createWordTest({ subject })
-              onClose()
+              void (async () => {
+                await createWordTest({ subject })
+                onClose()
+              })()
             }}
           >
             テストを作成

@@ -15,6 +15,27 @@ export type ApplyWordTestGradingParams = {
   grading: WordTestGradingValue[]
 }
 
+export type ListWordTestsRequest = Record<string, never>
+
+export type ListWordTestsResponse = {
+  wordTests: WordTest[]
+}
+
+export type GetWordTestRequest = {
+  wordTestId: string
+}
+
+export type GetWordTestResponse = {
+  wordTest: WordTest
+  grading: WordTestGradingValue[] | null
+}
+
+export type ApplyWordTestGradingRequest = ApplyWordTestGradingParams
+
+export type ApplyWordTestGradingResponse = {
+  ok: true
+}
+
 export type CreateWordTestRequest = {
   subject: WordTestSubject
 }

@@ -1,1 +1,0 @@
-export { useWordTestStore } from '@/stores'
