@@ -1,11 +1,21 @@
-import type { WordTestSubject } from '@typings/wordtest'
+import type { WordTestGradingValue, WordTestSubject } from '@typings/wordtest'
 
-export const subject = {
-  society: 'society',
-  japanese: 'japanese',
+export const SUBJECT = {
+  society: '3',
+  japanese: '1',
 } as const satisfies Record<string, WordTestSubject>
 
-export const SubjectLabel: Record<WordTestSubject, string> = {
-  [subject.society]: '社会',
-  [subject.japanese]: '国語',
+export const SUBJECT_LABEL: Record<WordTestSubject, string> = {
+  [SUBJECT.society]: '社会',
+  [SUBJECT.japanese]: '国語',
+}
+
+export const GRADING_VALUE = {
+  incorrect: '0',
+  correct: '1',
+} as const satisfies Record<string, WordTestGradingValue>
+
+export const GRADING_LABEL: Record<WordTestGradingValue, string> = {
+  [GRADING_VALUE.incorrect]: '誤',
+  [GRADING_VALUE.correct]: '正',
 }

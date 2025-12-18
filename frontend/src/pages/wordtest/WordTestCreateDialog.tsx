@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { WordTestSubject } from '@typings/wordtest'
 import { useWordTestCreateDialog } from '@/hooks/wordtest'
-import { subject as subjects, SubjectLabel } from '@/lib/Consts'
+import { SUBJECT as subjects, SUBJECT_LABEL } from '@/lib/Consts'
 
 type WordTestCreateDialogProps = {
   open: boolean
@@ -63,13 +63,13 @@ export function WordTestCreateDialog({
                       : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
                   ].join(' ')}
                 >
-                  {SubjectLabel[value]}
+                  {SUBJECT_LABEL[value]}
                 </button>
               )
             })}
           </div>
           <div className="mt-3 text-sm text-stone-700">
-            選択中: {selectedSubject ? SubjectLabel[selectedSubject] : '未選択'}
+            選択中: {selectedSubject ? SUBJECT_LABEL[selectedSubject] : '未選択'}
           </div>
         </section>
 

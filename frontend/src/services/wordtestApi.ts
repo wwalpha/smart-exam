@@ -43,7 +43,7 @@ export async function applyWordTestGrading(
   request: ApplyWordTestGradingRequest,
 ): Promise<ApplyWordTestGradingResponse> {
   return apiRequest<ApplyWordTestGradingResponse, ApplyWordTestGradingRequest>({
-    method: 'PUT',
+    method: 'POST',
     path: `/api/wordtests/${request.wordTestId}/grading`,
     body: request,
   })

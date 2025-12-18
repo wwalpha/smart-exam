@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { WordTestCreateDialog } from '@/pages/wordtest/WordTestCreateDialog'
 import { useWordTestPage } from '@/hooks/wordtest'
-import { SubjectLabel } from '@/lib/Consts'
+import { SUBJECT_LABEL } from '@/lib/Consts'
 
 export function WordTestPage() {
   const { datas, error } = useWordTestPage()
@@ -62,7 +62,7 @@ export function WordTestPage() {
                       {test.name}
                     </td>
                     <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
-                      {SubjectLabel[test.subject]}
+                      {SUBJECT_LABEL[test.subject]}
                     </td>
                     <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
                       {test.created_at.slice(0, 10)}

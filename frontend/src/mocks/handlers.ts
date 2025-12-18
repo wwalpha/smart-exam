@@ -6,7 +6,7 @@ import type {
   WordTestItem,
   WordTestSubject,
 } from '@typings/wordtest'
-import { subject, SubjectLabel } from '@/lib/Consts'
+import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts'
 
 function newId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -16,15 +16,15 @@ function newId(): string {
 }
 
 const subject_definitions: Record<WordTestSubject, { seed_items: WordTestItem[] }> = {
-  [subject.society]: {
+  [SUBJECT.society]: {
     seed_items: [
-      { question: '鎌倉幕府', answer: '鎌倉幕府' },
-      { question: '大化の改新', answer: '大化の改新' },
-      { question: '参勤交代', answer: '参勤交代' },
+      { qid: 'society_1', question: '鎌倉幕府', answer: '鎌倉幕府' },
+      { qid: 'society_2', question: '大化の改新', answer: '大化の改新' },
+      { qid: 'society_3', question: '参勤交代', answer: '参勤交代' },
     ],
   },
-  [subject.japanese]: {
-    seed_items: [{ question: '祖母が足のしゅじゅつをした。', answer: '手術' }],
+  [SUBJECT.japanese]: {
+    seed_items: [{ qid: 'japanese_1', question: '祖母が足のしゅじゅつをした。', answer: '手術' }],
   },
 }
 
@@ -35,17 +35,19 @@ function clone_seed_items(subject: WordTestSubject): WordTestItem[] {
 let wordTests: WordTestDetail[] = [
   {
     id: 'wt_1',
-    name: `${SubjectLabel[subject.society]} 単語テスト 1`,
-    subject: subject.society,
+    name: `${SUBJECT_LABEL[SUBJECT.society]} 単語テスト 1`,
+    subject: SUBJECT.society,
     created_at: '2025-12-01T00:00:00.000Z',
-    items: clone_seed_items(subject.society),
+    is_graded: false,
+    items: clone_seed_items(SUBJECT.society),
   },
   {
     id: 'wt_2',
-    name: `${SubjectLabel[subject.japanese]} 単語テスト 1`,
-    subject: subject.japanese,
+    name: `${SUBJECT_LABEL[SUBJECT.japanese]} 単語テスト 1`,
+    subject: SUBJECT.japanese,
     created_at: '2025-12-05T00:00:00.000Z',
-    items: clone_seed_items(subject.japanese),
+    is_graded: false,
+    items: clone_seed_items(SUBJECT.japanese),
   },
 ]
 
@@ -55,6 +57,7 @@ function toSummary(wordTest: WordTestDetail): WordTest {
     name: wordTest.name,
     subject: wordTest.subject,
     created_at: wordTest.created_at,
+    is_graded: wordTest.is_graded,
   }
 }
 
@@ -63,7 +66,7 @@ let wordTestGradings: Record<string, WordTestGradingValue[]> = {}
 export const handlers = [
   http.get('/api/wordtests', () => {
     return HttpResponse.json({
-      wordTests: wordTests.map(toSummary),
+      datas: wordTests.map(toSummary),
     })
   }),
 
@@ -80,8 +83,9 @@ export const handlers = [
     const newItem: WordTestDetail = {
       id: newId(),
       subject: body.subject,
-      name: `${SubjectLabel[body.subject]} 単語テスト ${nextIndex}`,
+      name: `${SUBJECT_LABEL[body.subject]} 単語テスト ${nextIndex}`,
       created_at: new Date().toISOString(),
+      is_graded: false,
       items: clone_seed_items(body.subject),
     }
 
@@ -106,7 +110,7 @@ export const handlers = [
     })
   }),
 
-  http.put('/api/wordtests/:wordTestId/grading', async ({ params, request }) => {
+  http.post('/api/wordtests/:wordTestId/grading', async ({ params, request }) => {
     const wordTestId = String(params.wordTestId)
     const found = wordTests.find((x) => x.id === wordTestId) ?? null
 
@@ -127,6 +131,21 @@ export const handlers = [
       ...wordTestGradings,
       [wordTestId]: body.grading,
     }
+
+    wordTests = wordTests.map((x) => {
+      if (x.id !== wordTestId) return x
+
+      const nextItems = x.items.map((item, index) => ({
+        ...item,
+        grading: body.grading?.[index],
+      }))
+
+      return {
+        ...x,
+        is_graded: true,
+        items: nextItems,
+      }
+    })
 
     return HttpResponse.json({
       ok: true,

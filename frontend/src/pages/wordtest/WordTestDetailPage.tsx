@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { useWordTestDetailPage } from '@/hooks/wordtest'
-import { SubjectLabel } from '@/lib/Consts'
+import { GRADING_LABEL, GRADING_VALUE, SUBJECT_LABEL } from '@/lib/Consts'
 
 export function WordTestDetailPage() {
   const { wordtestid } = useParams()
@@ -31,7 +31,7 @@ export function WordTestDetailPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold text-stone-900">詳細</h1>
           <p className="text-sm text-stone-700">
-            {wordTest.name}（{SubjectLabel[wordTest.subject]}）
+            {wordTest.name}（{SUBJECT_LABEL[wordTest.subject]}）
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -72,16 +72,17 @@ export function WordTestDetailPage() {
               </thead>
               <tbody>
                 {wordTest.items.map((item, index) => {
-                  const value = grading?.[index]
-                  const label = value ? (value === 'correct' ? '正' : '誤') : '未採点'
-                  const labelClassName = value
-                    ? value === 'correct'
+                  const value = item.grading ?? grading?.[index]
+                  const isGraded = value !== undefined
+                  const label = isGraded ? GRADING_LABEL[value] : '未採点'
+                  const labelClassName = isGraded
+                    ? value === GRADING_VALUE.correct
                       ? 'text-stone-900'
                       : 'text-rose-700'
                     : 'text-stone-500'
 
                   return (
-                    <tr key={`${index}_${item.question}`} className="odd:bg-white/40">
+                    <tr key={item.qid} className="odd:bg-white/40">
                       <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
                         {item.question}
                       </td>

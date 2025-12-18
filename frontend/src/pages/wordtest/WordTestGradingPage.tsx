@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import type { ApplyWordTestGradingParams, WordTestGradingValue } from '@typings/wordtest'
-import { SubjectLabel } from '@/lib/Consts'
+import { GRADING_VALUE, SUBJECT_LABEL } from '@/lib/Consts'
 import { useWordTestGradingPage } from '@/hooks/wordtest'
 
 export function WordTestGradingPage() {
@@ -32,7 +32,7 @@ export function WordTestGradingPage() {
       key={wordTest.id}
       wordTestId={wordTest.id}
       questions={wordTest.items.map((x) => x.question)}
-      subjectLabel={`${wordTest.name}（${SubjectLabel[wordTest.subject]}）`}
+      subjectLabel={`${wordTest.name}（${SUBJECT_LABEL[wordTest.subject]}）`}
       initialGrading={grading ?? null}
       onApply={async (params: ApplyWordTestGradingParams) => {
         await applyGrading(params.grading)
@@ -61,12 +61,12 @@ function WordTestGradingForm({
     if (initialGrading && initialGrading.length === questions.length) {
       return initialGrading
     }
-    return questions.map(() => 'correct')
+    return questions.map(() => GRADING_VALUE.correct)
   })
 
   const score = useMemo(() => {
-    const correct = grading.filter((x) => x === 'correct').length
-    const incorrect = grading.filter((x) => x === 'incorrect').length
+    const correct = grading.filter((x) => x === GRADING_VALUE.correct).length
+    const incorrect = grading.filter((x) => x === GRADING_VALUE.incorrect).length
     return { correct, incorrect }
   }, [grading])
 
@@ -127,7 +127,7 @@ function WordTestGradingForm({
                       type="button"
                       className={[
                         'rounded-md border px-3 py-1 text-xs font-semibold',
-                        value === 'correct'
+                        value === GRADING_VALUE.correct
                           ? 'border-rose-700 bg-rose-700 text-white'
                           : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
                       ].join(' ')}
@@ -135,7 +135,7 @@ function WordTestGradingForm({
                         setIsApplied(false)
                         setGrading((prev) => {
                           const next = [...prev]
-                          next[index] = 'correct'
+                          next[index] = GRADING_VALUE.correct
                           return next
                         })
                       }}
@@ -146,7 +146,7 @@ function WordTestGradingForm({
                       type="button"
                       className={[
                         'rounded-md border px-3 py-1 text-xs font-semibold',
-                        value === 'incorrect'
+                        value === GRADING_VALUE.incorrect
                           ? 'border-stone-700 bg-stone-700 text-white'
                           : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
                       ].join(' ')}
@@ -154,7 +154,7 @@ function WordTestGradingForm({
                         setIsApplied(false)
                         setGrading((prev) => {
                           const next = [...prev]
-                          next[index] = 'incorrect'
+                          next[index] = GRADING_VALUE.incorrect
                           return next
                         })
                       }}

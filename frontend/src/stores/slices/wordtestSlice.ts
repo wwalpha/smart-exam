@@ -13,6 +13,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
       name: wordTest.name,
       subject: wordTest.subject,
       created_at: wordTest.created_at,
+      is_graded: wordTest.is_graded,
     }
   }
 
@@ -66,13 +67,14 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
           set((state) => ({
             wordtest: {
               ...state.wordtest,
-              datas: response.wordTests,
+              datas: response.datas,
             },
           }))
         },
         '単語テスト一覧の取得に失敗しました。',
       )
     },
+    
     fetchWordTest: async (wordTestId) => {
       return await withWordTestStatus(
         async () => {
@@ -116,6 +118,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
         { fallback: null },
       )
     },
+
     createWordTest: async (subject) => {
       return await withWordTestStatus(
         async () => {
@@ -133,6 +136,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
         { rethrow: true },
       )
     },
+
     applyWordTestGrading: async (wordTestId, grading) => {
       await withWordTestStatus(
         async () => {
@@ -142,15 +146,43 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
             grading,
           })
 
-          set((state) => ({
-            wordtest: {
-              ...state.wordtest,
-              gradings: {
-                ...state.wordtest.gradings,
-                [wordTestId]: grading,
+          set((state) => {
+            const nextDatas = state.wordtest.datas.map((x) =>
+              x.id === wordTestId
+                ? {
+                    ...x,
+                    is_graded: true,
+                  }
+                : x,
+            )
+
+            const existingDetail = state.wordtest.details[wordTestId]
+            const nextDetails = existingDetail
+              ? {
+                  ...state.wordtest.details,
+                  [wordTestId]: {
+                    ...existingDetail,
+                    is_graded: true,
+                    items: existingDetail.items.map((item, index) => ({
+                      ...item,
+                      grading: grading[index],
+                    })),
+                  },
+                }
+              : state.wordtest.details
+
+            return {
+              wordtest: {
+                ...state.wordtest,
+                datas: nextDatas,
+                details: nextDetails,
+                gradings: {
+                  ...state.wordtest.gradings,
+                  [wordTestId]: grading,
+                },
               },
-            },
-          }))
+            }
+          })
         },
         '採点結果の反映に失敗しました。',
       )
