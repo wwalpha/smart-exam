@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { WordTestCreateDialog } from '@/pages/wordtest/WordTestCreateDialog'
-import { useWordTestList } from '@/hooks/wordtest'
+import { useWordTestPage } from '@/hooks/wordtest'
+import { SubjectLabel } from '@/lib/Consts'
 
 export function WordTestPage() {
-  const { wordTests } = useWordTestList()
+  const { datas, error } = useWordTestPage()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   return (
@@ -13,6 +14,7 @@ export function WordTestPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold text-stone-900">単語テスト</h1>
           <p className="text-sm text-stone-700">作成済みの単語テスト一覧です。</p>
+          {error ? <p className="text-sm text-rose-700">{error}</p> : null}
         </div>
 
         <button
@@ -44,7 +46,7 @@ export function WordTestPage() {
               </tr>
             </thead>
             <tbody>
-              {wordTests.length === 0 ? (
+              {datas.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -54,13 +56,13 @@ export function WordTestPage() {
                   </td>
                 </tr>
               ) : (
-                wordTests.map((test) => (
+                datas.map((test) => (
                   <tr key={test.id} className="odd:bg-white/40">
                     <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
                       {test.name}
                     </td>
                     <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
-                      {test.subject}
+                      {SubjectLabel[test.subject]}
                     </td>
                     <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
                       {test.created_at.slice(0, 10)}

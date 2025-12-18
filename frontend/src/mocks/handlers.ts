@@ -1,5 +1,12 @@
 import { http, HttpResponse } from 'msw'
-import type { WordTest, WordTestGradingValue, WordTestSubject } from '@typings/wordtest'
+import type {
+  WordTest,
+  WordTestDetail,
+  WordTestGradingValue,
+  WordTestItem,
+  WordTestSubject,
+} from '@typings/wordtest'
+import { subject, SubjectLabel } from '@/lib/Consts'
 
 function newId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -8,29 +15,55 @@ function newId(): string {
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`
 }
 
-let wordTests: WordTest[] = [
+const subject_definitions: Record<WordTestSubject, { seed_items: WordTestItem[] }> = {
+  [subject.society]: {
+    seed_items: [
+      { question: '鎌倉幕府', answer: '鎌倉幕府' },
+      { question: '大化の改新', answer: '大化の改新' },
+      { question: '参勤交代', answer: '参勤交代' },
+    ],
+  },
+  [subject.japanese]: {
+    seed_items: [{ question: '祖母が足のしゅじゅつをした。', answer: '手術' }],
+  },
+}
+
+function clone_seed_items(subject: WordTestSubject): WordTestItem[] {
+  return subject_definitions[subject].seed_items.map((x) => ({ ...x }))
+}
+
+let wordTests: WordTestDetail[] = [
   {
     id: 'wt_1',
-    name: '社会 単語テスト 1',
-    subject: '社会',
+    name: `${SubjectLabel[subject.society]} 単語テスト 1`,
+    subject: subject.society,
     created_at: '2025-12-01T00:00:00.000Z',
-    words: ['鎌倉幕府', '大化の改新', '参勤交代', '大政奉還'],
+    items: clone_seed_items(subject.society),
   },
   {
     id: 'wt_2',
-    name: '国語 単語テスト 1',
-    subject: '国語',
+    name: `${SubjectLabel[subject.japanese]} 単語テスト 1`,
+    subject: subject.japanese,
     created_at: '2025-12-05T00:00:00.000Z',
-    words: ['枕草子', '徒然草', '竹取物語', '平家物語'],
+    items: clone_seed_items(subject.japanese),
   },
 ]
+
+function toSummary(wordTest: WordTestDetail): WordTest {
+  return {
+    id: wordTest.id,
+    name: wordTest.name,
+    subject: wordTest.subject,
+    created_at: wordTest.created_at,
+  }
+}
 
 let wordTestGradings: Record<string, WordTestGradingValue[]> = {}
 
 export const handlers = [
   http.get('/api/wordtests', () => {
     return HttpResponse.json({
-      wordTests,
+      wordTests: wordTests.map(toSummary),
     })
   }),
 
@@ -44,18 +77,18 @@ export const handlers = [
     const nextIndex =
       wordTests.filter((x) => x.subject === body.subject).length + 1
 
-    const newItem: WordTest = {
+    const newItem: WordTestDetail = {
       id: newId(),
       subject: body.subject,
-      name: `${body.subject} 単語テスト ${nextIndex}`,
+      name: `${SubjectLabel[body.subject]} 単語テスト ${nextIndex}`,
       created_at: new Date().toISOString(),
-      words: [],
+      items: clone_seed_items(body.subject),
     }
 
     wordTests = [newItem, ...wordTests]
 
     return HttpResponse.json({
-      wordTest: newItem,
+      wordTest: toSummary(newItem),
     })
   }),
 

@@ -1,11 +1,19 @@
-export type WordTestSubject = '社会' | '国語'
+export type WordTestSubject = 'society' | 'japanese'
 
 export type WordTest = {
   id: string
   name: string
   subject: WordTestSubject
   created_at: string
-  words: string[]
+}
+
+export type WordTestDetail = WordTest & {
+  items: WordTestItem[]
+}
+
+export type WordTestItem = {
+  question: string
+  answer: string
 }
 
 export type WordTestGradingValue = 'correct' | 'incorrect'
@@ -26,7 +34,7 @@ export type GetWordTestRequest = {
 }
 
 export type GetWordTestResponse = {
-  wordTest: WordTest
+  wordTest: WordTestDetail
   grading: WordTestGradingValue[] | null
 }
 

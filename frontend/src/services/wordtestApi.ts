@@ -11,7 +11,7 @@ import type {
 import { apiRequest } from '@/services/apiClient'
 
 export async function listWordTests(
-  request: ListWordTestsRequest,
+  request?: ListWordTestsRequest,
 ): Promise<ListWordTestsResponse> {
   void request
   return apiRequest<ListWordTestsResponse>({

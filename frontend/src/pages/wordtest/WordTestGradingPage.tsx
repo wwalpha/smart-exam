@@ -1,11 +1,12 @@
 import { Link, useParams } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import type { ApplyWordTestGradingParams, WordTestGradingValue } from '@typings/wordtest'
-import { useWordTestGrading } from '@/hooks/wordtest'
+import { SubjectLabel } from '@/lib/Consts'
+import { useWordTestGradingPage } from '@/hooks/wordtest'
 
 export function WordTestGradingPage() {
   const { wordtestid } = useParams()
-  const { wordTest, isNotFound, grading, applyGrading } = useWordTestGrading(wordtestid)
+  const { wordTest, grading, applyGrading } = useWordTestGradingPage(wordtestid)
 
   if (!wordTest) {
     return (
@@ -13,7 +14,7 @@ export function WordTestGradingPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold text-stone-900">採点</h1>
           <p className="text-sm text-stone-700">
-            {isNotFound ? '対象の単語テストが見つかりません。' : '読み込み中...'}
+            読み込み中...
           </p>
         </div>
         <Link
@@ -30,8 +31,8 @@ export function WordTestGradingPage() {
     <WordTestGradingForm
       key={wordTest.id}
       wordTestId={wordTest.id}
-      words={wordTest.words}
-      subjectLabel={`${wordTest.name}（${wordTest.subject}）`}
+      questions={wordTest.items.map((x) => x.question)}
+      subjectLabel={`${wordTest.name}（${SubjectLabel[wordTest.subject]}）`}
       initialGrading={grading ?? null}
       onApply={async (params: ApplyWordTestGradingParams) => {
         await applyGrading(params.grading)
@@ -43,7 +44,7 @@ export function WordTestGradingPage() {
 type WordTestGradingFormProps = {
   wordTestId: string
   subjectLabel: string
-  words: string[]
+  questions: string[]
   initialGrading: WordTestGradingValue[] | null
   onApply: (params: ApplyWordTestGradingParams) => Promise<void>
 }
@@ -51,16 +52,16 @@ type WordTestGradingFormProps = {
 function WordTestGradingForm({
   wordTestId,
   subjectLabel,
-  words,
+  questions,
   initialGrading,
   onApply,
 }: WordTestGradingFormProps) {
   const [isApplied, setIsApplied] = useState(false)
   const [grading, setGrading] = useState<WordTestGradingValue[]>(() => {
-    if (initialGrading && initialGrading.length === words.length) {
+    if (initialGrading && initialGrading.length === questions.length) {
       return initialGrading
     }
-    return words.map(() => 'correct')
+    return questions.map(() => 'correct')
   })
 
   const score = useMemo(() => {
@@ -109,18 +110,18 @@ function WordTestGradingForm({
       <section className="rounded-lg border border-amber-200 bg-white/70 p-4">
         <h2 className="text-sm font-semibold text-stone-900">採点対象</h2>
 
-        {words.length === 0 ? (
+        {questions.length === 0 ? (
           <div className="mt-4 text-sm text-stone-700">採点対象の単語がありません。</div>
         ) : (
           <div className="mt-4 space-y-2">
-            {words.map((word, index) => {
+            {questions.map((question, index) => {
               const value = grading[index]
               return (
                 <div
-                  key={word}
+                  key={`${index}_${question}`}
                   className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-100 bg-white/60 px-3 py-2"
                 >
-                  <div className="text-sm font-semibold text-stone-900">{word}</div>
+                  <div className="text-sm font-semibold text-stone-900">{question}</div>
                   <div className="flex gap-2">
                     <button
                       type="button"

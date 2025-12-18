@@ -1,22 +1,27 @@
 import type {
-  ApplyWordTestGradingParams,
-  CreateWordTestRequest,
   CreateWordTestResponse,
-  GetWordTestRequest,
-  ListWordTestsRequest,
   WordTest,
+  WordTestDetail,
   WordTestGradingValue,
+  WordTestSubject,
 } from './wordtest'
+
+export type ApiStatus = {
+  isLoading: boolean
+  error: string | null
+}
 
 export type WordTestState = {
   datas: WordTest[]
-  wordTestGradings: Record<string, WordTestGradingValue[]>
+  details: Record<string, WordTestDetail>
+  gradings: Record<string, WordTestGradingValue[]>
+  status: ApiStatus
 }
 
 export type WordTestSlice = {
   wordtest: WordTestState
-  fetchWordTests: (request: ListWordTestsRequest) => Promise<void>
-  fetchWordTest: (request: GetWordTestRequest) => Promise<WordTest | null>
-  createWordTest: (request: CreateWordTestRequest) => Promise<CreateWordTestResponse>
-  applyWordTestGrading: (params: ApplyWordTestGradingParams) => Promise<void>
+  fetchWordTests: () => Promise<void>
+  fetchWordTest: (wordTestId: string) => Promise<WordTest | null>
+  createWordTest: (subject: WordTestSubject) => Promise<CreateWordTestResponse>
+  applyWordTestGrading: (wordTestId: string, grading: WordTestGradingValue[]) => Promise<void>
 }

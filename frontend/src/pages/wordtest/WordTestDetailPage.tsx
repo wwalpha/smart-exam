@@ -1,9 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
-import { useWordTestDetail } from '@/hooks/wordtest'
+import { useWordTestDetailPage } from '@/hooks/wordtest'
+import { SubjectLabel } from '@/lib/Consts'
 
 export function WordTestDetailPage() {
   const { wordtestid } = useParams()
-  const { wordTest, isNotFound } = useWordTestDetail(wordtestid)
+  const { wordTest, grading } = useWordTestDetailPage(wordtestid)
 
   if (!wordTest) {
     return (
@@ -11,7 +12,7 @@ export function WordTestDetailPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold text-stone-900">詳細</h1>
           <p className="text-sm text-stone-700">
-            {isNotFound ? '対象の単語テストが見つかりません。' : '読み込み中...'}
+            読み込み中...
           </p>
         </div>
         <Link
@@ -30,7 +31,7 @@ export function WordTestDetailPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold text-stone-900">詳細</h1>
           <p className="text-sm text-stone-700">
-            {wordTest.name}（{wordTest.subject}）
+            {wordTest.name}（{SubjectLabel[wordTest.subject]}）
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -50,15 +51,52 @@ export function WordTestDetailPage() {
       </div>
 
       <section className="rounded-lg border border-amber-200 bg-white/70 p-4">
-        <h2 className="text-sm font-semibold text-stone-900">テスト対象単語一覧</h2>
-        {wordTest.words.length === 0 ? (
-          <div className="mt-4 text-sm text-stone-700">まだ単語が登録されていません。</div>
+        <h2 className="text-sm font-semibold text-stone-900">問題一覧</h2>
+        {wordTest.items.length === 0 ? (
+          <div className="mt-4 text-sm text-stone-700">まだ問題が登録されていません。</div>
         ) : (
-          <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-stone-900">
-            {wordTest.words.map((word) => (
-              <li key={word}>{word}</li>
-            ))}
-          </ul>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="bg-amber-50">
+                <tr>
+                  <th className="border-b border-amber-200 px-4 py-3 font-semibold text-stone-900">
+                    問題
+                  </th>
+                  <th className="border-b border-amber-200 px-4 py-3 font-semibold text-stone-900">
+                    解答
+                  </th>
+                  <th className="border-b border-amber-200 px-4 py-3 font-semibold text-stone-900">
+                    正誤
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {wordTest.items.map((item, index) => {
+                  const value = grading?.[index]
+                  const label = value ? (value === 'correct' ? '正' : '誤') : '未採点'
+                  const labelClassName = value
+                    ? value === 'correct'
+                      ? 'text-stone-900'
+                      : 'text-rose-700'
+                    : 'text-stone-500'
+
+                  return (
+                    <tr key={`${index}_${item.question}`} className="odd:bg-white/40">
+                      <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
+                        {item.question}
+                      </td>
+                      <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
+                        {item.answer}
+                      </td>
+                      <td className={`border-b border-amber-100 px-4 py-3 font-semibold ${labelClassName}`}>
+                        {label}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

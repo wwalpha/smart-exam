@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { WordTestSubject } from '@typings/wordtest'
-import { useWordTestCreate } from '@/hooks/wordtest'
+import { useWordTestCreateDialog } from '@/hooks/wordtest'
+import { subject as subjects, SubjectLabel } from '@/lib/Consts'
 
 type WordTestCreateDialogProps = {
   open: boolean
@@ -11,8 +12,8 @@ export function WordTestCreateDialog({
   open,
   onClose,
 }: WordTestCreateDialogProps) {
-  const { createWordTest } = useWordTestCreate()
-  const [subject, setSubject] = useState<WordTestSubject | null>(null)
+  const { createWordTest } = useWordTestCreateDialog()
+  const [selectedSubject, setSelectedSubject] = useState<WordTestSubject | null>(null)
 
   if (!open) return null
 
@@ -48,13 +49,13 @@ export function WordTestCreateDialog({
         <section className="mt-4 rounded-lg border border-amber-200 bg-amber-50/40 p-4">
           <h2 className="text-sm font-semibold text-stone-900">科目選択</h2>
           <div className="mt-3 flex flex-wrap gap-2">
-            {(['社会', '国語'] as const).map((value) => {
-              const isActive = subject === value
+            {([subjects.society, subjects.japanese] as const).map((value) => {
+              const isActive = selectedSubject === value
               return (
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setSubject(value)}
+                  onClick={() => setSelectedSubject(value)}
                   className={[
                     'rounded-md border px-3 py-2 text-sm font-semibold',
                     isActive
@@ -62,13 +63,13 @@ export function WordTestCreateDialog({
                       : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
                   ].join(' ')}
                 >
-                  {value}
+                  {SubjectLabel[value]}
                 </button>
               )
             })}
           </div>
           <div className="mt-3 text-sm text-stone-700">
-            選択中: {subject ?? '未選択'}
+            選択中: {selectedSubject ? SubjectLabel[selectedSubject] : '未選択'}
           </div>
         </section>
 
@@ -83,13 +84,17 @@ export function WordTestCreateDialog({
 
           <button
             type="button"
-            disabled={!subject}
+            disabled={!selectedSubject}
             className="rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
-              if (!subject) return
+              if (!selectedSubject) return
               void (async () => {
-                await createWordTest({ subject })
-                onClose()
+                try {
+                  await createWordTest(selectedSubject)
+                  onClose()
+                } catch {
+                  // エラー表示は slice 側で管理し、ここでは握りつぶして未処理例外を避ける
+                }
               })()
             }}
           >
