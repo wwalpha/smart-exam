@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import type { WordTestSubject } from '@typings/wordtest'
 import { useWordTestCreateDialog } from '@/hooks/wordtest'
 import { SUBJECT as subjects, SUBJECT_LABEL } from '@/lib/Consts'
 
@@ -12,8 +10,13 @@ export function WordTestCreateDialog({
   open,
   onClose,
 }: WordTestCreateDialogProps) {
-  const { createWordTest } = useWordTestCreateDialog()
-  const [selectedSubject, setSelectedSubject] = useState<WordTestSubject | null>(null)
+  const {
+    register,
+    selectedSubject,
+    isCreateDisabled,
+    getSubjectClickHandler,
+    onCreateClick,
+  } = useWordTestCreateDialog({ onClose })
 
   if (!open) return null
 
@@ -47,29 +50,49 @@ export function WordTestCreateDialog({
         </div>
 
         <section className="mt-4 rounded-lg border border-amber-200 bg-amber-50/40 p-4">
-          <h2 className="text-sm font-semibold text-stone-900">科目選択</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {([subjects.society, subjects.japanese] as const).map((value) => {
-              const isActive = selectedSubject === value
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSelectedSubject(value)}
-                  className={[
-                    'rounded-md border px-3 py-2 text-sm font-semibold',
-                    isActive
-                      ? 'border-rose-700 bg-rose-700 text-white'
-                      : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
-                  ].join(' ')}
-                >
-                  {SUBJECT_LABEL[value]}
-                </button>
-              )
-            })}
-          </div>
-          <div className="mt-3 text-sm text-stone-700">
-            選択中: {selectedSubject ? SUBJECT_LABEL[selectedSubject] : '未選択'}
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="space-y-2">
+              <h2 className="text-sm font-semibold text-stone-900">科目選択</h2>
+              <div className="flex flex-wrap gap-2">
+                {([subjects.society, subjects.japanese] as const).map((value) => {
+                  const isActive = selectedSubject === value
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={getSubjectClickHandler(value)}
+                      className={[
+                        'rounded-md border px-3 py-2 text-sm font-semibold',
+                        isActive
+                          ? 'border-rose-700 bg-rose-700 text-white'
+                          : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
+                      ].join(' ')}
+                    >
+                      {SUBJECT_LABEL[value]}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2 text-right">
+              <div className="flex items-center justify-end gap-3">
+                <label className="text-sm font-semibold text-stone-900" htmlFor="wordtest-count">
+                  問題数
+                </label>
+                <input
+                  id="wordtest-count"
+                  type="number"
+                  min={1}
+                  className="w-28 rounded-md border border-amber-200 bg-white px-3 py-2 text-right text-sm text-stone-900"
+                  {...register('count', {
+                    valueAsNumber: true,
+                    required: true,
+                    min: 1,
+                  })}
+                />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -84,19 +107,9 @@ export function WordTestCreateDialog({
 
           <button
             type="button"
-            disabled={!selectedSubject}
+            disabled={isCreateDisabled}
             className="rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => {
-              if (!selectedSubject) return
-              void (async () => {
-                try {
-                  await createWordTest(selectedSubject)
-                  onClose()
-                } catch {
-                  // エラー表示は slice 側で管理し、ここでは握りつぶして未処理例外を避ける
-                }
-              })()
-            }}
+            onClick={onCreateClick}
           >
             テストを作成
           </button>

@@ -17,7 +17,7 @@ export function WordTestDetailPage() {
         </div>
         <Link
           to="/wordtest"
-          className="inline-flex items-center rounded-md border border-amber-200 bg-white px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-amber-50"
+          className="inline-flex items-center rounded border border-amber-200 bg-white px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-amber-50"
         >
           一覧へ戻る
         </Link>
@@ -28,6 +28,8 @@ export function WordTestDetailPage() {
   const subjectLabel = summary
     ? `${summary.name}（${SUBJECT_LABEL[summary.subject]}）`
     : `ID: ${detail.id}`
+
+  const isAlreadyGraded = summary?.is_graded ?? false
 
   return (
     <div className="space-y-6">
@@ -41,16 +43,27 @@ export function WordTestDetailPage() {
         <div className="flex flex-wrap gap-2">
           <Link
             to="/wordtest"
-            className="inline-flex items-center rounded-md border border-amber-200 bg-white px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-amber-50"
+            className="inline-flex items-center rounded border border-amber-200 bg-white px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-amber-50"
           >
             一覧へ戻る
           </Link>
-          <Link
-            to={`/wordtest/${detail.id}/grading`}
-            className="inline-flex items-center rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800"
-          >
-            採点へ
-          </Link>
+          {isAlreadyGraded ? (
+            <button
+              type="button"
+              disabled
+              title="採点済みのため採点できません"
+              className="inline-flex items-center rounded border border-stone-400 bg-stone-200 px-4 py-2 text-sm font-semibold text-stone-700 cursor-not-allowed"
+            >
+              採点済み
+            </button>
+          ) : (
+            <Link
+              to={`/wordtest/${detail.id}/grading`}
+              className="inline-flex items-center rounded bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800"
+            >
+              採点へ
+            </Link>
+          )}
         </div>
       </div>
 

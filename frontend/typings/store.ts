@@ -2,7 +2,7 @@ import type {
   CreateWordTestResponse,
   GradingData,
   GetWordTestDetailResponse,
-  WordTest,
+  WordTestTitle,
   WordTestSubject,
 } from './wordtest'
 
@@ -17,7 +17,7 @@ export type ApiStatus = {
 // 単語テスト機能の Zustand state
 export type WordTestState = {
   // 単語テスト一覧（サマリ）
-  lists: WordTest[]
+  lists: WordTestTitle[]
   // 単語テスト詳細のキャッシュ（key=wordTestId）
   details: Record<string, GetWordTestDetailResponse>
   // API 状態
@@ -33,7 +33,7 @@ export type WordTestSlice = {
   // 単語テスト詳細を取得する
   fetchWordTest: (wordTestId: string) => Promise<GetWordTestDetailResponse | null>
   // 単語テストを作成する
-  createWordTest: (subject: WordTestSubject) => Promise<CreateWordTestResponse>
+  createWordTest: (subject: WordTestSubject, count: number) => Promise<CreateWordTestResponse>
   // 採点結果を反映する
   applyWordTestGrading: (wordTestId: string, datas: GradingData[]) => Promise<void>
 }

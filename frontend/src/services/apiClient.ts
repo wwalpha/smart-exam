@@ -21,5 +21,9 @@ export async function apiRequest<TResponse, TBody = undefined>(
     data: params.body,
   })
 
+  if (response.status === 204) {
+    return undefined as unknown as TResponse
+  }
+
   return response.data
 }

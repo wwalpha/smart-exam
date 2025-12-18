@@ -1,7 +1,8 @@
 import type { StateCreator } from 'zustand'
+import orderBy from 'lodash/orderBy'
 import type { WordTestSlice } from '@typings/store'
 import type { GradingData } from '@typings/wordtest'
-import * as wordtestApi from '@/services/wordtestApi'
+import * as WORDTEST_API from '@/services/wordtestApi'
 
 // 単語テスト機能の Zustand slice
 export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSlice> = (
@@ -71,8 +72,9 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
       await withWordTestStatus(
         async ({ updateWordTest }) => {
           // 一覧はサーバー（MSW）側を正として置き換える
-          const response = await wordtestApi.listWordTests()
-          updateWordTest({ lists: response.datas })
+          const response = await WORDTEST_API.listWordTests()
+          const nextLists = orderBy(response.datas, ['created_at'], ['desc'])
+          updateWordTest({ lists: nextLists })
         },
         '単語テスト一覧の取得に失敗しました。',
       )
@@ -81,7 +83,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     fetchWordTest: async (wordTestId) => {
       return await withWordTestStatus(
         async ({ getWordTest, updateWordTest }) => {
-          const response = await wordtestApi.getWordTest({ wordTestId })
+          const response = await WORDTEST_API.getWordTest({ wordTestId })
 
           const current = getWordTest()
           // 詳細取得は items（問題/答え）を含むため、details に保持する
@@ -99,13 +101,14 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
       )
     },
 
-    createWordTest: async (subject) => {
+    createWordTest: async (subject, count) => {
       return await withWordTestStatus(
         async ({ getWordTest, updateWordTest }) => {
           // 作成結果を即時に store に反映し、画面のリロード無しで一覧へ反映する
-          const response = await wordtestApi.createWordTest({ subject })
+          const response = await WORDTEST_API.createWordTest({ subject, count })
           const current = getWordTest()
-          updateWordTest({ lists: [response.wordTest, ...current.lists] })
+          const nextLists = orderBy([response, ...current.lists], ['created_at'], ['desc'])
+          updateWordTest({ lists: nextLists })
           return response
         },
         '単語テストの作成に失敗しました。',
@@ -116,34 +119,18 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     applyWordTestGrading: async (wordTestId, datas) => {
       await withWordTestStatus(
         async ({ getWordTest, updateWordTest }) => {
-          const existingDetail = getWordTest().details[wordTestId] ?? null
-
-          if (!existingDetail) {
-            throw new Error('wordtest detail not found')
-          }
-
           const gradingByQid = new Map<string, GradingData['grading']>(
             datas.map((x) => [x.qid, x.grading]),
           )
 
-          const nextGrading = existingDetail.items.map((item) => gradingByQid.get(item.qid))
-          if (nextGrading.some((x) => x === undefined)) {
-            throw new Error('grading is missing for some items')
-          }
-
           // 採点は「反映する」操作で API に送信し、結果は store に保持して画面遷移しても復元できるようにする
-          await wordtestApi.applyWordTestGrading(wordTestId, { results: datas })
+          await WORDTEST_API.applyWordTestGrading(wordTestId, { results: datas })
+
+          // 採点反映後、一覧を再取得して最新状態にする
+          const listResponse = await WORDTEST_API.listWordTests()
+          const refreshedLists = orderBy(listResponse.datas, ['created_at'], ['desc'])
 
           const current = getWordTest()
-
-          const nextLists = current.lists.map((x) =>
-            x.id === wordTestId
-              ? {
-                  ...x,
-                  is_graded: true,
-                }
-              : x,
-          )
 
           const currentDetail = current.details[wordTestId]
           const nextDetails = currentDetail
@@ -153,14 +140,14 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
                   ...currentDetail,
                   items: currentDetail.items.map((item) => ({
                     ...item,
-                    grading: gradingByQid.get(item.qid),
+                    grading: gradingByQid.get(item.qid) ?? item.grading,
                   })),
                 },
               }
             : current.details
 
           updateWordTest({
-            lists: nextLists,
+            lists: refreshedLists,
             details: nextDetails,
           })
         },

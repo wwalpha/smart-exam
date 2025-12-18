@@ -2,7 +2,7 @@
 export type WordTestSubject = '3' | '1'
 
 // 単語テスト一覧で扱うサマリ型（詳細は含まない）
-export type WordTest = {
+export type WordTestTitle = {
   // 単語テストID
   id: string
   // 単語テスト名
@@ -44,7 +44,7 @@ export type ListWordTestsRequest = Record<string, never>
 // 単語テスト一覧取得レスポンス
 export type ListWordTestsResponse = {
   // 一覧データ
-  datas: WordTest[]
+  datas: WordTestTitle[]
 }
 
 // 単語テスト詳細取得リクエスト
@@ -68,16 +68,15 @@ export type ApplyWordTestGradingRequest = {
 }
 
 // 採点反映レスポンス
-export type ApplyWordTestGradingResponse = Record<string, never>
+export type ApplyWordTestGradingResponse = void
 
 // 単語テスト作成リクエスト
 export type CreateWordTestRequest = {
   // 作成する科目（コード値）
   subject: WordTestSubject
+  // 作成する問題数
+  count: number
 }
 
-// 単語テスト作成レスポンス
-export type CreateWordTestResponse = {
-  // 作成された単語テスト（サマリ）
-  wordTest: WordTest
-}
+// 単語テスト作成レスポンス（作成された単語テスト（サマリ）をそのまま返す）
+export type CreateWordTestResponse = WordTestTitle

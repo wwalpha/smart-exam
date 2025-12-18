@@ -131,7 +131,7 @@ function WordTestGradingForm({
                     <button
                       type="button"
                       className={[
-                        'rounded-md border px-3 py-1 text-xs font-semibold',
+                        'w-20 rounded-md border px-3 py-1 text-center text-xs font-semibold',
                         value === GRADING_VALUE.correct
                           ? 'border-rose-700 bg-rose-700 text-white'
                           : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
@@ -150,7 +150,7 @@ function WordTestGradingForm({
                     <button
                       type="button"
                       className={[
-                        'rounded-md border px-3 py-1 text-xs font-semibold',
+                        'w-20 rounded-md border px-3 py-1 text-center text-xs font-semibold',
                         value === GRADING_VALUE.incorrect
                           ? 'border-stone-700 bg-stone-700 text-white'
                           : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',

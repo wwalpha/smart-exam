@@ -10,9 +10,9 @@ import type {
 } from '@typings/wordtest'
 import { apiRequest } from '@/services/apiClient'
 
-export async function listWordTests(
+export const listWordTests = async (
   request?: ListWordTestsRequest,
-): Promise<ListWordTestsResponse> {
+): Promise<ListWordTestsResponse> => {
   void request
   return apiRequest<ListWordTestsResponse>({
     method: 'GET',
@@ -20,18 +20,18 @@ export async function listWordTests(
   })
 }
 
-export async function getWordTest(
+export const getWordTest = async (
   request: GetWordTestDetailRequest,
-): Promise<GetWordTestDetailResponse> {
+): Promise<GetWordTestDetailResponse> => {
   return apiRequest<GetWordTestDetailResponse>({
     method: 'GET',
     path: `/api/wordtests/${request.wordTestId}`,
   })
 }
 
-export async function createWordTest(
+export const createWordTest = async (
   request: CreateWordTestRequest,
-): Promise<CreateWordTestResponse> {
+): Promise<CreateWordTestResponse> => {
   return apiRequest<CreateWordTestResponse, CreateWordTestRequest>({
     method: 'POST',
     path: '/api/wordtests',
@@ -39,10 +39,10 @@ export async function createWordTest(
   })
 }
 
-export async function applyWordTestGrading(
+export const applyWordTestGrading = async (
   wordTestId: string,
   request: ApplyWordTestGradingRequest,
-): Promise<ApplyWordTestGradingResponse> {
+): Promise<ApplyWordTestGradingResponse> => {
   return apiRequest<ApplyWordTestGradingResponse, ApplyWordTestGradingRequest>({
     method: 'POST',
     path: `/api/wordtests/${wordTestId}/grading`,

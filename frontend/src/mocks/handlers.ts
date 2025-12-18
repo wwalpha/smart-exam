@@ -1,13 +1,13 @@
 import { http, HttpResponse } from 'msw'
 import type {
-  WordTest,
+  WordTestTitle,
   GradingValue,
   WordTestItem,
   WordTestSubject,
 } from '@typings/wordtest'
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts'
 
-type WordTestWithItems = WordTest & {
+type WordTestWithItems = WordTestTitle & {
   items: WordTestItem[]
 }
 
@@ -35,6 +35,21 @@ function clone_seed_items(subject: WordTestSubject): WordTestItem[] {
   return subject_definitions[subject].seed_items.map((x) => ({ ...x }))
 }
 
+function build_items(subject: WordTestSubject, count: number): WordTestItem[] {
+  const seeds = clone_seed_items(subject)
+  if (seeds.length === 0) return []
+
+  const result: WordTestItem[] = []
+  for (let index = 0; index < count; index += 1) {
+    const seed = seeds[index % seeds.length]
+    result.push({
+      ...seed,
+      qid: index < seeds.length ? seed.qid : `${seed.qid}_${index + 1}`,
+    })
+  }
+  return result
+}
+
 let wordTests: WordTestWithItems[] = [
   {
     id: 'wt_1',
@@ -52,9 +67,20 @@ let wordTests: WordTestWithItems[] = [
     is_graded: false,
     items: clone_seed_items(SUBJECT.japanese),
   },
+  {
+    id: 'wt_3',
+    name: `${SUBJECT_LABEL[SUBJECT.society]} 単語テスト 2`,
+    subject: SUBJECT.society,
+    created_at: '2025-12-10T00:00:00.000Z',
+    is_graded: true,
+    items: clone_seed_items(SUBJECT.society).map((item, index) => ({
+      ...item,
+      grading: index % 2 === 0 ? '1' : '0',
+    })),
+  },
 ]
 
-function toSummary(wordTest: WordTestWithItems): WordTest {
+function toSummary(wordTest: WordTestWithItems): WordTestTitle {
   return {
     id: wordTest.id,
     name: wordTest.name,
@@ -72,9 +98,13 @@ export const handlers = [
   }),
 
   http.post('/api/wordtests', async ({ request }) => {
-    const body = (await request.json()) as { subject?: WordTestSubject }
+    const body = (await request.json()) as { subject?: WordTestSubject; count?: number }
 
     if (!body.subject) {
+      return new HttpResponse(null, { status: 400 })
+    }
+
+    if (typeof body.count !== 'number' || !Number.isFinite(body.count) || body.count < 1) {
       return new HttpResponse(null, { status: 400 })
     }
 
@@ -87,14 +117,12 @@ export const handlers = [
       name: `${SUBJECT_LABEL[body.subject]} 単語テスト ${nextIndex}`,
       created_at: new Date().toISOString(),
       is_graded: false,
-      items: clone_seed_items(body.subject),
+      items: build_items(body.subject, body.count),
     }
 
     wordTests = [newItem, ...wordTests]
 
-    return HttpResponse.json({
-      wordTest: toSummary(newItem),
-    })
+    return HttpResponse.json(toSummary(newItem))
   }),
 
   http.get('/api/wordtests/:wordTestId', ({ params }) => {
@@ -155,8 +183,6 @@ export const handlers = [
       }
     })
 
-    return HttpResponse.json({
-      ok: true,
-    })
+    return new HttpResponse(null, { status: 204 })
   }),
 ]
