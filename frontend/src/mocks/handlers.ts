@@ -27,7 +27,14 @@ const subject_definitions: Record<WordTestSubject, { seed_items: WordTestItem[] 
     ],
   },
   [SUBJECT.japanese]: {
-    seed_items: [{ qid: 'japanese_1', question: '祖母が足のしゅじゅつをした。', answer: '手術' }],
+    seed_items: [
+      {
+        qid: 'japanese_1',
+        question:
+          '祖母が足の<span class="text-blue-600 font-bold">しゅじゅつ</span>をした。',
+        answer: '手術',
+      },
+    ],
   },
 }
 

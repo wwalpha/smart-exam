@@ -101,7 +101,9 @@ export function WordTestDetailPage() {
                   return (
                     <tr key={item.qid} className="odd:bg-white/40">
                       <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
-                        {item.question}
+                        <span
+                          dangerouslySetInnerHTML={{ __html: item.question }}
+                        />
                       </td>
                       <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
                         {item.answer}

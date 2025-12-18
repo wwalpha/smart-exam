@@ -1,8 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
-import { useMemo, useState } from 'react'
-import type { ApplyWordTestGradingRequest, GradingValue } from '@typings/wordtest'
+import type { GradingValue } from '@typings/wordtest'
 import { GRADING_VALUE, SUBJECT_LABEL } from '@/lib/Consts'
-import { useWordTestGradingPage } from '@/hooks/wordtest'
+import { useWordTestGradingForm, useWordTestGradingPage } from '@/hooks/wordtest'
 
 export function WordTestGradingPage() {
   const { wordtestid } = useParams()
@@ -38,9 +37,7 @@ export function WordTestGradingPage() {
       items={detail.items.map((x) => ({ qid: x.qid, question: x.question }))}
       subjectLabel={subjectLabel}
       initialGrading={grading ?? null}
-      onApply={async (request: ApplyWordTestGradingRequest) => {
-        await applyGrading(request.results)
-      }}
+      applyGrading={applyGrading}
     />
   )
 }
@@ -50,7 +47,7 @@ type WordTestGradingFormProps = {
   subjectLabel: string
   items: { qid: string; question: string }[]
   initialGrading: GradingValue[] | null
-  onApply: (request: ApplyWordTestGradingRequest) => Promise<void>
+  applyGrading: (datas: { qid: string; grading: GradingValue }[]) => Promise<void>
 }
 
 function WordTestGradingForm({
@@ -58,21 +55,20 @@ function WordTestGradingForm({
   subjectLabel,
   items,
   initialGrading,
-  onApply,
+  applyGrading,
 }: WordTestGradingFormProps) {
-  const [isApplied, setIsApplied] = useState(false)
-  const [grading, setGrading] = useState<GradingValue[]>(() => {
-    if (initialGrading && initialGrading.length === items.length) {
-      return initialGrading
-    }
-    return items.map(() => GRADING_VALUE.correct)
+  const {
+    grading,
+    score,
+    isApplied,
+    onApplyClick,
+    getSetCorrectHandler,
+    getSetIncorrectHandler,
+  } = useWordTestGradingForm({
+    items,
+    initialGrading,
+    applyGrading,
   })
-
-  const score = useMemo(() => {
-    const correct = grading.filter((x) => x === GRADING_VALUE.correct).length
-    const incorrect = grading.filter((x) => x === GRADING_VALUE.incorrect).length
-    return { correct, incorrect }
-  }, [grading])
 
   return (
     <div className="space-y-6">
@@ -96,16 +92,7 @@ function WordTestGradingForm({
           <button
             type="button"
             className="inline-flex items-center rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800"
-            onClick={() => {
-              void (async () => {
-                const datas = items.map((item, index) => ({
-                  qid: item.qid,
-                  grading: grading[index],
-                }))
-                await onApply({ results: datas })
-                setIsApplied(true)
-              })()
-            }}
+            onClick={onApplyClick}
           >
             反映する
           </button>
@@ -126,7 +113,10 @@ function WordTestGradingForm({
                   key={item.qid}
                   className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-100 bg-white/60 px-3 py-2"
                 >
-                  <div className="text-sm font-semibold text-stone-900">{item.question}</div>
+                  <div
+                    className="text-sm font-semibold text-stone-900"
+                    dangerouslySetInnerHTML={{ __html: item.question }}
+                  />
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -136,14 +126,7 @@ function WordTestGradingForm({
                           ? 'border-rose-700 bg-rose-700 text-white'
                           : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
                       ].join(' ')}
-                      onClick={() => {
-                        setIsApplied(false)
-                        setGrading((prev) => {
-                          const next = [...prev]
-                          next[index] = GRADING_VALUE.correct
-                          return next
-                        })
-                      }}
+                      onClick={getSetCorrectHandler(index)}
                     >
                       正
                     </button>
@@ -155,14 +138,7 @@ function WordTestGradingForm({
                           ? 'border-stone-700 bg-stone-700 text-white'
                           : 'border-amber-200 bg-white text-stone-900 hover:bg-amber-50',
                       ].join(' ')}
-                      onClick={() => {
-                        setIsApplied(false)
-                        setGrading((prev) => {
-                          const next = [...prev]
-                          next[index] = GRADING_VALUE.incorrect
-                          return next
-                        })
-                      }}
+                      onClick={getSetIncorrectHandler(index)}
                     >
                       誤
                     </button>
