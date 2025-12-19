@@ -52,3 +52,49 @@ resource "aws_lambda_function" "api" {
 
   depends_on = [aws_cloudwatch_log_group.lambda]
 }
+
+# ----------------------------------------------------------------------------------------------
+# CloudWatch Log Group for Bedrock Lambda.
+# ----------------------------------------------------------------------------------------------
+resource "aws_cloudwatch_log_group" "bedrock" {
+  name              = "/aws/lambda/${local.bedrock_function_name}"
+  retention_in_days = 30
+}
+
+# ----------------------------------------------------------------------------------------------
+# Bedrock Lambda function.
+# ----------------------------------------------------------------------------------------------
+resource "aws_lambda_function" "bedrock" {
+  function_name = local.bedrock_function_name
+  role          = aws_iam_role.lambda.arn
+  runtime       = "nodejs20.x"
+  handler       = "index.handler"
+
+  filename         = data.archive_file.lambda_dummy.output_path
+  source_code_hash = data.archive_file.lambda_dummy.output_base64sha256
+
+  lifecycle {
+    ignore_changes = [source_code_hash]
+  }
+
+  timeout     = 300
+  memory_size = 1024
+
+  environment {
+    variables = {
+      FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
+
+      SUBJECTS_TABLE           = aws_dynamodb_table.subjects.name
+      TESTS_TABLE              = aws_dynamodb_table.tests.name
+      QUESTIONS_TABLE          = aws_dynamodb_table.questions.name
+      ATTEMPTS_TABLE           = aws_dynamodb_table.attempts.name
+      ANSWER_SHEETS_TABLE      = aws_dynamodb_table.answer_sheets.name
+      GRADED_SHEETS_TABLE      = aws_dynamodb_table.graded_sheets.name
+      WORDS_TABLE              = aws_dynamodb_table.words.name
+      WORD_TESTS_TABLE         = aws_dynamodb_table.word_tests.name
+      WORD_TEST_ATTEMPTS_TABLE = aws_dynamodb_table.word_test_attempts.name
+    }
+  }
+
+  depends_on = [aws_cloudwatch_log_group.bedrock]
+}
