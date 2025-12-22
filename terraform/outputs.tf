@@ -47,3 +47,35 @@ output "cognito_user_pool_client_id" {
   description = "Cognito user pool app client id."
   value       = aws_cognito_user_pool_client.auth.id
 }
+
+# ----------------------------------------------------------------------------------------------
+# Frontend S3 bucket name.
+# ----------------------------------------------------------------------------------------------
+output "frontend_bucket_name" {
+  description = "Frontend S3 bucket name."
+  value       = aws_s3_bucket.frontend.bucket
+}
+
+# ----------------------------------------------------------------------------------------------
+# CloudFront Distribution ID.
+# ----------------------------------------------------------------------------------------------
+output "cloudfront_distribution_id" {
+  description = "CloudFront Distribution ID."
+  value       = aws_cloudfront_distribution.frontend.id
+}
+
+# ----------------------------------------------------------------------------------------------
+# Lambda function name for API.
+# ----------------------------------------------------------------------------------------------
+output "lambda_function_name" {
+  description = "Lambda function name for API."
+  value       = aws_lambda_function.api.function_name
+}
+
+# ----------------------------------------------------------------------------------------------
+# Lambda function name for Bedrock.
+# ----------------------------------------------------------------------------------------------
+output "bedrock_function_name" {
+  description = "Lambda function name for Bedrock."
+  value       = aws_lambda_function.bedrock.function_name
+}

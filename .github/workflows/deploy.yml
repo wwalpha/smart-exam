@@ -1,0 +1,144 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-1
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    outputs:
+      http_api_endpoint: ${{ steps.outputs.outputs.http_api_endpoint }}
+      cognito_user_pool_id: ${{ steps.outputs.outputs.cognito_user_pool_id }}
+      cognito_user_pool_client_id: ${{ steps.outputs.outputs.cognito_user_pool_client_id }}
+      frontend_bucket_name: ${{ steps.outputs.outputs.frontend_bucket_name }}
+      cloudfront_distribution_id: ${{ steps.outputs.outputs.cloudfront_distribution_id }}
+      lambda_function_name: ${{ steps.outputs.outputs.lambda_function_name }}
+      bedrock_function_name: ${{ steps.outputs.outputs.bedrock_function_name }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: terraform apply -auto-approve
+
+      - name: Get Terraform Outputs
+        id: outputs
+        working-directory: ./terraform
+        run: |
+          echo "http_api_endpoint=$(terraform output -raw http_api_endpoint)" >> $GITHUB_OUTPUT
+          echo "cognito_user_pool_id=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_OUTPUT
+          echo "cognito_user_pool_client_id=$(terraform output -raw cognito_user_pool_client_id)" >> $GITHUB_OUTPUT
+          echo "frontend_bucket_name=$(terraform output -raw frontend_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> $GITHUB_OUTPUT
+          echo "bedrock_function_name=$(terraform output -raw bedrock_function_name)" >> $GITHUB_OUTPUT
+
+  backend:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Build
+        working-directory: ./backend
+        run: npm run build
+
+      - name: Install Production Dependencies
+        working-directory: ./backend
+        run: |
+          rm -rf node_modules
+          npm ci --omit=dev
+
+      - name: Zip Artifact
+        working-directory: ./backend
+        run: |
+          cd dist
+          zip -r ../function.zip .
+          cd ..
+          zip -r function.zip node_modules package.json
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy API Lambda
+        run: |
+          aws lambda update-function-code --function-name ${{ needs.terraform.outputs.lambda_function_name }} --zip-file fileb://backend/function.zip
+
+      - name: Deploy Bedrock Lambda
+        run: |
+          aws lambda update-function-code --function-name ${{ needs.terraform.outputs.bedrock_function_name }} --zip-file fileb://backend/function.zip
+
+  frontend:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build
+        working-directory: ./frontend
+        env:
+          VITE_API_ENDPOINT: ${{ needs.terraform.outputs.http_api_endpoint }}
+          VITE_COGNITO_USER_POOL_ID: ${{ needs.terraform.outputs.cognito_user_pool_id }}
+          VITE_COGNITO_CLIENT_ID: ${{ needs.terraform.outputs.cognito_user_pool_client_id }}
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync to S3
+        run: |
+          aws s3 sync frontend/dist s3://${{ needs.terraform.outputs.frontend_bucket_name }} --delete
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ needs.terraform.outputs.cloudfront_distribution_id }} --paths "/*"

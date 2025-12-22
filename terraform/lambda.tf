@@ -45,8 +45,12 @@ resource "aws_lambda_function" "api" {
       ANSWER_SHEETS_TABLE      = aws_dynamodb_table.answer_sheets.name
       GRADED_SHEETS_TABLE      = aws_dynamodb_table.graded_sheets.name
       WORDS_TABLE              = aws_dynamodb_table.words.name
+      WORD_GROUPS_TABLE        = aws_dynamodb_table.word_groups.name
       WORD_TESTS_TABLE         = aws_dynamodb_table.word_tests.name
       WORD_TEST_ATTEMPTS_TABLE = aws_dynamodb_table.word_test_attempts.name
+      EXAM_PAPERS_TABLE        = aws_dynamodb_table.exam_papers.name
+      EXAM_RESULTS_TABLE       = aws_dynamodb_table.exam_results.name
+      BEDROCK_REGION           = "us-east-1"
     }
   }
 
@@ -68,7 +72,7 @@ resource "aws_lambda_function" "bedrock" {
   function_name = local.bedrock_function_name
   role          = aws_iam_role.lambda.arn
   runtime       = "nodejs20.x"
-  handler       = "index.handler"
+  handler       = "handlers/bedrock.handler"
 
   filename         = data.archive_file.lambda_dummy.output_path
   source_code_hash = data.archive_file.lambda_dummy.output_base64sha256
@@ -91,8 +95,11 @@ resource "aws_lambda_function" "bedrock" {
       ANSWER_SHEETS_TABLE      = aws_dynamodb_table.answer_sheets.name
       GRADED_SHEETS_TABLE      = aws_dynamodb_table.graded_sheets.name
       WORDS_TABLE              = aws_dynamodb_table.words.name
+      WORD_GROUPS_TABLE        = aws_dynamodb_table.word_groups.name
       WORD_TESTS_TABLE         = aws_dynamodb_table.word_tests.name
       WORD_TEST_ATTEMPTS_TABLE = aws_dynamodb_table.word_test_attempts.name
+      EXAM_PAPERS_TABLE        = aws_dynamodb_table.exam_papers.name
+      EXAM_RESULTS_TABLE       = aws_dynamodb_table.exam_results.name
     }
   }
 

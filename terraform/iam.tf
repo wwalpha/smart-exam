@@ -55,13 +55,18 @@ data "aws_iam_policy_document" "lambda" {
       aws_dynamodb_table.answer_sheets.arn,
       aws_dynamodb_table.graded_sheets.arn,
       aws_dynamodb_table.words.arn,
+      aws_dynamodb_table.word_groups.arn,
       aws_dynamodb_table.word_tests.arn,
       aws_dynamodb_table.word_test_attempts.arn,
+      aws_dynamodb_table.exam_papers.arn,
+      aws_dynamodb_table.exam_results.arn,
       "${aws_dynamodb_table.tests.arn}/index/*",
       "${aws_dynamodb_table.questions.arn}/index/*",
       "${aws_dynamodb_table.attempts.arn}/index/*",
       "${aws_dynamodb_table.words.arn}/index/*",
       "${aws_dynamodb_table.word_test_attempts.arn}/index/*",
+      "${aws_dynamodb_table.exam_papers.arn}/index/*",
+      "${aws_dynamodb_table.exam_results.arn}/index/*",
     ]
   }
 

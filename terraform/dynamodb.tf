@@ -155,6 +155,20 @@ resource "aws_dynamodb_table" "words" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# DynamoDB table for word groups (Word Sets).
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "word_groups" {
+  name         = "${var.project_name}_${var.env}_word_groups"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "group_id"
+
+  attribute {
+    name = "group_id"
+    type = "S"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
 # DynamoDB table for word tests.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "word_tests" {
@@ -195,6 +209,62 @@ resource "aws_dynamodb_table" "word_test_attempts" {
     name            = "gsi_word_test_id_started_at"
     hash_key        = "word_test_id"
     range_key       = "started_at"
+    projection_type = "ALL"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for Exam Papers (PDFs).
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "exam_papers" {
+  name         = "${var.project_name}_${var.env}_exam_papers"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "paper_id"
+
+  attribute {
+    name = "paper_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "grade"
+    type = "S"
+  }
+
+  attribute {
+    name = "subject"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "gsi_grade_subject"
+    hash_key        = "grade"
+    range_key       = "subject"
+    projection_type = "ALL"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for Exam Results.
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "exam_results" {
+  name         = "${var.project_name}_${var.env}_exam_results"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "result_id"
+
+  attribute {
+    name = "result_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "test_date"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "gsi_test_date"
+    hash_key        = "test_date"
     projection_type = "ALL"
   }
 }
