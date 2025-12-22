@@ -30,14 +30,18 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         working-directory: ./terraform
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ vars.TERRAFORM_BACKEND_BUCKET }}" \
+            -backend-config="key=${{ vars.TERRAFORM_BACKEND_KEY }}" \
+            -backend-config="region=${{ vars.TERRAFORM_BACKEND_REGION }}"
 
       - name: Terraform Apply
         working-directory: ./terraform
@@ -93,7 +97,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy API Lambda
@@ -132,7 +136,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Sync to S3
