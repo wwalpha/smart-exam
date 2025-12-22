@@ -76,6 +76,12 @@ export type CreateWordTestRequest = {
   subject: WordTestSubject;
   // 作成する問題数
   count: number;
+  // 採点済み回答用紙
+  graded_answer_sheet?: File;
+  // 問題用紙
+  question_paper?: File;
+  // 解答
+  answer_key?: File;
 };
 
 // 単語テスト作成レスポンス（作成された単語テスト（サマリ）をそのまま返す）

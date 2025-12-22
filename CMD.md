@@ -1,2 +1,13 @@
-1. math.pdfは適切に問題番号洗い出せるのか、検証してください
-2. 必要に応じて、backend処理を直すr
+GITHUB actionsのエラーを確認し、解消する。下記情報を使う
+
+Environment secrets
+AWS_ACCOUNT_ID
+AWS_IAM_ROLE_ARN
+Environment variables
+
+TERRAFORM_BACKEND_BUCKET
+
+TERRAFORM_BACKEND_KEY
+
+TERRAFORM_BACKEND_REGION
+

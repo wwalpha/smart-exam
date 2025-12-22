@@ -28,12 +28,12 @@ app.post('/api/upload-url', async (req, res) => {
 // Analyze Exam Paper (Bedrock)
 app.post('/api/analyze-paper', async (req, res) => {
   try {
-    const { s3Key } = req.body;
+    const { s3Key, subject } = req.body;
     if (!s3Key) {
       res.status(400).json({ error: 's3Key is required' });
       return;
     }
-    const questions = await analyzeExamPaper(s3Key);
+    const questions = await analyzeExamPaper(s3Key, subject);
     res.json({ questions });
   } catch (error) {
     console.error(error);

@@ -1,4 +1,5 @@
 import type {
+  CreateWordTestRequest,
   CreateWordTestResponse,
   GradingData,
   GetWordTestDetailResponse,
@@ -50,7 +51,7 @@ export type WordTestSlice = {
   // 単語テスト詳細を取得する
   fetchWordTest: (wordTestId: string) => Promise<GetWordTestDetailResponse | null>;
   // 単語テストを作成する
-  createWordTest: (subject: WordTestSubject, count: number) => Promise<CreateWordTestResponse>;
+  createWordTest: (request: CreateWordTestRequest) => Promise<CreateWordTestResponse>;
   // 採点結果を反映する
   applyWordTestGrading: (wordTestId: string, datas: GradingData[]) => Promise<void>;
 };

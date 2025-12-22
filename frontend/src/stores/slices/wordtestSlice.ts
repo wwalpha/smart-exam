@@ -95,11 +95,11 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
       );
     },
 
-    createWordTest: async (subject, count) => {
+    createWordTest: async (request) => {
       return await withWordTestStatus(
         async ({ getWordTest, updateWordTest }) => {
           // 作成結果を即時に store に反映し、画面のリロード無しで一覧へ反映する
-          const response = await WORDTEST_API.createWordTest({ subject, count });
+          const response = await WORDTEST_API.createWordTest(request);
           const current = getWordTest();
           const nextLists = orderBy([response, ...current.lists], ['created_at'], ['desc']);
           updateWordTest({ lists: nextLists });

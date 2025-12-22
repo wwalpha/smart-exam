@@ -32,10 +32,23 @@ export const getWordTest = async (
 export const createWordTest = async (
   request: CreateWordTestRequest,
 ): Promise<CreateWordTestResponse> => {
-  return apiRequest<CreateWordTestResponse, CreateWordTestRequest>({
+  const formData = new FormData();
+  formData.append('subject', request.subject);
+  formData.append('count', request.count.toString());
+  if (request.graded_answer_sheet) {
+    formData.append('graded_answer_sheet', request.graded_answer_sheet);
+  }
+  if (request.question_paper) {
+    formData.append('question_paper', request.question_paper);
+  }
+  if (request.answer_key) {
+    formData.append('answer_key', request.answer_key);
+  }
+
+  return apiRequest<CreateWordTestResponse, FormData>({
     method: 'POST',
     path: '/api/wordtests',
-    body: request,
+    body: formData,
   })
 }
 

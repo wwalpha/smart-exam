@@ -83,6 +83,47 @@ export function WordTestCreateDialog({ open, onClose }: WordTestCreateDialogProp
           </div>
         </section>
 
+        <section className="mt-4 rounded-lg border border-amber-200 bg-amber-50/40 p-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-stone-900" htmlFor="graded_answer_sheet">
+                採点済み回答用紙
+              </label>
+              <input
+                id="graded_answer_sheet"
+                type="file"
+                accept=".pdf,image/*"
+                className="w-full text-sm text-stone-700 file:mr-4 file:rounded-md file:border-0 file:bg-amber-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-amber-700 hover:file:bg-amber-200"
+                {...register('graded_answer_sheet')}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-stone-900" htmlFor="question_paper">
+                問題用紙
+              </label>
+              <input
+                id="question_paper"
+                type="file"
+                accept=".pdf,image/*"
+                className="w-full text-sm text-stone-700 file:mr-4 file:rounded-md file:border-0 file:bg-amber-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-amber-700 hover:file:bg-amber-200"
+                {...register('question_paper')}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-stone-900" htmlFor="answer_key">
+                解答
+              </label>
+              <input
+                id="answer_key"
+                type="file"
+                accept=".pdf,image/*"
+                className="w-full text-sm text-stone-700 file:mr-4 file:rounded-md file:border-0 file:bg-amber-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-amber-700 hover:file:bg-amber-200"
+                {...register('answer_key')}
+              />
+            </div>
+          </div>
+        </section>
+
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
