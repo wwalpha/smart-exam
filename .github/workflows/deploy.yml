@@ -16,6 +16,7 @@ env:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       http_api_endpoint: ${{ steps.outputs.outputs.http_api_endpoint }}
       cognito_user_pool_id: ${{ steps.outputs.outputs.cognito_user_pool_id }}
@@ -62,6 +63,7 @@ jobs:
   backend:
     needs: terraform
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - uses: actions/checkout@v4
 
@@ -110,6 +112,7 @@ jobs:
 
   frontend:
     needs: terraform
+    environment: staging
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
