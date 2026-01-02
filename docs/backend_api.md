@@ -1,6 +1,6 @@
 # Backend API 一覧
 
-本書は [要件定義書.md](../要件定義書.md) をベースに、Smart Exam の Backend API の「一覧」を記載します。
+本書は [要件定義書_v1.2.md](../要件定義_v1.2.md) をベースに、Smart Exam の Backend API の「一覧」を記載します。
 
 - フロントエンド画面設計: [docs/frontend.md](frontend.md)
 - Request / Response の詳細定義は [docs/swagger.yml](swagger.yml) に記載します。
@@ -8,44 +8,91 @@
 
 ---
 
-## エンドポイント一覧（v1）
+## 共通
+- GET /api/health
+  - ヘルスチェック
+- GET /api/me
+  - ログイン中ユーザー情報
 
-### Catalog（科目/テスト/問題）
-- GET `/v1/subjects` : 科目一覧（科目別フィルタ用）
-- GET `/v1/tests?subjectid={subjectid}` : テスト一覧（科目別フィルタ）
-- GET `/v1/tests/{testid}/questions` : 問題一覧（問題選択・不正解再実施用）
+---
 
-### Attempts（オンライン実施/結果保管）
-- POST `/v1/attempts` : 実施開始
-- POST `/v1/attempts/{attemptid}/submit` : 解答提出（正誤結果を保管）
-- GET `/v1/tests/{testid}/results` : テスト結果取得（正誤表示）
-- GET `/v1/tests/{testid}/wrongquestions` : 不正解問題取得（再実施用）
+## Material Sets（教材セット）
+- GET /api/material-sets
+  - 一覧取得（検索/フィルタ/ページング）
+  - Query: subject, grade, provider, from, to, q, limit, cursor
+- POST /api/material-sets
+  - 新規作成
+- GET /api/material-sets/{materialSetId}
+  - 詳細取得
+- PATCH /api/material-sets/{materialSetId}
+  - メタ情報更新
 
-### AnswerSheets（解答用紙の作成・印刷）
-- POST `/v1/answersheets` : 問題を手動選択して解答用紙を作成（印刷用）
+---
 
-### Files（S3 署名付きURL）
-- POST `/v1/files/presignupload` : アップロード用 署名付きURL発行（採点済み用紙など）
-- POST `/v1/files/presigndownload` : ダウンロード用 署名付きURL発行（解答用紙PDFなど）
+## Material Files（教材ファイル: PDF/画像）
+- POST /api/material-sets/{materialSetId}/files
+  - アップロード（推奨: multipart）
+- GET /api/material-sets/{materialSetId}/files
+  - ファイル一覧
+- GET /api/files/{fileId}/download
+  - ダウンロード（署名URL or stream）
+- PATCH /api/files/{fileId}
+  - ステータス更新（例: ARCHIVED）
 
-### GradedSheets（採点済み用紙アップロード→AI解析→正誤表示）
-- POST `/v1/gradedsheets` : 採点済み用紙登録（AI解析開始）
-- GET `/v1/gradedsheets/{gradedsheetid}` : 解析ステータス/正誤結果取得
+---
 
-### Explanations（AI解説生成）
-- POST `/v1/questions/{questionid}/explanations` : 解説生成（疑似問題生成はしない）
+## Questions（問題）
+- POST /api/material-sets/{materialSetId}/questions/candidates
+  - OCR/抽出候補の登録（候補扱い）
+- POST /api/material-sets/{materialSetId}/questions
+  - 問題の確定登録（手動確定）
+- GET /api/material-sets/{materialSetId}/questions
+  - 教材セット内の問題一覧
+- PATCH /api/questions/{questionId}
+  - 問題メタ更新（displayLabel/canonicalKey/tags等）
 
-### Words（単語マスタ）
-- POST `/v1/words` : 単語（Q/A）登録（単語テスト用）
-- GET `/v1/words` : 単語一覧
-- DELETE `/v1/words/{wordid}` : 単語削除
+---
 
-### WordTests（単語テスト）
-- POST `/v1/wordtests` : 指定数の単語テスト（漢字テスト）作成
-- GET `/v1/wordtests` : 作成済み単語テスト一覧
-- DELETE `/v1/wordtests/{wordtestid}` : 単語テスト削除
-- GET `/v1/wordtests/{wordtestid}/pdf` : 単語テストPDFダウンロードURL取得
+## Kanji（漢字）
+- POST /api/kanji
+  - 漢字1件作成
+- POST /api/kanji/import
+  - 一括インポート（text形式）
+- GET /api/kanji
+  - 漢字一覧（検索/ページング）
+  - Query: q, limit, cursor
 
-### WordTestAttempts（単語テストの正誤登録）
-- POST `/v1/wordtestattempts` : 単語テスト実施開始（正誤登録用 attempt 作成）
-- POST `/v1/wordtestattempts/{wordtestattemptid}/submit` : 単語テストの正誤提出
+---
+
+## Attempts（正誤履歴: 追記型）
+- POST /api/questions/{questionId}/attempts
+  - 問題の正誤を記録（CORRECT/WRONG）
+- GET /api/questions/{questionId}/status
+  - 問題の派生状態（currentState/streak/dueDate/excluded/lastAttemptDate）
+- POST /api/kanji/{kanjiId}/attempts
+  - 漢字の正誤を記録
+- GET /api/kanji/{kanjiId}/status
+  - 漢字の派生状態
+
+---
+
+## Review Tests（復習テスト: 生成/ロック/ライフサイクル）
+- POST /api/review-tests
+  - テスト生成（決定論ソート + ロック取得）
+- GET /api/review-tests
+  - テスト一覧（status/subject/ページング）
+  - Query: status, subject, limit, cursor
+- GET /api/review-tests/{testId}
+  - テスト詳細（items + 参照メタ）
+- PATCH /api/review-tests/{testId}
+  - ステータス更新（PAUSED/IN_PROGRESS/COMPLETED/CANCELED）
+- DELETE /api/review-tests/{testId}
+  - テスト削除（必ずロック解除）
+
+---
+
+## Review Test Results（テスト結果入力: まとめて入力）
+- POST /api/review-tests/{testId}/results
+  - テスト結果を一括登録（対象ごとの正誤、オプションで「全正解」等の簡易入力モード）
+  - 登録に伴い該当targetのロック解除
+
