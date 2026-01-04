@@ -2,6 +2,7 @@
   "name": "smart-exam-monorepo",
   "private": true,
   "scripts": {
+    "shadcn@latest": "yarn workspace frontend shadcn@latest",
     "mock:api": "yarn dlx @stoplight/prism-cli mock ./docs/swagger.yml -p 4010"
   },
   "workspaces": [

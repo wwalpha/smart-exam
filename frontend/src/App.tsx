@@ -1,5 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Route, Routes } from 'react-router-dom';
+import { matchPath, Route, Routes, useLocation } from 'react-router-dom';
 
 // Dashboard
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -29,6 +29,8 @@ import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
 import { PdfSettingsPage } from '@/pages/settings/PdfSettingsPage';
 
 export const App = () => {
+  const location = useLocation();
+
   const sidebarItems = [
     { label: 'ダッシュボード', to: '/' },
     { label: '教材管理', to: '/materials' },
@@ -39,8 +41,44 @@ export const App = () => {
     { label: '設定', to: '/settings/pdf' },
   ];
 
+  const pageTitle = (() => {
+    const rules: Array<{ pattern: string; title: string }> = [
+      { pattern: '/', title: 'ダッシュボード' },
+
+      { pattern: '/materials', title: '教材セット一覧' },
+      { pattern: '/materials/new', title: '教材セット登録' },
+      { pattern: '/materials/:id/questions', title: '問題管理' },
+      { pattern: '/materials/:id', title: '教材セット詳細' },
+
+      { pattern: '/reviewtests/questions', title: '問題復習テスト一覧' },
+      { pattern: '/reviewtests/questions/new', title: '問題復習テスト作成' },
+      { pattern: '/reviewtests/questions/:id/grading', title: '採点' },
+      { pattern: '/reviewtests/questions/:id/pdf', title: 'PDF' },
+      { pattern: '/reviewtests/questions/:id', title: '詳細' },
+
+      { pattern: '/reviewtests/kanji', title: '漢字復習テスト一覧' },
+      { pattern: '/reviewtests/kanji/new', title: '漢字復習テスト作成' },
+      { pattern: '/reviewtests/kanji/:id/grading', title: '採点' },
+      { pattern: '/reviewtests/kanji/:id/pdf', title: 'PDF' },
+      { pattern: '/reviewtests/kanji/:id', title: '詳細' },
+
+      { pattern: '/kanji', title: '漢字一覧' },
+      { pattern: '/kanji/new', title: '漢字登録' },
+      { pattern: '/kanji/import', title: '漢字一括登録' },
+      { pattern: '/kanji/:id', title: '漢字編集' },
+
+      { pattern: '/search/questions', title: '問題検索' },
+      { pattern: '/settings/pdf', title: 'PDF設定' },
+    ];
+
+    const matched = rules.find((rule) =>
+      matchPath({ path: rule.pattern, end: true }, location.pathname)
+    );
+    return matched?.title;
+  })();
+
   return (
-    <AppLayout title="Smart Exam" sidebarItems={sidebarItems}>
+    <AppLayout title="Smart Exam" pageTitle={pageTitle} sidebarItems={sidebarItems}>
       <Routes>
         {/* Dashboard */}
         <Route path="/" element={<DashboardPage />} />
@@ -80,3 +118,4 @@ export const App = () => {
     </AppLayout>
   );
 }
+

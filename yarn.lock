@@ -3830,6 +3830,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tailwindcss/vite@npm:^4.1.18":
+  version: 4.1.18
+  resolution: "@tailwindcss/vite@npm:4.1.18"
+  dependencies:
+    "@tailwindcss/node": "npm:4.1.18"
+    "@tailwindcss/oxide": "npm:4.1.18"
+    tailwindcss: "npm:4.1.18"
+  peerDependencies:
+    vite: ^5.2.0 || ^6 || ^7
+  checksum: 10c0/7605364d29cd5683948f7b74f22c5f3b39b89b54d25b3b1094f8300ec6fe9f053f73246170debad86e01080f858d0bf6d0ef8e398a9dc0ce1f5a02c34447726b
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:^0.10.1":
   version: 0.10.1
   resolution: "@tybys/wasm-util@npm:0.10.1"
@@ -5977,6 +5990,7 @@ __metadata:
     "@radix-ui/react-slot": "npm:^1.2.4"
     "@smart-exam/api-types": "workspace:*"
     "@tailwindcss/postcss": "npm:^4.1.18"
+    "@tailwindcss/vite": "npm:^4.1.18"
     "@types/lodash": "npm:^4.17.21"
     "@types/node": "npm:^25.0.3"
     "@types/react": "npm:^19.2.7"

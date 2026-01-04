@@ -34,7 +34,6 @@ export const MaterialSetCreatePage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="算数">算数</SelectItem>
-                    <SelectItem value="国語">国語</SelectItem>
                     <SelectItem value="理科">理科</SelectItem>
                     <SelectItem value="社会">社会</SelectItem>
                   </SelectContent>
