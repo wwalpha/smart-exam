@@ -1,124 +1,59 @@
-import { Link, useParams } from 'react-router-dom'
-import { useWordTestDetailPage } from '@/hooks/wordtest'
-import { GRADING_LABEL, GRADING_VALUE, SUBJECT_LABEL } from '@/lib/Consts'
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useWordTestDetailPage } from '@/hooks/wordtest';
+import { SUBJECT_LABEL } from '@/lib/Consts';
 
-export function WordTestDetailPage() {
-  const { wordtestid } = useParams()
-  const { summary, detail } = useWordTestDetailPage(wordtestid)
+export const WordTestDetailPage = () => {
+  const { test, questions, onPrintClick } = useWordTestDetailPage();
 
-  if (!detail) {
-    return (
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-stone-900">詳細</h1>
-          <p className="text-sm text-stone-700">
-            読み込み中...
-          </p>
-        </div>
-        <Link
-          to="/wordtest"
-          className="inline-flex items-center rounded border border-amber-200 bg-white px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-amber-50"
-        >
-          一覧へ戻る
-        </Link>
-      </div>
-    )
+  if (!test) {
+    return <div className="p-8">Loading...</div>;
   }
 
-  const subjectLabel = summary
-    ? `${summary.name}（${SUBJECT_LABEL[summary.subject]}）`
-    : `ID: ${detail.id}`
-
-  const isAlreadyGraded = summary?.is_graded ?? false
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-6 p-8">
+      <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-stone-900">詳細</h1>
-          <p className="text-sm text-stone-700">
-            {subjectLabel}
-          </p>
+          <h1 className="text-2xl font-bold">{test.name}</h1>
+          <div className="flex gap-4 text-sm text-muted-foreground">
+            <span>科目: {SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL]}</span>
+            <span>作成日: {new Date(test.created_at).toLocaleString()}</span>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/wordtest"
-            className="inline-flex items-center rounded border border-amber-200 bg-white px-4 py-2 text-sm font-semibold text-stone-900 hover:bg-amber-50"
-          >
-            一覧へ戻る
-          </Link>
-          {isAlreadyGraded ? (
-            <button
-              type="button"
-              disabled
-              title="採点済みのため採点できません"
-              className="inline-flex items-center rounded border border-stone-400 bg-stone-200 px-4 py-2 text-sm font-semibold text-stone-700 cursor-not-allowed"
-            >
-              採点済み
-            </button>
-          ) : (
-            <Link
-              to={`/wordtest/${detail.id}/grading`}
-              className="inline-flex items-center rounded bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800"
-            >
-              採点へ
-            </Link>
-          )}
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => window.history.back()}>
+            戻る
+          </Button>
+          <Button onClick={onPrintClick}>印刷用ページ</Button>
         </div>
       </div>
 
-      <section className="rounded-lg border border-amber-200 bg-white/70 p-4">
-        <h2 className="text-sm font-semibold text-stone-900">問題一覧</h2>
-        {detail.items.length === 0 ? (
-          <div className="mt-4 text-sm text-stone-700">まだ問題が登録されていません。</div>
-        ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead className="bg-amber-50">
-                <tr>
-                  <th className="border-b border-amber-200 px-4 py-3 font-semibold text-stone-900">
-                    問題
-                  </th>
-                  <th className="border-b border-amber-200 px-4 py-3 font-semibold text-stone-900">
-                    解答
-                  </th>
-                  <th className="border-b border-amber-200 px-4 py-3 font-semibold text-stone-900">
-                    正誤
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {detail.items.map((item) => {
-                  const value = item.grading
-                  const isGraded = value !== undefined
-                  const label = isGraded ? GRADING_LABEL[value] : '未採点'
-                  const labelClassName = isGraded
-                    ? value === GRADING_VALUE.correct
-                      ? 'text-stone-900'
-                      : 'text-rose-700'
-                    : 'text-stone-500'
-
-                  return (
-                    <tr key={item.qid} className="odd:bg-white/40">
-                      <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
-                        <span
-                          dangerouslySetInnerHTML={{ __html: item.question }}
-                        />
-                      </td>
-                      <td className="border-b border-amber-100 px-4 py-3 text-stone-900">
-                        {item.answer}
-                      </td>
-                      <td className={`border-b border-amber-100 px-4 py-3 font-semibold ${labelClassName}`}>
-                        {label}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>出題一覧</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">No.</TableHead>
+                <TableHead>問題</TableHead>
+                <TableHead>答え</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {questions.map((q, i) => (
+                <TableRow key={i}>
+                  <TableCell>{i + 1}</TableCell>
+                  <TableCell>{q.question}</TableCell>
+                  <TableCell>{q.answer}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }

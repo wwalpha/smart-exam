@@ -24,17 +24,4 @@ export type Word = {
   answer: string;
 };
 
-// 単語グループ一覧取得レスポンス
-export type ListWordGroupsResponse = {
-  datas: WordGroup[];
-};
 
-// 単語グループ作成リクエスト
-export type CreateWordGroupRequest = {
-  title: string;
-  subject: WordTestSubject;
-  words: { question: string; answer: string }[];
-};
-
-// 単語グループ作成レスポンス
-export type CreateWordGroupResponse = WordGroup;

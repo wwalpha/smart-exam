@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useWordTestStore } from '@/stores';
 
-export function useWordMasterPage() {
+export const useWordMasterPage = () => {
   const fetchWordGroups = useWordTestStore((s) => s.fetchWordGroups);
   const groups = useWordTestStore((s) => s.wordmaster.groups);
   const status = useWordTestStore((s) => s.wordmaster.status);

@@ -1,28 +1,56 @@
-import { useWordTestStore } from '@/stores'
-import type { GradingData } from '@typings/wordtest'
-import { useWordTestDetailPage } from '@/hooks/wordtest/useWordTestDetailPage'
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useWordTestDetailPage } from './useWordTestDetailPage';
+import { useWordTestStore } from '@/stores';
+import { GRADING_VALUE } from '@/lib/Consts';
+import { useConfirm } from '@/components/common/useConfirm';
 
-export function useWordTestGradingPage(wordTestId: string | undefined) {
-  const { summary, detail } = useWordTestDetailPage(wordTestId)
-  const applyWordTestGrading = useWordTestStore((s) => s.applyWordTestGrading)
+type GradingFormValues = {
+  results: { isCorrect: boolean }[];
+};
 
-  const grading = (() => {
-    if (!detail) return undefined
-    const derived = detail.items.map((x) => x.grading)
-    return derived.every((x) => x !== undefined) ? derived : undefined
-  })()
+export const useWordTestGradingPage = () => {
+  const { test, questions } = useWordTestDetailPage();
+  const applyWordTestGrading = useWordTestStore((s) => s.applyWordTestGrading);
+  const status = useWordTestStore((s) => s.wordtest.status);
+  const { confirm, ConfirmDialog } = useConfirm();
 
-  const applyGrading = async (datas: GradingData[]): Promise<void> => {
-    if (!wordTestId) return
+  const form = useForm<GradingFormValues>({
+    defaultValues: { results: [] },
+  });
 
-    // 採点の永続化は UI から直接 API を叩かず、store action に集約する
-    await applyWordTestGrading(wordTestId, datas)
-  }
+  const { reset, handleSubmit } = form;
+
+  // Initialize form when questions are loaded
+  useEffect(() => {
+    if (questions.length > 0) {
+      // Check if already graded
+      const initialResults = questions.map(q => ({
+        isCorrect: q.grading === GRADING_VALUE.correct
+      }));
+      reset({ results: initialResults });
+    }
+  }, [questions, reset]);
+
+  const onSubmit = handleSubmit(async (data) => {
+    if (!test?.id) return;
+    const gradingData = questions.map((q, i) => ({
+      qid: q.qid,
+      grading: data.results[i]?.isCorrect ? GRADING_VALUE.correct : GRADING_VALUE.incorrect,
+    }));
+    await applyWordTestGrading(test.id, gradingData);
+    await confirm('採点を保存しました', { hideCancel: true });
+  });
 
   return {
-    summary,
-    detail,
-    grading,
-    applyGrading,
-  }
+    test,
+    questions,
+    register: form.register,
+    control: form.control,
+    handleSubmit: form.handleSubmit,
+    onSubmit,
+    isSubmitting: status.isLoading,
+    error: status.error,
+    ConfirmDialog,
+  };
 }

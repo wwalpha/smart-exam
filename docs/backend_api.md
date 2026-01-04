@@ -9,6 +9,7 @@
 ---
 
 ## 共通
+
 - GET /api/health
   - ヘルスチェック
 - GET /api/me
@@ -17,6 +18,7 @@
 ---
 
 ## Material Sets（教材セット）
+
 - GET /api/material-sets
   - 一覧取得（検索/フィルタ/ページング）
   - Query: subject, grade, provider, from, to, q, limit, cursor
@@ -30,6 +32,7 @@
 ---
 
 ## Material Files（教材ファイル: PDF/画像）
+
 - POST /api/material-sets/{materialSetId}/files
   - アップロード（推奨: multipart）
 - GET /api/material-sets/{materialSetId}/files
@@ -42,6 +45,7 @@
 ---
 
 ## Questions（問題）
+
 - POST /api/material-sets/{materialSetId}/questions/candidates
   - OCR/抽出候補の登録（候補扱い）
 - POST /api/material-sets/{materialSetId}/questions
@@ -54,6 +58,7 @@
 ---
 
 ## Kanji（漢字）
+
 - POST /api/kanji
   - 漢字1件作成
 - POST /api/kanji/import
@@ -65,6 +70,7 @@
 ---
 
 ## Attempts（正誤履歴: 追記型）
+
 - POST /api/questions/{questionId}/attempts
   - 問題の正誤を記録（CORRECT/WRONG）
 - GET /api/questions/{questionId}/status
@@ -77,6 +83,7 @@
 ---
 
 ## Review Tests（復習テスト: 生成/ロック/ライフサイクル）
+
 - POST /api/review-tests
   - テスト生成（決定論ソート + ロック取得）
 - GET /api/review-tests
@@ -92,7 +99,7 @@
 ---
 
 ## Review Test Results（テスト結果入力: まとめて入力）
+
 - POST /api/review-tests/{testId}/results
   - テスト結果を一括登録（対象ごとの正誤、オプションで「全正解」等の簡易入力モード）
   - 登録に伴い該当targetのロック解除
-

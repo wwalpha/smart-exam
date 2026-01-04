@@ -7,7 +7,7 @@ import type {
   GetWordTestDetailResponse,
   ListWordTestsRequest,
   ListWordTestsResponse,
-} from '@typings/wordtest';
+} from '@smart-exam/api-types';
 import { apiRequest } from '@/services/apiClient';
 
 export const listWordTests = async (request?: ListWordTestsRequest): Promise<ListWordTestsResponse> => {

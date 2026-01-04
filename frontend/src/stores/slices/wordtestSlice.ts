@@ -1,8 +1,9 @@
 import type { StateCreator } from 'zustand';
 import orderBy from 'lodash/orderBy';
-import type { WordTestSlice } from '@typings/store';
-import type { GradingData } from '@typings/wordtest';
+import type { WordTestSlice } from '@/stores/store.types';
+import type { GradingData } from '@smart-exam/api-types';
 import * as WORDTEST_API from '@/services/wordtestApi';
+import { withStatus } from '../utils';
 
 // 単語テスト機能の Zustand slice
 export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSlice> = (set, get) => {
@@ -33,28 +34,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     updateWordTest({ status: next });
   };
 
-  const withWordTestStatus = async <T>(
-    fn: (helpers: {
-      getWordTest: () => WordTestFeatureState;
-      updateWordTest: (patch: WordTestFeaturePatch) => void;
-    }) => Promise<T>,
-    errorMessage: string,
-    options?: {
-      fallback?: T;
-      rethrow?: boolean;
-    }
-  ): Promise<T> => {
-    setStatus({ isLoading: true, error: null });
-    try {
-      return await fn({ getWordTest, updateWordTest });
-    } catch (error) {
-      setStatus({ error: errorMessage });
-      if (options?.rethrow) throw error;
-      return options?.fallback as T;
-    } finally {
-      setStatus({ isLoading: false });
-    }
-  };
+
 
   return {
     wordtest: {
@@ -66,7 +46,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
       },
     },
     fetchWordTests: async () => {
-      await withWordTestStatus(async ({ updateWordTest }) => {
+      await withStatus(setStatus, async () => {
         // 一覧はサーバー（MSW）側を正として置き換える
         const response = await WORDTEST_API.listWordTests();
         const nextLists = orderBy(response.datas, ['created_at'], ['desc']);
@@ -75,8 +55,9 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     },
 
     fetchWordTest: async (wordTestId) => {
-      return await withWordTestStatus(
-        async ({ getWordTest, updateWordTest }) => {
+      return await withStatus(
+        setStatus,
+        async () => {
           const response = await WORDTEST_API.getWordTest({ wordTestId });
 
           const current = getWordTest();
@@ -96,8 +77,9 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     },
 
     createWordTest: async (request) => {
-      return await withWordTestStatus(
-        async ({ getWordTest, updateWordTest }) => {
+      return await withStatus(
+        setStatus,
+        async () => {
           // 作成結果を即時に store に反映し、画面のリロード無しで一覧へ反映する
           const response = await WORDTEST_API.createWordTest(request);
           const current = getWordTest();
@@ -111,7 +93,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
     },
 
     applyWordTestGrading: async (wordTestId, datas) => {
-      await withWordTestStatus(async ({ getWordTest, updateWordTest }) => {
+      await withStatus(setStatus, async () => {
         const gradingByQid = new Map<string, GradingData['grading']>(datas.map((x) => [x.qid, x.grading]));
 
         // 採点は「反映する」操作で API に送信し、結果は store に保持して画面遷移しても復元できるようにする

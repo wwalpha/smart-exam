@@ -7,7 +7,7 @@ import type {
   ListExamPapersResponse,
   ListExamResultsResponse,
   UploadUrlResponse,
-} from '@typings/exam';
+} from '@smart-exam/api-types';
 
 export const getUploadUrl = async (filename: string, contentType: string): Promise<UploadUrlResponse> => {
   return apiRequest<UploadUrlResponse, { filename: string; contentType: string }>({

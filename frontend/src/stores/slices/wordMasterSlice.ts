@@ -1,7 +1,8 @@
 import type { StateCreator } from 'zustand';
 import orderBy from 'lodash/orderBy';
-import type { WordMasterSlice } from '@typings/store';
+import type { WordMasterSlice } from '@/stores/store.types';
 import * as WORDMASTER_API from '@/services/wordMasterApi';
+import { withStatus } from '../utils';
 
 export const createWordMasterSlice: StateCreator<WordMasterSlice, [], [], WordMasterSlice> = (set, get) => {
   type WordMasterFeatureState = WordMasterSlice['wordmaster'];
@@ -31,29 +32,7 @@ export const createWordMasterSlice: StateCreator<WordMasterSlice, [], [], WordMa
     updateWordMaster({ status: next });
   };
 
-  const withWordMasterStatus = async <T>(
-    fn: (helpers: {
-      getWordMaster: () => WordMasterFeatureState;
-      updateWordMaster: (patch: WordMasterFeaturePatch) => void;
-    }) => Promise<T>,
-    errorMessage: string,
-    options?: {
-      fallback?: T;
-      rethrow?: boolean;
-    }
-  ): Promise<T> => {
-    setStatus({ isLoading: true, error: null });
-    try {
-      const result = await fn({ getWordMaster, updateWordMaster });
-      setStatus({ isLoading: false });
-      return result;
-    } catch (error) {
-      console.error(error);
-      setStatus({ isLoading: false, error: errorMessage });
-      if (options?.rethrow) throw error;
-      return options?.fallback as T;
-    }
-  };
+
 
   return {
     wordmaster: {
@@ -65,7 +44,7 @@ export const createWordMasterSlice: StateCreator<WordMasterSlice, [], [], WordMa
     },
 
     fetchWordGroups: async () => {
-      await withWordMasterStatus(async ({ updateWordMaster }) => {
+      await withStatus(setStatus, async () => {
         const response = await WORDMASTER_API.listWordGroups();
         const sorted = orderBy(response.datas, ['created_at'], ['desc']);
         updateWordMaster({ groups: sorted });
@@ -73,8 +52,9 @@ export const createWordMasterSlice: StateCreator<WordMasterSlice, [], [], WordMa
     },
 
     createWordGroup: async (request) => {
-      return await withWordMasterStatus(
-        async ({ getWordMaster, updateWordMaster }) => {
+      return await withStatus(
+        setStatus,
+        async () => {
           const response = await WORDMASTER_API.createWordGroup(request);
           const current = getWordMaster();
           const nextGroups = orderBy([response, ...current.groups], ['created_at'], ['desc']);

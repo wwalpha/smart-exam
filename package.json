@@ -1,0 +1,10 @@
+{
+  "name": "smart-exam-monorepo",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/*"
+  ],
+  "packageManager": "yarn@4.0.2"
+}

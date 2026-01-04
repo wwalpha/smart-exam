@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import type { WordTestSubject } from '@typings/wordtest';
+import { useConfirm } from '@/components/common/useConfirm';
 
 type FormValues = {
   title: string;
@@ -9,15 +10,16 @@ type FormValues = {
   file: FileList;
 };
 
-export function useWordMasterCreateDialog(params: { onClose: () => void }) {
+export const useWordMasterCreateDialog = (params: { onClose: () => void }) => {
   const createWordGroup = useWordTestStore((s) => s.createWordGroup);
+  const status = useWordTestStore((s) => s.wordmaster.status);
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const {
     control,
     register,
     handleSubmit,
     setValue,
-    formState: { isSubmitting },
   } = useForm<FormValues>({
     defaultValues: {
       title: '',
@@ -28,7 +30,7 @@ export function useWordMasterCreateDialog(params: { onClose: () => void }) {
   const selectedSubject = useWatch({ control, name: 'subject' });
   const file = useWatch({ control, name: 'file' });
 
-  const isCreateDisabled = !selectedSubject || !file || file.length === 0 || isSubmitting;
+  const isCreateDisabled = !selectedSubject || !file || file.length === 0 || status.isLoading;
 
   const getSubjectClickHandler = useCallback(
     (value: WordTestSubject) => {
@@ -54,29 +56,27 @@ export function useWordMasterCreateDialog(params: { onClose: () => void }) {
         .filter((item) => item.question && item.answer);
 
       if (words.length === 0) {
-        alert('有効な単語データが見つかりませんでした。');
+        await confirm('有効な単語データが見つかりませんでした。', { hideCancel: true });
         return;
       }
 
-      try {
-        await createWordGroup({
-          title: values.title,
-          subject: values.subject,
-          words: words,
-        });
-        params.onClose();
-      } catch {
-        // Error handled in store
-      }
+      await createWordGroup({
+        title: values.title,
+        subject: values.subject,
+        words: words,
+      });
+      params.onClose();
     });
-  }, [createWordGroup, handleSubmit, params]);
+  }, [createWordGroup, handleSubmit, params, confirm]);
 
   return {
     register,
     selectedSubject,
-    isSubmitting,
+    isSubmitting: status.isLoading,
     isCreateDisabled,
     getSubjectClickHandler,
     onCreateClick,
+    error: status.error,
+    ConfirmDialog,
   };
 }

@@ -8,7 +8,7 @@ type UseWordTestGradingFormParams = {
   applyGrading: (datas: GradingData[]) => Promise<void>
 }
 
-export function useWordTestGradingForm(params: UseWordTestGradingFormParams) {
+export const useWordTestGradingForm = (params: UseWordTestGradingFormParams) => {
   const [isApplied, setIsApplied] = useState(false)
   const [grading, setGrading] = useState<GradingValue[]>(() => {
     if (params.initialGrading && params.initialGrading.length === params.items.length) {

@@ -8,7 +8,7 @@ type AppLayoutProps = {
   children: ReactNode
 }
 
-export function AppLayout({ title, sidebarItems, children }: AppLayoutProps) {
+export const AppLayout = ({ title, sidebarItems, children }: AppLayoutProps) => {
   return (
     <div className="min-h-screen w-full">
       <div className="flex min-h-screen w-full flex-col">

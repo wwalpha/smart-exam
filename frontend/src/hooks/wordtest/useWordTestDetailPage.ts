@@ -1,43 +1,45 @@
-import { useEffect, useRef } from 'react'
-import { useWordTestStore } from '@/stores'
+import { useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { useWordTestStore } from '@/stores';
 
-export function useWordTestDetailPage(wordTestId: string | undefined) {
-  const lists = useWordTestStore((s) => s.wordtest.lists)
-  const details = useWordTestStore((s) => s.wordtest.details)
-  const fetchWordTests = useWordTestStore((s) => s.fetchWordTests)
-  const fetchWordTest = useWordTestStore((s) => s.fetchWordTest)
-  const hasRequestedRef = useRef(false)
-  const hasRequestedListsRef = useRef(false)
+export const useWordTestDetailPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const lists = useWordTestStore((s) => s.wordtest.lists);
+  const details = useWordTestStore((s) => s.wordtest.details);
+  const fetchWordTests = useWordTestStore((s) => s.fetchWordTests);
+  const fetchWordTest = useWordTestStore((s) => s.fetchWordTest);
+  const status = useWordTestStore((s) => s.wordtest.status);
+  const hasRequestedRef = useRef(false);
+  const hasRequestedListsRef = useRef(false);
 
-  const summary = wordTestId ? lists.find((x) => x.id === wordTestId) : undefined
-  const detail = wordTestId ? details[wordTestId] : undefined
-
-  useEffect(() => {
-    if (!wordTestId) return
-
-    // 詳細直リンク時など、一覧が未取得だと is_graded を判定できないため
-    if (summary) return
-    if (hasRequestedListsRef.current) return
-    hasRequestedListsRef.current = true
-
-    // 画面側で await しないため Promise を握りつぶす
-    void fetchWordTests()
-  }, [fetchWordTests, summary, wordTestId])
+  const summary = id ? lists.find((x) => x.id === id) : undefined;
+  const detail = id ? details[id] : undefined;
 
   useEffect(() => {
-    if (!wordTestId) return
+    if (!id) return;
+    if (summary) return;
+    if (hasRequestedListsRef.current) return;
+    hasRequestedListsRef.current = true;
+    void fetchWordTests();
+  }, [fetchWordTests, summary, id]);
 
-    // 詳細を取得済みなら追加の fetch は不要
-    if (wordTestId in details) return
+  useEffect(() => {
+    if (!id) return;
+    if (id in details) return;
+    if (hasRequestedRef.current) return;
+    hasRequestedRef.current = true;
+    void fetchWordTest(id);
+  }, [details, fetchWordTest, id]);
 
-    // StrictMode 等で effect が複数回走っても API を多重呼び出ししないため
-    if (hasRequestedRef.current) return
+  const onPrintClick = () => {
+    window.print();
+  };
 
-    hasRequestedRef.current = true
-
-    // 画面側で await しないため Promise を握りつぶす
-    void fetchWordTest(wordTestId)
-  }, [details, fetchWordTest, wordTestId])
-
-  return { summary, detail }
+  return {
+    test: summary ? { ...summary, ...detail } : undefined,
+    questions: detail?.items || [],
+    onPrintClick,
+    isLoading: status.isLoading,
+    error: status.error,
+  };
 }

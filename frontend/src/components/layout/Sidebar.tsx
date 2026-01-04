@@ -9,7 +9,7 @@ type SidebarProps = {
   items: SidebarItem[]
 }
 
-export function Sidebar({ items }: SidebarProps) {
+export const Sidebar = ({ items }: SidebarProps) => {
   return (
     <aside className="w-64 shrink-0 border-r border-amber-200 bg-amber-50">
       <nav className="p-3">

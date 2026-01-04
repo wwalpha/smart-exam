@@ -27,18 +27,4 @@ export type ExamResult = {
   created_at: string;
 };
 
-export type CreateExamPaperRequest = Omit<ExamPaper, 'paper_id' | 'created_at'>;
-export type CreateExamResultRequest = Omit<ExamResult, 'result_id' | 'created_at'>;
 
-export type ListExamPapersResponse = {
-  datas: ExamPaper[];
-};
-
-export type ListExamResultsResponse = {
-  datas: ExamResult[];
-};
-
-export type UploadUrlResponse = {
-  url: string;
-  key: string;
-};

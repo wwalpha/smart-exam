@@ -16,6 +16,7 @@
     "@aws-sdk/client-s3": "^3.956.0",
     "@aws-sdk/lib-dynamodb": "^3.0.0",
     "@aws-sdk/s3-request-presigner": "^3.956.0",
+    "@smart-exam/api-types": "workspace:*",
     "@vendia/serverless-express": "^4.12.6",
     "cors": "^2.8.5",
     "express": "^5.1.0",

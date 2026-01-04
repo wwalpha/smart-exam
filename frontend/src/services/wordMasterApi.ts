@@ -1,4 +1,4 @@
-import type { CreateWordGroupRequest, CreateWordGroupResponse, ListWordGroupsResponse } from '@typings/wordmaster';
+import type { CreateWordGroupRequest, CreateWordGroupResponse, ListWordGroupsResponse } from '@smart-exam/api-types';
 import { apiRequest } from '@/services/apiClient';
 
 export const listWordGroups = async (): Promise<ListWordGroupsResponse> => {

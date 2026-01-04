@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useWordTestStore } from '@/stores'
 
-export function useWordTestPage() {
+export const useWordTestPage = () => {
   const lists = useWordTestStore((s) => s.wordtest.lists)
   const status = useWordTestStore((s) => s.wordtest.status)
   const fetchWordTests = useWordTestStore((s) => s.fetchWordTests)
