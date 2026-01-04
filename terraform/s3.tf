@@ -1,8 +1,19 @@
 # ----------------------------------------------------------------------------------------------
 # S3 bucket for app files (question PDFs, answer sheet PDFs, graded sheet images).
 # ----------------------------------------------------------------------------------------------
+resource "random_string" "files_bucket_suffix" {
+  length  = 6
+  lower   = true
+  upper   = false
+  numeric = true
+  special = false
+}
+
+# ----------------------------------------------------------------------------------------------
+# S3 bucket for app files (question PDFs, answer sheet PDFs, graded sheet images).
+# ----------------------------------------------------------------------------------------------
 resource "aws_s3_bucket" "files" {
-  bucket        = "${var.project_name}-files"
+  bucket        = "${var.project_name}-files-${random_string.files_bucket_suffix.result}"
   force_destroy = true
 }
 
