@@ -1,14 +1,14 @@
 import { WordsService } from '../services/WordsService';
 import { WordTable } from '../types/db';
 import { Kanji, CreateKanjiRequest } from './repo.types';
-import { randomUUID } from 'crypto';
+import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 import type { ImportKanjiRequest, ImportKanjiResponse, UpdateKanjiRequest } from '@smart-exam/api-types';
 
 export const KanjiRepository = {
   createKanji: async (data: CreateKanjiRequest): Promise<Kanji> => {
     const now = DateUtils.now();
-    const id = randomUUID();
+    const id = createUuid();
     
     const item: Kanji = {
       id,

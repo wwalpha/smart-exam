@@ -1,13 +1,13 @@
 import { AttemptsService } from '../services/AttemptsService';
 import { AttemptTable, AttemptResultItem } from '../types/db';
 import { Attempt, AttemptResult } from './repo.types';
-import { randomUUID } from 'crypto';
+import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 
 export const AttemptsRepository = {
   createAttempt: async (testId: string, subjectId: string): Promise<Attempt> => {
     const now = DateUtils.now();
-    const id = randomUUID();
+    const id = createUuid();
     
     const item: Attempt = {
       attemptId: id,

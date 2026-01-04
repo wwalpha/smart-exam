@@ -7,6 +7,7 @@ import type {
   DeleteReviewTestParams,
   GetReviewTestParams,
   GetReviewTestResponse,
+  ReviewTestDetail,
   ReviewTestListResponse,
   UpdateReviewTestStatusRequest,
   UpdateReviewTestStatusParams,
@@ -43,7 +44,11 @@ export const getReviewTest: AsyncHandler<
     res.status(404).json({ error: 'Not Found' });
     return;
   }
-  res.json(item);
+  const detail: ReviewTestDetail = {
+    ...item,
+    items: [],
+  };
+  res.json(detail);
 };
 
 export const updateReviewTestStatus: AsyncHandler<

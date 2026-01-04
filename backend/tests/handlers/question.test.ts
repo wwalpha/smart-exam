@@ -28,7 +28,7 @@ describe('question handler', () => {
 
     await listQuestions(req, res, next);
 
-    expect(res.json).toHaveBeenCalledWith({ datas: mockItems });
+    expect(res.json).toHaveBeenCalledWith(mockItems);
   });
 
   it('createQuestion creates item', async () => {

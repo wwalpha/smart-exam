@@ -2,12 +2,12 @@ import { ExamPapersService } from '../services/ExamPapersService';
 import { ExamResultsService } from '../services/ExamResultsService';
 import { ExamPaperTable, ExamResultTable } from '../types/db';
 import { ExamPaper, ExamResult } from './repo.types';
-import { randomUUID } from 'crypto';
+import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 
 export const ExamPapersRepository = {
   createExamPaper: async (paper: Omit<ExamPaper, 'paperId' | 'createdAt'>): Promise<ExamPaper> => {
-    const id = randomUUID();
+    const id = createUuid();
     const now = DateUtils.now();
 
     const newPaper: ExamPaper = {
@@ -50,7 +50,7 @@ export const ExamPapersRepository = {
 
 export const ExamResultsRepository = {
   createExamResult: async (result: Omit<ExamResult, 'resultId' | 'createdAt'>): Promise<ExamResult> => {
-    const id = randomUUID();
+    const id = createUuid();
     const now = DateUtils.now();
 
     const newResult: ExamResult = {

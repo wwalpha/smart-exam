@@ -7,7 +7,7 @@ vi.mock('@/services/BedrockService');
 
 describe('bedrock handler', () => {
   it('analyzePaper returns questions', async () => {
-    const mockQuestions = [{ id: '1', displayLabel: 'Q1' }];
+    const mockQuestions = ['1', '1-1'];
     vi.mocked(analyzeExamPaper).mockResolvedValue(mockQuestions as any);
 
     const req = {

@@ -1,6 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { MaterialSlice } from '@/stores/store.types';
 import * as MATERIAL_API from '@/services/materialApi';
+import * as EXAM_API from '@/services/examApi';
 import { withStatus } from '../utils';
 
 export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSlice> = (set, get) => {
@@ -67,6 +68,34 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           const response = await MATERIAL_API.createMaterialSet(request);
           // Optionally refresh list or add to list
           return response;
+        },
+        '教材セットの作成に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    createMaterialSetWithUpload: async (params) => {
+      return await withStatus(
+        setStatus,
+        async () => {
+          const materialSet = await MATERIAL_API.createMaterialSet(params.request);
+
+          const uploads: Array<{ fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER'; file: File }> = [];
+          if (params.questionFile) uploads.push({ fileType: 'QUESTION', file: params.questionFile });
+          if (params.answerFile) uploads.push({ fileType: 'ANSWER', file: params.answerFile });
+          if (params.gradedFile) uploads.push({ fileType: 'GRADED_ANSWER', file: params.gradedFile });
+
+          for (const upload of uploads) {
+            const prefix = `materials/${materialSet.id}/${upload.fileType}`;
+            const presigned = await EXAM_API.getUploadUrl(upload.file.name, upload.file.type, prefix);
+            await EXAM_API.uploadFileToS3(presigned.uploadUrl, upload.file);
+          }
+
+          // ファイル一覧を即時反映
+          const files = await MATERIAL_API.listMaterialFiles(materialSet.id);
+          updateMaterial({ files: Array.isArray(files) ? files : [] });
+
+          return materialSet;
         },
         '教材セットの作成に失敗しました。',
         { rethrow: true }

@@ -35,7 +35,7 @@ export type CreateReviewTestRequest = {
 export type CreateReviewTestResponse = ReviewTest;
 
 /** 復習テスト取得レスポンス */
-export type GetReviewTestResponse = ReviewTest;
+export type GetReviewTestResponse = ReviewTestDetail;
 
 /** 復習テスト一覧取得レスポンス */
 export type ReviewTestListResponse = {

@@ -10,7 +10,7 @@ export const MaterialSetCreatePage = () => {
   const { register, setValue } = form;
 
   return (
-    <div className="space-y-6 p-8 max-w-3xl mx-auto">
+    <div className="space-y-6 p-0 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold">教材セット登録</h1>
 
       <Card>

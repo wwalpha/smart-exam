@@ -1,13 +1,13 @@
 import { WordTestsService } from '../services/WordTestsService';
 import { WordTestTable } from '../types/db';
 import { ReviewTest, CreateReviewTestRequest } from './repo.types';
-import { randomUUID } from 'crypto';
+import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 
 export const ReviewTestRepository = {
   createReviewTest: async (data: CreateReviewTestRequest): Promise<ReviewTest> => {
     const now = DateUtils.now();
-    const id = randomUUID();
+    const id = createUuid();
     
     const item: ReviewTest = {
       id,

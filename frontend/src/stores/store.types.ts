@@ -165,6 +165,12 @@ export type MaterialSlice = {
   material: MaterialState;
   fetchMaterialSets: (params?: Record<string, unknown>) => Promise<void>;
   createMaterialSet: (request: CreateMaterialSetRequest) => Promise<MaterialSet>;
+  createMaterialSetWithUpload: (params: {
+    request: CreateMaterialSetRequest;
+    questionFile?: File;
+    answerFile?: File;
+    gradedFile?: File;
+  }) => Promise<MaterialSet>;
   fetchMaterialSet: (id: string) => Promise<void>;
   updateMaterialSet: (id: string, request: UpdateMaterialSetRequest) => Promise<void>;
   fetchMaterialFiles: (id: string) => Promise<void>;

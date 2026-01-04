@@ -57,6 +57,6 @@ describe('reviewTest handler', () => {
 
     await getReviewTest(req, res, next);
 
-    expect(res.json).toHaveBeenCalledWith(mockItem);
+    expect(res.json).toHaveBeenCalledWith({ ...mockItem, items: [] });
   });
 });

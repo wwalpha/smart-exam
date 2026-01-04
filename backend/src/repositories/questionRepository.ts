@@ -1,13 +1,13 @@
 import { QuestionsService } from '../services/QuestionsService';
 import { QuestionTable } from '../types/db';
 import { Question, CreateQuestionRequest, UpdateQuestionRequest } from './repo.types';
-import { randomUUID } from 'crypto';
+import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 
 export const QuestionRepository = {
   createQuestion: async (data: CreateQuestionRequest & { materialSetId: string }): Promise<Question> => {
     const now = DateUtils.now();
-    const id = randomUUID();
+    const id = createUuid();
     
     const item: Question = {
       id,

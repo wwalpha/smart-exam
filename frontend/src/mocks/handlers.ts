@@ -254,7 +254,9 @@ export const handlers = [
       return new HttpResponse(null, { status: 400 });
     }
 
-    const fileKey = `uploads/${newId()}-${body.fileName}`;
+    const normalizedPrefix = typeof body.prefix === 'string' ? body.prefix.replace(/^\/+/, '').replace(/\/+$/, '') : '';
+    const base = normalizedPrefix ? normalizedPrefix : 'uploads';
+    const fileKey = `${base}/${newId()}-${body.fileName}`;
     const uploadUrl = `http://localhost/mock-s3/${encodeURIComponent(fileKey)}`;
 
     const response: GetUploadUrlResponse = {
@@ -347,8 +349,7 @@ export const handlers = [
   http.get('/api/material-sets/:materialSetId/questions', ({ params }) => {
     const materialSetId = String(params.materialSetId);
     const items = questionsByMaterialSetId[materialSetId] ?? [];
-    const response: QuestionListResponse = { datas: items };
-    return HttpResponse.json(response);
+    return HttpResponse.json(items);
   }),
 
   http.post('/api/material-sets/:materialSetId/questions', async ({ params, request }) => {

@@ -11,23 +11,26 @@ type FormValues = CreateMaterialSetRequest & {
 
 export const useMaterialCreate = () => {
   const navigate = useNavigate();
-  const createMaterialSet = useWordTestStore((s) => s.createMaterialSet);
+  const createMaterialSetWithUpload = useWordTestStore((s) => s.createMaterialSetWithUpload);
   const status = useWordTestStore((s) => s.material.status);
 
   const form = useForm<FormValues>();
 
   const submit = async (data: FormValues) => {
-    const materialSet = await createMaterialSet({
-      name: data.name,
-      subject: data.subject,
-      yearMonth: data.yearMonth,
-      grade: data.grade,
-      provider: data.provider,
-      testType: data.testType,
-      unit: data.unit,
+    const materialSet = await createMaterialSetWithUpload({
+      request: {
+        name: data.name,
+        subject: data.subject,
+        yearMonth: data.yearMonth,
+        grade: data.grade,
+        provider: data.provider,
+        testType: data.testType,
+        unit: data.unit,
+      },
+      questionFile: data.questionFile?.[0],
+      answerFile: data.answerFile?.[0],
+      gradedFile: data.gradedFile?.[0],
     });
-    
-    // TODO: Handle file uploads here if needed
     
     if (materialSet) {
       navigate(`/materials/${materialSet.id}`);
