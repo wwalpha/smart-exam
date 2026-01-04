@@ -32,10 +32,7 @@ export const MaterialSetListPage = () => {
     <div className="space-y-6 p-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">教材セット一覧</h1>
-        <Button asChild>
-          <Link to="/materials/new">新規登録</Link>
-        </Button>
+        <h1 className="text-2xl font-bold">教材セット</h1>
       </div>
 
       <Card>
@@ -76,64 +73,15 @@ export const MaterialSetListPage = () => {
               <label className="text-sm font-medium">キーワード</label>
               <Input {...register('q')} placeholder="教材名、回・テスト名など" />
             </div>
-            <Button type="submit">検索</Button>
+            <div className="flex items-center gap-2">
+              <Button type="submit">検索</Button>
+              <Button type="button" asChild>
+                <Link to="/materials/new">新規登録</Link>
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>教材名</TableHead>
-              <TableHead>科目</TableHead>
-              <TableHead>教材年月</TableHead>
-              <TableHead>回・テスト名</TableHead>
-              <TableHead>学年</TableHead>
-              <TableHead>操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pagedMaterials.map((material) => (
-              <TableRow key={material.id}>
-                <TableCell>
-                  <Link to={`/materials/${material.id}`} className="font-medium hover:underline">
-                    {material.name}
-                  </Link>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{material.subject}</Badge>
-                </TableCell>
-                <TableCell>{material.yearMonth}</TableCell>
-                <TableCell>{material.testType}</TableCell>
-                <TableCell>{material.grade}年</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link to={`/materials/${material.id}`}>詳細</Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="削除"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => remove(material.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-            {materials.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  データがありません
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
 
       <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
@@ -155,6 +103,55 @@ export const MaterialSetListPage = () => {
             次へ
           </Button>
         </div>
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead />
+              <TableHead>教材名</TableHead>
+              <TableHead>科目</TableHead>
+              <TableHead>教材年月</TableHead>
+              <TableHead>回・テスト名</TableHead>
+              <TableHead>学年</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {pagedMaterials.map((material) => (
+              <TableRow key={material.id}>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="削除"
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => remove(material.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <Link to={`/materials/${material.id}`} className="font-medium underline underline-offset-4">
+                    {material.name}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">{material.subject}</Badge>
+                </TableCell>
+                <TableCell>{material.yearMonth}</TableCell>
+                <TableCell>{material.testType}</TableCell>
+                <TableCell>{material.grade}年</TableCell>
+              </TableRow>
+            ))}
+            {materials.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  データがありません
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

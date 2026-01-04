@@ -41,3 +41,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "files" {
     }
   }
 }
+
+# ----------------------------------------------------------------------------------------------
+# CORS configuration for browser access (presigned PUT uploads, reads).
+# ----------------------------------------------------------------------------------------------
+resource "aws_s3_bucket_cors_configuration" "files" {
+  bucket = aws_s3_bucket.files.id
+
+  cors_rule {
+    allowed_methods = ["GET", "HEAD", "PUT"]
+    allowed_origins = ["*"]
+    allowed_headers = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}

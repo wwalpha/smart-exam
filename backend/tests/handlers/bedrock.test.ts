@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { analyzePaper } from '@/handlers/bedrock';
-import { analyzeExamPaper } from '@/services/BedrockService';
+import { BedrockRepository } from '@/repositories';
 import { Request, Response } from 'express';
 
-vi.mock('@/services/BedrockService');
+vi.mock('@/repositories');
 
 describe('bedrock handler', () => {
   it('analyzePaper returns questions', async () => {
     const mockQuestions = ['1', '1-1'];
-    vi.mocked(analyzeExamPaper).mockResolvedValue(mockQuestions as any);
+    vi.mocked(BedrockRepository.analyzeExamPaper).mockResolvedValue(mockQuestions as any);
 
     const req = {
       body: { s3Key: 'key', subject: 'sub' },

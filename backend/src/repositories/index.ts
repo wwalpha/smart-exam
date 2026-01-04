@@ -1,4 +1,5 @@
 export { AttemptsRepository } from './attemptRepository';
+export { BedrockRepository } from './bedrockRepository';
 export { DashboardRepository } from './dashboardRepository';
 export { ExamPapersRepository, ExamResultsRepository } from './examRepository';
 export { KanjiRepository } from './kanjiRepository';

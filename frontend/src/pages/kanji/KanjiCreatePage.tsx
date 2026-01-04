@@ -13,21 +13,8 @@ export const KanjiCreatePage = () => {
   return (
     <div className="space-y-6 p-8 max-w-2xl mx-auto">
       <Card>
-        <CardHeader>
-          <CardTitle>漢字登録</CardTitle>
-        </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
-            <div className="space-y-2">
-              <Label>問題 *</Label>
-              <Input {...register('kanji', { required: true })} placeholder="例: 憂鬱" />
-            </div>
-
-            <div className="space-y-2">
-              <Label>答え</Label>
-              <Input {...register('reading')} placeholder="例: ゆううつ" />
-            </div>
-
             <div className="space-y-2">
               <Label>科目</Label>
               <input type="hidden" {...register('subject', { required: true })} />
@@ -42,6 +29,16 @@ export const KanjiCreatePage = () => {
                   <SelectItem value="社会">社会</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>問題 *</Label>
+              <Input {...register('kanji', { required: true })} placeholder="例: 憂鬱" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>答え</Label>
+              <Input {...register('reading')} placeholder="例: ゆううつ" />
             </div>
 
             <div className="flex justify-end gap-4 pt-4">
