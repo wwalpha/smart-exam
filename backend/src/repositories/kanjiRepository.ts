@@ -4,6 +4,56 @@ import { Kanji, CreateKanjiRequest } from './repo.types';
 import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 import type { ImportKanjiRequest, ImportKanjiResponse, UpdateKanjiRequest } from '@smart-exam/api-types';
+import { WordTestAttemptRepository } from './wordTestAttemptRepository';
+
+type ImportedHistoryEntry = {
+  startedAtIso: string;
+  submittedAtIso: string;
+  isCorrect: boolean;
+};
+
+const parseOkNg = (raw: string): boolean | null => {
+  const s = raw.trim().toUpperCase();
+  if (s === 'OK') return true;
+  if (s === 'NG') return false;
+  return null;
+};
+
+const parseYmdToIso = (ymd: string): string | null => {
+  const m = /^([0-9]{4})\/([0-9]{2})\/([0-9]{2})$/.exec(ymd.trim());
+  if (!m) return null;
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  const ms = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+  const dt = new Date(ms);
+  if (dt.getUTCFullYear() !== year || dt.getUTCMonth() !== month - 1 || dt.getUTCDate() !== day) return null;
+  return dt.toISOString();
+};
+
+const parsePipeLine = (line: string): { kanji: string; reading: string; histories: ImportedHistoryEntry[] } => {
+  const parts = line.split('|').map((x) => x.trim());
+  if (parts.length < 2) {
+    throw new Error('フォーマットが不正です');
+  }
+
+  const kanji = parts[0];
+  const reading = parts[1];
+
+  const histories: ImportedHistoryEntry[] = [];
+  for (const token of parts.slice(2)) {
+    if (!token) continue;
+    const [dateRaw, okngRaw = ''] = token.split(',');
+    const dateIso = parseYmdToIso(dateRaw ?? '');
+    const okng = parseOkNg(okngRaw);
+    if (!dateIso || okng === null) {
+      throw new Error('履歴の形式が不正です');
+    }
+    histories.push({ startedAtIso: dateIso, submittedAtIso: dateIso, isCorrect: okng });
+  }
+
+  return { kanji, reading, histories };
+};
 
 export const KanjiRepository = {
   createKanji: async (data: CreateKanjiRequest): Promise<Kanji> => {
@@ -81,6 +131,15 @@ export const KanjiRepository = {
   },
 
   importKanji: async (data: ImportKanjiRequest): Promise<ImportKanjiResponse> => {
+    if (!data.subject || String(data.subject).trim().length === 0) {
+      return {
+        successCount: 0,
+        duplicateCount: 0,
+        errorCount: 1,
+        errors: [{ line: 1, content: '', reason: '科目は必須です' }],
+      };
+    }
+
     const lines = data.fileContent
       .split(/\r?\n/)
       .map((x) => x.trim())
@@ -96,23 +155,27 @@ export const KanjiRepository = {
 
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index];
-      const cols = line.split(/\t|,/).map((x) => x.trim());
-
-      const kanji = cols[0];
-      const reading = cols[1] ?? '';
-      const meaning = cols[2] || undefined;
-      const subject = (data.subject || cols[3] || undefined) as string | undefined;
-      const source = cols[4] || undefined;
-
-      if (!kanji) {
-        errorCount += 1;
-        errors.push({ line: index + 1, content: line, reason: '問題が空です' });
-        continue;
-      }
-
-      const existingId = existingByQuestion.get(kanji);
-
       try {
+        const isPipeFormat = line.includes('|');
+
+        const parsedPipe = isPipeFormat ? parsePipeLine(line) : null;
+        const cols = isPipeFormat ? [] : line.split(/\t|,/).map((x) => x.trim());
+
+        const kanji = parsedPipe?.kanji ?? cols[0];
+        const reading = parsedPipe?.reading ?? (cols[1] ?? '');
+        const meaning = parsedPipe ? undefined : (cols[2] || undefined);
+        const subject = String(data.subject);
+        const source = parsedPipe ? undefined : (cols[4] || undefined);
+
+        if (!kanji) {
+          errorCount += 1;
+          errors.push({ line: index + 1, content: line, reason: '問題が空です' });
+          continue;
+        }
+
+        const existingId = existingByQuestion.get(kanji);
+
+        let wordId: string;
         if (existingId) {
           if (data.mode === 'SKIP') {
             duplicateCount += 1;
@@ -126,18 +189,32 @@ export const KanjiRepository = {
             subject,
             source,
           });
+          wordId = existingId;
           successCount += 1;
-          continue;
+        } else {
+          const created = await KanjiRepository.createKanji({
+            kanji,
+            reading,
+            meaning,
+            subject,
+            source,
+          });
+          wordId = created.id;
+          successCount += 1;
         }
 
-        await KanjiRepository.createKanji({
-          kanji,
-          reading,
-          meaning,
-          subject,
-          source,
-        });
-        successCount += 1;
+        const histories = parsedPipe?.histories ?? [];
+        if (histories.length > 0) {
+          const wordTestId = `kanji_import_${subject}`;
+          for (const h of histories) {
+            await WordTestAttemptRepository.createSubmittedAttempt({
+              wordTestId,
+              startedAt: h.startedAtIso,
+              submittedAt: h.submittedAtIso,
+              results: [{ wordId, isCorrect: h.isCorrect }],
+            });
+          }
+        }
       } catch (e) {
         errorCount += 1;
         errors.push({ line: index + 1, content: line, reason: e instanceof Error ? e.message : 'Unknown error' });

@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
@@ -29,10 +28,6 @@ export const useKanjiList = () => {
       subject: data.subject === 'ALL' ? undefined : data.subject,
     });
   };
-
-  useEffect(() => {
-    fetchKanjiList();
-  }, [fetchKanjiList]);
 
   const { confirm, ConfirmDialog } = useConfirm();
 

@@ -5,9 +5,9 @@ import { useWordTestStore } from '@/stores';
 import type { ImportKanjiResponse } from '@smart-exam/api-types';
 
 type FormValues = {
-  textData: string;
   mode: 'SKIP' | 'UPDATE';
   subject: string;
+  file: FileList;
 };
 
 export const useKanjiImport = () => {
@@ -19,17 +19,21 @@ export const useKanjiImport = () => {
   const form = useForm<FormValues>({
     defaultValues: {
       mode: 'SKIP',
-      subject: '__NONE__',
+      subject: '国語',
     },
   });
 
   const submit = async (data: FormValues) => {
-    if (!data.textData) return;
+    const subject = String(data.subject ?? '').trim();
+    const file = data.file?.[0];
+    if (!subject || !file) return;
+
+    const fileContent = await file.text();
 
     const response = await importKanji({
-      fileContent: data.textData,
+      fileContent,
       mode: data.mode,
-      subject: data.subject === '__NONE__' ? undefined : data.subject,
+      subject,
     });
     setResult(response);
   };

@@ -14,7 +14,7 @@ export const KanjiCreatePage = () => {
     <div className="space-y-6 p-8 max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>基本情報</CardTitle>
+          <CardTitle>漢字登録</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
@@ -33,8 +33,7 @@ export const KanjiCreatePage = () => {
               <input type="hidden" {...register('subject', { required: true })} />
               <Select
                 value={subject}
-                onValueChange={(v) => setValue('subject', v, { shouldDirty: true, shouldValidate: true })}
-              >
+                onValueChange={(v) => setValue('subject', v, { shouldDirty: true, shouldValidate: true })}>
                 <SelectTrigger>
                   <SelectValue placeholder="選択してください" />
                 </SelectTrigger>

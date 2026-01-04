@@ -33,28 +33,26 @@ export const KanjiListPage = () => {
       <ConfirmDialog />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>検索条件</CardTitle>
+          <CardTitle className="sr-only">検索</CardTitle>
           <div className="flex gap-2">
+            <Button type="submit" form="kanji-search-form">検索</Button>
+            <Button asChild variant="outline">
+              <Link to="/kanji/new">新規登録</Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to="/kanji/import">一括インポート</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/kanji/new">新規登録</Link>
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={onSearch} className="flex flex-wrap gap-4 items-end">
+          <form id="kanji-search-form" onSubmit={onSearch} className="flex flex-wrap gap-4 items-end">
             <div className="w-40">
-              <label className="text-sm font-medium">問題</label>
               <Input {...register('q')} placeholder="問題" />
             </div>
             <div className="w-40">
-              <label className="text-sm font-medium">解答</label>
               <Input {...register('reading')} placeholder="解答" />
             </div>
             <div className="w-40">
-              <label className="text-sm font-medium">科目</label>
               <input type="hidden" {...register('subject')} />
               <Select value={subject} onValueChange={(v) => setValue('subject', v, { shouldDirty: true })}>
                 <SelectTrigger>
@@ -67,7 +65,6 @@ export const KanjiListPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit">検索</Button>
           </form>
         </CardContent>
       </Card>
@@ -77,7 +74,6 @@ export const KanjiListPage = () => {
           <TableHeader>
             <TableRow>
               <TableHead>操作</TableHead>
-              <TableHead>科目</TableHead>
               <TableHead>問題</TableHead>
               <TableHead>解答</TableHead>
             </TableRow>
@@ -102,14 +98,16 @@ export const KanjiListPage = () => {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell>{kanji.subject}</TableCell>
-                <TableCell className="font-medium text-lg">{kanji.kanji}</TableCell>
+                <TableCell>
+                  <div className="font-medium text-lg">{kanji.kanji}</div>
+                  {kanji.subject ? <div className="text-xs text-muted-foreground">{kanji.subject}</div> : null}
+                </TableCell>
                 <TableCell>{kanji.reading}</TableCell>
               </TableRow>
             ))}
             {kanjiList.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

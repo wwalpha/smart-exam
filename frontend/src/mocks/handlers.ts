@@ -336,7 +336,15 @@ export const handlers = [
       if (grade && (item.grade ?? '') !== grade) return false;
       if (!q) return true;
 
-      const haystack = [item.name, item.testType, item.provider, item.unit, item.course, item.description, item.yearMonth]
+      const haystack = [
+        item.name,
+        item.testType,
+        item.provider,
+        item.unit,
+        item.course,
+        item.description,
+        item.yearMonth,
+      ]
         .filter((v): v is string => typeof v === 'string' && v.length > 0)
         .join(' ')
         .toLowerCase();
@@ -504,6 +512,16 @@ export const handlers = [
   http.post('/api/kanji/import', async ({ request }) => {
     const body = (await request.json()) as ImportKanjiRequest;
 
+    if (!body.subject || String(body.subject).trim().length === 0) {
+      const response: ImportKanjiResponse = {
+        successCount: 0,
+        duplicateCount: 0,
+        errorCount: 1,
+        errors: [{ line: 1, content: '', reason: '科目は必須です' }],
+      };
+      return HttpResponse.json(response);
+    }
+
     const lines = body.fileContent
       .split('\n')
       .map((x: string) => x.trim())
@@ -515,11 +533,12 @@ export const handlers = [
     const errors: ImportKanjiResponse['errors'] = [];
 
     lines.forEach((line: string, index: number) => {
-      const cols = line.split(',').map((x: string) => x.trim());
+      const isPipe = line.includes('|');
+      const cols = (isPipe ? line.split('|') : line.split(',')).map((x: string) => x.trim());
       const kanji = cols[0] ?? '';
       const reading = cols[1] ?? '';
-      const meaning = cols[2] ?? '';
-      const subject = (cols[3] ?? body.subject ?? '').trim();
+      const meaning = isPipe ? '' : (cols[2] ?? '');
+      const subject = String(body.subject).trim();
 
       if (!kanji) {
         errorCount += 1;
