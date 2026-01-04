@@ -7,7 +7,8 @@ import { useKanjiImport } from '@/hooks/kanji';
 
 export const KanjiImportPage = () => {
   const { form, submit, isSubmitting } = useKanjiImport();
-  const { register, setValue } = form;
+  const { register, setValue, watch } = form;
+  const subject = watch('subject');
 
   return (
     <div className="space-y-6 p-8 max-w-2xl mx-auto">
@@ -21,12 +22,16 @@ export const KanjiImportPage = () => {
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
               <Label>科目（任意）</Label>
-              <Select onValueChange={(v) => setValue('subject', v)} defaultValue="">
+              <input type="hidden" {...register('subject')} />
+              <Select
+                value={subject}
+                onValueChange={(v) => setValue('subject', v, { shouldDirty: true })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="選択しない（入力データに含める）" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">選択しない</SelectItem>
+                  <SelectItem value="__NONE__">選択しない</SelectItem>
                   <SelectItem value="国語">国語</SelectItem>
                   <SelectItem value="社会">社会</SelectItem>
                 </SelectContent>

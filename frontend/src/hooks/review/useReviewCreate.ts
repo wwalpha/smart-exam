@@ -4,10 +4,7 @@ import { useWordTestStore } from '@/stores';
 
 type CreateFormValues = {
   subject: string;
-  rangeFrom: string;
-  rangeTo: string;
   count: number;
-  includeCorrect: boolean;
 };
 
 export const useReviewCreate = () => {
@@ -22,8 +19,8 @@ export const useReviewCreate = () => {
   
   const form = useForm<CreateFormValues>({
     defaultValues: {
+      subject: '',
       count: 20,
-      includeCorrect: false,
     },
   });
 
@@ -31,10 +28,7 @@ export const useReviewCreate = () => {
     const newTest = await createReviewTest({
       mode,
       subject: data.subject,
-      rangeFrom: data.rangeFrom ? new Date(data.rangeFrom).toISOString() : undefined,
-      rangeTo: data.rangeTo ? new Date(data.rangeTo).toISOString() : undefined,
       count: Number(data.count),
-      includeCorrect: data.includeCorrect,
     });
     
     if (newTest) {

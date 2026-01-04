@@ -11,7 +11,7 @@ type SidebarProps = {
 
 export const Sidebar = ({ items }: SidebarProps) => {
   return (
-    <aside className="w-64 shrink-0 border-r border-amber-200 bg-amber-50">
+    <aside className="w-64 shrink-0 border-r border-border bg-background">
       <nav className="p-3">
         <ul className="space-y-1">
           {items.map((item) => (
@@ -22,8 +22,8 @@ export const Sidebar = ({ items }: SidebarProps) => {
                   [
                     'block w-full rounded-md px-3 py-2 text-left text-sm',
                     isActive
-                      ? 'bg-amber-100 font-semibold text-stone-900'
-                      : 'text-stone-900 hover:bg-amber-100',
+                      ? 'bg-accent font-semibold text-accent-foreground'
+                      : 'text-foreground hover:bg-accent/50',
                   ].join(' ')
                 }
               >

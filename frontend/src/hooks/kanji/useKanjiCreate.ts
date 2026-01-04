@@ -6,7 +6,6 @@ import { useWordTestStore } from '@/stores';
 type FormValues = {
   kanji: string;
   reading: string;
-  meaning: string;
   subject: string;
 };
 
@@ -18,7 +17,13 @@ export const useKanjiCreate = () => {
   const fetchKanji = useWordTestStore((s) => s.fetchKanji);
   const { detail, status } = useWordTestStore((s) => s.kanji);
 
-  const form = useForm<FormValues>();
+  const form = useForm<FormValues>({
+    defaultValues: {
+      kanji: '',
+      reading: '',
+      subject: '国語',
+    },
+  });
   const { reset } = form;
 
   const isEdit = !!id;
@@ -34,7 +39,6 @@ export const useKanjiCreate = () => {
       reset({
         kanji: detail.kanji,
         reading: detail.reading || '',
-        meaning: detail.meaning || '',
         subject: detail.subject || '国語',
       });
     }

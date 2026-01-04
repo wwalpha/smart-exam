@@ -21,7 +21,12 @@ import type {
   ExamResult,
   GetUploadUrlRequest,
   GetUploadUrlResponse,
+  DeleteKanjiResponse,
+  GetKanjiResponse,
+  ImportKanjiRequest,
+  ImportKanjiResponse,
   Kanji,
+  KanjiListResponse,
   MaterialSet,
   MaterialSetListResponse,
   Question,
@@ -32,6 +37,8 @@ import type {
   SubmitAttemptRequest,
   SubmitAttemptResponse,
   SubmitReviewTestResultsRequest,
+  UpdateKanjiRequest,
+  UpdateKanjiResponse,
   UpdateQuestionRequest,
   UpdateQuestionResponse,
   UpdateReviewTestStatusRequest,
@@ -182,7 +189,7 @@ let kanjiItems: Kanji[] = [
     kanji: '試',
     reading: 'し',
     meaning: 'ためす',
-    subject: 'japanese',
+    subject: '国語',
     createdAt: '2025-12-01T00:00:00.000Z',
     updatedAt: '2025-12-01T00:00:00.000Z',
   },
@@ -384,11 +391,38 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('/api/kanji', () => {
-    const response = {
-      items: kanjiItems,
-      total: kanjiItems.length,
+  http.get('/api/kanji', ({ request }) => {
+    const url = new URL(request.url);
+    const q = (url.searchParams.get('q') ?? '').trim();
+    const reading = (url.searchParams.get('reading') ?? '').trim();
+    const subject = (url.searchParams.get('subject') ?? '').trim();
+    const limit = Number(url.searchParams.get('limit') ?? '50');
+    const cursor = url.searchParams.get('cursor');
+    const offset = cursor ? Number(cursor) : 0;
+
+    const filtered = kanjiItems.filter((item) => {
+      if (subject && item.subject !== subject) return false;
+      if (q && !item.kanji.includes(q)) return false;
+      if (reading && !(item.reading ?? '').includes(reading)) return false;
+      return true;
+    });
+
+    const items = filtered.slice(offset, offset + limit);
+    const nextOffset = offset + items.length;
+    const nextCursor = nextOffset < filtered.length ? String(nextOffset) : undefined;
+    const response: KanjiListResponse = {
+      items,
+      total: filtered.length,
+      cursor: nextCursor,
     };
+    return HttpResponse.json(response);
+  }),
+
+  http.get('/api/kanji/:kanjiId', ({ params }) => {
+    const kanjiId = String(params.kanjiId);
+    const item = kanjiItems.find((x) => x.id === kanjiId) ?? null;
+    if (!item) return new HttpResponse(null, { status: 404 });
+    const response: GetKanjiResponse = item;
     return HttpResponse.json(response);
   }),
 
@@ -402,6 +436,100 @@ export const handlers = [
     };
     kanjiItems = [item, ...kanjiItems];
     const response: CreateKanjiResponse = item;
+    return HttpResponse.json(response);
+  }),
+
+  http.patch('/api/kanji/:kanjiId', async ({ params, request }) => {
+    const kanjiId = String(params.kanjiId);
+    const body = (await request.json()) as UpdateKanjiRequest;
+    const idx = kanjiItems.findIndex((x) => x.id === kanjiId);
+    if (idx < 0) return new HttpResponse(null, { status: 404 });
+    const updated: Kanji = {
+      ...kanjiItems[idx],
+      ...body,
+      updatedAt: nowIso(),
+    };
+    kanjiItems = kanjiItems.map((x) => (x.id === kanjiId ? updated : x));
+    const response: UpdateKanjiResponse = updated;
+    return HttpResponse.json(response);
+  }),
+
+  http.delete('/api/kanji/:kanjiId', ({ params }) => {
+    const kanjiId = String(params.kanjiId);
+    const before = kanjiItems.length;
+    kanjiItems = kanjiItems.filter((x) => x.id !== kanjiId);
+    if (kanjiItems.length === before) return new HttpResponse(null, { status: 404 });
+    const response: DeleteKanjiResponse = {};
+    return HttpResponse.json(response);
+  }),
+
+  http.post('/api/kanji/import', async ({ request }) => {
+    const body = (await request.json()) as ImportKanjiRequest;
+
+    const lines = body.fileContent
+      .split('\n')
+      .map((x: string) => x.trim())
+      .filter(Boolean);
+
+    let successCount = 0;
+    let duplicateCount = 0;
+    let errorCount = 0;
+    const errors: ImportKanjiResponse['errors'] = [];
+
+    lines.forEach((line: string, index: number) => {
+      const cols = line.split(',').map((x: string) => x.trim());
+      const kanji = cols[0] ?? '';
+      const reading = cols[1] ?? '';
+      const meaning = cols[2] ?? '';
+      const subject = (cols[3] ?? body.subject ?? '').trim();
+
+      if (!kanji) {
+        errorCount += 1;
+        errors.push({ line: index + 1, content: line, reason: '問題(漢字)が空です' });
+        return;
+      }
+
+      const exists = kanjiItems.some((x) => x.kanji === kanji && (subject ? x.subject === subject : true));
+      if (exists && body.mode === 'SKIP') {
+        duplicateCount += 1;
+        return;
+      }
+
+      if (exists && body.mode === 'UPDATE') {
+        kanjiItems = kanjiItems.map((x) => {
+          if (x.kanji !== kanji) return x;
+          if (subject && x.subject !== subject) return x;
+          return {
+            ...x,
+            reading: reading || x.reading,
+            meaning: meaning || x.meaning,
+            subject: subject || x.subject,
+            updatedAt: nowIso(),
+          };
+        });
+        successCount += 1;
+        return;
+      }
+
+      const item: Kanji = {
+        id: `k_${newId()}`,
+        kanji,
+        reading: reading || undefined,
+        meaning: meaning || undefined,
+        subject: subject || undefined,
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      kanjiItems = [item, ...kanjiItems];
+      successCount += 1;
+    });
+
+    const response: ImportKanjiResponse = {
+      successCount,
+      duplicateCount,
+      errorCount,
+      errors,
+    };
     return HttpResponse.json(response);
   }),
 

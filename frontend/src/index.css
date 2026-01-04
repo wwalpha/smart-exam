@@ -13,22 +13,22 @@
        #BDE8F5 -> 194 74% 85%
     */
 
-    --background: 194 74% 85%;
+    --background: 194 74% 92%;
     --foreground: 218 70% 19%;
 
-    --card: 194 74% 85%;
+    --card: 194 74% 92%;
     --card-foreground: 218 70% 19%;
 
-    --popover: 194 74% 85%;
+    --popover: 194 74% 92%;
     --popover-foreground: 218 70% 19%;
 
     --primary: 214 67% 33%;
-    --primary-foreground: 194 74% 85%;
+    --primary-foreground: 194 74% 92%;
 
     --secondary: 209 51% 53%;
     --secondary-foreground: 218 70% 19%;
 
-    --muted: 194 74% 85%;
+    --muted: 194 74% 92%;
     --muted-foreground: 218 70% 19%;
 
     --accent: 209 51% 53%;

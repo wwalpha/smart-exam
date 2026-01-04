@@ -22,7 +22,7 @@ export const useKanjiList = () => {
     }
   });
 
-  const search = (data: SearchFormValues) => {
+  const runSearch = (data: SearchFormValues) => {
     fetchKanjiList({
       q: data.q,
       reading: data.reading,
@@ -49,7 +49,7 @@ export const useKanjiList = () => {
     isLoading: status.isLoading,
     error: status.error,
     form,
-    search: form.handleSubmit(search),
+    runSearch,
     remove,
     ConfirmDialog,
   };

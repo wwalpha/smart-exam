@@ -100,6 +100,14 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
         setStatus,
         async () => {
           await KANJI_API.deleteKanji(id);
+
+          const current = getKanji();
+          const nextList = current.list.filter((x) => x.id !== id);
+          updateKanji({
+            list: nextList,
+            total: Math.max(0, current.total - (nextList.length === current.list.length ? 0 : 1)),
+            detail: current.detail?.id === id ? null : current.detail,
+          });
         },
         '漢字の削除に失敗しました。',
         { rethrow: true }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,8 +8,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useKanjiList } from '@/hooks/kanji';
 
 export const KanjiListPage = () => {
-  const { kanjiList, form, search, remove, ConfirmDialog } = useKanjiList();
-  const { register, setValue } = form;
+  const { kanjiList, total, form, runSearch, remove, ConfirmDialog } = useKanjiList();
+  const { register, setValue, watch, handleSubmit } = form;
+  const subject = watch('subject');
+
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const totalPages = Math.max(1, Math.ceil(kanjiList.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+
+  const pagedList = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return kanjiList.slice(start, start + pageSize);
+  }, [kanjiList, currentPage]);
+
+  const onSearch = handleSubmit((data) => {
+    setPage(1);
+    runSearch(data);
+  });
 
   return (
     <div className="space-y-6 p-8">
@@ -30,7 +47,7 @@ export const KanjiListPage = () => {
           <CardTitle>検索条件</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={search} className="flex flex-wrap gap-4 items-end">
+          <form onSubmit={onSearch} className="flex flex-wrap gap-4 items-end">
             <div className="w-40">
               <label className="text-sm font-medium">問題</label>
               <Input {...register('q')} placeholder="問題" />
@@ -41,7 +58,8 @@ export const KanjiListPage = () => {
             </div>
             <div className="w-40">
               <label className="text-sm font-medium">科目</label>
-              <Select onValueChange={(v) => setValue('subject', v)} defaultValue="ALL">
+              <input type="hidden" {...register('subject')} />
+              <Select value={subject} onValueChange={(v) => setValue('subject', v, { shouldDirty: true })}>
                 <SelectTrigger>
                   <SelectValue placeholder="科目" />
                 </SelectTrigger>
@@ -69,7 +87,7 @@ export const KanjiListPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {kanjiList.map((kanji) => (
+            {pagedList.map((kanji) => (
               <TableRow key={kanji.id}>
                 <TableCell className="font-medium text-lg">{kanji.kanji}</TableCell>
                 <TableCell>{kanji.reading}</TableCell>
@@ -80,7 +98,11 @@ export const KanjiListPage = () => {
                     <Button asChild variant="ghost" size="sm">
                       <Link to={`/kanji/${kanji.id}`}>編集</Link>
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-red-500" onClick={() => remove(kanji.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => remove(kanji.id)}>
                       削除
                     </Button>
                   </div>
@@ -96,6 +118,29 @@ export const KanjiListPage = () => {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">全{total}件</div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}>
+            前へ
+          </Button>
+          <div className="text-sm">
+            {currentPage} / {totalPages}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage >= totalPages}>
+            次へ
+          </Button>
+        </div>
       </div>
     </div>
   );

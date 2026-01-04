@@ -95,7 +95,12 @@ export const QuestionManagementPage = () => {
                   <TableCell>{q.canonicalKey}</TableCell>
                   <TableCell>{q.category || '-'}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="destructive" size="sm" onClick={() => remove(q.id)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => remove(q.id)}
+                    >
                       削除
                     </Button>
                   </TableCell>

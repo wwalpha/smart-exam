@@ -8,6 +8,14 @@ import { useReviewDetail } from '@/hooks/review';
 export const ReviewTestDetailPage = () => {
   const { review, isLoading, error, basePath, remove, ConfirmDialog } = useReviewDetail();
 
+  const formatYmdSlash = (iso: string): string => {
+    const d = new Date(iso);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}/${m}/${day}`;
+  };
+
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
   }
@@ -35,7 +43,7 @@ export const ReviewTestDetailPage = () => {
           <Button asChild>
             <Link to={`${basePath}/${review.id}/pdf`}>PDF出力</Link>
           </Button>
-          <Button variant="destructive" onClick={remove}>
+          <Button variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={remove}>
             削除
           </Button>
         </div>
@@ -53,7 +61,7 @@ export const ReviewTestDetailPage = () => {
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium">作成日</span>
-              <span>{new Date(review.createdAt).toLocaleDateString()}</span>
+              <span>{formatYmdSlash(review.createdAt)}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium">問題数</span>

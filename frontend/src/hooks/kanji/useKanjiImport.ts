@@ -7,7 +7,7 @@ import type { ImportKanjiResponse } from '@smart-exam/api-types';
 type FormValues = {
   textData: string;
   mode: 'SKIP' | 'UPDATE';
-  subject?: string;
+  subject: string;
 };
 
 export const useKanjiImport = () => {
@@ -17,7 +17,10 @@ export const useKanjiImport = () => {
   const [result, setResult] = useState<ImportKanjiResponse | null>(null);
 
   const form = useForm<FormValues>({
-    defaultValues: { mode: 'SKIP' },
+    defaultValues: {
+      mode: 'SKIP',
+      subject: '__NONE__',
+    },
   });
 
   const submit = async (data: FormValues) => {
@@ -26,7 +29,7 @@ export const useKanjiImport = () => {
     const response = await importKanji({
       fileContent: data.textData,
       mode: data.mode,
-      subject: data.subject || undefined,
+      subject: data.subject === '__NONE__' ? undefined : data.subject,
     });
     setResult(response);
   };
