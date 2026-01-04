@@ -1,4 +1,4 @@
-import { analyzeExamPaper } from '@/services/BedrockService';
+// import { analyzeExamPaper } from '@/services/BedrockService';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
@@ -15,6 +15,6 @@ export const analyzePaper: AsyncHandler<
     res.status(400).json({ error: 's3Key is required' });
     return;
   }
-  const questions = await analyzeExamPaper(s3Key, subject);
-  res.json({ questions });
+  // const questions = await analyzeExamPaper(s3Key, subject);
+  res.json({ questions: [] });
 };

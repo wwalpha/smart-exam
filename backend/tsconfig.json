@@ -15,13 +15,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": [
-    "src",
-    "tests",
-    "typings"
-  ],
-  "exclude": [
-    "dist",
-    "node_modules"
-  ]
+  "include": ["src", "tests"],
+  "exclude": ["dist", "node_modules"]
 }
