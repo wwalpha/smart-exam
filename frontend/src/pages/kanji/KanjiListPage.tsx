@@ -32,12 +32,12 @@ export const KanjiListPage = () => {
         <CardContent>
           <form onSubmit={search} className="flex flex-wrap gap-4 items-end">
             <div className="w-40">
-              <label className="text-sm font-medium">漢字</label>
-              <Input {...register('q')} placeholder="漢字" />
+              <label className="text-sm font-medium">問題</label>
+              <Input {...register('q')} placeholder="問題" />
             </div>
             <div className="w-40">
-              <label className="text-sm font-medium">よみ</label>
-              <Input {...register('reading')} placeholder="よみ" />
+              <label className="text-sm font-medium">答え</label>
+              <Input {...register('reading')} placeholder="答え" />
             </div>
             <div className="w-40">
               <label className="text-sm font-medium">科目</label>
@@ -61,11 +61,10 @@ export const KanjiListPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>漢字</TableHead>
-              <TableHead>よみ</TableHead>
+              <TableHead>問題</TableHead>
+              <TableHead>答え</TableHead>
               <TableHead>意味</TableHead>
               <TableHead>科目</TableHead>
-              <TableHead>出典/メモ</TableHead>
               <TableHead>操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -76,7 +75,6 @@ export const KanjiListPage = () => {
                 <TableCell>{kanji.reading}</TableCell>
                 <TableCell className="max-w-xs truncate">{kanji.meaning}</TableCell>
                 <TableCell>{kanji.subject}</TableCell>
-                <TableCell className="max-w-xs truncate">{kanji.source}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     <Button asChild variant="ghost" size="sm">
@@ -91,7 +89,7 @@ export const KanjiListPage = () => {
             ))}
             {kanjiList.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

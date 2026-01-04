@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import type { CreateMaterialSetRequest } from '@smart-exam/api-types';
 
-type FormValues = CreateMaterialSetRequest & {
+type FormValues = Omit<CreateMaterialSetRequest, 'date'> & {
+  date?: string;
   questionFile?: FileList;
   answerFile?: FileList;
   gradedFile?: FileList;
@@ -20,7 +21,8 @@ export const useMaterialCreate = () => {
     const materialSet = await createMaterialSet({
       name: data.name,
       subject: data.subject,
-      date: data.date,
+      // 実施日は入力不要のため、未指定の場合は今日の日付を自動設定する
+      date: data.date ?? new Date().toISOString().slice(0, 10),
       grade: data.grade,
       provider: data.provider,
       testType: data.testType,

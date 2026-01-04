@@ -29,14 +29,20 @@ export const createWordTest = async (request: CreateWordTestRequest): Promise<Cr
   const formData = new FormData();
   formData.append('subject', request.subject);
   formData.append('count', request.count.toString());
-  if (request.graded_answer_sheet) {
-    formData.append('graded_answer_sheet', request.graded_answer_sheet);
+  if (request.name) {
+    formData.append('name', request.name);
   }
-  if (request.question_paper) {
-    formData.append('question_paper', request.question_paper);
+  if (request.sourceId) {
+    formData.append('sourceId', request.sourceId);
   }
-  if (request.answer_key) {
-    formData.append('answer_key', request.answer_key);
+  if (request.gradedAnswerSheet) {
+    formData.append('gradedAnswerSheet', request.gradedAnswerSheet);
+  }
+  if (request.questionPaper) {
+    formData.append('questionPaper', request.questionPaper);
+  }
+  if (request.answerKey) {
+    formData.append('answerKey', request.answerKey);
   }
 
   return apiRequest<CreateWordTestResponse, FormData>({

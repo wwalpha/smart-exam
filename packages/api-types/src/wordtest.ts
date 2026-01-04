@@ -48,3 +48,69 @@ export type GradingData = {
 
 /** 単語テスト一覧取得リクエスト（クエリ無しの空オブジェクト） */
 export type ListWordTestsRequest = Record<string, never>;
+
+/**
+ * `GET /wordtests`
+ * 単語テスト一覧取得レスポンス
+ */
+export type ListWordTestsResponse = {
+  datas: WordTestTitle[];
+};
+
+/**
+ * `GET /wordtests/:wordTestId`
+ * 単語テスト詳細取得リクエスト（path params）
+ */
+export type GetWordTestDetailRequest = {
+  wordTestId: string;
+};
+
+/**
+ * `GET /wordtests/:wordTestId`
+ * 単語テスト詳細取得レスポンス
+ */
+export type GetWordTestDetailResponse = {
+  id: string;
+  items: WordTestItem[];
+};
+
+/**
+ * `POST /wordtests`
+ * 単語テスト作成リクエスト
+ */
+export type CreateWordTestRequest = {
+  /** テスト名（任意。未指定の場合はサーバ側で自動生成しても良い） */
+  name?: string;
+  /** 科目（コード値） */
+  subject: WordTestSubject;
+  /** 出題元（グループ等の識別子） */
+  sourceId?: string;
+  /** 出題数 */
+  count: number;
+  /** 採点済み答案（任意） */
+  gradedAnswerSheet?: File;
+  /** 問題用紙（任意） */
+  questionPaper?: File;
+  /** 解答（任意） */
+  answerKey?: File;
+};
+
+/**
+ * `POST /wordtests`
+ * 単語テスト作成レスポンス
+ */
+export type CreateWordTestResponse = WordTestTitle;
+
+/**
+ * `POST /wordtests/:wordTestId/grading`
+ * 採点反映リクエスト
+ */
+export type ApplyWordTestGradingRequest = {
+  results: GradingData[];
+};
+
+/**
+ * `POST /wordtests/:wordTestId/grading`
+ * 採点反映レスポンス（本文無し）
+ */
+export type ApplyWordTestGradingResponse = Record<string, never>;

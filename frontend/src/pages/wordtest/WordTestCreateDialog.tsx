@@ -46,7 +46,7 @@ export const WordTestCreateDialog = ({ open, onClose }: WordTestCreateDialogProp
 
           <div className="space-y-2">
             <Label>単語データ選択</Label>
-            <Select onValueChange={(v) => setValue('source_id', v)} disabled={!selectedSubject}>
+            <Select onValueChange={(v) => setValue('sourceId', v)} disabled={!selectedSubject}>
               <SelectTrigger>
                 <SelectValue placeholder={selectedSubject ? '選択してください' : '先に科目を選択してください'} />
               </SelectTrigger>

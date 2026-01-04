@@ -2,11 +2,16 @@ import { describe, expect, it, beforeAll } from 'vitest';
 import { getDynamoDbLocal } from '../setup/dynamodbLocal';
 import { ExamPapersService } from '@/services/ExamPapersService';
 
-beforeAll(async () => {
-  await getDynamoDbLocal();
-});
+const integrationEnabled = process.env.DDB_LOCAL_INTEGRATION === '1';
+const describeIf = integrationEnabled ? describe : describe.skip;
 
-describe('ExamPapersService (DynamoDB Local)', () => {
+if (integrationEnabled) {
+  beforeAll(async () => {
+    await getDynamoDbLocal();
+  });
+}
+
+describeIf('ExamPapersService (DynamoDB Local)', () => {
   it('creates and lists exam papers', async () => {
     const paperId = `paper_${Date.now()}`;
 

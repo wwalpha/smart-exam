@@ -30,6 +30,14 @@ export type KanjiListResponse = {
   cursor?: string;
 };
 
+/** `GET /kanji/:kanjiId` */
+export type GetKanjiParams = {
+  kanjiId: string;
+};
+
+/** `GET /kanji/:kanjiId` */
+export type GetKanjiResponse = Kanji;
+
 /** 漢字作成リクエスト */
 export type CreateKanjiRequest = {
   /** 漢字 */
@@ -50,12 +58,30 @@ export type CreateKanjiResponse = Kanji;
 /** 漢字更新リクエスト */
 export type UpdateKanjiRequest = Partial<CreateKanjiRequest>;
 
+/** `PATCH /kanji/:kanjiId` */
+export type UpdateKanjiParams = {
+  kanjiId: string;
+};
+
+/** `PATCH /kanji/:kanjiId` */
+export type UpdateKanjiResponse = Kanji;
+
+/** `DELETE /kanji/:kanjiId` */
+export type DeleteKanjiParams = {
+  kanjiId: string;
+};
+
+/** `DELETE /kanji/:kanjiId` */
+export type DeleteKanjiResponse = Record<string, never>;
+
 /** 漢字インポートリクエスト */
 export type ImportKanjiRequest = {
   /** CSV/TSV等のファイル内容 */
   fileContent: string;
   /** インポートモード (SKIP: 重複スキップ, UPDATE: 上書き) */
   mode: 'SKIP' | 'UPDATE';
+  /** 科目（指定時は全行に適用） */
+  subject?: string;
 };
 
 /** 漢字インポートレスポンス */

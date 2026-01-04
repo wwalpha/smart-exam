@@ -2,11 +2,16 @@ import { describe, expect, it, beforeAll } from 'vitest';
 import { getDynamoDbLocal } from '../setup/dynamodbLocal';
 import { WordTestsService } from '@/services/WordTestsService';
 
-beforeAll(async () => {
-  await getDynamoDbLocal();
-});
+const integrationEnabled = process.env.DDB_LOCAL_INTEGRATION === '1';
+const describeIf = integrationEnabled ? describe : describe.skip;
 
-describe('WordTestsService (DynamoDB Local)', () => {
+if (integrationEnabled) {
+  beforeAll(async () => {
+    await getDynamoDbLocal();
+  });
+}
+
+describeIf('WordTestsService (DynamoDB Local)', () => {
   it('creates and gets a word test', async () => {
     const wordTestId = `wt_${Date.now()}`;
 

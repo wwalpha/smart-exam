@@ -8,7 +8,6 @@ type FormValues = {
   reading: string;
   meaning: string;
   subject: string;
-  source: string;
 };
 
 export const useKanjiCreate = () => {
@@ -37,7 +36,6 @@ export const useKanjiCreate = () => {
         reading: detail.reading || '',
         meaning: detail.meaning || '',
         subject: detail.subject || '国語',
-        source: detail.source || '',
       });
     }
   }, [isEdit, detail, reset]);

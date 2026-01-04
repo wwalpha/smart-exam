@@ -140,6 +140,17 @@ export interface WordTable {
   answerHiragana: string;
   /** 単語種別 (GSI1 PK) */
   wordType: 'KANJI';
+
+  /** 科目（任意） */
+  subject?: string;
+  /** 意味（任意） */
+  meaning?: string;
+  /** 出典/メモ（任意） */
+  source?: string;
+  /** 作成日時 (ISO 8601) */
+  createdAt?: string;
+  /** 更新日時 (ISO 8601) */
+  updatedAt?: string;
 }
 
 /**

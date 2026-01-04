@@ -4,7 +4,7 @@ import { useWordTestStore } from '@/stores';
 type FormValues = {
   name: string;
   subject: string;
-  source_id: string;
+  sourceId: string;
   count: number;
 };
 
@@ -25,7 +25,7 @@ export const useWordTestCreateDialog = (params: { onClose: () => void }) => {
     await createWordTest({
       name: data.name,
       subject: data.subject as any,
-      source_id: data.source_id,
+      sourceId: data.sourceId,
       count: Number(data.count),
     });
     params.onClose();

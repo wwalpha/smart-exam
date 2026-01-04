@@ -3,6 +3,7 @@ import { TestTable } from '../types/db';
 import { MaterialSet, CreateMaterialSetRequest } from './repo.types';
 import { randomUUID } from 'crypto';
 import { DateUtils } from '@/lib/dateUtils';
+import type { MaterialFile } from '@smart-exam/api-types';
 
 export const MaterialRepository = {
   createMaterialSet: async (data: CreateMaterialSetRequest): Promise<MaterialSet> => {
@@ -78,5 +79,9 @@ export const MaterialRepository = {
       createdAt: dbItem.createdAt,
       updatedAt: dbItem.updatedAt,
     }));
-  }
+  },
+
+  listMaterialFiles: async (_materialSetId: string): Promise<MaterialFile[]> => {
+    return [];
+  },
 };

@@ -38,10 +38,15 @@ app.post('/api/examresults', handleRequest(examResultHandler.createExamResult));
 app.get('/api/material-sets', handleRequest(materialHandler.listMaterialSets));
 app.post('/api/material-sets', handleRequest(materialHandler.createMaterialSet));
 app.get('/api/material-sets/:materialSetId', handleRequest(materialHandler.getMaterialSet));
+app.get('/api/material-sets/:materialSetId/files', handleRequest(materialHandler.listMaterialFiles));
 
 // Kanji
 app.get('/api/kanji', handleRequest(kanjiHandler.listKanji));
 app.post('/api/kanji', handleRequest(kanjiHandler.createKanji));
+app.get('/api/kanji/:kanjiId', handleRequest(kanjiHandler.getKanji));
+app.patch('/api/kanji/:kanjiId', handleRequest(kanjiHandler.updateKanji));
+app.delete('/api/kanji/:kanjiId', handleRequest(kanjiHandler.deleteKanji));
+app.post('/api/kanji/import', handleRequest(kanjiHandler.importKanji));
 
 // Questions
 app.get('/api/material-sets/:materialSetId/questions', handleRequest(questionHandler.listQuestions));

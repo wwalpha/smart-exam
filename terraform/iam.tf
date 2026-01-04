@@ -52,7 +52,6 @@ data "aws_iam_policy_document" "lambda" {
       aws_dynamodb_table.tests.arn,
       aws_dynamodb_table.questions.arn,
       aws_dynamodb_table.attempts.arn,
-      aws_dynamodb_table.answer_sheets.arn,
       aws_dynamodb_table.graded_sheets.arn,
       aws_dynamodb_table.words.arn,
       aws_dynamodb_table.word_groups.arn,

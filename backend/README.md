@@ -7,6 +7,7 @@
 ## コマンド
 - `npm run build`
 - `npm run test`
+- `npm run test:integration` (Docker が必要 / DynamoDB Local を起動して `src/services` の統合テストも実行)
 - `npm run typecheck`
 
 ## 構成

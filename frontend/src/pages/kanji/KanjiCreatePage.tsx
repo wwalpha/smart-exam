@@ -21,13 +21,13 @@ export const KanjiCreatePage = () => {
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label>漢字 *</Label>
+              <Label>問題 *</Label>
               <Input {...register('kanji', { required: true })} placeholder="例: 憂鬱" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>よみ</Label>
+                <Label>答え</Label>
                 <Input {...register('reading')} placeholder="例: ゆううつ" />
               </div>
               <div className="space-y-2">
@@ -47,11 +47,6 @@ export const KanjiCreatePage = () => {
             <div className="space-y-2">
               <Label>意味</Label>
               <Textarea {...register('meaning')} placeholder="意味や用例など" />
-            </div>
-
-            <div className="space-y-2">
-              <Label>出典/メモ</Label>
-              <Input {...register('source')} placeholder="例: 第1回 復習テスト" />
             </div>
 
             <div className="flex justify-end gap-4 pt-4">

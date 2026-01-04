@@ -24,7 +24,6 @@ output "dynamodb_table_names" {
     tests              = aws_dynamodb_table.tests.name
     questions          = aws_dynamodb_table.questions.name
     attempts           = aws_dynamodb_table.attempts.name
-    answer_sheets      = aws_dynamodb_table.answer_sheets.name
     graded_sheets      = aws_dynamodb_table.graded_sheets.name
     words              = aws_dynamodb_table.words.name
     word_tests         = aws_dynamodb_table.word_tests.name

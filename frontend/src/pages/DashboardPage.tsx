@@ -21,6 +21,9 @@ export const DashboardPage = () => {
     return <div className="p-8">データの取得に失敗しました。</div>;
   }
 
+  const topIncorrectQuestions = Array.isArray(data.topIncorrectQuestions) ? data.topIncorrectQuestions : [];
+  const topIncorrectKanji = Array.isArray(data.topIncorrectKanji) ? data.topIncorrectKanji : [];
+
   return (
     <div className="space-y-6 p-8">
       <h1 className="text-2xl font-bold">ダッシュボード</h1>
@@ -53,7 +56,7 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {data.topIncorrectQuestions.map((q) => (
+              {topIncorrectQuestions.map((q) => (
                 <div key={q.id} className="flex items-center justify-between border-b pb-2 last:border-0">
                   <div>
                     <div className="font-medium">{q.displayLabel}</div>
@@ -64,7 +67,7 @@ export const DashboardPage = () => {
                   </div>
                 </div>
               ))}
-              {data.topIncorrectQuestions.length === 0 && (
+              {topIncorrectQuestions.length === 0 && (
                 <div className="text-sm text-muted-foreground">データがありません</div>
               )}
             </div>
@@ -82,7 +85,7 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {data.topIncorrectKanji.map((k) => (
+              {topIncorrectKanji.map((k) => (
                 <div key={k.id} className="flex items-center justify-between border-b pb-2 last:border-0">
                   <div>
                     <div className="font-medium text-lg">{k.kanji}</div>
@@ -93,7 +96,7 @@ export const DashboardPage = () => {
                   </div>
                 </div>
               ))}
-              {data.topIncorrectKanji.length === 0 && (
+              {topIncorrectKanji.length === 0 && (
                 <div className="text-sm text-muted-foreground">データがありません</div>
               )}
             </div>

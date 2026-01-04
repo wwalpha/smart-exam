@@ -20,15 +20,9 @@ export const MaterialSetCreatePage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>教材名 *</Label>
-                <Input {...register('name', { required: true })} placeholder="例: 第1回 復習テスト" />
-              </div>
-              <div className="space-y-2">
-                <Label>実施日 *</Label>
-                <Input type="date" {...register('date', { required: true })} />
-              </div>
+            <div className="space-y-2">
+              <Label>教材名 *</Label>
+              <Input {...register('name', { required: true })} placeholder="例: 第1回 復習テスト" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -70,10 +64,7 @@ export const MaterialSetCreatePage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="SAPIX">SAPIX</SelectItem>
-                    <SelectItem value="四谷大塚">四谷大塚</SelectItem>
-                    <SelectItem value="早稲田アカデミー">早稲田アカデミー</SelectItem>
-                    <SelectItem value="日能研">日能研</SelectItem>
-                    <SelectItem value="その他">その他</SelectItem>
+                    <SelectItem value="四谷">四谷</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

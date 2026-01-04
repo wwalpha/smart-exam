@@ -6,6 +6,7 @@ import { useMaterialDetail } from '@/hooks/materials';
 
 export const MaterialSetDetailPage = () => {
   const { material, files, isLoading, error, id } = useMaterialDetail();
+  const safeFiles = Array.isArray(files) ? files : [];
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -49,7 +50,7 @@ export const MaterialSetDetailPage = () => {
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">実施日</div>
-              <div>{material.date}</div>
+              <div>{material.date ?? '-'}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">学年</div>
@@ -79,7 +80,7 @@ export const MaterialSetDetailPage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {files.map((file) => (
+            {safeFiles.map((file) => (
               <div key={file.id} className="flex items-center justify-between border p-3 rounded-md">
                 <div>
                   <div className="font-medium">{file.fileType}</div>
@@ -90,7 +91,7 @@ export const MaterialSetDetailPage = () => {
                 </Button>
               </div>
             ))}
-            {files.length === 0 && <div className="text-muted-foreground">ファイルが登録されていません</div>}
+            {safeFiles.length === 0 && <div className="text-muted-foreground">ファイルが登録されていません</div>}
           </div>
         </CardContent>
       </Card>

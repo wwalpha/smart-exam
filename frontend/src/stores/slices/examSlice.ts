@@ -65,11 +65,11 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(setStatus, async () => {
         // Upload Question PDF
         const qUpload = await EXAM_API.getUploadUrl(params.questionFile.name, params.questionFile.type);
-        await EXAM_API.uploadFileToS3(qUpload.url, params.questionFile);
+        await EXAM_API.uploadFileToS3(qUpload.uploadUrl, params.questionFile);
 
         // Upload Answer PDF
         const aUpload = await EXAM_API.getUploadUrl(params.answerFile.name, params.answerFile.type);
-        await EXAM_API.uploadFileToS3(aUpload.url, params.answerFile);
+        await EXAM_API.uploadFileToS3(aUpload.uploadUrl, params.answerFile);
 
         // Create Paper Record
         const request = {
@@ -77,8 +77,8 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
           subject: params.subject,
           category: params.category,
           name: params.name,
-          questionPdfKey: qUpload.key,
-          answerPdfKey: aUpload.key,
+          questionPdfKey: qUpload.fileKey,
+          answerPdfKey: aUpload.fileKey,
         };
         const response = await EXAM_API.createExamPaper(request);
         const current = getExam();
@@ -99,7 +99,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(setStatus, async () => {
         const response = await EXAM_API.createExamResult(request);
         const current = getExam();
-        const nextResults = orderBy([response, ...current.results], ['test_date', 'created_at'], ['desc', 'desc']);
+        const nextResults = orderBy([response, ...current.results], ['testDate', 'createdAt'], ['desc', 'desc']);
         updateExam({ results: nextResults });
       }, '試験結果の登録に失敗しました。');
     },
@@ -109,8 +109,8 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
         let gradedPdfKey = undefined;
         if (params.gradedFile) {
           const upload = await EXAM_API.getUploadUrl(params.gradedFile.name, params.gradedFile.type);
-          await EXAM_API.uploadFileToS3(upload.url, params.gradedFile);
-          gradedPdfKey = upload.key;
+          await EXAM_API.uploadFileToS3(upload.uploadUrl, params.gradedFile);
+          gradedPdfKey = upload.fileKey;
         }
 
         const request = {

@@ -152,9 +152,9 @@ export type ExamSlice = {
     category: string;
     name: string;
     title: string;
-    test_date: string;
+    testDate: string;
     gradedFile?: File;
-    details: { number: number; is_correct: boolean }[];
+    details: { number: number; isCorrect: boolean }[];
   }) => Promise<void>;
 };
 
