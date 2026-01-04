@@ -5,26 +5,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useReviewList } from '@/hooks/review';
+import { formatYmdSlash } from '@/utils/date';
 
 export const ReviewTestListPage = () => {
-  const {
-    isKanji,
-    basePath,
-    reviews,
-    form,
-    search,
-    remove,
-    ConfirmDialog,
-  } = useReviewList();
+  const { isKanji, basePath, reviews, form, search, remove, ConfirmDialog } = useReviewList();
   const { setValue } = form;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return <Badge variant="default">完了</Badge>;
-      case 'IN_PROGRESS': return <Badge variant="secondary">実施中</Badge>;
-      case 'PAUSED': return <Badge variant="outline">中断</Badge>;
-      case 'CANCELED': return <Badge variant="destructive">中止</Badge>;
-      default: return <Badge variant="outline">{status}</Badge>;
+      case 'COMPLETED':
+        return <Badge variant="default">完了</Badge>;
+      case 'IN_PROGRESS':
+        return <Badge variant="secondary">実施中</Badge>;
+      case 'PAUSED':
+        return <Badge variant="outline">中断</Badge>;
+      case 'CANCELED':
+        return <Badge variant="destructive">中止</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -33,9 +31,11 @@ export const ReviewTestListPage = () => {
       <ConfirmDialog />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{isKanji ? '漢字復習テスト一覧' : '問題復習テスト一覧'}</h1>
-        <Button asChild>
-          <Link to={`${basePath}/new`}>新規生成</Link>
-        </Button>
+        {isKanji && (
+          <Button asChild>
+            <Link to={`${basePath}/new`}>新規生成</Link>
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -52,10 +52,18 @@ export const ReviewTestListPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">全て</SelectItem>
-                  <SelectItem value="算数">算数</SelectItem>
-                  <SelectItem value="国語">国語</SelectItem>
-                  <SelectItem value="理科">理科</SelectItem>
-                  <SelectItem value="社会">社会</SelectItem>
+                  {isKanji ? (
+                    <>
+                      <SelectItem value="国語">国語</SelectItem>
+                      <SelectItem value="社会">社会</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="算数">算数</SelectItem>
+                      <SelectItem value="理科">理科</SelectItem>
+                      <SelectItem value="社会">社会</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -74,7 +82,14 @@ export const ReviewTestListPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit">検索</Button>
+            <div className="flex items-center gap-2">
+              <Button type="submit">検索</Button>
+              {!isKanji && (
+                <Button asChild variant="outline">
+                  <Link to={`${basePath}/new`}>新規生成</Link>
+                </Button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -103,7 +118,7 @@ export const ReviewTestListPage = () => {
                 <TableCell>
                   <Badge variant="outline">{test.subject}</Badge>
                 </TableCell>
-                <TableCell>{new Date(test.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{formatYmdSlash(test.createdAt)}</TableCell>
                 <TableCell>{test.itemCount}問</TableCell>
                 <TableCell>{getStatusBadge(test.status)}</TableCell>
                 <TableCell>{test.score !== undefined ? `${test.score}点` : '-'}</TableCell>
@@ -112,7 +127,11 @@ export const ReviewTestListPage = () => {
                     <Button asChild variant="ghost" size="sm">
                       <Link to={`${basePath}/${test.id}`}>詳細</Link>
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-red-500" onClick={() => remove(test.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => remove(test.id)}>
                       削除
                     </Button>
                   </div>

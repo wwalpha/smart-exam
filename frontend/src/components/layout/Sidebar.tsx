@@ -1,17 +1,17 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom';
 
 export type SidebarItem = {
-  label: string
-  to: string
-}
+  label: string;
+  to: string;
+};
 
 type SidebarProps = {
-  items: SidebarItem[]
-}
+  items: SidebarItem[];
+};
 
 export const Sidebar = ({ items }: SidebarProps) => {
   return (
-    <aside className="w-64 shrink-0 border-r border-border bg-background">
+    <aside className="w-64 shrink-0 border-r border-border bg-primary text-primary-foreground">
       <nav className="p-3">
         <ul className="space-y-1">
           {items.map((item) => (
@@ -22,11 +22,10 @@ export const Sidebar = ({ items }: SidebarProps) => {
                   [
                     'block w-full rounded-md px-3 py-2 text-left text-sm',
                     isActive
-                      ? 'bg-accent font-semibold text-accent-foreground'
-                      : 'text-foreground hover:bg-accent/50',
+                      ? 'bg-primary-foreground/15 font-semibold text-primary-foreground'
+                      : 'text-primary-foreground hover:bg-primary/90',
                   ].join(' ')
-                }
-              >
+                }>
                 {item.label}
               </NavLink>
             </li>
@@ -34,5 +33,5 @@ export const Sidebar = ({ items }: SidebarProps) => {
         </ul>
       </nav>
     </aside>
-  )
-}
+  );
+};

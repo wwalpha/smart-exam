@@ -1,15 +1,15 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import '@/index.css'
-import { App } from '@/App'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import '@/index.css';
+import { App } from '@/App';
 
 async function prepareApp(): Promise<void> {
-  if (import.meta.env.DEV) {
-    const { worker } = await import('@/mocks/browser')
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW === '1') {
+    const { worker } = await import('@/mocks/browser');
     await worker.start({
       onUnhandledRequest: 'bypass',
-    })
+    });
   }
 }
 
@@ -19,6 +19,6 @@ void prepareApp().then(() => {
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    </StrictMode>,
-  )
-})
+    </StrictMode>
+  );
+});

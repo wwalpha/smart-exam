@@ -7,7 +7,7 @@ export type ApiClientRequestParams<TBody> = {
 };
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_ENDPOINT,
+  baseURL: import.meta.env.VITE_APIGW_URL ?? import.meta.env.VITE_API_ENDPOINT,
 });
 
 export async function apiRequest<TResponse, TBody = undefined>(

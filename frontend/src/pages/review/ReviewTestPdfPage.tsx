@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useReviewPdf } from '@/hooks/review';
+import { formatYmdSlash } from '@/utils/date';
 
 export const ReviewTestPdfPage = () => {
   const { review, isLoading, basePath, pdfUrl, navigate, id } = useReviewPdf();
@@ -32,7 +33,7 @@ export const ReviewTestPdfPage = () => {
             <h2 className="text-2xl font-bold mb-2">復習テスト ({review.subject})</h2>
             <div className="flex justify-between text-sm">
               <span>ID: {review.testId}</span>
-              <span>作成日: {new Date(review.createdAt).toLocaleDateString()}</span>
+              <span>作成日: {formatYmdSlash(review.createdAt)}</span>
             </div>
           </div>
 

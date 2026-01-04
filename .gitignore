@@ -40,6 +40,11 @@ terraform.rc
 dist
 node_modules
 
+# Env files
+.env
+.env.*
+!.env.example
+
 # Yarn (Berry)
 .pnp.*
 .yarn/*

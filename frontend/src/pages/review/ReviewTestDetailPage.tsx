@@ -4,17 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewDetail } from '@/hooks/review';
+import { formatYmdSlash } from '@/utils/date';
 
 export const ReviewTestDetailPage = () => {
   const { review, isLoading, error, basePath, remove, ConfirmDialog } = useReviewDetail();
-
-  const formatYmdSlash = (iso: string): string => {
-    const d = new Date(iso);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}/${m}/${day}`;
-  };
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -43,7 +36,10 @@ export const ReviewTestDetailPage = () => {
           <Button asChild>
             <Link to={`${basePath}/${review.id}/pdf`}>PDF出力</Link>
           </Button>
-          <Button variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={remove}>
+          <Button
+            variant="outline"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={remove}>
             削除
           </Button>
         </div>
