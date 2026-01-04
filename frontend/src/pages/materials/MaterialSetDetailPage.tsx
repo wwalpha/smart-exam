@@ -49,8 +49,8 @@ export const MaterialSetDetailPage = () => {
               <Badge variant="outline">{material.subject}</Badge>
             </div>
             <div>
-              <div className="text-sm font-medium text-muted-foreground">実施日</div>
-              <div>{material.date ?? '-'}</div>
+              <div className="text-sm font-medium text-muted-foreground">教材年月</div>
+              <div>{material.yearMonth || '-'}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">学年</div>
@@ -65,12 +65,6 @@ export const MaterialSetDetailPage = () => {
               <div>{material.testType}</div>
             </div>
           </div>
-          {material.description && (
-            <div>
-              <div className="text-sm font-medium text-muted-foreground">メモ</div>
-              <div className="whitespace-pre-wrap">{material.description}</div>
-            </div>
-          )}
         </CardContent>
       </Card>
 

@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useMaterialCreate } from '@/hooks/materials';
@@ -20,15 +19,16 @@ export const MaterialSetCreatePage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
-            <div className="space-y-2">
-              <Label>教材名 *</Label>
-              <Input {...register('name', { required: true })} placeholder="例: 第1回 復習テスト" />
-            </div>
+            <div className="grid grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>教材名 *</Label>
+                <Input {...register('name', { required: true })} placeholder="例: 第1回 復習テスト" />
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>科目 *</Label>
-                <Select onValueChange={(v) => setValue('subject', v)}>
+                <input type="hidden" {...register('subject', { required: true })} />
+                <Select onValueChange={(v) => setValue('subject', v, { shouldValidate: true })}>
                   <SelectTrigger>
                     <SelectValue placeholder="選択してください" />
                   </SelectTrigger>
@@ -39,9 +39,11 @@ export const MaterialSetCreatePage = () => {
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
                 <Label>学年 *</Label>
-                <Select onValueChange={(v) => setValue('grade', v)}>
+                <input type="hidden" {...register('grade', { required: true })} />
+                <Select onValueChange={(v) => setValue('grade', v, { shouldValidate: true })}>
                   <SelectTrigger>
                     <SelectValue placeholder="選択してください" />
                   </SelectTrigger>
@@ -52,12 +54,11 @@ export const MaterialSetCreatePage = () => {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>教材種別 *</Label>
-                <Select onValueChange={(v) => setValue('provider', v)}>
+                <input type="hidden" {...register('provider', { required: true })} />
+                <Select onValueChange={(v) => setValue('provider', v, { shouldValidate: true })}>
                   <SelectTrigger>
                     <SelectValue placeholder="選択してください" />
                   </SelectTrigger>
@@ -67,26 +68,21 @@ export const MaterialSetCreatePage = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-2">
+                <Label>教材年月 *</Label>
+                <Input type="month" {...register('yearMonth', { required: true })} />
+              </div>
+
               <div className="space-y-2">
                 <Label>回・テスト名 *</Label>
                 <Input {...register('testType', { required: true })} placeholder="例: マンスリー確認テスト" />
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>単元</Label>
                 <Input {...register('unit')} placeholder="例: 平面図形" />
               </div>
-              <div className="space-y-2">
-                <Label>コース</Label>
-                <Input {...register('course')} placeholder="例: α1" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>メモ</Label>
-              <Textarea {...register('description')} placeholder="備考など" />
             </div>
 
             <div className="space-y-4 pt-4 border-t">

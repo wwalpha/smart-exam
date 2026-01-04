@@ -155,6 +155,7 @@ let materialSets: MaterialSet[] = [
     id: 'mat_1',
     name: 'Mock Material Set',
     subject: 'math',
+    yearMonth: '2025-12',
     date: '2025-12-01',
     createdAt: '2025-12-01T00:00:00.000Z',
     updatedAt: '2025-12-01T00:00:00.000Z',

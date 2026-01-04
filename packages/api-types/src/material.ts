@@ -22,7 +22,8 @@ export type UpdateQuestionParams = {
 export type CreateMaterialSetRequest = {
   name: string;
   subject: string;
-  date: string;
+  /** 教材年月 (YYYY-MM) */
+  yearMonth: string;
   grade?: string;
   provider?: string;
   testType?: string;
@@ -137,8 +138,10 @@ export type MaterialSet = {
   description?: string;
   /** キーワードタグ */
   keywords?: string[];
-  /** 実施日 (YYYY-MM-DD) */
-  date: string;
+  /** 教材年月 (YYYY-MM) */
+  yearMonth: string;
+  /** 実施日 (YYYY-MM-DD) - 旧データ互換用 */
+  date?: string;
   /** 作成日時 (ISO 8601) */
   createdAt: string;
   /** 更新日時 (ISO 8601) */

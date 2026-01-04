@@ -36,8 +36,10 @@ export interface TestTable {
   keywords?: string[];
   /** 解答用紙S3パス */
   answerSheetPath?: string;
-  /** 実施日 */
-  date: string;
+  /** 教材年月 (YYYY-MM) */
+  yearMonth?: string;
+  /** 実施日 - 旧データ互換用 */
+  date?: string;
   /** 作成日時 */
   createdAt: string;
   /** 更新日時 */

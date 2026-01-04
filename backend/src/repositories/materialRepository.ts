@@ -9,7 +9,7 @@ export const MaterialRepository = {
   createMaterialSet: async (data: CreateMaterialSetRequest): Promise<MaterialSet> => {
     const now = DateUtils.now();
     const id = randomUUID();
-    
+
     const item: MaterialSet = {
       id,
       ...data,
@@ -29,7 +29,7 @@ export const MaterialRepository = {
       unit: data.unit,
       course: data.course,
       keywords: data.keywords,
-      date: data.date,
+      yearMonth: data.yearMonth,
       createdAt: now,
       updatedAt: now,
     };
@@ -41,9 +41,9 @@ export const MaterialRepository = {
 
   getMaterialSet: async (id: string): Promise<MaterialSet | null> => {
     const dbItem = await TestsService.get(id);
-    
+
     if (!dbItem) return null;
-    
+
     return {
       id: dbItem.testId,
       name: dbItem.title,
@@ -55,6 +55,7 @@ export const MaterialRepository = {
       course: dbItem.course,
       description: dbItem.description,
       keywords: dbItem.keywords,
+      yearMonth: dbItem.yearMonth ?? (dbItem.date ? dbItem.date.slice(0, 7) : dbItem.createdAt.slice(0, 7)),
       date: dbItem.date,
       createdAt: dbItem.createdAt,
       updatedAt: dbItem.updatedAt,
@@ -64,7 +65,7 @@ export const MaterialRepository = {
   listMaterialSets: async (): Promise<MaterialSet[]> => {
     const items = await TestsService.list();
 
-    return items.map(dbItem => ({
+    return items.map((dbItem) => ({
       id: dbItem.testId,
       name: dbItem.title,
       subject: dbItem.subjectId,
@@ -75,6 +76,7 @@ export const MaterialRepository = {
       course: dbItem.course,
       description: dbItem.description,
       keywords: dbItem.keywords,
+      yearMonth: dbItem.yearMonth ?? (dbItem.date ? dbItem.date.slice(0, 7) : dbItem.createdAt.slice(0, 7)),
       date: dbItem.date,
       createdAt: dbItem.createdAt,
       updatedAt: dbItem.updatedAt,

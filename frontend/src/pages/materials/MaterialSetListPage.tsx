@@ -69,7 +69,7 @@ export const MaterialSetListPage = () => {
             <TableRow>
               <TableHead>教材名</TableHead>
               <TableHead>科目</TableHead>
-              <TableHead>実施日</TableHead>
+              <TableHead>教材年月</TableHead>
               <TableHead>回・テスト名</TableHead>
               <TableHead>学年</TableHead>
               <TableHead>操作</TableHead>
@@ -86,7 +86,7 @@ export const MaterialSetListPage = () => {
                 <TableCell>
                   <Badge variant="outline">{material.subject}</Badge>
                 </TableCell>
-                <TableCell>{material.date}</TableCell>
+                <TableCell>{material.yearMonth}</TableCell>
                 <TableCell>{material.testType}</TableCell>
                 <TableCell>{material.grade}年</TableCell>
                 <TableCell>
