@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { apiRequest } from '@/services/apiClient';
-
-type SearchResult = {
-  id: string;
-  subject: string;
-  unit: string;
-  questionText: string;
-  sourceMaterialId: string;
-  sourceMaterialName: string;
-};
+import type { QuestionSearchResult, SearchQuestionsRequest, SearchQuestionsResponse } from '@smart-exam/api-types';
 
 type SearchFormValues = {
   keyword: string;
@@ -17,22 +9,27 @@ type SearchFormValues = {
 };
 
 export const useQuestionSearch = () => {
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<QuestionSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const form = useForm<SearchFormValues>();
   const { handleSubmit } = form;
 
-  const submit = handleSubmit(async (_data) => {
+  const submit = handleSubmit(async (data) => {
     setIsSearching(true);
     try {
-      const response = await apiRequest<SearchResult[]>({
-        method: 'GET',
+      const body: SearchQuestionsRequest = {
+        keyword: data.keyword || undefined,
+        subject: data.subject && data.subject !== 'ALL' ? data.subject : undefined,
+      };
+
+      const response = await apiRequest<SearchQuestionsResponse, SearchQuestionsRequest>({
+        method: 'POST',
         path: '/api/questions/search',
+        body,
       });
-      setResults(response);
+      setResults(response.datas);
     } catch (error) {
       console.error(error);
-      setResults([]);
     } finally {
       setIsSearching(false);
     }

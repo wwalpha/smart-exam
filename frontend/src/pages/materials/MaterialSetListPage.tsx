@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,11 +10,27 @@ import { Badge } from '@/components/ui/badge';
 import { useMaterialList } from '@/hooks/materials';
 
 export const MaterialSetListPage = () => {
-  const { materials, form, search } = useMaterialList();
+  const { materials, form, search, remove, ConfirmDialog } = useMaterialList();
   const { register, setValue } = form;
+
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const totalPages = Math.max(1, Math.ceil(materials.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+
+  const pagedMaterials = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return materials.slice(start, start + pageSize);
+  }, [materials, currentPage]);
+
+  const onSearch: React.FormEventHandler<HTMLFormElement> = (e) => {
+    setPage(1);
+    search(e);
+  };
 
   return (
     <div className="space-y-6 p-8">
+      <ConfirmDialog />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">教材セット一覧</h1>
         <Button asChild>
@@ -25,7 +43,7 @@ export const MaterialSetListPage = () => {
           <CardTitle>検索条件</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={search} className="flex flex-wrap gap-4 items-end">
+          <form onSubmit={onSearch} className="flex flex-wrap gap-4 items-end">
             <div className="w-40">
               <label className="text-sm font-medium">科目</label>
               <Select onValueChange={(v) => setValue('subject', v)} defaultValue="ALL">
@@ -76,7 +94,7 @@ export const MaterialSetListPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {materials.map((material) => (
+            {pagedMaterials.map((material) => (
               <TableRow key={material.id}>
                 <TableCell>
                   <Link to={`/materials/${material.id}`} className="font-medium hover:underline">
@@ -90,9 +108,19 @@ export const MaterialSetListPage = () => {
                 <TableCell>{material.testType}</TableCell>
                 <TableCell>{material.grade}年</TableCell>
                 <TableCell>
-                  <Button asChild variant="ghost" size="sm">
-                    <Link to={`/materials/${material.id}`}>詳細</Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button asChild variant="ghost" size="sm">
+                      <Link to={`/materials/${material.id}`}>詳細</Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="削除"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => remove(material.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -105,6 +133,28 @@ export const MaterialSetListPage = () => {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-end">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}>
+            前へ
+          </Button>
+          <div className="text-sm">
+            {currentPage} / {totalPages}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage >= totalPages}>
+            次へ
+          </Button>
+        </div>
       </div>
     </div>
   );

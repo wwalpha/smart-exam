@@ -86,6 +86,13 @@ export const MaterialRepository = {
     }));
   },
 
+  deleteMaterialSet: async (id: string): Promise<boolean> => {
+    const existing = await TestsService.get(id);
+    if (!existing) return false;
+    await TestsService.delete(id);
+    return true;
+  },
+
   listMaterialFiles: async (_materialSetId: string): Promise<MaterialFile[]> => {
     const materialSetId = _materialSetId;
     const bucket = ENV.FILES_BUCKET_NAME;

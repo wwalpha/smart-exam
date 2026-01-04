@@ -8,9 +8,23 @@ import type {
   ListQuestionsParams,
   UpdateQuestionParams,
   QuestionListResponse,
+  SearchQuestionsRequest,
+  SearchQuestionsResponse,
   UpdateQuestionRequest,
   UpdateQuestionResponse,
 } from '@smart-exam/api-types';
+
+export const searchQuestions: AsyncHandler<{}, SearchQuestionsResponse, SearchQuestionsRequest, ParsedQs> = async (
+  req,
+  res
+) => {
+  const { keyword, subject } = req.body ?? {};
+  const items = await QuestionRepository.searchQuestions({
+    keyword,
+    subject,
+  });
+  res.json({ datas: items });
+};
 
 export const listQuestions: AsyncHandler<ListQuestionsParams, QuestionListResponse, {}, ParsedQs> = async (
   req,

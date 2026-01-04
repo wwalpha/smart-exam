@@ -2,28 +2,18 @@ import { apiRequest } from './apiClient';
 import type {
   Kanji,
   KanjiListResponse,
+  SearchKanjiRequest,
   CreateKanjiRequest,
   UpdateKanjiRequest,
   ImportKanjiRequest,
   ImportKanjiResponse,
 } from '@smart-exam/api-types';
 
-export const listKanji = async (params?: {
-  q?: string;
-  reading?: string;
-  subject?: string;
-  limit?: number;
-  cursor?: string;
-}): Promise<KanjiListResponse> => {
-  const query = new URLSearchParams();
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) query.append(key, String(value));
-    });
-  }
-  return apiRequest<KanjiListResponse>({
-    method: 'GET',
-    path: `/api/kanji?${query.toString()}`,
+export const listKanji = async (params?: SearchKanjiRequest): Promise<KanjiListResponse> => {
+  return apiRequest<KanjiListResponse, SearchKanjiRequest>({
+    method: 'POST',
+    path: '/api/kanji/search',
+    body: params ?? {},
   });
 };
 

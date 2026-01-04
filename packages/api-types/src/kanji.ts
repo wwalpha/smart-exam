@@ -30,6 +30,18 @@ export type KanjiListResponse = {
   cursor?: string;
 };
 
+/** `POST /kanji/search` */
+export type SearchKanjiRequest = {
+  q?: string;
+  reading?: string;
+  subject?: string;
+  limit?: number;
+  cursor?: string;
+};
+
+/** `POST /kanji/search` */
+export type SearchKanjiResponse = KanjiListResponse;
+
 /** `GET /kanji/:kanjiId` */
 export type GetKanjiParams = {
   kanjiId: string;

@@ -21,7 +21,6 @@ import type {
   ExamResult,
   GetUploadUrlRequest,
   GetUploadUrlResponse,
-  DeleteKanjiResponse,
   GetKanjiResponse,
   ImportKanjiRequest,
   ImportKanjiResponse,
@@ -29,6 +28,9 @@ import type {
   KanjiListResponse,
   MaterialSet,
   MaterialSetListResponse,
+  SearchKanjiRequest,
+  SearchMaterialSetsRequest,
+  SearchQuestionsRequest,
   Question,
   QuestionListResponse,
   ReviewTest,
@@ -323,6 +325,33 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
+  http.post('/api/material-sets/search', async ({ request }) => {
+    const body = (await request.json()) as SearchMaterialSetsRequest;
+    const subject = (body.subject ?? '').trim();
+    const grade = (body.grade ?? '').trim();
+    const q = (body.q ?? '').trim().toLowerCase();
+
+    const filtered = materialSets.filter((item) => {
+      if (subject && item.subject !== subject) return false;
+      if (grade && (item.grade ?? '') !== grade) return false;
+      if (!q) return true;
+
+      const haystack = [item.name, item.testType, item.provider, item.unit, item.course, item.description, item.yearMonth]
+        .filter((v): v is string => typeof v === 'string' && v.length > 0)
+        .join(' ')
+        .toLowerCase();
+      const keywords = Array.isArray(item.keywords) ? item.keywords.join(' ').toLowerCase() : '';
+
+      return haystack.includes(q) || keywords.includes(q);
+    });
+
+    const response: MaterialSetListResponse = {
+      items: filtered,
+      total: filtered.length,
+    };
+    return HttpResponse.json(response);
+  }),
+
   http.post('/api/material-sets', async ({ request }) => {
     const body = (await request.json()) as CreateMaterialSetRequest;
     const item: MaterialSet = {
@@ -340,6 +369,14 @@ export const handlers = [
     const found = materialSets.find((x) => x.id === materialSetId);
     if (!found) return new HttpResponse(null, { status: 404 });
     return HttpResponse.json(found);
+  }),
+
+  http.delete('/api/material-sets/:materialSetId', ({ params }) => {
+    const materialSetId = String(params.materialSetId);
+    const before = materialSets.length;
+    materialSets = materialSets.filter((x) => x.id !== materialSetId);
+    if (materialSets.length === before) return new HttpResponse(null, { status: 404 });
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.get('/api/material-sets/:materialSetId/files', () => {
@@ -393,13 +430,13 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  http.get('/api/kanji', ({ request }) => {
-    const url = new URL(request.url);
-    const q = (url.searchParams.get('q') ?? '').trim();
-    const reading = (url.searchParams.get('reading') ?? '').trim();
-    const subject = (url.searchParams.get('subject') ?? '').trim();
-    const limit = Number(url.searchParams.get('limit') ?? '50');
-    const cursor = url.searchParams.get('cursor');
+  http.post('/api/kanji/search', async ({ request }) => {
+    const body = (await request.json()) as SearchKanjiRequest;
+    const q = (body.q ?? '').trim();
+    const reading = (body.reading ?? '').trim();
+    const subject = (body.subject ?? '').trim();
+    const limit = Number(body.limit ?? 50);
+    const cursor = body.cursor;
     const offset = cursor ? Number(cursor) : 0;
 
     const filtered = kanjiItems.filter((item) => {
@@ -461,8 +498,7 @@ export const handlers = [
     const before = kanjiItems.length;
     kanjiItems = kanjiItems.filter((x) => x.id !== kanjiId);
     if (kanjiItems.length === before) return new HttpResponse(null, { status: 404 });
-    const response: DeleteKanjiResponse = {};
-    return HttpResponse.json(response);
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.post('/api/kanji/import', async ({ request }) => {
@@ -789,8 +825,12 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.get('/api/questions/search', () => {
-    return HttpResponse.json([
+  http.post('/api/questions/search', async ({ request }) => {
+    const body = (await request.json()) as SearchQuestionsRequest;
+    const keyword = (body.keyword ?? '').trim();
+    const subject = (body.subject ?? '').trim();
+
+    const all = [
       {
         id: '1',
         subject: '算数',
@@ -807,6 +847,14 @@ export const handlers = [
         sourceMaterialId: 'm2',
         sourceMaterialName: '第2回 週テスト',
       },
-    ]);
+    ];
+
+    const filtered = all.filter((x) => {
+      if (subject && x.subject !== subject) return false;
+      if (keyword && !x.questionText.includes(keyword)) return false;
+      return true;
+    });
+
+    return HttpResponse.json({ datas: filtered });
   }),
 ];

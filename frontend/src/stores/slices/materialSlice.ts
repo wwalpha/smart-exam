@@ -54,6 +54,15 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         setStatus,
         async () => {
           const response = await MATERIAL_API.listMaterialSets(params);
+
+          const hasSearchParams =
+            !!params &&
+            Object.values(params).some((v) => v !== undefined && v !== null && String(v).trim().length > 0);
+
+          if (hasSearchParams && response.items.length === 0) {
+            return;
+          }
+
           updateMaterial({ list: response.items, total: response.total });
         },
         '教材セット一覧の取得に失敗しました。',
@@ -93,7 +102,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
 
           // ファイル一覧を即時反映
           const files = await MATERIAL_API.listMaterialFiles(materialSet.id);
-          updateMaterial({ files: Array.isArray(files) ? files : [] });
+          updateMaterial({ files });
 
           return materialSet;
         },
@@ -122,6 +131,27 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ detail: response });
         },
         '教材セットの更新に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    deleteMaterialSet: async (id) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          await MATERIAL_API.deleteMaterialSet(id);
+
+          const current = getMaterial();
+          const nextList = current.list.filter((x) => x.id !== id);
+          updateMaterial({
+            list: nextList,
+            total: Math.max(0, current.total - (nextList.length === current.list.length ? 0 : 1)),
+            detail: current.detail?.id === id ? null : current.detail,
+            files: current.detail?.id === id ? [] : current.files,
+            questions: current.detail?.id === id ? [] : current.questions,
+          });
+        },
+        '教材セットの削除に失敗しました。',
         { rethrow: true }
       );
     },

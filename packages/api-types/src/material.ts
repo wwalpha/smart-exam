@@ -3,6 +3,11 @@ export type GetMaterialSetParams = {
   materialSetId: string;
 };
 
+/** `DELETE /material-sets/:materialSetId` */
+export type DeleteMaterialSetParams = {
+  materialSetId: string;
+};
+
 /** `GET /material-sets/:materialSetId/questions` */
 export type ListQuestionsParams = {
   materialSetId: string;
@@ -47,6 +52,9 @@ export type UpdateMaterialSetRequest = Partial<CreateMaterialSetRequest>;
 /** 教材セット取得レスポンス */
 export type GetMaterialSetResponse = MaterialSet;
 
+/** `DELETE /material-sets/:materialSetId` */
+export type DeleteMaterialSetResponse = Record<string, never>;
+
 /** 教材セット一覧取得レスポンス */
 export type MaterialSetListResponse = {
   /** 教材セットリスト */
@@ -56,6 +64,21 @@ export type MaterialSetListResponse = {
   /** 次ページ用カーソル */
   cursor?: string;
 };
+
+/** `POST /material-sets/search` */
+export type SearchMaterialSetsRequest = {
+  subject?: string;
+  grade?: string;
+  provider?: string;
+  from?: string;
+  to?: string;
+  q?: string;
+  limit?: number;
+  cursor?: string;
+};
+
+/** `POST /material-sets/search` */
+export type SearchMaterialSetsResponse = MaterialSetListResponse;
 
 /**
  * 教材に関連するファイル

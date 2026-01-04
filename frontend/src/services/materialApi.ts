@@ -2,6 +2,7 @@ import { apiRequest } from './apiClient';
 import type {
   MaterialSet,
   MaterialSetListResponse,
+  SearchMaterialSetsRequest,
   CreateMaterialSetRequest,
   UpdateMaterialSetRequest,
   MaterialFile,
@@ -12,25 +13,11 @@ import type {
   UpdateQuestionRequest,
 } from '@smart-exam/api-types';
 
-export const listMaterialSets = async (params?: {
-  subject?: string;
-  grade?: string;
-  provider?: string;
-  from?: string;
-  to?: string;
-  q?: string;
-  limit?: number;
-  cursor?: string;
-}): Promise<MaterialSetListResponse> => {
-  const query = new URLSearchParams();
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) query.append(key, String(value));
-    });
-  }
-  return apiRequest<MaterialSetListResponse>({
-    method: 'GET',
-    path: `/api/material-sets?${query.toString()}`,
+export const listMaterialSets = async (params?: SearchMaterialSetsRequest): Promise<MaterialSetListResponse> => {
+  return apiRequest<MaterialSetListResponse, SearchMaterialSetsRequest>({
+    method: 'POST',
+    path: '/api/material-sets/search',
+    body: params ?? {},
   });
 };
 
@@ -57,6 +44,13 @@ export const updateMaterialSet = async (
     method: 'PATCH',
     path: `/api/material-sets/${materialSetId}`,
     body: request,
+  });
+};
+
+export const deleteMaterialSet = async (materialSetId: string): Promise<void> => {
+  return apiRequest<void>({
+    method: 'DELETE',
+    path: `/api/material-sets/${materialSetId}`,
   });
 };
 

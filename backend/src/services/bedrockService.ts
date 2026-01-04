@@ -6,13 +6,48 @@ import { ENV } from '../lib/env';
 const bedrockClient = new BedrockRuntimeClient({ region: ENV.BEDROCK_REGION || 'us-east-1' });
 const s3Client = new S3Client({ region: ENV.AWS_REGION });
 
-const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
+const nodeStreamToBuffer = async (stream: Readable): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
     stream.on('error', (err) => reject(err));
     stream.on('end', () => resolve(Buffer.concat(chunks)));
   });
+};
+
+const webStreamToBuffer = async (stream: ReadableStream<Uint8Array>): Promise<Buffer> => {
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) chunks.push(value);
+  }
+  const totalLength = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+  const merged = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const c of chunks) {
+    merged.set(c, offset);
+    offset += c.byteLength;
+  }
+  return Buffer.from(merged);
+};
+
+const bodyToBuffer = async (body: unknown): Promise<Buffer> => {
+  if (body instanceof Readable) {
+    return nodeStreamToBuffer(body);
+  }
+
+  if (body && typeof (body as any).transformToByteArray === 'function') {
+    const bytes = (await (body as any).transformToByteArray()) as Uint8Array;
+    return Buffer.from(bytes);
+  }
+
+  if (body && typeof (body as any).getReader === 'function') {
+    return webStreamToBuffer(body as ReadableStream<Uint8Array>);
+  }
+
+  throw new Error('Unsupported S3 body stream type');
 };
 
 export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'): Promise<string[]> => {
@@ -27,7 +62,7 @@ export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'):
     throw new Error('Empty file body from S3');
   }
 
-  const fileBuffer = await streamToBuffer(s3Response.Body as Readable);
+  const fileBuffer = await bodyToBuffer(s3Response.Body);
 
   // 2. Call Bedrock
   // Using Claude 4.5 Sonnet

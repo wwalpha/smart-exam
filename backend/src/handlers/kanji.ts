@@ -12,6 +12,8 @@ import type {
   ImportKanjiRequest,
   ImportKanjiResponse,
   KanjiListResponse,
+  SearchKanjiRequest,
+  SearchKanjiResponse,
   UpdateKanjiParams,
   UpdateKanjiRequest,
   UpdateKanjiResponse,
@@ -19,8 +21,30 @@ import type {
 
 export const listKanji: AsyncHandler<ParamsDictionary, KanjiListResponse, {}, ParsedQs> = async (req, res) => {
   const items = await KanjiRepository.listKanji();
-  // Mapping to api-types structure (items vs datas)
-  res.json({ items: items, total: items.length });
+  res.json({ items, total: items.length });
+};
+
+export const searchKanji: AsyncHandler<ParamsDictionary, SearchKanjiResponse, SearchKanjiRequest, ParsedQs> = async (
+  req,
+  res
+) => {
+  const items = await KanjiRepository.listKanji();
+  const q = (req.body.q ?? '').trim();
+  const reading = (req.body.reading ?? '').trim();
+  const subject = (req.body.subject ?? '').trim();
+
+  const qLower = q.toLowerCase();
+  const readingLower = reading.toLowerCase();
+  const subjectLower = subject.toLowerCase();
+
+  const filtered = items.filter((x) => {
+    if (qLower && !String(x.kanji ?? '').toLowerCase().includes(qLower)) return false;
+    if (readingLower && !String(x.reading ?? '').toLowerCase().includes(readingLower)) return false;
+    if (subjectLower && String(x.subject ?? '').toLowerCase() !== subjectLower) return false;
+    return true;
+  });
+
+  res.json({ items: filtered, total: filtered.length });
 };
 
 export const createKanji: AsyncHandler<ParamsDictionary, CreateKanjiResponse, CreateKanjiRequest, ParsedQs> = async (
@@ -71,7 +95,7 @@ export const deleteKanji: AsyncHandler<
     res.status(404).json({ error: 'Not Found' });
     return;
   }
-  res.json({});
+  res.status(204).send();
 };
 
 export const importKanji: AsyncHandler<ParamsDictionary, ImportKanjiResponse, ImportKanjiRequest, ParsedQs> = async (

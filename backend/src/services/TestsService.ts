@@ -20,6 +20,13 @@ export const TestsService = {
     return result?.Item || null;
   },
 
+  delete: async (testId: string): Promise<void> => {
+    await dbHelper.delete({
+      TableName: TABLE_NAME,
+      Key: { testId },
+    });
+  },
+
   list: async (): Promise<TestTable[]> => {
     const result = await dbHelper.scan<TestTable>({
       TableName: TABLE_NAME,

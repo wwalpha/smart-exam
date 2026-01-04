@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,21 +31,17 @@ export const KanjiListPage = () => {
   return (
     <div className="space-y-6 p-8">
       <ConfirmDialog />
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">漢字マスタ一覧</h1>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link to="/kanji/import">一括インポート</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/kanji/new">新規登録</Link>
-          </Button>
-        </div>
-      </div>
-
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>検索条件</CardTitle>
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link to="/kanji/import">一括インポート</Link>
+            </Button>
+            <Button asChild>
+              <Link to="/kanji/new">新規登録</Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSearch} className="flex flex-wrap gap-4 items-end">
@@ -53,8 +50,8 @@ export const KanjiListPage = () => {
               <Input {...register('q')} placeholder="問題" />
             </div>
             <div className="w-40">
-              <label className="text-sm font-medium">答え</label>
-              <Input {...register('reading')} placeholder="答え" />
+              <label className="text-sm font-medium">解答</label>
+              <Input {...register('reading')} placeholder="解答" />
             </div>
             <div className="w-40">
               <label className="text-sm font-medium">科目</label>
@@ -79,39 +76,40 @@ export const KanjiListPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>問題</TableHead>
-              <TableHead>答え</TableHead>
-              <TableHead>意味</TableHead>
-              <TableHead>科目</TableHead>
               <TableHead>操作</TableHead>
+              <TableHead>科目</TableHead>
+              <TableHead>問題</TableHead>
+              <TableHead>解答</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {pagedList.map((kanji) => (
               <TableRow key={kanji.id}>
-                <TableCell className="font-medium text-lg">{kanji.kanji}</TableCell>
-                <TableCell>{kanji.reading}</TableCell>
-                <TableCell className="max-w-xs truncate">{kanji.meaning}</TableCell>
-                <TableCell>{kanji.subject}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link to={`/kanji/${kanji.id}`}>編集</Link>
+                    <Button asChild variant="ghost" size="icon" aria-label="編集">
+                      <Link to={`/kanji/${kanji.id}`}>
+                        <Pencil className="h-4 w-4" />
+                      </Link>
                     </Button>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      aria-label="削除"
                       className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => remove(kanji.id)}>
-                      削除
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
+                <TableCell>{kanji.subject}</TableCell>
+                <TableCell className="font-medium text-lg">{kanji.kanji}</TableCell>
+                <TableCell>{kanji.reading}</TableCell>
               </TableRow>
             ))}
             {kanjiList.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

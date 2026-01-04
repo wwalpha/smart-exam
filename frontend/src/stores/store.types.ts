@@ -173,6 +173,7 @@ export type MaterialSlice = {
   }) => Promise<MaterialSet>;
   fetchMaterialSet: (id: string) => Promise<void>;
   updateMaterialSet: (id: string, request: UpdateMaterialSetRequest) => Promise<void>;
+  deleteMaterialSet: (id: string) => Promise<void>;
   fetchMaterialFiles: (id: string) => Promise<void>;
   fetchQuestions: (id: string) => Promise<void>;
   createQuestion: (materialSetId: string, request: CreateQuestionRequest) => Promise<void>;

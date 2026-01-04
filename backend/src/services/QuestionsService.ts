@@ -12,6 +12,13 @@ export const QuestionsService = {
     });
   },
 
+  scanAll: async (): Promise<QuestionTable[]> => {
+    const result = await dbHelper.scan<QuestionTable>({
+      TableName: TABLE_NAME,
+    });
+    return result.Items || [];
+  },
+
   listByTestId: async (testId: string): Promise<QuestionTable[]> => {
     const result = await dbHelper.query<QuestionTable>({
       TableName: TABLE_NAME,

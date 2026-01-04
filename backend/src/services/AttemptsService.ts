@@ -12,6 +12,13 @@ export const AttemptsService = {
     });
   },
 
+  scanAll: async (): Promise<AttemptTable[]> => {
+    const result = await dbHelper.scan<AttemptTable>({
+      TableName: TABLE_NAME,
+    });
+    return result.Items || [];
+  },
+
   update: async (attemptId: string, updates: Partial<AttemptTable>): Promise<AttemptTable | null> => {
     const expAttrNames: Record<string, string> = {};
     const expAttrValues: Record<string, unknown> = {};
