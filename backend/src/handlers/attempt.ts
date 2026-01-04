@@ -1,4 +1,4 @@
-import { AttemptsRepository } from '@/repositories/attemptRepository';
+import { AttemptsRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type {

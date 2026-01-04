@@ -1,4 +1,4 @@
-import { QuestionRepository } from '@/repositories/questionRepository';
+import { QuestionRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type {

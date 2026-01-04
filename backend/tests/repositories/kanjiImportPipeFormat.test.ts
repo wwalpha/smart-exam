@@ -1,16 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-import { KanjiRepository } from '@/repositories/kanjiRepository';
+import { KanjiRepository, WordTestAttemptRepository } from '@/repositories';
 import { WordsService } from '@/services/WordsService';
-import { WordTestAttemptRepository } from '@/repositories/wordTestAttemptRepository';
 
 vi.mock('@/services/WordsService');
-vi.mock('@/repositories/wordTestAttemptRepository');
+
+// WordTestAttemptRepository is spied per-test
 
 describe('KanjiRepository.importKanji (pipe format)', () => {
   it('creates master and 3 history attempts for 3 dated tokens', async () => {
     vi.mocked(WordsService.listKanji).mockResolvedValue([] as any);
     vi.mocked(WordsService.create).mockResolvedValue();
-    vi.mocked(WordTestAttemptRepository.createSubmittedAttempt).mockResolvedValue({ wordTestAttemptId: 'a1' });
+    vi.spyOn(WordTestAttemptRepository, 'createSubmittedAttempt').mockResolvedValue({ wordTestAttemptId: 'a1' });
 
     const res = await KanjiRepository.importKanji({
       subject: '国語',

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { listQuestions, createQuestion, updateQuestion, searchQuestions } from '@/handlers/question';
-import { QuestionRepository } from '@/repositories/questionRepository';
+import { QuestionRepository } from '@/repositories';
 import { Request, Response } from 'express';
 import type {
   CreateQuestionParams,
@@ -11,12 +11,12 @@ import type {
   UpdateQuestionRequest,
 } from '@smart-exam/api-types';
 
-vi.mock('@/repositories/questionRepository');
+// repository methods are spied per-test
 
 describe('question handler', () => {
   it('listQuestions returns items', async () => {
     const mockItems = [{ id: '1', displayLabel: 'Q1' }];
-    vi.mocked(QuestionRepository.listQuestions).mockResolvedValue(mockItems as any);
+    vi.spyOn(QuestionRepository, 'listQuestions').mockResolvedValue(mockItems as any);
 
     const req = {
       params: { materialSetId: 'mat1' },
@@ -34,7 +34,7 @@ describe('question handler', () => {
 
   it('createQuestion creates item', async () => {
     const mockItem = { id: '1', displayLabel: 'Q1' };
-    vi.mocked(QuestionRepository.createQuestion).mockResolvedValue(mockItem as any);
+    vi.spyOn(QuestionRepository, 'createQuestion').mockResolvedValue(mockItem as any);
 
     const req = {
       params: { materialSetId: 'mat1' },
@@ -54,7 +54,7 @@ describe('question handler', () => {
 
   it('updateQuestion updates item', async () => {
     const mockItem = { id: '1', displayLabel: 'Q1-updated' };
-    vi.mocked(QuestionRepository.updateQuestion).mockResolvedValue(mockItem as any);
+    vi.spyOn(QuestionRepository, 'updateQuestion').mockResolvedValue(mockItem as any);
 
     const req = {
       params: { questionId: '1' },
@@ -83,7 +83,7 @@ describe('question handler', () => {
       },
     ];
 
-    vi.mocked(QuestionRepository.searchQuestions).mockResolvedValue(mockItems as any);
+    vi.spyOn(QuestionRepository, 'searchQuestions').mockResolvedValue(mockItems as any);
 
     const req = {
       body: { keyword: 'Q1', subject: '算数' },

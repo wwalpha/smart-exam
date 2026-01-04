@@ -1,4 +1,4 @@
-import { ReviewTestRepository } from '@/repositories/reviewTestRepository';
+import { ReviewTestRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type {

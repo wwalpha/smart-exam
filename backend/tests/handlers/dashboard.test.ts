@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Request, Response } from 'express';
 import { getDashboard } from '@/handlers/dashboard';
-import { DashboardRepository } from '@/repositories/dashboardRepository';
+import { DashboardRepository } from '@/repositories';
 import type { DashboardData } from '@smart-exam/api-types';
 
-vi.mock('@/repositories/dashboardRepository');
+vi.mock('@/repositories');
 
 describe('dashboard handler', () => {
   it('getDashboard returns DashboardData shape', async () => {

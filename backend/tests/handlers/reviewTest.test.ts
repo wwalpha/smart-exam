@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import { listReviewTests, createReviewTest, getReviewTest } from '@/handlers/reviewTest';
-import { ReviewTestRepository } from '@/repositories/reviewTestRepository';
+import { ReviewTestRepository } from '@/repositories';
 import { Request, Response } from 'express';
 import type { CreateReviewTestRequest, GetReviewTestParams } from '@smart-exam/api-types';
 
-vi.mock('@/repositories/reviewTestRepository');
+// repository methods are spied per-test
 
 describe('reviewTest handler', () => {
   it('listReviewTests returns items', async () => {
     const mockItems = [{ id: '1', status: 'IN_PROGRESS' }];
-    vi.mocked(ReviewTestRepository.listReviewTests).mockResolvedValue(mockItems as any);
+    vi.spyOn(ReviewTestRepository, 'listReviewTests').mockResolvedValue(mockItems as any);
 
     const req = {} as Request;
     const res = {
@@ -25,7 +25,7 @@ describe('reviewTest handler', () => {
 
   it('createReviewTest creates item', async () => {
     const mockItem = { id: '1', status: 'IN_PROGRESS' };
-    vi.mocked(ReviewTestRepository.createReviewTest).mockResolvedValue(mockItem as any);
+    vi.spyOn(ReviewTestRepository, 'createReviewTest').mockResolvedValue(mockItem as any);
 
     const req = {
       body: { subject: 'sub1' },
@@ -44,7 +44,7 @@ describe('reviewTest handler', () => {
 
   it('getReviewTest returns item', async () => {
     const mockItem = { id: '1', status: 'IN_PROGRESS' };
-    vi.mocked(ReviewTestRepository.getReviewTest).mockResolvedValue(mockItem as any);
+    vi.spyOn(ReviewTestRepository, 'getReviewTest').mockResolvedValue(mockItem as any);
 
     const req = {
       params: { testId: '1' },

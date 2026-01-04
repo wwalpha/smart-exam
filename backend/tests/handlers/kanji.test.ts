@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { listKanji, createKanji } from '@/handlers/kanji';
-import { KanjiRepository } from '@/repositories/kanjiRepository';
+import { KanjiRepository } from '@/repositories';
 import { Request, Response } from 'express';
 
-vi.mock('@/repositories/kanjiRepository');
+vi.mock('@/repositories');
 
 describe('kanji handler', () => {
   it('listKanji returns items', async () => {

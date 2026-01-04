@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createAttempt, submitAttempt, getLatestAttempt } from '@/handlers/attempt';
-import { AttemptsRepository } from '@/repositories/attemptRepository';
+import { AttemptsRepository } from '@/repositories';
 import { Request, Response } from 'express';
 import type {
   CreateAttemptParams,
@@ -10,12 +10,12 @@ import type {
   SubmitAttemptRequest,
 } from '@smart-exam/api-types';
 
-vi.mock('@/repositories/attemptRepository');
+// repository methods are spied per-test
 
 describe('attempt handler', () => {
   it('createAttempt creates item', async () => {
     const mockItem = { attemptId: '1', status: 'IN_PROGRESS' };
-    vi.mocked(AttemptsRepository.createAttempt).mockResolvedValue(mockItem as any);
+    vi.spyOn(AttemptsRepository, 'createAttempt').mockResolvedValue(mockItem as any);
 
     const req = {
       params: { testId: 'test1' },
@@ -35,7 +35,7 @@ describe('attempt handler', () => {
 
   it('submitAttempt submits item', async () => {
     const mockItem = { attemptId: '1', status: 'SUBMITTED' };
-    vi.mocked(AttemptsRepository.submitAttempt).mockResolvedValue(mockItem as any);
+    vi.spyOn(AttemptsRepository, 'submitAttempt').mockResolvedValue(mockItem as any);
 
     const req = {
       params: { attemptId: '1' },
@@ -54,7 +54,7 @@ describe('attempt handler', () => {
 
   it('getLatestAttempt returns item', async () => {
     const mockItem = { attemptId: '1', status: 'IN_PROGRESS' };
-    vi.mocked(AttemptsRepository.getLatestAttempt).mockResolvedValue(mockItem as any);
+    vi.spyOn(AttemptsRepository, 'getLatestAttempt').mockResolvedValue(mockItem as any);
 
     const req = {
       params: { testId: 'test1' },

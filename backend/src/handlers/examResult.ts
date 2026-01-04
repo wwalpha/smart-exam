@@ -1,4 +1,4 @@
-import { ExamResultsRepository } from '@/repositories/examRepository';
+import { ExamResultsRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';

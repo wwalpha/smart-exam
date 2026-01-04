@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { listExamPapers, createExamPaper } from '@/handlers/examPaper';
-import { ExamPapersRepository } from '@/repositories/examRepository';
+import { ExamPapersRepository } from '@/repositories';
 import { Request, Response } from 'express';
 
-vi.mock('@/repositories/examRepository');
+// repository methods are spied per-test
 
 describe('examPaper handler', () => {
   it('listExamPapers returns papers', async () => {
     const mockPapers = [{ paperId: '1', name: 'Test Paper' }];
-    vi.mocked(ExamPapersRepository.listExamPapers).mockResolvedValue(mockPapers as any);
+    vi.spyOn(ExamPapersRepository, 'listExamPapers').mockResolvedValue(mockPapers as any);
 
     const req = {} as Request;
     const res = {
@@ -24,7 +24,7 @@ describe('examPaper handler', () => {
 
   it('createExamPaper creates paper', async () => {
     const mockPaper = { paperId: '1', name: 'Test Paper' };
-    vi.mocked(ExamPapersRepository.createExamPaper).mockResolvedValue(mockPaper as any);
+    vi.spyOn(ExamPapersRepository, 'createExamPaper').mockResolvedValue(mockPaper as any);
 
     const req = {
       body: { name: 'Test Paper' },
