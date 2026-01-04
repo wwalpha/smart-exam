@@ -18,6 +18,12 @@ export type CreateAttemptRequest = {
   subjectId: string;
 };
 
+export type CreateAttemptResponse = Attempt;
+
 export type SubmitAttemptRequest = {
   results: AttemptResult[];
 };
+
+export type SubmitAttemptResponse = Attempt;
+
+export type GetLatestAttemptResponse = Attempt;

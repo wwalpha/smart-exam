@@ -21,7 +21,7 @@ data "archive_file" "lambda_dummy" {
 resource "aws_lambda_function" "api" {
   function_name = local.lambda_function_name
   role          = aws_iam_role.lambda.arn
-  runtime       = "nodejs20.x"
+  runtime       = "nodejs22.x"
   handler       = "index.handler"
 
   filename         = data.archive_file.lambda_dummy.output_path
@@ -38,17 +38,17 @@ resource "aws_lambda_function" "api" {
     variables = {
       FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
 
-      SUBJECTS_TABLE           = aws_dynamodb_table.subjects.name
-      TESTS_TABLE              = aws_dynamodb_table.tests.name
-      QUESTIONS_TABLE          = aws_dynamodb_table.questions.name
-      ATTEMPTS_TABLE           = aws_dynamodb_table.attempts.name
-      GRADED_SHEETS_TABLE      = aws_dynamodb_table.graded_sheets.name
-      WORDS_TABLE              = aws_dynamodb_table.words.name
-      WORD_GROUPS_TABLE        = aws_dynamodb_table.word_groups.name
-      WORD_TESTS_TABLE         = aws_dynamodb_table.word_tests.name
-      WORD_TEST_ATTEMPTS_TABLE = aws_dynamodb_table.word_test_attempts.name
-      EXAM_PAPERS_TABLE        = aws_dynamodb_table.exam_papers.name
-      EXAM_RESULTS_TABLE       = aws_dynamodb_table.exam_results.name
+      TABLE_SUBJECTS           = aws_dynamodb_table.subjects.name
+      TABLE_TESTS              = aws_dynamodb_table.tests.name
+      TABLE_QUESTIONS          = aws_dynamodb_table.questions.name
+      TABLE_ATTEMPTS           = aws_dynamodb_table.attempts.name
+      TABLE_GRADED_SHEETS      = aws_dynamodb_table.graded_sheets.name
+      TABLE_WORDS              = aws_dynamodb_table.words.name
+      TABLE_WORD_GROUPS        = aws_dynamodb_table.word_groups.name
+      TABLE_WORD_TESTS         = aws_dynamodb_table.word_tests.name
+      TABLE_WORD_TEST_ATTEMPTS = aws_dynamodb_table.word_test_attempts.name
+      TABLE_EXAM_PAPERS        = aws_dynamodb_table.exam_papers.name
+      TABLE_EXAM_RESULTS       = aws_dynamodb_table.exam_results.name
       BEDROCK_REGION           = "us-east-1"
     }
   }
@@ -70,7 +70,7 @@ resource "aws_cloudwatch_log_group" "bedrock" {
 resource "aws_lambda_function" "bedrock" {
   function_name = local.bedrock_function_name
   role          = aws_iam_role.lambda.arn
-  runtime       = "nodejs20.x"
+  runtime       = "nodejs22.x"
   handler       = "handlers/bedrock.handler"
 
   filename         = data.archive_file.lambda_dummy.output_path
@@ -87,17 +87,17 @@ resource "aws_lambda_function" "bedrock" {
     variables = {
       FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
 
-      SUBJECTS_TABLE           = aws_dynamodb_table.subjects.name
-      TESTS_TABLE              = aws_dynamodb_table.tests.name
-      QUESTIONS_TABLE          = aws_dynamodb_table.questions.name
-      ATTEMPTS_TABLE           = aws_dynamodb_table.attempts.name
-      GRADED_SHEETS_TABLE      = aws_dynamodb_table.graded_sheets.name
-      WORDS_TABLE              = aws_dynamodb_table.words.name
-      WORD_GROUPS_TABLE        = aws_dynamodb_table.word_groups.name
-      WORD_TESTS_TABLE         = aws_dynamodb_table.word_tests.name
-      WORD_TEST_ATTEMPTS_TABLE = aws_dynamodb_table.word_test_attempts.name
-      EXAM_PAPERS_TABLE        = aws_dynamodb_table.exam_papers.name
-      EXAM_RESULTS_TABLE       = aws_dynamodb_table.exam_results.name
+      TABLE_SUBJECTS           = aws_dynamodb_table.subjects.name
+      TABLE_TESTS              = aws_dynamodb_table.tests.name
+      TABLE_QUESTIONS          = aws_dynamodb_table.questions.name
+      TABLE_ATTEMPTS           = aws_dynamodb_table.attempts.name
+      TABLE_GRADED_SHEETS      = aws_dynamodb_table.graded_sheets.name
+      TABLE_WORDS              = aws_dynamodb_table.words.name
+      TABLE_WORD_GROUPS        = aws_dynamodb_table.word_groups.name
+      TABLE_WORD_TESTS         = aws_dynamodb_table.word_tests.name
+      TABLE_WORD_TEST_ATTEMPTS = aws_dynamodb_table.word_test_attempts.name
+      TABLE_EXAM_PAPERS        = aws_dynamodb_table.exam_papers.name
+      TABLE_EXAM_RESULTS       = aws_dynamodb_table.exam_results.name
     }
   }
 

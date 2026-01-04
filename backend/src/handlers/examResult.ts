@@ -1,18 +1,20 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ExamResultsRepository } from '@/repositories/examRepository';
 import { apiHandler } from '@/lib/handler';
-import { ExamResult, ListExamResultsResponse, CreateExamResultRequest } from '@smart-exam/api-types';
+import type { CreateExamResultRequest, CreateExamResultResponse, ListExamResultsResponse } from '@smart-exam/api-types';
 
-type ListExamResultsRequest = Request<{}, ListExamResultsResponse, {}, {}>;
-type CreateExamResultResponse = Response<ExamResult>;
-type CreateExamResultReq = Request<{}, ExamResult, CreateExamResultRequest>;
+type ListExamResultsReq = Request<{}, ListExamResultsResponse, {}, {}>;
+type ListExamResultsRes = Response<ListExamResultsResponse>;
 
-export const listExamResults = apiHandler(async (req: ListExamResultsRequest, res: Response<ListExamResultsResponse>) => {
+type CreateExamResultReq = Request<{}, CreateExamResultResponse, CreateExamResultRequest>;
+type CreateExamResultRes = Response<CreateExamResultResponse>;
+
+export const listExamResults = apiHandler(async (req: ListExamResultsReq, res: ListExamResultsRes) => {
   const results = await ExamResultsRepository.listExamResults();
   res.json({ datas: results });
 });
 
-export const createExamResult = apiHandler(async (req: CreateExamResultReq, res: CreateExamResultResponse) => {
+export const createExamResult = apiHandler(async (req: CreateExamResultReq, res: CreateExamResultRes) => {
   const result = await ExamResultsRepository.createExamResult(req.body);
   res.json(result);
 });

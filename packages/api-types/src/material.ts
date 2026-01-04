@@ -54,8 +54,14 @@ export type CreateMaterialSetRequest = {
   keywords?: string[];
 };
 
+/** 教材セット作成レスポンス */
+export type CreateMaterialSetResponse = MaterialSet;
+
 /** 教材セット更新リクエスト */
 export type UpdateMaterialSetRequest = Partial<CreateMaterialSetRequest>;
+
+/** 教材セット取得レスポンス */
+export type GetMaterialSetResponse = MaterialSet;
 
 /**
  * 教材に関連するファイル
@@ -110,5 +116,11 @@ export type CreateQuestionRequest = {
   tags?: string[];
 };
 
+/** 問題作成レスポンス */
+export type CreateQuestionResponse = Question;
+
 /** 問題更新リクエスト */
 export type UpdateQuestionRequest = Partial<CreateQuestionRequest>;
+
+/** 問題更新レスポンス */
+export type UpdateQuestionResponse = Question;

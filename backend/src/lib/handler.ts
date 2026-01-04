@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { ApiError } from '@/lib/apiError';
@@ -16,15 +16,34 @@ export type AsyncHandler<
   next: NextFunction
 ) => Promise<void | unknown>;
 
-// 共通ハンドラーラッパーを定義する
-export const apiHandler = <
+export type AsyncHandlerWithoutNext<
   Params extends ParamsDictionary = ParamsDictionary,
   ResBody = unknown,
   ReqBody = unknown,
   ReqQuery extends ParsedQs = ParsedQs,
->(
-  handler: AsyncHandler<Params, ResBody, ReqBody, ReqQuery>
-) => {
+> = (req: Request<Params, ResBody, ReqBody, ReqQuery>, res: Response<ResBody>) => Promise<void | unknown>;
+
+// 共通ハンドラーラッパーを定義する
+export function apiHandler<
+  Params extends ParamsDictionary = ParamsDictionary,
+  ResBody = unknown,
+  ReqBody = unknown,
+  ReqQuery extends ParsedQs = ParsedQs,
+>(handler: AsyncHandlerWithoutNext<Params, ResBody, ReqBody, ReqQuery>): RequestHandler;
+
+export function apiHandler<
+  Params extends ParamsDictionary = ParamsDictionary,
+  ResBody = unknown,
+  ReqBody = unknown,
+  ReqQuery extends ParsedQs = ParsedQs,
+>(handler: AsyncHandler<Params, ResBody, ReqBody, ReqQuery>): RequestHandler;
+
+export function apiHandler<
+  Params extends ParamsDictionary = ParamsDictionary,
+  ResBody = unknown,
+  ReqBody = unknown,
+  ReqQuery extends ParsedQs = ParsedQs,
+>(handler: AsyncHandler<Params, ResBody, ReqBody, ReqQuery> | AsyncHandlerWithoutNext<Params, ResBody, ReqBody, ReqQuery>) {
   // Express ハンドラーを返却する
   return async (
     req: Request<Params, ResBody, ReqBody, ReqQuery>,
@@ -34,7 +53,7 @@ export const apiHandler = <
     // 例外処理を開始する
     try {
       // ハンドラーを実行する
-      await handler(req, res, next);
+      await (handler as any)(req, res, next);
       // 例外を捕捉する
     } catch (error) {
       // 例外の種別とメッセージをログへ出す（500の原因追跡のため）
@@ -66,4 +85,4 @@ export const apiHandler = <
       } as unknown as ResBody);
     }
   };
-};
+}

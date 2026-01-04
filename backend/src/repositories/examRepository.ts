@@ -68,9 +68,9 @@ export const ExamResultsRepository = {
       name: result.name,
       title: result.title,
       testDate: result.testDate,
-      totalScore: result.totalScore,
-      details: result.details.map(d => ({ number: d.number, isCorrect: d.isCorrect })),
-      gradedImagePath: result.gradedImageKey,
+      totalScore: result.score ?? 0,
+      details: result.details.map((d) => ({ number: d.number, isCorrect: d.isCorrect })),
+      gradedImagePath: result.gradedPdfKey,
       createdAt: now,
     };
 
@@ -91,9 +91,9 @@ export const ExamResultsRepository = {
       name: dbItem.name,
       title: dbItem.title,
       testDate: dbItem.testDate,
-      totalScore: dbItem.totalScore,
-      details: dbItem.details.map(d => ({ number: d.number, isCorrect: d.isCorrect })),
-      gradedImageKey: dbItem.gradedImagePath,
+      score: dbItem.totalScore,
+      details: dbItem.details.map((d) => ({ number: d.number, isCorrect: d.isCorrect })),
+      gradedPdfKey: dbItem.gradedImagePath,
       createdAt: dbItem.createdAt,
     }));
   }

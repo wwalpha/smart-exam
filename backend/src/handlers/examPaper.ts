@@ -1,18 +1,20 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ExamPapersRepository } from '@/repositories/examRepository';
 import { apiHandler } from '@/lib/handler';
-import { ExamPaper, ListExamPapersResponse, CreateExamPaperRequest } from '@smart-exam/api-types';
+import type { CreateExamPaperRequest, CreateExamPaperResponse, ListExamPapersResponse } from '@smart-exam/api-types';
 
-type ListExamPapersRequest = Request<{}, ListExamPapersResponse, {}, {}>;
-type CreateExamPaperResponse = Response<ExamPaper>;
-type CreateExamPaperReq = Request<{}, ExamPaper, CreateExamPaperRequest>;
+type ListExamPapersReq = Request<{}, ListExamPapersResponse, {}, {}>;
+type ListExamPapersRes = Response<ListExamPapersResponse>;
 
-export const listExamPapers = apiHandler(async (req: ListExamPapersRequest, res: Response<ListExamPapersResponse>) => {
+type CreateExamPaperReq = Request<{}, CreateExamPaperResponse, CreateExamPaperRequest>;
+type CreateExamPaperRes = Response<CreateExamPaperResponse>;
+
+export const listExamPapers = apiHandler(async (req: ListExamPapersReq, res: ListExamPapersRes) => {
   const papers = await ExamPapersRepository.listExamPapers();
   res.json({ datas: papers });
 });
 
-export const createExamPaper = apiHandler(async (req: CreateExamPaperReq, res: CreateExamPaperResponse) => {
+export const createExamPaper = apiHandler(async (req: CreateExamPaperReq, res: CreateExamPaperRes) => {
   const paper = await ExamPapersRepository.createExamPaper(req.body);
   res.json(paper);
 });

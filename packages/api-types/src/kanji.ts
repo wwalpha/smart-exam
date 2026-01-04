@@ -44,6 +44,9 @@ export type CreateKanjiRequest = {
   source?: string;
 };
 
+/** 漢字作成レスポンス */
+export type CreateKanjiResponse = Kanji;
+
 /** 漢字更新リクエスト */
 export type UpdateKanjiRequest = Partial<CreateKanjiRequest>;
 

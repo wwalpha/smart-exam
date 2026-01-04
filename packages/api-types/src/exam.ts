@@ -60,8 +60,14 @@ export type ExamResult = {
 /** 試験問題作成リクエスト */
 export type CreateExamPaperRequest = Omit<ExamPaper, 'paperId' | 'createdAt'>;
 
+/** 試験問題作成レスポンス */
+export type CreateExamPaperResponse = ExamPaper;
+
 /** 試験結果作成リクエスト */
 export type CreateExamResultRequest = Omit<ExamResult, 'resultId' | 'createdAt'>;
+
+/** 試験結果作成レスポンス */
+export type CreateExamResultResponse = ExamResult;
 
 /** 試験問題一覧取得レスポンス */
 export type ListExamPapersResponse = {

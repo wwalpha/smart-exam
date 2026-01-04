@@ -48,6 +48,12 @@ export type CreateReviewTestRequest = {
   includeCorrect?: boolean;
 };
 
+/** 復習テスト作成レスポンス */
+export type CreateReviewTestResponse = ReviewTest;
+
+/** 復習テスト取得レスポンス */
+export type GetReviewTestResponse = ReviewTest;
+
 /**
  * 復習テストの出題アイテム
  */
@@ -90,6 +96,9 @@ export type ReviewTestDetail = ReviewTest & {
 export type UpdateReviewTestStatusRequest = {
   status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
 };
+
+/** 復習テストステータス更新レスポンス */
+export type UpdateReviewTestStatusResponse = ReviewTest;
 
 /**
  * 復習テスト結果
