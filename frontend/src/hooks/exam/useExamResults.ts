@@ -8,9 +8,9 @@ type FormValues = {
   category: string;
   name: string;
   title: string;
-  test_date: string;
+  testDate: string;
   gradedFile: FileList;
-  details: { number: number; is_correct: boolean }[];
+  details: { number: number; isCorrect: boolean }[];
 };
 
 export const useExamResults = () => {
@@ -21,7 +21,7 @@ export const useExamResults = () => {
 
   const form = useForm<FormValues>({
     defaultValues: {
-      details: Array.from({ length: 10 }).map((_, i) => ({ number: i + 1, is_correct: false })),
+      details: Array.from({ length: 10 }).map((_, i) => ({ number: i + 1, isCorrect: false })),
     },
   });
 
@@ -44,9 +44,9 @@ export const useExamResults = () => {
       category: data.category,
       name: data.name,
       title: data.title,
-      test_date: data.test_date,
+      testDate: data.testDate,
       gradedFile: data.gradedFile?.[0],
-      details: data.details.map((d) => ({ ...d, is_correct: Boolean(d.is_correct) })),
+      details: data.details.map((d) => ({ ...d, isCorrect: Boolean(d.isCorrect) })),
     });
     reset();
   });

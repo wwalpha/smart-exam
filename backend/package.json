@@ -11,6 +11,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@alphax/dynamodb": "^1.2.16",
     "@aws-sdk/client-bedrock-runtime": "^3.956.0",
     "@aws-sdk/client-dynamodb": "^3.0.0",
     "@aws-sdk/client-s3": "^3.956.0",
@@ -19,6 +20,7 @@
     "@smart-exam/api-types": "workspace:*",
     "@vendia/serverless-express": "^4.12.6",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.19",
     "express": "^5.1.0",
     "pdf-to-png-converter": "^3.11.0"
   },

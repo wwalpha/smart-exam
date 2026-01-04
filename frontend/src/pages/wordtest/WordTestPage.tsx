@@ -48,7 +48,7 @@ export const WordTestPage = () => {
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{SUBJECT_LABEL[item.subject as keyof typeof SUBJECT_LABEL]}</TableCell>
-                    <TableCell>{new Date(item.created_at).toLocaleString()}</TableCell>
+                    <TableCell>{new Date(item.createdAt).toLocaleString()}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>

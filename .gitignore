@@ -40,4 +40,13 @@ terraform.rc
 dist
 node_modules
 
+# Yarn (Berry)
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 .terraform*

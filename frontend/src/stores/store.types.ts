@@ -4,7 +4,6 @@ import type {
   GradingData,
   GetWordTestDetailResponse,
   WordTestTitle,
-  WordTestSubject,
   CreateWordGroupRequest,
   CreateWordGroupResponse,
   WordGroup,
@@ -13,7 +12,6 @@ import type {
   ExamPaper,
   ExamResult,
   MaterialSet,
-  MaterialSetListResponse,
   CreateMaterialSetRequest,
   UpdateMaterialSetRequest,
   MaterialFile,
@@ -21,13 +19,11 @@ import type {
   CreateQuestionRequest,
   UpdateQuestionRequest,
   ReviewTest,
-  ReviewTestListResponse,
   CreateReviewTestRequest,
   ReviewTestDetail,
   UpdateReviewTestStatusRequest,
   SubmitReviewTestResultsRequest,
   Kanji,
-  KanjiListResponse,
   CreateKanjiRequest,
   UpdateKanjiRequest,
   ImportKanjiRequest,
@@ -167,7 +163,7 @@ export type ExamSlice = {
  */
 export type MaterialSlice = {
   material: MaterialState;
-  fetchMaterialSets: (params?: any) => Promise<void>;
+  fetchMaterialSets: (params?: Record<string, unknown>) => Promise<void>;
   createMaterialSet: (request: CreateMaterialSetRequest) => Promise<MaterialSet>;
   fetchMaterialSet: (id: string) => Promise<void>;
   updateMaterialSet: (id: string, request: UpdateMaterialSetRequest) => Promise<void>;
@@ -183,7 +179,7 @@ export type MaterialSlice = {
  */
 export type ReviewSlice = {
   review: ReviewState;
-  fetchReviewTests: (params?: any) => Promise<void>;
+  fetchReviewTests: (params?: Record<string, unknown>) => Promise<void>;
   createReviewTest: (request: CreateReviewTestRequest) => Promise<ReviewTest>;
   fetchReviewTest: (id: string) => Promise<void>;
   updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest) => Promise<void>;
@@ -196,7 +192,7 @@ export type ReviewSlice = {
  */
 export type KanjiSlice = {
   kanji: KanjiState;
-  fetchKanjiList: (params?: any) => Promise<void>;
+  fetchKanjiList: (params?: Record<string, unknown>) => Promise<void>;
   createKanji: (request: CreateKanjiRequest) => Promise<void>;
   fetchKanji: (id: string) => Promise<void>;
   updateKanji: (id: string, request: UpdateKanjiRequest) => Promise<void>;

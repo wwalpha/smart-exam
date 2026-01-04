@@ -1,9 +1,10 @@
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
+import { ENV } from '../lib/env';
 
-const bedrockClient = new BedrockRuntimeClient({ region: process.env.BEDROCK_REGION || 'us-east-1' });
-const s3Client = new S3Client({ region: process.env.AWS_REGION });
+const bedrockClient = new BedrockRuntimeClient({ region: ENV.BEDROCK_REGION || 'us-east-1' });
+const s3Client = new S3Client({ region: ENV.AWS_REGION });
 
 const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
@@ -17,7 +18,7 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
 export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'): Promise<string[]> => {
   // 1. Get file from S3
   const getObjectParams = {
-    Bucket: process.env.FILES_BUCKET_NAME,
+    Bucket: ENV.FILES_BUCKET_NAME,
     Key: s3Key,
   };
   const s3Response = await s3Client.send(new GetObjectCommand(getObjectParams));

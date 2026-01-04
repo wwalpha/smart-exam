@@ -18,7 +18,7 @@ export const WordTestDetailPage = () => {
           <h1 className="text-2xl font-bold">{test.name}</h1>
           <div className="flex gap-4 text-sm text-muted-foreground">
             <span>科目: {SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL]}</span>
-            <span>作成日: {new Date(test.created_at).toLocaleString()}</span>
+            <span>作成日: {new Date(test.createdAt).toLocaleString()}</span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -56,4 +56,4 @@ export const WordTestDetailPage = () => {
       </Card>
     </div>
   );
-}
+};

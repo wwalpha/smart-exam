@@ -2,14 +2,7 @@ import { Button } from '@/components/ui/button';
 import { useReviewPdf } from '@/hooks/review';
 
 export const ReviewTestPdfPage = () => {
-  const {
-    review,
-    isLoading,
-    basePath,
-    pdfUrl,
-    navigate,
-    id,
-  } = useReviewPdf();
+  const { review, isLoading, basePath, pdfUrl, navigate, id } = useReviewPdf();
 
   if (isLoading || !review) {
     return <div>Loading...</div>;
@@ -22,9 +15,7 @@ export const ReviewTestPdfPage = () => {
           <Button variant="outline" onClick={() => navigate(`${basePath}/${id}`)}>
             戻る
           </Button>
-          <h1 className="text-lg font-bold">
-            {review.testId} - PDFプレビュー
-          </h1>
+          <h1 className="text-lg font-bold">{review.testId} - PDFプレビュー</h1>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => window.print()}>印刷</Button>
@@ -33,7 +24,7 @@ export const ReviewTestPdfPage = () => {
           </Button>
         </div>
       </div>
-      
+
       <div className="flex-1 bg-gray-100 p-8 overflow-auto flex justify-center">
         <div className="bg-white shadow-lg w-[210mm] min-h-[297mm] p-[20mm] box-border">
           {/* This is a HTML representation of what the PDF might look like */}

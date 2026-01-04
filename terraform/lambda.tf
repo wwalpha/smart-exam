@@ -42,7 +42,6 @@ resource "aws_lambda_function" "api" {
       TESTS_TABLE              = aws_dynamodb_table.tests.name
       QUESTIONS_TABLE          = aws_dynamodb_table.questions.name
       ATTEMPTS_TABLE           = aws_dynamodb_table.attempts.name
-      ANSWER_SHEETS_TABLE      = aws_dynamodb_table.answer_sheets.name
       GRADED_SHEETS_TABLE      = aws_dynamodb_table.graded_sheets.name
       WORDS_TABLE              = aws_dynamodb_table.words.name
       WORD_GROUPS_TABLE        = aws_dynamodb_table.word_groups.name
@@ -92,7 +91,6 @@ resource "aws_lambda_function" "bedrock" {
       TESTS_TABLE              = aws_dynamodb_table.tests.name
       QUESTIONS_TABLE          = aws_dynamodb_table.questions.name
       ATTEMPTS_TABLE           = aws_dynamodb_table.attempts.name
-      ANSWER_SHEETS_TABLE      = aws_dynamodb_table.answer_sheets.name
       GRADED_SHEETS_TABLE      = aws_dynamodb_table.graded_sheets.name
       WORDS_TABLE              = aws_dynamodb_table.words.name
       WORD_GROUPS_TABLE        = aws_dynamodb_table.word_groups.name

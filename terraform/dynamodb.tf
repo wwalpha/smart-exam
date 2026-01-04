@@ -4,10 +4,10 @@
 resource "aws_dynamodb_table" "subjects" {
   name         = "${var.project_name}_${var.env}_subjects"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "subject_id"
+  hash_key     = "subjectId"
 
   attribute {
-    name = "subject_id"
+    name = "subjectId"
     type = "S"
   }
 }
@@ -18,22 +18,22 @@ resource "aws_dynamodb_table" "subjects" {
 resource "aws_dynamodb_table" "tests" {
   name         = "${var.project_name}_${var.env}_tests"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "test_id"
+  hash_key     = "testId"
 
   attribute {
-    name = "test_id"
+    name = "testId"
     type = "S"
   }
 
   attribute {
-    name = "subject_id"
+    name = "subjectId"
     type = "S"
   }
 
   global_secondary_index {
     name            = "gsi_subject_id"
-    hash_key        = "subject_id"
-    range_key       = "test_id"
+    hash_key        = "subjectId"
+    range_key       = "testId"
     projection_type = "ALL"
   }
 }
@@ -44,15 +44,15 @@ resource "aws_dynamodb_table" "tests" {
 resource "aws_dynamodb_table" "questions" {
   name         = "${var.project_name}_${var.env}_questions"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "question_id"
+  hash_key     = "questionId"
 
   attribute {
-    name = "question_id"
+    name = "questionId"
     type = "S"
   }
 
   attribute {
-    name = "test_id"
+    name = "testId"
     type = "S"
   }
 
@@ -63,7 +63,7 @@ resource "aws_dynamodb_table" "questions" {
 
   global_secondary_index {
     name            = "gsi_test_id_number"
-    hash_key        = "test_id"
+    hash_key        = "testId"
     range_key       = "number"
     projection_type = "ALL"
   }
@@ -75,42 +75,28 @@ resource "aws_dynamodb_table" "questions" {
 resource "aws_dynamodb_table" "attempts" {
   name         = "${var.project_name}_${var.env}_attempts"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "attempt_id"
+  hash_key     = "attemptId"
 
   attribute {
-    name = "attempt_id"
+    name = "attemptId"
     type = "S"
   }
 
   attribute {
-    name = "test_id"
+    name = "testId"
     type = "S"
   }
 
   attribute {
-    name = "started_at"
+    name = "startedAt"
     type = "S"
   }
 
   global_secondary_index {
     name            = "gsi_test_id_started_at"
-    hash_key        = "test_id"
-    range_key       = "started_at"
+    hash_key        = "testId"
+    range_key       = "startedAt"
     projection_type = "ALL"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for answer sheets.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "answer_sheets" {
-  name         = "${var.project_name}_${var.env}_answer_sheets"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "answer_sheet_id"
-
-  attribute {
-    name = "answer_sheet_id"
-    type = "S"
   }
 }
 
@@ -120,10 +106,10 @@ resource "aws_dynamodb_table" "answer_sheets" {
 resource "aws_dynamodb_table" "graded_sheets" {
   name         = "${var.project_name}_${var.env}_graded_sheets"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "graded_sheet_id"
+  hash_key     = "gradedSheetId"
 
   attribute {
-    name = "graded_sheet_id"
+    name = "gradedSheetId"
     type = "S"
   }
 }
@@ -134,22 +120,22 @@ resource "aws_dynamodb_table" "graded_sheets" {
 resource "aws_dynamodb_table" "words" {
   name         = "${var.project_name}_${var.env}_words"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "word_id"
+  hash_key     = "wordId"
 
   attribute {
-    name = "word_id"
+    name = "wordId"
     type = "S"
   }
 
   attribute {
-    name = "word_type"
+    name = "wordType"
     type = "S"
   }
 
   global_secondary_index {
     name            = "gsi_word_type"
-    hash_key        = "word_type"
-    range_key       = "word_id"
+    hash_key        = "wordType"
+    range_key       = "wordId"
     projection_type = "ALL"
   }
 }
@@ -160,10 +146,10 @@ resource "aws_dynamodb_table" "words" {
 resource "aws_dynamodb_table" "word_groups" {
   name         = "${var.project_name}_${var.env}_word_groups"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "group_id"
+  hash_key     = "groupId"
 
   attribute {
-    name = "group_id"
+    name = "groupId"
     type = "S"
   }
 }
@@ -174,10 +160,10 @@ resource "aws_dynamodb_table" "word_groups" {
 resource "aws_dynamodb_table" "word_tests" {
   name         = "${var.project_name}_${var.env}_word_tests"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "word_test_id"
+  hash_key     = "wordTestId"
 
   attribute {
-    name = "word_test_id"
+    name = "wordTestId"
     type = "S"
   }
 }
@@ -188,27 +174,27 @@ resource "aws_dynamodb_table" "word_tests" {
 resource "aws_dynamodb_table" "word_test_attempts" {
   name         = "${var.project_name}_${var.env}_word_test_attempts"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "word_test_attempt_id"
+  hash_key     = "wordTestAttemptId"
 
   attribute {
-    name = "word_test_attempt_id"
+    name = "wordTestAttemptId"
     type = "S"
   }
 
   attribute {
-    name = "word_test_id"
+    name = "wordTestId"
     type = "S"
   }
 
   attribute {
-    name = "started_at"
+    name = "startedAt"
     type = "S"
   }
 
   global_secondary_index {
     name            = "gsi_word_test_id_started_at"
-    hash_key        = "word_test_id"
-    range_key       = "started_at"
+    hash_key        = "wordTestId"
+    range_key       = "startedAt"
     projection_type = "ALL"
   }
 }
@@ -219,10 +205,10 @@ resource "aws_dynamodb_table" "word_test_attempts" {
 resource "aws_dynamodb_table" "exam_papers" {
   name         = "${var.project_name}_${var.env}_exam_papers"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "paper_id"
+  hash_key     = "paperId"
 
   attribute {
-    name = "paper_id"
+    name = "paperId"
     type = "S"
   }
 
@@ -250,21 +236,21 @@ resource "aws_dynamodb_table" "exam_papers" {
 resource "aws_dynamodb_table" "exam_results" {
   name         = "${var.project_name}_${var.env}_exam_results"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "result_id"
+  hash_key     = "resultId"
 
   attribute {
-    name = "result_id"
+    name = "resultId"
     type = "S"
   }
 
   attribute {
-    name = "test_date"
+    name = "testDate"
     type = "S"
   }
 
   global_secondary_index {
     name            = "gsi_test_date"
-    hash_key        = "test_date"
+    hash_key        = "testDate"
     projection_type = "ALL"
   }
 }

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useWordTestDetailPage } from './useWordTestDetailPage';
 import { useWordTestStore } from '@/stores';
 import { GRADING_VALUE } from '@/lib/Consts';
 import { useConfirm } from '@/components/common/useConfirm';
+import type { WordTestItem } from '@typings/wordtest';
 
 type GradingFormValues = {
   results: { isCorrect: boolean }[];
@@ -25,7 +26,7 @@ export const useWordTestGradingPage = () => {
   useEffect(() => {
     if (questions.length > 0) {
       // Check if already graded
-      const initialResults = questions.map(q => ({
+      const initialResults = questions.map((q: WordTestItem) => ({
         isCorrect: q.grading === GRADING_VALUE.correct
       }));
       reset({ results: initialResults });
@@ -34,7 +35,7 @@ export const useWordTestGradingPage = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     if (!test?.id) return;
-    const gradingData = questions.map((q, i) => ({
+    const gradingData = questions.map((q: WordTestItem, i: number) => ({
       qid: q.qid,
       grading: data.results[i]?.isCorrect ? GRADING_VALUE.correct : GRADING_VALUE.incorrect,
     }));

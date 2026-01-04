@@ -1,32 +1,18 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import { Request, Response } from 'express';
+import { analyzeExamPaper } from '@/services/BedrockService';
+import { apiHandler } from '@/lib/handler';
+import { AnalyzePaperRequest, AnalyzePaperResponse } from '@smart-exam/api-types';
 
-const client = new BedrockRuntimeClient({ region: process.env.AWS_REGION });
+type AnalyzePaperReq = Request<{}, AnalyzePaperResponse | { error: string }, AnalyzePaperRequest>;
 
-export const handler = async (event: any) => {
-  console.log('Bedrock handler invoked', JSON.stringify(event));
-
-  try {
-    // Example usage - this would need to be adapted to the specific model and prompt
-    // const command = new InvokeModelCommand({
-    //   modelId: "anthropic.claude-v2",
-    //   contentType: "application/json",
-    //   accept: "application/json",
-    //   body: JSON.stringify({
-    //     prompt: "\n\nHuman: Hello\n\nAssistant:",
-    //     max_tokens_to_sample: 300,
-    //   }),
-    // });
-    // const response = await client.send(command);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Bedrock handler ready' }),
-    };
-  } catch (error) {
-    console.error('Error invoking Bedrock', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
-    };
+export const analyzePaper = apiHandler(
+  async (req: AnalyzePaperReq, res: Response<AnalyzePaperResponse | { error: string }>) => {
+    const { s3Key, subject } = req.body;
+    if (!s3Key) {
+      res.status(400).json({ error: 's3Key is required' });
+      return;
+    }
+    const questions = await analyzeExamPaper(s3Key, subject);
+    res.json({ questions });
   }
-};
+);

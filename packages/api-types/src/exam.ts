@@ -3,7 +3,7 @@
  */
 export type ExamPaper = {
   /** 試験ID */
-  paper_id: string;
+  paperId: string;
   /** 学年 */
   grade: string;
   /** 科目 */
@@ -13,11 +13,11 @@ export type ExamPaper = {
   /** 試験名 */
   name: string;
   /** 問題PDFのS3キー */
-  question_pdf_key: string;
+  questionPdfKey: string;
   /** 解答PDFのS3キー */
-  answer_pdf_key: string;
+  answerPdfKey: string;
   /** 作成日時 (ISO 8601) */
-  created_at: string;
+  createdAt: string;
 };
 
 /**
@@ -25,9 +25,9 @@ export type ExamPaper = {
  */
 export type ExamResult = {
   /** 結果ID */
-  result_id: string;
+  resultId: string;
   /** 関連する試験ID（任意） */
-  paper_id?: string;
+  paperId?: string;
   /** 学年 */
   grade: string;
   /** 科目 */
@@ -39,27 +39,29 @@ export type ExamResult = {
   /** タイトル */
   title: string;
   /** 受験日 (YYYY-MM-DD) */
-  test_date: string;
+  testDate: string;
   /** 得点 */
   score?: number;
   /** 採点済み答案PDFのS3キー */
-  graded_pdf_key?: string;
+  gradedPdfKey?: string;
   /** 詳細結果リスト */
   details: {
     /** 問題番号 */
     number: number;
-    /** 正誤フラグ */
-    is_correct: boolean;
+    /** 正誤 */
+    isCorrect: boolean;
+    /** 配点/得点 */
+    score?: number;
   }[];
   /** 作成日時 (ISO 8601) */
-  created_at: string;
+  createdAt: string;
 };
 
 /** 試験問題作成リクエスト */
-export type CreateExamPaperRequest = Omit<ExamPaper, 'paper_id' | 'created_at'>;
+export type CreateExamPaperRequest = Omit<ExamPaper, 'paperId' | 'createdAt'>;
 
 /** 試験結果作成リクエスト */
-export type CreateExamResultRequest = Omit<ExamResult, 'result_id' | 'created_at'>;
+export type CreateExamResultRequest = Omit<ExamResult, 'resultId' | 'createdAt'>;
 
 /** 試験問題一覧取得レスポンス */
 export type ListExamPapersResponse = {

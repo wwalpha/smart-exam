@@ -62,24 +62,24 @@ let wordTests: WordTestWithItems[] = [
     id: 'wt_1',
     name: `${SUBJECT_LABEL[SUBJECT.society]} 単語テスト 1`,
     subject: SUBJECT.society,
-    created_at: '2025-12-01T00:00:00.000Z',
-    is_graded: false,
+    createdAt: '2025-12-01T00:00:00.000Z',
+    isGraded: false,
     items: clone_seed_items(SUBJECT.society),
   },
   {
     id: 'wt_2',
     name: `${SUBJECT_LABEL[SUBJECT.japanese]} 単語テスト 1`,
     subject: SUBJECT.japanese,
-    created_at: '2025-12-05T00:00:00.000Z',
-    is_graded: false,
+    createdAt: '2025-12-05T00:00:00.000Z',
+    isGraded: false,
     items: clone_seed_items(SUBJECT.japanese),
   },
   {
     id: 'wt_3',
     name: `${SUBJECT_LABEL[SUBJECT.society]} 単語テスト 2`,
     subject: SUBJECT.society,
-    created_at: '2025-12-10T00:00:00.000Z',
-    is_graded: true,
+    createdAt: '2025-12-10T00:00:00.000Z',
+    isGraded: true,
     items: clone_seed_items(SUBJECT.society).map((item, index) => ({
       ...item,
       grading: index % 2 === 0 ? '1' : '0',
@@ -92,8 +92,8 @@ function toSummary(wordTest: WordTestWithItems): WordTestTitle {
     id: wordTest.id,
     name: wordTest.name,
     subject: wordTest.subject,
-    created_at: wordTest.created_at,
-    is_graded: wordTest.is_graded,
+    createdAt: wordTest.createdAt,
+    isGraded: wordTest.isGraded,
   }
 }
 
@@ -122,8 +122,8 @@ export const handlers = [
       id: newId(),
       subject: body.subject,
       name: `${SUBJECT_LABEL[body.subject]} 単語テスト ${nextIndex}`,
-      created_at: new Date().toISOString(),
-      is_graded: false,
+      createdAt: new Date().toISOString(),
+      isGraded: false,
       items: build_items(body.subject, body.count),
     }
 
@@ -185,11 +185,32 @@ export const handlers = [
 
       return {
         ...x,
-        is_graded: true,
+        isGraded: true,
         items: nextItems,
       }
     })
 
     return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.get('/api/questions/search', () => {
+    return HttpResponse.json([
+      {
+        id: '1',
+        subject: '算数',
+        unit: '速さ',
+        questionText: '時速4kmで2時間歩くと何km進みますか？',
+        sourceMaterialId: 'm1',
+        sourceMaterialName: '第1回 週テスト',
+      },
+      {
+        id: '2',
+        subject: '理科',
+        unit: '植物',
+        questionText: '光合成に必要なものは何ですか？',
+        sourceMaterialId: 'm2',
+        sourceMaterialName: '第2回 週テスト',
+      },
+    ])
   }),
 ]

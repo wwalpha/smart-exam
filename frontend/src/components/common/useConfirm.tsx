@@ -51,7 +51,7 @@ export const useConfirm = () => {
   };
 
   const ConfirmDialog = () => (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+    <AlertDialog open={isOpen} onOpenChange={(open: boolean) => !open && handleCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{options.title}</AlertDialogTitle>

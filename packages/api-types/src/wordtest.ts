@@ -14,9 +14,9 @@ export type WordTestTitle = {
   /** 科目（コード値） */
   subject: WordTestSubject;
   /** 作成日時（ISO文字列） */
-  created_at: string;
+  createdAt: string;
   /** 採点済みかどうか */
-  is_graded: boolean;
+  isGraded: boolean;
 };
 
 /**
@@ -48,53 +48,3 @@ export type GradingData = {
 
 /** 単語テスト一覧取得リクエスト（クエリ無しの空オブジェクト） */
 export type ListWordTestsRequest = Record<string, never>;
-
-/** 単語テスト一覧取得レスポンス */
-export type ListWordTestsResponse = {
-  /** 一覧データ */
-  datas: WordTestTitle[];
-};
-
-/** 単語テスト詳細取得リクエスト */
-export type GetWordTestDetailRequest = {
-  /** 取得対象の単語テストID */
-  wordTestId: string;
-};
-
-/** 単語テスト詳細取得レスポンス */
-export type GetWordTestDetailResponse = {
-  /** 単語テストID */
-  id: string;
-  /** 出題アイテム（問題/答え） */
-  items: WordTestItem[];
-};
-
-/** 採点反映リクエスト（body） */
-export type ApplyWordTestGradingRequest = {
-  /** 採点結果 */
-  results: GradingData[];
-};
-
-/** 採点反映レスポンス */
-export type ApplyWordTestGradingResponse = void;
-
-/** 単語テスト作成リクエスト */
-export type CreateWordTestRequest = {
-  /** テスト名 */
-  name?: string;
-  /** 元となる単語グループID */
-  source_id?: string;
-  /** 作成する科目（コード値） */
-  subject: WordTestSubject;
-  /** 作成する問題数 */
-  count: number;
-  /** 採点済み回答用紙 */
-  graded_answer_sheet?: File;
-  /** 問題用紙 */
-  question_paper?: File;
-  /** 解答 */
-  answer_key?: File;
-};
-
-/** 単語テスト作成レスポンス（作成された単語テスト（サマリ）をそのまま返す） */
-export type CreateWordTestResponse = WordTestTitle;

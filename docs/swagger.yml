@@ -56,6 +56,156 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/exampapers:
+    get:
+      tags: [ExamPapers]
+      summary: List exam papers
+      responses:
+        "200":
+          description: List of exam papers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamPaperListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags: [ExamPapers]
+      summary: Create an exam paper
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamPaperCreateRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamPaperResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/examresults:
+    get:
+      tags: [ExamResults]
+      summary: List exam results
+      responses:
+        "200":
+          description: List of exam results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResultListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags: [ExamResults]
+      summary: Create an exam result
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamResultCreateRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResultResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/tests/{testId}/attempts:
+    post:
+      tags: [Attempts]
+      summary: Create a test attempt
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestAttemptCreateRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestAttempt"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/attempts/{attemptId}/submit:
+    patch:
+      tags: [Attempts]
+      summary: Submit a test attempt
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestAttemptSubmitRequest"
+      responses:
+        "200":
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestAttempt"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/tests/{testId}/attempts/latest:
+    get:
+      tags: [Attempts]
+      summary: Get latest attempt for a test
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Latest attempt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestAttempt"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   /api/material-sets:
     get:
       tags: [MaterialSets]
@@ -1269,3 +1419,153 @@ components:
                   state: { $ref: "#/components/schemas/AttemptState" }
                   derived:
                     $ref: "#/components/schemas/DerivedStatus"
+
+    # --- Exam Papers ---
+    ExamPaper:
+      type: object
+      required: [paperId, grade, subject, category, name, questionPdfKey, answerPdfKey, createdAt]
+      properties:
+        paperId: { type: string }
+        grade: { type: string }
+        subject: { type: string }
+        category: { type: string }
+        name: { type: string }
+        questionPdfKey: { type: string }
+        answerPdfKey: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    ExamPaperCreateRequest:
+      type: object
+      required: [grade, subject, category, name, questionPdfKey, answerPdfKey]
+      properties:
+        grade: { type: string }
+        subject: { type: string }
+        category: { type: string }
+        name: { type: string }
+        questionPdfKey: { type: string }
+        answerPdfKey: { type: string }
+
+    ExamPaperResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/ExamPaper"
+
+    ExamPaperListResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/ExamPaper" }
+            nextCursor: { type: string, nullable: true }
+
+    # --- Exam Results ---
+    ExamResult:
+      type: object
+      required: [resultId, grade, subject, category, name, title, testDate, totalScore, details, createdAt]
+      properties:
+        resultId: { type: string }
+        paperId: { type: string, nullable: true }
+        grade: { type: string }
+        subject: { type: string }
+        category: { type: string }
+        name: { type: string }
+        title: { type: string }
+        testDate: { type: string, format: date }
+        totalScore: { type: number }
+        details:
+          type: array
+          items:
+            type: object
+            required: [number, isCorrect]
+            properties:
+              number: { type: number }
+              isCorrect: { type: boolean }
+        gradedImagePath: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    ExamResultCreateRequest:
+      type: object
+      required: [grade, subject, category, name, title, testDate, totalScore, details]
+      properties:
+        paperId: { type: string, nullable: true }
+        grade: { type: string }
+        subject: { type: string }
+        category: { type: string }
+        name: { type: string }
+        title: { type: string }
+        testDate: { type: string, format: date }
+        totalScore: { type: number }
+        details:
+          type: array
+          items:
+            type: object
+            required: [number, isCorrect]
+            properties:
+              number: { type: number }
+              isCorrect: { type: boolean }
+        gradedImagePath: { type: string, nullable: true }
+
+    ExamResultResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/ExamResult"
+
+    ExamResultListResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/ExamResult" }
+            nextCursor: { type: string, nullable: true }
+
+    # --- Test Attempts ---
+    TestAttempt:
+      type: object
+      required: [attemptId, testId, subjectId, status, startedAt, results]
+      properties:
+        attemptId: { type: string }
+        testId: { type: string }
+        subjectId: { type: string }
+        status:
+          type: string
+          enum: [IN_PROGRESS, SUBMITTED]
+        startedAt: { type: string, format: date-time }
+        submittedAt: { type: string, format: date-time, nullable: true }
+        results:
+          type: array
+          items:
+            type: object
+            required: [questionId, number, isCorrect]
+            properties:
+              questionId: { type: string }
+              number: { type: number }
+              isCorrect: { type: boolean }
+
+    TestAttemptCreateRequest:
+      type: object
+      required: [subjectId]
+      properties:
+        subjectId: { type: string }
+
+    TestAttemptSubmitRequest:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required: [questionId, number, isCorrect]
+            properties:
+              questionId: { type: string }
+              number: { type: number }
+              isCorrect: { type: boolean }
+

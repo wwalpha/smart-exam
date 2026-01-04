@@ -11,7 +11,7 @@ export type WordGroup = {
   /** 科目 */
   subject: WordTestSubject;
   /** 作成日時 (ISO 8601) */
-  created_at: string;
+  createdAt: string;
 };
 
 /**
@@ -21,7 +21,7 @@ export type Word = {
   /** 単語ID */
   id: string;
   /** グループID */
-  group_id: string;
+  groupId: string;
   /** 問題 */
   question: string;
   /** 答え */

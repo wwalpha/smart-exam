@@ -12,9 +12,8 @@ export const ExamPapersPage = () => {
     papers,
     form,
     submit,
-    isSubmitting,
   } = useExamPapers();
-  const { register, setValue } = form;
+  const { register, setValue, formState: { isSubmitting } } = form;
 
   return (
     <div className="space-y-6 p-8">
@@ -93,12 +92,12 @@ export const ExamPapersPage = () => {
             </TableHeader>
             <TableBody>
               {papers.map((paper) => (
-                <TableRow key={paper.paper_id}>
+                <TableRow key={paper.paperId}>
                   <TableCell>{paper.grade}</TableCell>
                   <TableCell>{SUBJECT_LABEL[paper.subject as keyof typeof SUBJECT_LABEL] || paper.subject}</TableCell>
                   <TableCell>{paper.category}</TableCell>
                   <TableCell>{paper.name}</TableCell>
-                  <TableCell>{new Date(paper.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(paper.createdAt).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

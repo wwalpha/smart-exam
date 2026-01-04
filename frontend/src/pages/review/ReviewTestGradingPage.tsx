@@ -54,7 +54,7 @@ export const ReviewTestGradingPage = () => {
               </TableHeader>
               <TableBody>
                 {fields.map((field, index) => {
-                  const question = review.items.find(i => i.itemId === field.itemId);
+                  const question = review.items.find((i) => i.itemId === field.itemId);
                   return (
                     <TableRow key={field.id}>
                       <TableCell>{index + 1}</TableCell>

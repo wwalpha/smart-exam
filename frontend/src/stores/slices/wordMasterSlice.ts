@@ -46,7 +46,7 @@ export const createWordMasterSlice: StateCreator<WordMasterSlice, [], [], WordMa
     fetchWordGroups: async () => {
       await withStatus(setStatus, async () => {
         const response = await WORDMASTER_API.listWordGroups();
-        const sorted = orderBy(response.datas, ['created_at'], ['desc']);
+        const sorted = orderBy(response.datas, ['createdAt'], ['desc']);
         updateWordMaster({ groups: sorted });
       }, '単語グループ一覧の取得に失敗しました。');
     },
@@ -57,7 +57,7 @@ export const createWordMasterSlice: StateCreator<WordMasterSlice, [], [], WordMa
         async () => {
           const response = await WORDMASTER_API.createWordGroup(request);
           const current = getWordMaster();
-          const nextGroups = orderBy([response, ...current.groups], ['created_at'], ['desc']);
+          const nextGroups = orderBy([response, ...current.groups], ['createdAt'], ['desc']);
           updateWordMaster({ groups: nextGroups });
           return response;
         },

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { apiRequest } from '@/services/apiClient';
 
 type SearchResult = {
   id: string;
@@ -23,28 +24,18 @@ export const useQuestionSearch = () => {
 
   const submit = handleSubmit(async (_data) => {
     setIsSearching(true);
-    // Simulate API call
-    setTimeout(() => {
-      setResults([
-        {
-          id: '1',
-          subject: '算数',
-          unit: '速さ',
-          questionText: '時速4kmで2時間歩くと何km進みますか？',
-          sourceMaterialId: 'm1',
-          sourceMaterialName: '第1回 週テスト',
-        },
-        {
-          id: '2',
-          subject: '理科',
-          unit: '植物',
-          questionText: '光合成に必要なものは何ですか？',
-          sourceMaterialId: 'm2',
-          sourceMaterialName: '第2回 週テスト',
-        },
-      ]);
+    try {
+      const response = await apiRequest<SearchResult[]>({
+        method: 'GET',
+        path: '/api/questions/search',
+      });
+      setResults(response);
+    } catch (error) {
+      console.error(error);
+      setResults([]);
+    } finally {
       setIsSearching(false);
-    }, 500);
+    }
   });
 
   return {

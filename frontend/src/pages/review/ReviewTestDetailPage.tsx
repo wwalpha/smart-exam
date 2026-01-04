@@ -6,14 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useReviewDetail } from '@/hooks/review';
 
 export const ReviewTestDetailPage = () => {
-  const {
-    review,
-    isLoading,
-    error,
-    basePath,
-    remove,
-    ConfirmDialog,
-  } = useReviewDetail();
+  const { review, isLoading, error, basePath, remove, ConfirmDialog } = useReviewDetail();
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -42,7 +35,9 @@ export const ReviewTestDetailPage = () => {
           <Button asChild>
             <Link to={`${basePath}/${review.id}/pdf`}>PDF出力</Link>
           </Button>
-          <Button variant="destructive" onClick={remove}>削除</Button>
+          <Button variant="destructive" onClick={remove}>
+            削除
+          </Button>
         </div>
       </div>
 

@@ -1,12 +1,16 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
+import { Request, Response } from 'express';
+import { s3Client } from '@/lib/aws';
+import { ENV } from '@/lib/env';
+import { apiHandler } from '@/lib/handler';
+import { GetUploadUrlRequest, GetUploadUrlResponse } from '@smart-exam/api-types';
 
-const s3Client = new S3Client({});
-const BUCKET_NAME = process.env.FILES_BUCKET_NAME || '';
+const BUCKET_NAME = ENV.FILES_BUCKET_NAME;
 
-export const generatePresignedUrl = async (filename: string, contentType: string) => {
-  const key = `uploads/${randomUUID()}-${filename}`;
+export const generatePresignedUrl = async (fileName: string, contentType: string) => {
+  const key = `uploads/${randomUUID()}-${fileName}`;
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
@@ -14,5 +18,13 @@ export const generatePresignedUrl = async (filename: string, contentType: string
   });
 
   const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-  return { url, key };
+  return { uploadUrl: url, fileKey: key };
 };
+
+type GetUploadUrlReq = Request<{}, GetUploadUrlResponse, GetUploadUrlRequest>;
+
+export const getUploadUrl = apiHandler(async (req: GetUploadUrlReq, res: Response<GetUploadUrlResponse>) => {
+  const { fileName, contentType } = req.body;
+  const result = await generatePresignedUrl(fileName, contentType);
+  res.json(result);
+});

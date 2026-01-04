@@ -13,9 +13,8 @@ export const ExamResultsPage = () => {
     form,
     fieldArray,
     submit,
-    isSubmitting,
   } = useExamResults();
-  const { register, setValue } = form;
+  const { register, setValue, formState: { isSubmitting } } = form;
   const { fields, append } = fieldArray;
 
   // Watch fields to auto-fill or filter if needed (not implemented in original, but good practice)
@@ -38,7 +37,7 @@ export const ExamResultsPage = () => {
               </div>
               <div className="space-y-2">
                 <Label>実施日</Label>
-                <Input type="date" {...register('test_date', { required: true })} />
+                <Input type="date" {...register('testDate', { required: true })} />
               </div>
               <div className="col-span-2 space-y-2">
                 <Label>採点済み回答用紙 (PDF)</Label>
@@ -84,13 +83,13 @@ export const ExamResultsPage = () => {
                     <span className="text-sm font-bold w-8">{index + 1}</span>
                     <input
                       type="checkbox"
-                      {...register(`details.${index}.is_correct`)}
+                      {...register(`details.${index}.isCorrect`)}
                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
                   </div>
                 ))}
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => append({ number: fields.length + 1, is_correct: false })}>
+              <Button type="button" variant="outline" size="sm" onClick={() => append({ number: fields.length + 1, isCorrect: false })}>
                 問題を追加
               </Button>
             </div>
@@ -121,8 +120,8 @@ export const ExamResultsPage = () => {
             </TableHeader>
             <TableBody>
               {results.map((result) => (
-                <TableRow key={result.result_id}>
-                  <TableCell>{result.test_date}</TableCell>
+                <TableRow key={result.resultId}>
+                  <TableCell>{result.testDate}</TableCell>
                   <TableCell>{result.title}</TableCell>
                   <TableCell>{SUBJECT_LABEL[result.subject as keyof typeof SUBJECT_LABEL] || result.subject}</TableCell>
                   <TableCell>{`${result.grade} ${result.category} ${result.name}`}</TableCell>

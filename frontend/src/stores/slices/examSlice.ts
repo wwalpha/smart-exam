@@ -47,7 +47,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
     fetchExamPapers: async () => {
       await withStatus(setStatus, async () => {
         const response = await EXAM_API.listExamPapers();
-        const sorted = orderBy(response.datas, ['created_at'], ['desc']);
+        const sorted = orderBy(response.datas, ['createdAt'], ['desc']);
         updateExam({ papers: sorted });
       }, '試験問題一覧の取得に失敗しました。');
     },
@@ -56,7 +56,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(setStatus, async () => {
         const response = await EXAM_API.createExamPaper(request);
         const current = getExam();
-        const nextPapers = orderBy([response, ...current.papers], ['created_at'], ['desc']);
+        const nextPapers = orderBy([response, ...current.papers], ['createdAt'], ['desc']);
         updateExam({ papers: nextPapers });
       }, '試験問題の登録に失敗しました。');
     },
@@ -77,12 +77,12 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
           subject: params.subject,
           category: params.category,
           name: params.name,
-          question_pdf_key: qUpload.key,
-          answer_pdf_key: aUpload.key,
+          questionPdfKey: qUpload.key,
+          answerPdfKey: aUpload.key,
         };
         const response = await EXAM_API.createExamPaper(request);
         const current = getExam();
-        const nextPapers = orderBy([response, ...current.papers], ['created_at'], ['desc']);
+        const nextPapers = orderBy([response, ...current.papers], ['createdAt'], ['desc']);
         updateExam({ papers: nextPapers });
       }, '試験問題の登録に失敗しました。');
     },
@@ -90,7 +90,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
     fetchExamResults: async () => {
       await withStatus(setStatus, async () => {
         const response = await EXAM_API.listExamResults();
-        const sorted = orderBy(response.datas, ['test_date', 'created_at'], ['desc', 'desc']);
+        const sorted = orderBy(response.datas, ['testDate', 'createdAt'], ['desc', 'desc']);
         updateExam({ results: sorted });
       }, '試験結果一覧の取得に失敗しました。');
     },
@@ -119,13 +119,13 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
           category: params.category,
           name: params.name,
           title: params.title,
-          test_date: params.test_date,
-          graded_pdf_key: gradedPdfKey,
+          testDate: params.testDate,
+          gradedPdfKey: gradedPdfKey,
           details: params.details,
         };
         const response = await EXAM_API.createExamResult(request);
         const current = getExam();
-        const nextResults = orderBy([response, ...current.results], ['test_date', 'created_at'], ['desc', 'desc']);
+        const nextResults = orderBy([response, ...current.results], ['testDate', 'createdAt'], ['desc', 'desc']);
         updateExam({ results: nextResults });
       }, '試験結果の登録に失敗しました。');
     },

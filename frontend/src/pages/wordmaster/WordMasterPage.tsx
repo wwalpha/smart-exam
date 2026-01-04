@@ -45,7 +45,7 @@ export const WordMasterPage = () => {
                   <TableRow key={group.id}>
                     <TableCell className="font-medium">{group.title}</TableCell>
                     <TableCell>{SUBJECT_LABEL[group.subject as keyof typeof SUBJECT_LABEL]}</TableCell>
-                    <TableCell>{new Date(group.created_at).toLocaleString()}</TableCell>
+                    <TableCell>{new Date(group.createdAt).toLocaleString()}</TableCell>
                   </TableRow>
                 ))
               )}
