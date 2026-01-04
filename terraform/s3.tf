@@ -2,7 +2,8 @@
 # S3 bucket for app files (question PDFs, answer sheet PDFs, graded sheet images).
 # ----------------------------------------------------------------------------------------------
 resource "aws_s3_bucket" "files" {
-  bucket = "${var.project_name}-files"
+  bucket        = "${var.project_name}-files"
+  force_destroy = true
 }
 
 # ----------------------------------------------------------------------------------------------
