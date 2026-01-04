@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "test": "vitest run",
     "test:integration": "DDB_LOCAL_INTEGRATION=1 vitest run",
     "test:watch": "vitest",
@@ -33,6 +33,7 @@
     "@types/node": "^22.0.0",
     "eslint": "^9.0.0",
     "testcontainers": "^10.15.0",
+    "tsc-alias": "^1.8.11",
     "typescript": "^5.6.0",
     "vitest": "^2.0.0"
   }
