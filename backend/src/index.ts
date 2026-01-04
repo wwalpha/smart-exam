@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import serverlessExpress from '@vendia/serverless-express';
@@ -17,7 +16,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (req, res) => {
+app.get(['/health', '/v1/health'], (req, res) => {
   res.json({ status: 'ok' });
 });
 

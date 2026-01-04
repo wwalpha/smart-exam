@@ -7,22 +7,6 @@ resource "aws_apigatewayv2_api" "http" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# API Gateway Cognito JWT authorizer.
-# ----------------------------------------------------------------------------------------------
-resource "aws_apigatewayv2_authorizer" "cognito" {
-  api_id          = aws_apigatewayv2_api.http.id
-  authorizer_type = "JWT"
-  name            = "${var.project_name}_${var.env}_cognito"
-
-  identity_sources = ["$request.header.Authorization"]
-
-  jwt_configuration {
-    audience = [aws_cognito_user_pool_client.auth.id]
-    issuer   = "https://cognito-idp.${data.aws_region.current.name}.amazonaws.com/${aws_cognito_user_pool.auth.id}"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
 # API Gateway -> Lambda integration.
 # ----------------------------------------------------------------------------------------------
 resource "aws_apigatewayv2_integration" "lambda" {
@@ -40,8 +24,7 @@ resource "aws_apigatewayv2_route" "default" {
   route_key = "$default"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 
-  authorization_type = "JWT"
-  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
+  authorization_type = "NONE"
 }
 
 # ----------------------------------------------------------------------------------------------

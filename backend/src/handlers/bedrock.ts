@@ -1,11 +1,8 @@
-import { analyzeExamPaper } from '@/services/BedrockService';
+import { analyzeExamPaper } from '../services/BedrockService';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import type {
-  AnalyzePaperRequest,
-  AnalyzePaperResponse,
-} from '@smart-exam/api-types';
+import type { AnalyzePaperRequest, AnalyzePaperResponse } from '@smart-exam/api-types';
 
 export const analyzePaper: AsyncHandler<
   ParamsDictionary,

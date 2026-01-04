@@ -8,15 +8,6 @@ variable "project_name" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# Environment name (e.g. dev, stg, prod).
-# ----------------------------------------------------------------------------------------------
-variable "env" {
-  description = "Environment name (e.g. dev, stg, prod)."
-  type        = string
-  default     = "dev"
-}
-
-# ----------------------------------------------------------------------------------------------
 # AWS region.
 # ----------------------------------------------------------------------------------------------
 variable "region" {
@@ -32,4 +23,13 @@ variable "enable_bedrock" {
   description = "Whether to allow Lambda to call Bedrock runtime APIs."
   type        = bool
   default     = true
+}
+
+# ----------------------------------------------------------------------------------------------
+# SNS email endpoints for Lambda error alarms.
+# ----------------------------------------------------------------------------------------------
+variable "alarm_notification_emails" {
+  description = "Email addresses to subscribe to the SNS topic used by Lambda error CloudWatch alarms. Each subscription requires manual confirmation."
+  type        = list(string)
+  default     = []
 }

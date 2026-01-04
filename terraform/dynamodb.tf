@@ -2,7 +2,7 @@
 # DynamoDB tables.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "subjects" {
-  name         = "${var.project_name}_${var.env}_subjects"
+  name         = "${var.project_name}_subjects"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "subjectId"
 
@@ -16,7 +16,7 @@ resource "aws_dynamodb_table" "subjects" {
 # DynamoDB table for tests.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "tests" {
-  name         = "${var.project_name}_${var.env}_tests"
+  name         = "${var.project_name}_tests"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "testId"
 
@@ -42,7 +42,7 @@ resource "aws_dynamodb_table" "tests" {
 # DynamoDB table for questions.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "questions" {
-  name         = "${var.project_name}_${var.env}_questions"
+  name         = "${var.project_name}_questions"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "questionId"
 
@@ -73,7 +73,7 @@ resource "aws_dynamodb_table" "questions" {
 # DynamoDB table for attempts.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "attempts" {
-  name         = "${var.project_name}_${var.env}_attempts"
+  name         = "${var.project_name}_attempts"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "attemptId"
 
@@ -104,7 +104,7 @@ resource "aws_dynamodb_table" "attempts" {
 # DynamoDB table for graded sheets.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "graded_sheets" {
-  name         = "${var.project_name}_${var.env}_graded_sheets"
+  name         = "${var.project_name}_graded_sheets"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "gradedSheetId"
 
@@ -118,7 +118,7 @@ resource "aws_dynamodb_table" "graded_sheets" {
 # DynamoDB table for words.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "words" {
-  name         = "${var.project_name}_${var.env}_words"
+  name         = "${var.project_name}_words"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "wordId"
 
@@ -144,7 +144,7 @@ resource "aws_dynamodb_table" "words" {
 # DynamoDB table for word groups (Word Sets).
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "word_groups" {
-  name         = "${var.project_name}_${var.env}_word_groups"
+  name         = "${var.project_name}_word_groups"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "groupId"
 
@@ -158,7 +158,7 @@ resource "aws_dynamodb_table" "word_groups" {
 # DynamoDB table for word tests.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "word_tests" {
-  name         = "${var.project_name}_${var.env}_word_tests"
+  name         = "${var.project_name}_word_tests"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "wordTestId"
 
@@ -172,7 +172,7 @@ resource "aws_dynamodb_table" "word_tests" {
 # DynamoDB table for word test attempts.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "word_test_attempts" {
-  name         = "${var.project_name}_${var.env}_word_test_attempts"
+  name         = "${var.project_name}_word_test_attempts"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "wordTestAttemptId"
 
@@ -203,7 +203,7 @@ resource "aws_dynamodb_table" "word_test_attempts" {
 # DynamoDB table for Exam Papers (PDFs).
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "exam_papers" {
-  name         = "${var.project_name}_${var.env}_exam_papers"
+  name         = "${var.project_name}_exam_papers"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "paperId"
 
@@ -234,7 +234,7 @@ resource "aws_dynamodb_table" "exam_papers" {
 # DynamoDB table for Exam Results.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "exam_results" {
-  name         = "${var.project_name}_${var.env}_exam_results"
+  name         = "${var.project_name}_exam_results"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "resultId"
 
