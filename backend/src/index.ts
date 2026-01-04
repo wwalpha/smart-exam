@@ -10,6 +10,7 @@ import * as kanjiHandler from '@/handlers/kanji';
 import * as questionHandler from '@/handlers/question';
 import * as attemptHandler from '@/handlers/attempt';
 import * as reviewTestHandler from '@/handlers/reviewTest';
+import { handleRequest } from '@/lib/handler';
 
 const app = express();
 app.use(cors());
@@ -20,37 +21,37 @@ app.get('/health', (req, res) => {
 });
 
 // S3 Presigned URL
-app.post('/api/upload-url', s3Handler.getUploadUrl);
+app.post('/api/upload-url', handleRequest(s3Handler.getUploadUrl));
 
 // Analyze Exam Paper (Bedrock)
-app.post('/api/analyze-paper', bedrockHandler.analyzePaper);
+app.post('/api/analyze-paper', handleRequest(bedrockHandler.analyzePaper));
 
 // Exam Papers
-app.get('/api/exampapers', examPaperHandler.listExamPapers);
-app.post('/api/exampapers', examPaperHandler.createExamPaper);
+app.get('/api/exampapers', handleRequest(examPaperHandler.listExamPapers));
+app.post('/api/exampapers', handleRequest(examPaperHandler.createExamPaper));
 
 // Exam Results
-app.get('/api/examresults', examResultHandler.listExamResults);
-app.post('/api/examresults', examResultHandler.createExamResult);
+app.get('/api/examresults', handleRequest(examResultHandler.listExamResults));
+app.post('/api/examresults', handleRequest(examResultHandler.createExamResult));
 
 // Material Sets
-app.get('/api/material-sets', materialHandler.listMaterialSets);
-app.post('/api/material-sets', materialHandler.createMaterialSet);
-app.get('/api/material-sets/:materialSetId', materialHandler.getMaterialSet);
+app.get('/api/material-sets', handleRequest(materialHandler.listMaterialSets));
+app.post('/api/material-sets', handleRequest(materialHandler.createMaterialSet));
+app.get('/api/material-sets/:materialSetId', handleRequest(materialHandler.getMaterialSet));
 
 // Kanji
-app.get('/api/kanji', kanjiHandler.listKanji);
-app.post('/api/kanji', kanjiHandler.createKanji);
+app.get('/api/kanji', handleRequest(kanjiHandler.listKanji));
+app.post('/api/kanji', handleRequest(kanjiHandler.createKanji));
 
 // Questions
-app.get('/api/material-sets/:materialSetId/questions', questionHandler.listQuestions);
-app.post('/api/material-sets/:materialSetId/questions', questionHandler.createQuestion);
-app.patch('/api/questions/:questionId', questionHandler.updateQuestion);
+app.get('/api/material-sets/:materialSetId/questions', handleRequest(questionHandler.listQuestions));
+app.post('/api/material-sets/:materialSetId/questions', handleRequest(questionHandler.createQuestion));
+app.patch('/api/questions/:questionId', handleRequest(questionHandler.updateQuestion));
 
 // Attempts
-app.post('/api/questions/:testId/attempts', attemptHandler.createAttempt); // Note: testId here might be questionId based on path, but handler expects testId param. 
+app.post('/api/questions/:testId/attempts', handleRequest(attemptHandler.createAttempt)); // Note: testId here might be questionId based on path, but handler expects testId param.
 // Re-reading backend_api.md: POST /api/questions/{questionId}/attempts
-// But my attempt handler was designed for test attempts. 
+// But my attempt handler was designed for test attempts.
 // Let's stick to the backend_api.md definition for now, but I implemented test attempts.
 // I will map it to test attempts for now as per my repository implementation which matches dynamodb_tables.md (attempts table is for tests).
 // Wait, backend_api.md says "Attempts (正誤履歴: 追記型)" -> POST /api/questions/{questionId}/attempts.
@@ -60,15 +61,15 @@ app.post('/api/questions/:testId/attempts', attemptHandler.createAttempt); // No
 // Actually, let's look at the handler again.
 // createAttempt takes testId from params.
 // So I will expose it as /api/tests/:testId/attempts for now to match the repo logic.
-app.post('/api/tests/:testId/attempts', attemptHandler.createAttempt);
-app.patch('/api/attempts/:attemptId/submit', attemptHandler.submitAttempt);
-app.get('/api/tests/:testId/attempts/latest', attemptHandler.getLatestAttempt);
+app.post('/api/tests/:testId/attempts', handleRequest(attemptHandler.createAttempt));
+app.patch('/api/attempts/:attemptId/submit', handleRequest(attemptHandler.submitAttempt));
+app.get('/api/tests/:testId/attempts/latest', handleRequest(attemptHandler.getLatestAttempt));
 
 // Review Tests
-app.get('/api/review-tests', reviewTestHandler.listReviewTests);
-app.post('/api/review-tests', reviewTestHandler.createReviewTest);
-app.get('/api/review-tests/:testId', reviewTestHandler.getReviewTest);
-app.patch('/api/review-tests/:testId', reviewTestHandler.updateReviewTestStatus);
-app.delete('/api/review-tests/:testId', reviewTestHandler.deleteReviewTest);
+app.get('/api/review-tests', handleRequest(reviewTestHandler.listReviewTests));
+app.post('/api/review-tests', handleRequest(reviewTestHandler.createReviewTest));
+app.get('/api/review-tests/:testId', handleRequest(reviewTestHandler.getReviewTest));
+app.patch('/api/review-tests/:testId', handleRequest(reviewTestHandler.updateReviewTestStatus));
+app.delete('/api/review-tests/:testId', handleRequest(reviewTestHandler.deleteReviewTest));
 
 export const handler = serverlessExpress({ app });

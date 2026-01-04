@@ -1,12 +1,18 @@
-import type { Request, Response } from 'express';
 import { analyzeExamPaper } from '@/services/BedrockService';
-import { apiHandler } from '@/lib/handler';
-import type { AnalyzePaperRequest, AnalyzePaperResponse } from '@smart-exam/api-types';
+import type { AsyncHandler } from '@/lib/handler';
+import type { ParamsDictionary } from 'express-serve-static-core';
+import type { ParsedQs } from 'qs';
+import type {
+  AnalyzePaperRequest,
+  AnalyzePaperResponse,
+} from '@smart-exam/api-types';
 
-type AnalyzePaperReq = Request<{}, AnalyzePaperResponse | { error: string }, AnalyzePaperRequest>;
-type AnalyzePaperRes = Response<AnalyzePaperResponse | { error: string }>;
-
-export const analyzePaper = apiHandler(async (req: AnalyzePaperReq, res: AnalyzePaperRes) => {
+export const analyzePaper: AsyncHandler<
+  ParamsDictionary,
+  AnalyzePaperResponse | { error: string },
+  AnalyzePaperRequest,
+  ParsedQs
+> = async (req, res) => {
   const { s3Key, subject } = req.body;
   if (!s3Key) {
     res.status(400).json({ error: 's3Key is required' });
@@ -14,4 +20,4 @@ export const analyzePaper = apiHandler(async (req: AnalyzePaperReq, res: Analyze
   }
   const questions = await analyzeExamPaper(s3Key, subject);
   res.json({ questions });
-});
+};

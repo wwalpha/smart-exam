@@ -71,30 +71,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          cache: 'yarn'
 
-      - name: Install Dependencies
-        working-directory: ./backend
-        run: npm ci
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Build
-        working-directory: ./backend
-        run: npm run build
+      - name: Install Dependencies (Yarn)
+        run: yarn install --immutable
 
-      - name: Install Production Dependencies
-        working-directory: ./backend
+      - name: Build (Yarn)
         run: |
-          rm -rf node_modules
-          npm ci --omit=dev
+          yarn workspace @smart-exam/api-types build
+          yarn workspace smart-exam-backend build
+
+      - name: Install Production Dependencies (Yarn)
+        run: yarn workspaces focus smart-exam-backend --production
 
       - name: Zip Artifact
-        working-directory: ./backend
         run: |
-          cd dist
+          cd backend/dist
           zip -r ../function.zip .
-          cd ..
-          zip -r function.zip node_modules package.json
+          cd ../..
+          zip -r backend/function.zip node_modules
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -104,11 +102,11 @@ jobs:
 
       - name: Deploy API Lambda
         run: |
-          aws lambda update-function-code --function-name ${{ needs.terraform.outputs.lambda_function_name }} --zip-file fileb://backend/function.zip
+          aws --no-cli-pager lambda update-function-code --function-name ${{ needs.terraform.outputs.lambda_function_name }} --zip-file fileb://backend/function.zip
 
       - name: Deploy Bedrock Lambda
         run: |
-          aws lambda update-function-code --function-name ${{ needs.terraform.outputs.bedrock_function_name }} --zip-file fileb://backend/function.zip
+          aws --no-cli-pager lambda update-function-code --function-name ${{ needs.terraform.outputs.bedrock_function_name }} --zip-file fileb://backend/function.zip
 
   frontend:
     needs: terraform
@@ -121,20 +119,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'yarn'
 
-      - name: Install Dependencies
-        working-directory: ./frontend
-        run: npm ci
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install Dependencies (Yarn)
+        run: yarn install --immutable
 
       - name: Build
-        working-directory: ./frontend
         env:
           VITE_API_ENDPOINT: ${{ needs.terraform.outputs.http_api_endpoint }}
           VITE_COGNITO_USER_POOL_ID: ${{ needs.terraform.outputs.cognito_user_pool_id }}
           VITE_COGNITO_CLIENT_ID: ${{ needs.terraform.outputs.cognito_user_pool_client_id }}
-        run: npm run build
+        run: yarn workspace frontend build
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -144,8 +142,8 @@ jobs:
 
       - name: Sync to S3
         run: |
-          aws s3 sync frontend/dist s3://${{ needs.terraform.outputs.frontend_bucket_name }} --delete
+          aws --no-cli-pager s3 sync frontend/dist s3://${{ needs.terraform.outputs.frontend_bucket_name }} --delete
 
       - name: Invalidate CloudFront
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ needs.terraform.outputs.cloudfront_distribution_id }} --paths "/*"
+          aws --no-cli-pager cloudfront create-invalidation --distribution-id ${{ needs.terraform.outputs.cloudfront_distribution_id }} --paths "/*"

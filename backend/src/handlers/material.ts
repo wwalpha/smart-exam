@@ -1,36 +1,38 @@
-import type { Request, Response } from 'express';
 import { MaterialRepository } from '@/repositories/materialRepository';
-import { apiHandler } from '@/lib/handler';
+import type { AsyncHandler } from '@/lib/handler';
+import type { ParsedQs } from 'qs';
 import type {
   CreateMaterialSetRequest,
   CreateMaterialSetResponse,
+  GetMaterialSetParams,
   GetMaterialSetResponse,
   MaterialSetListResponse,
 } from '@smart-exam/api-types';
 
-type ListMaterialSetsReq = Request<{}, MaterialSetListResponse, {}, {}>;
-type ListMaterialSetsRes = Response<MaterialSetListResponse>;
-
-type CreateMaterialSetReq = Request<{}, CreateMaterialSetResponse, CreateMaterialSetRequest>;
-type CreateMaterialSetRes = Response<CreateMaterialSetResponse>;
-
-type GetMaterialSetReq = Request<{ materialSetId: string }, GetMaterialSetResponse | { error: string }, {}, {}>;
-type GetMaterialSetRes = Response<GetMaterialSetResponse | { error: string }>;
-
-export const listMaterialSets = apiHandler(async (req: ListMaterialSetsReq, res: ListMaterialSetsRes) => {
+export const listMaterialSets: AsyncHandler<{}, MaterialSetListResponse, {}, ParsedQs> = async (req, res) => {
   // TODO: Parse query params for filtering
   const items = await MaterialRepository.listMaterialSets();
   // Note: api-types defines items, total, cursor. Backend was using datas, total, hasMore.
   // I am mapping to api-types structure now.
   res.json({ items: items, total: items.length });
-});
+};
 
-export const createMaterialSet = apiHandler(async (req: CreateMaterialSetReq, res: CreateMaterialSetRes) => {
+export const createMaterialSet: AsyncHandler<
+  {},
+  CreateMaterialSetResponse,
+  CreateMaterialSetRequest,
+  ParsedQs
+> = async (req, res) => {
   const item = await MaterialRepository.createMaterialSet(req.body);
   res.status(201).json(item);
-});
+};
 
-export const getMaterialSet = apiHandler(async (req: GetMaterialSetReq, res: GetMaterialSetRes) => {
+export const getMaterialSet: AsyncHandler<
+  GetMaterialSetParams,
+  GetMaterialSetResponse | { error: string },
+  {},
+  ParsedQs
+> = async (req, res) => {
   const { materialSetId } = req.params;
   const item = await MaterialRepository.getMaterialSet(materialSetId);
   if (!item) {
@@ -38,4 +40,4 @@ export const getMaterialSet = apiHandler(async (req: GetMaterialSetReq, res: Get
     return;
   }
   res.json(item);
-});
+};

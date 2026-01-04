@@ -1,45 +1,42 @@
-import type { Request, Response } from 'express';
 import { ReviewTestRepository } from '@/repositories/reviewTestRepository';
-import { apiHandler } from '@/lib/handler';
+import type { AsyncHandler } from '@/lib/handler';
+import type { ParsedQs } from 'qs';
 import type {
   CreateReviewTestRequest,
   CreateReviewTestResponse,
+  DeleteReviewTestParams,
+  GetReviewTestParams,
   GetReviewTestResponse,
   ReviewTestListResponse,
   UpdateReviewTestStatusRequest,
+  UpdateReviewTestStatusParams,
   UpdateReviewTestStatusResponse,
 } from '@smart-exam/api-types';
 
-type ListReviewTestsReq = Request<{}, ReviewTestListResponse, {}, {}>;
-type ListReviewTestsRes = Response<ReviewTestListResponse>;
-
-type CreateReviewTestReq = Request<{}, CreateReviewTestResponse, CreateReviewTestRequest>;
-type CreateReviewTestRes = Response<CreateReviewTestResponse>;
-
-type GetReviewTestReq = Request<{ testId: string }, GetReviewTestResponse | { error: string }, {}, {}>;
-type GetReviewTestRes = Response<GetReviewTestResponse | { error: string }>;
-
-type UpdateReviewTestStatusReq = Request<
-  { testId: string },
-  UpdateReviewTestStatusResponse | { error: string },
-  UpdateReviewTestStatusRequest
->;
-type UpdateReviewTestStatusRes = Response<UpdateReviewTestStatusResponse | { error: string }>;
-
-type DeleteReviewTestReq = Request<{ testId: string }, void, {}, {}>;
-type DeleteReviewTestRes = Response<void>;
-
-export const listReviewTests = apiHandler(async (req: ListReviewTestsReq, res: ListReviewTestsRes) => {
+export const listReviewTests: AsyncHandler<{}, ReviewTestListResponse, {}, ParsedQs> = async (
+  req,
+  res
+) => {
   const items = await ReviewTestRepository.listReviewTests();
   res.json({ items, total: items.length });
-});
+};
 
-export const createReviewTest = apiHandler(async (req: CreateReviewTestReq, res: CreateReviewTestRes) => {
+export const createReviewTest: AsyncHandler<
+  {},
+  CreateReviewTestResponse,
+  CreateReviewTestRequest,
+  ParsedQs
+> = async (req, res) => {
   const item = await ReviewTestRepository.createReviewTest(req.body);
   res.status(201).json(item);
-});
+};
 
-export const getReviewTest = apiHandler(async (req: GetReviewTestReq, res: GetReviewTestRes) => {
+export const getReviewTest: AsyncHandler<
+  GetReviewTestParams,
+  GetReviewTestResponse | { error: string },
+  {},
+  ParsedQs
+> = async (req, res) => {
   const { testId } = req.params;
   const item = await ReviewTestRepository.getReviewTest(testId);
   if (!item) {
@@ -47,25 +44,31 @@ export const getReviewTest = apiHandler(async (req: GetReviewTestReq, res: GetRe
     return;
   }
   res.json(item);
-});
+};
 
-export const updateReviewTestStatus = apiHandler(
-  async (req: UpdateReviewTestStatusReq, res: UpdateReviewTestStatusRes) => {
-    const { testId } = req.params;
-    const { status } = req.body;
-    // const item = await service.updateReviewTestStatus(testId, status); // Not implemented yet
-    // if (!item) {
-    //   res.status(404).json({ error: 'Not Found' });
-    //   return;
-    // }
-    // res.json(item);
-    res.status(501).json({ error: 'Not Implemented' });
-  }
-);
+export const updateReviewTestStatus: AsyncHandler<
+  UpdateReviewTestStatusParams,
+  UpdateReviewTestStatusResponse | { error: string },
+  UpdateReviewTestStatusRequest,
+  ParsedQs
+> = async (req, res) => {
+  const { testId } = req.params;
+  const { status } = req.body;
+  void testId;
+  void status;
+  // const item = await service.updateReviewTestStatus(testId, status); // Not implemented yet
+  // if (!item) {
+  //   res.status(404).json({ error: 'Not Found' });
+  //   return;
+  // }
+  // res.json(item);
+  res.status(501).json({ error: 'Not Implemented' });
+};
 
-export const deleteReviewTest = apiHandler(async (req: DeleteReviewTestReq, res: DeleteReviewTestRes) => {
+export const deleteReviewTest: AsyncHandler<DeleteReviewTestParams, void, {}, ParsedQs> = async (req, res) => {
   const { testId } = req.params;
   // await service.deleteReviewTest(testId); // Not implemented in service yet
   // For now, just return 204 to satisfy interface, or implement delete in service
+  void testId;
   res.status(204).send();
-});
+};

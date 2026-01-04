@@ -1,43 +1,21 @@
-/**
- * 教材セット（テスト一回分など）
- */
-export type MaterialSet = {
-  /** ID */
-  id: string;
-  /** 名称 */
-  name: string;
-  /** 科目 */
-  subject: string;
-  /** 学年 */
-  grade?: string;
-  /** 提供元（SAPIX, YOTSUYA, etc.） */
-  provider?: string;
-  /** テスト種別（回・テスト名） */
-  testType?: string;
-  /** 単元 */
-  unit?: string;
-  /** コース/クラス */
-  course?: string;
-  /** 説明/メモ */
-  description?: string;
-  /** キーワードタグ */
-  keywords?: string[];
-  /** 実施日 (YYYY-MM-DD) */
-  date: string;
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
-  /** 更新日時 (ISO 8601) */
-  updatedAt: string;
+/** `GET /material-sets/:materialSetId` */
+export type GetMaterialSetParams = {
+  materialSetId: string;
 };
 
-/** 教材セット一覧取得レスポンス */
-export type MaterialSetListResponse = {
-  /** 教材セットリスト */
-  items: MaterialSet[];
-  /** 総件数 */
-  total: number;
-  /** 次ページ用カーソル */
-  cursor?: string;
+/** `GET /material-sets/:materialSetId/questions` */
+export type ListQuestionsParams = {
+  materialSetId: string;
+};
+
+/** `POST /material-sets/:materialSetId/questions` */
+export type CreateQuestionParams = {
+  materialSetId: string;
+};
+
+/** `PATCH /questions/:questionId` */
+export type UpdateQuestionParams = {
+  questionId: string;
 };
 
 /** 教材セット作成リクエスト */
@@ -62,6 +40,16 @@ export type UpdateMaterialSetRequest = Partial<CreateMaterialSetRequest>;
 
 /** 教材セット取得レスポンス */
 export type GetMaterialSetResponse = MaterialSet;
+
+/** 教材セット一覧取得レスポンス */
+export type MaterialSetListResponse = {
+  /** 教材セットリスト */
+  items: MaterialSet[];
+  /** 総件数 */
+  total: number;
+  /** 次ページ用カーソル */
+  cursor?: string;
+};
 
 /**
  * 教材に関連するファイル
@@ -124,3 +112,35 @@ export type UpdateQuestionRequest = Partial<CreateQuestionRequest>;
 
 /** 問題更新レスポンス */
 export type UpdateQuestionResponse = Question;
+
+/**
+ * 教材セット（テスト一回分など）
+ */
+export type MaterialSet = {
+  /** ID */
+  id: string;
+  /** 名称 */
+  name: string;
+  /** 科目 */
+  subject: string;
+  /** 学年 */
+  grade?: string;
+  /** 提供元（SAPIX, YOTSUYA, etc.） */
+  provider?: string;
+  /** テスト種別（回・テスト名） */
+  testType?: string;
+  /** 単元 */
+  unit?: string;
+  /** コース/クラス */
+  course?: string;
+  /** 説明/メモ */
+  description?: string;
+  /** キーワードタグ */
+  keywords?: string[];
+  /** 実施日 (YYYY-MM-DD) */
+  date: string;
+  /** 作成日時 (ISO 8601) */
+  createdAt: string;
+  /** 更新日時 (ISO 8601) */
+  updatedAt: string;
+};

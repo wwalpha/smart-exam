@@ -1,7 +1,10 @@
-import type { Request, Response } from 'express';
 import { AttemptsRepository } from '@/repositories/attemptRepository';
-import { apiHandler } from '@/lib/handler';
+import type { AsyncHandler } from '@/lib/handler';
+import type { ParsedQs } from 'qs';
 import type {
+  CreateAttemptParams,
+  GetLatestAttemptParams,
+  SubmitAttemptParams,
   CreateAttemptRequest,
   CreateAttemptResponse,
   GetLatestAttemptResponse,
@@ -9,45 +12,45 @@ import type {
   SubmitAttemptResponse,
 } from '@smart-exam/api-types';
 
-type CreateAttemptReq = Request<{ testId: string }, CreateAttemptResponse, CreateAttemptRequest>;
-type CreateAttemptRes = Response<CreateAttemptResponse>;
+export const createAttempt: AsyncHandler<
+  CreateAttemptParams,
+  CreateAttemptResponse,
+  CreateAttemptRequest,
+  ParsedQs
+> = async (req, res) => {
+  const { testId } = req.params;
+  const { subjectId } = req.body;
+  const item = await AttemptsRepository.createAttempt(testId, subjectId);
+  res.status(201).json(item);
+};
 
-type SubmitAttemptReq = Request<{ attemptId: string }, SubmitAttemptResponse | { error: string }, SubmitAttemptRequest>;
-type SubmitAttemptRes = Response<SubmitAttemptResponse | { error: string }>;
-
-type GetLatestAttemptReq = Request<{ testId: string }, GetLatestAttemptResponse | { error: string }, {}, {}>;
-type GetLatestAttemptRes = Response<GetLatestAttemptResponse | { error: string }>;
-
-export const createAttempt = apiHandler(
-  async (req: CreateAttemptReq, res: CreateAttemptRes) => {
-    const { testId } = req.params;
-    const { subjectId } = req.body;
-    const item = await AttemptsRepository.createAttempt(testId, subjectId);
-    res.status(201).json(item);
+export const submitAttempt: AsyncHandler<
+  SubmitAttemptParams,
+  SubmitAttemptResponse | { error: string },
+  SubmitAttemptRequest,
+  ParsedQs
+> = async (req, res) => {
+  const { attemptId } = req.params;
+  const { results } = req.body;
+  const item = await AttemptsRepository.submitAttempt(attemptId, results);
+  if (!item) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
   }
-);
+  res.json(item);
+};
 
-export const submitAttempt = apiHandler(
-  async (req: SubmitAttemptReq, res: SubmitAttemptRes) => {
-    const { attemptId } = req.params;
-    const { results } = req.body;
-    const item = await AttemptsRepository.submitAttempt(attemptId, results);
-    if (!item) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-    res.json(item);
+export const getLatestAttempt: AsyncHandler<
+  GetLatestAttemptParams,
+  GetLatestAttemptResponse | { error: string },
+  {},
+  ParsedQs
+> = async (req, res) => {
+  const { testId } = req.params;
+  const item = await AttemptsRepository.getLatestAttempt(testId);
+  if (!item) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
   }
-);
-
-export const getLatestAttempt = apiHandler(
-  async (req: GetLatestAttemptReq, res: GetLatestAttemptRes) => {
-    const { testId } = req.params;
-    const item = await AttemptsRepository.getLatestAttempt(testId);
-    if (!item) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-    res.json(item);
-  }
-);
+  res.json(item);
+};

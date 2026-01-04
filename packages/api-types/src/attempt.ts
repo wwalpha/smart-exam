@@ -1,17 +1,16 @@
-export type AttemptResult = {
-  questionId: string;
-  number: number;
-  isCorrect: boolean;
+/** `POST /tests/:testId/attempts` */
+export type CreateAttemptParams = {
+  testId: string;
 };
 
-export type Attempt = {
+/** `PATCH /attempts/:attemptId/submit` */
+export type SubmitAttemptParams = {
   attemptId: string;
+};
+
+/** `GET /tests/:testId/attempts/latest` */
+export type GetLatestAttemptParams = {
   testId: string;
-  subjectId: string;
-  status: 'IN_PROGRESS' | 'SUBMITTED';
-  startedAt: string;
-  submittedAt?: string;
-  results: AttemptResult[];
 };
 
 export type CreateAttemptRequest = {
@@ -27,3 +26,19 @@ export type SubmitAttemptRequest = {
 export type SubmitAttemptResponse = Attempt;
 
 export type GetLatestAttemptResponse = Attempt;
+
+export type AttemptResult = {
+  questionId: string;
+  number: number;
+  isCorrect: boolean;
+};
+
+export type Attempt = {
+  attemptId: string;
+  testId: string;
+  subjectId: string;
+  status: 'IN_PROGRESS' | 'SUBMITTED';
+  startedAt: string;
+  submittedAt?: string;
+  results: AttemptResult[];
+};

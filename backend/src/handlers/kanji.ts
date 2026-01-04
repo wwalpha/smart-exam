@@ -1,25 +1,23 @@
-import { Request, Response } from 'express';
 import { KanjiRepository } from '@/repositories/kanjiRepository';
-import { apiHandler } from '@/lib/handler';
-import type { CreateKanjiRequest, CreateKanjiResponse, KanjiListResponse as KanjiListResponseBody } from '@smart-exam/api-types';
+import type { AsyncHandler } from '@/lib/handler';
+import type { ParamsDictionary } from 'express-serve-static-core';
+import type { ParsedQs } from 'qs';
+import type {
+  CreateKanjiRequest,
+  CreateKanjiResponse,
+  KanjiListResponse,
+} from '@smart-exam/api-types';
 
-type KanjiListRequest = Request<{}, KanjiListResponseBody, {}, {}>;
-type KanjiListResponse = Response<KanjiListResponseBody>;
+export const listKanji: AsyncHandler<ParamsDictionary, KanjiListResponse, {}, ParsedQs> = async (req, res) => {
+  const items = await KanjiRepository.listKanji();
+  // Mapping to api-types structure (items vs datas)
+  res.json({ items: items, total: items.length });
+};
 
-type CreateKanjiReq = Request<{}, CreateKanjiResponse, CreateKanjiRequest>;
-type CreateKanjiRes = Response<CreateKanjiResponse>;
-
-export const listKanji = apiHandler(
-  async (req: KanjiListRequest, res: KanjiListResponse) => {
-    const items = await KanjiRepository.listKanji();
-    // Mapping to api-types structure (items vs datas)
-    res.json({ items: items, total: items.length });
-  }
-);
-
-export const createKanji = apiHandler(
-  async (req: CreateKanjiReq, res: CreateKanjiRes) => {
-    const item = await KanjiRepository.createKanji(req.body);
-    res.status(201).json(item);
-  }
-);
+export const createKanji: AsyncHandler<ParamsDictionary, CreateKanjiResponse, CreateKanjiRequest, ParsedQs> = async (
+  req,
+  res
+) => {
+  const item = await KanjiRepository.createKanji(req.body);
+  res.status(201).json(item);
+};

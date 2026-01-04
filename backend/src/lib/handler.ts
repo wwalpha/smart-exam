@@ -1,49 +1,22 @@
-import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { ApiError } from '@/lib/apiError';
 import { logger } from '@/lib/logger';
 
-// 非同期ハンドラー型を定義する
 export type AsyncHandler<
   Params extends ParamsDictionary = ParamsDictionary,
   ResBody = unknown,
   ReqBody = unknown,
   ReqQuery extends ParsedQs = ParsedQs,
-> = (
-  req: Request<Params, ResBody, ReqBody, ReqQuery>,
-  res: Response<ResBody>,
-  next: NextFunction
-) => Promise<void | unknown>;
-
-export type AsyncHandlerWithoutNext<
-  Params extends ParamsDictionary = ParamsDictionary,
-  ResBody = unknown,
-  ReqBody = unknown,
-  ReqQuery extends ParsedQs = ParsedQs,
-> = (req: Request<Params, ResBody, ReqBody, ReqQuery>, res: Response<ResBody>) => Promise<void | unknown>;
-
-// 共通ハンドラーラッパーを定義する
-export function apiHandler<
-  Params extends ParamsDictionary = ParamsDictionary,
-  ResBody = unknown,
-  ReqBody = unknown,
-  ReqQuery extends ParsedQs = ParsedQs,
->(handler: AsyncHandlerWithoutNext<Params, ResBody, ReqBody, ReqQuery>): RequestHandler;
+> = (req: Request<Params, ResBody, ReqBody, ReqQuery>, res: Response<ResBody>, next: NextFunction) => Promise<void>;
 
 export function apiHandler<
   Params extends ParamsDictionary = ParamsDictionary,
   ResBody = unknown,
   ReqBody = unknown,
   ReqQuery extends ParsedQs = ParsedQs,
->(handler: AsyncHandler<Params, ResBody, ReqBody, ReqQuery>): RequestHandler;
-
-export function apiHandler<
-  Params extends ParamsDictionary = ParamsDictionary,
-  ResBody = unknown,
-  ReqBody = unknown,
-  ReqQuery extends ParsedQs = ParsedQs,
->(handler: AsyncHandler<Params, ResBody, ReqBody, ReqQuery> | AsyncHandlerWithoutNext<Params, ResBody, ReqBody, ReqQuery>) {
+>(handler: AsyncHandler<Params, ResBody, ReqBody, ReqQuery>) {
   // Express ハンドラーを返却する
   return async (
     req: Request<Params, ResBody, ReqBody, ReqQuery>,
@@ -53,7 +26,7 @@ export function apiHandler<
     // 例外処理を開始する
     try {
       // ハンドラーを実行する
-      await (handler as any)(req, res, next);
+      await handler(req, res, next);
       // 例外を捕捉する
     } catch (error) {
       // 例外の種別とメッセージをログへ出す（500の原因追跡のため）
@@ -86,3 +59,5 @@ export function apiHandler<
     }
   };
 }
+
+export const handleRequest = apiHandler;

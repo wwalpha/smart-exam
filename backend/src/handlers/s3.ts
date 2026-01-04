@@ -1,10 +1,11 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
-import type { Request, Response } from 'express';
 import { s3Client } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import { apiHandler } from '@/lib/handler';
+import type { AsyncHandler } from '@/lib/handler';
+import type { ParamsDictionary } from 'express-serve-static-core';
+import type { ParsedQs } from 'qs';
 import type { GetUploadUrlRequest, GetUploadUrlResponse } from '@smart-exam/api-types';
 
 const BUCKET_NAME = ENV.FILES_BUCKET_NAME;
@@ -21,11 +22,11 @@ export const generatePresignedUrl = async (fileName: string, contentType: string
   return { uploadUrl: url, fileKey: key };
 };
 
-type GetUploadUrlReq = Request<{}, GetUploadUrlResponse, GetUploadUrlRequest>;
-type GetUploadUrlRes = Response<GetUploadUrlResponse>;
-
-export const getUploadUrl = apiHandler(async (req: GetUploadUrlReq, res: GetUploadUrlRes) => {
+export const getUploadUrl: AsyncHandler<ParamsDictionary, GetUploadUrlResponse, GetUploadUrlRequest, ParsedQs> = async (
+  req,
+  res
+) => {
   const { fileName, contentType } = req.body;
   const result = await generatePresignedUrl(fileName, contentType);
   res.json(result);
-});
+};

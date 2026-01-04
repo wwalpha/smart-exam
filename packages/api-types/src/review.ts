@@ -1,33 +1,16 @@
-/**
- * 復習テスト
- */
-export type ReviewTest = {
-  /** ID */
-  id: string;
-  /** 表示用ID */
+/** `GET /review-tests/:testId` */
+export type GetReviewTestParams = {
   testId: string;
-  /** 科目 */
-  subject: string;
-  /** ステータス */
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
-  /** 出題数 */
-  itemCount: number;
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
-  /** 更新日時 (ISO 8601) */
-  updatedAt: string;
-  /** 得点 (完了時のみ) */
-  score?: number;
 };
 
-/** 復習テスト一覧取得レスポンス */
-export type ReviewTestListResponse = {
-  /** 復習テストリスト */
-  items: ReviewTest[];
-  /** 総件数 */
-  total: number;
-  /** 次ページ用カーソル */
-  cursor?: string;
+/** `PATCH /review-tests/:testId` */
+export type UpdateReviewTestStatusParams = {
+  testId: string;
+};
+
+/** `DELETE /review-tests/:testId` */
+export type DeleteReviewTestParams = {
+  testId: string;
 };
 
 /** 復習テスト作成リクエスト */
@@ -53,6 +36,16 @@ export type CreateReviewTestResponse = ReviewTest;
 
 /** 復習テスト取得レスポンス */
 export type GetReviewTestResponse = ReviewTest;
+
+/** 復習テスト一覧取得レスポンス */
+export type ReviewTestListResponse = {
+  /** 復習テストリスト */
+  items: ReviewTest[];
+  /** 総件数 */
+  total: number;
+  /** 次ページ用カーソル */
+  cursor?: string;
+};
 
 /**
  * 復習テストの出題アイテム
@@ -99,6 +92,28 @@ export type UpdateReviewTestStatusRequest = {
 
 /** 復習テストステータス更新レスポンス */
 export type UpdateReviewTestStatusResponse = ReviewTest;
+
+/**
+ * 復習テスト
+ */
+export type ReviewTest = {
+  /** ID */
+  id: string;
+  /** 表示用ID */
+  testId: string;
+  /** 科目 */
+  subject: string;
+  /** ステータス */
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+  /** 出題数 */
+  itemCount: number;
+  /** 作成日時 (ISO 8601) */
+  createdAt: string;
+  /** 更新日時 (ISO 8601) */
+  updatedAt: string;
+  /** 得点 (完了時のみ) */
+  score?: number;
+};
 
 /**
  * 復習テスト結果
