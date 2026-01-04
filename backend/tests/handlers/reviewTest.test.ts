@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { listReviewTests, createReviewTest, getReviewTest } from '@/handlers/reviewTest';
 import { ReviewTestRepository } from '@/repositories/reviewTestRepository';
 import { Request, Response } from 'express';
+import type { CreateReviewTestRequest, GetReviewTestParams } from '@smart-exam/api-types';
 
 vi.mock('@/repositories/reviewTestRepository');
 
@@ -28,7 +29,7 @@ describe('reviewTest handler', () => {
 
     const req = {
       body: { subject: 'sub1' },
-    } as Request;
+    } as Request<Record<string, never>, unknown, CreateReviewTestRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -47,7 +48,7 @@ describe('reviewTest handler', () => {
 
     const req = {
       params: { testId: '1' },
-    } as unknown as Request;
+    } as unknown as Request<GetReviewTestParams>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),

@@ -2,6 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { listQuestions, createQuestion, updateQuestion } from '@/handlers/question';
 import { QuestionRepository } from '@/repositories/questionRepository';
 import { Request, Response } from 'express';
+import type {
+  CreateQuestionParams,
+  CreateQuestionRequest,
+  ListQuestionsParams,
+  UpdateQuestionParams,
+  UpdateQuestionRequest,
+} from '@smart-exam/api-types';
 
 vi.mock('@/repositories/questionRepository');
 
@@ -12,7 +19,7 @@ describe('question handler', () => {
 
     const req = {
       params: { materialSetId: 'mat1' },
-    } as unknown as Request;
+    } as unknown as Request<ListQuestionsParams>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -31,7 +38,7 @@ describe('question handler', () => {
     const req = {
       params: { materialSetId: 'mat1' },
       body: { displayLabel: 'Q1' },
-    } as unknown as Request;
+    } as unknown as Request<CreateQuestionParams, unknown, CreateQuestionRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -51,7 +58,7 @@ describe('question handler', () => {
     const req = {
       params: { questionId: '1' },
       body: { displayLabel: 'Q1-updated' },
-    } as unknown as Request;
+    } as unknown as Request<UpdateQuestionParams, unknown, UpdateQuestionRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),

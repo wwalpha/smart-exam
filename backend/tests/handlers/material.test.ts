@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { listMaterialSets, createMaterialSet, getMaterialSet } from '@/handlers/material';
 import { MaterialRepository } from '@/repositories/materialRepository';
 import { Request, Response } from 'express';
+import type { CreateMaterialSetRequest, GetMaterialSetParams } from '@smart-exam/api-types';
 
 vi.mock('@/repositories/materialRepository');
 
@@ -28,7 +29,7 @@ describe('material handler', () => {
 
     const req = {
       body: { name: 'Test Material' },
-    } as Request;
+    } as Request<Record<string, never>, unknown, CreateMaterialSetRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -47,7 +48,7 @@ describe('material handler', () => {
 
     const req = {
       params: { materialSetId: '1' },
-    } as unknown as Request;
+    } as unknown as Request<GetMaterialSetParams>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),

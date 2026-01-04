@@ -1,0 +1,34 @@
+import { describe, expect, it, beforeAll } from 'vitest';
+import { getDynamoDbLocal } from '../setup/dynamodbLocal';
+import { WordTestsService } from '@/services/WordTestsService';
+
+beforeAll(async () => {
+  await getDynamoDbLocal();
+});
+
+describe('WordTestsService (DynamoDB Local)', () => {
+  it('creates and gets a word test', async () => {
+    const wordTestId = `wt_${Date.now()}`;
+
+    await WordTestsService.create({
+      wordTestId,
+      wordType: 'KANJI',
+      count: 2,
+      wordIds: ['w1', 'w2'],
+      testId: wordTestId,
+      subject: 'japanese',
+      status: 'IN_PROGRESS',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const got = await WordTestsService.get(wordTestId);
+    expect(got?.wordTestId).toBe(wordTestId);
+    expect(got?.count).toBe(2);
+  });
+
+  it('lists word tests', async () => {
+    const items = await WordTestsService.list();
+    expect(Array.isArray(items)).toBe(true);
+  });
+});

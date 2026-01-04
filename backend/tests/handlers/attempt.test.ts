@@ -2,6 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { createAttempt, submitAttempt, getLatestAttempt } from '@/handlers/attempt';
 import { AttemptsRepository } from '@/repositories/attemptRepository';
 import { Request, Response } from 'express';
+import type {
+  CreateAttemptParams,
+  CreateAttemptRequest,
+  GetLatestAttemptParams,
+  SubmitAttemptParams,
+  SubmitAttemptRequest,
+} from '@smart-exam/api-types';
 
 vi.mock('@/repositories/attemptRepository');
 
@@ -13,7 +20,7 @@ describe('attempt handler', () => {
     const req = {
       params: { testId: 'test1' },
       body: { subjectId: 'sub1' },
-    } as unknown as Request;
+    } as unknown as Request<CreateAttemptParams, unknown, CreateAttemptRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -33,7 +40,7 @@ describe('attempt handler', () => {
     const req = {
       params: { attemptId: '1' },
       body: { results: [] },
-    } as unknown as Request;
+    } as unknown as Request<SubmitAttemptParams, unknown, SubmitAttemptRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -51,7 +58,7 @@ describe('attempt handler', () => {
 
     const req = {
       params: { testId: 'test1' },
-    } as unknown as Request;
+    } as unknown as Request<GetLatestAttemptParams>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
