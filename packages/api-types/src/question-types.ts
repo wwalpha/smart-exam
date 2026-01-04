@@ -1,5 +1,5 @@
-import { Question } from './material';
+import type { Question } from './material';
 
 export type QuestionListResponse = {
-  datas: Question[];
+	datas: Question[];
 };

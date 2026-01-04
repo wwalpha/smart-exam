@@ -1,14 +1,17 @@
 import { TestsService } from '../services/TestsService';
 import { TestTable } from '../types/db';
 import { MaterialSet, CreateMaterialSetRequest } from './repo.types';
-import { randomUUID } from 'crypto';
 import { DateUtils } from '@/lib/dateUtils';
 import type { MaterialFile } from '@smart-exam/api-types';
+import { createUuid } from '@/lib/uuid';
+import { ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { s3Client } from '@/lib/aws';
+import { ENV } from '@/lib/env';
 
 export const MaterialRepository = {
   createMaterialSet: async (data: CreateMaterialSetRequest): Promise<MaterialSet> => {
     const now = DateUtils.now();
-    const id = randomUUID();
+    const id = createUuid();
 
     const item: MaterialSet = {
       id,
@@ -84,6 +87,53 @@ export const MaterialRepository = {
   },
 
   listMaterialFiles: async (_materialSetId: string): Promise<MaterialFile[]> => {
-    return [];
+    const materialSetId = _materialSetId;
+    const bucket = ENV.FILES_BUCKET_NAME;
+    if (!bucket) return [];
+
+    const prefix = `materials/${materialSetId}/`;
+    const response = await s3Client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix,
+      })
+    );
+
+    const now = DateUtils.now();
+    const objects = response.Contents ?? [];
+
+    const allowedTypes = new Set<MaterialFile['fileType']>(['QUESTION', 'ANSWER', 'GRADED_ANSWER']);
+
+    return objects
+      .map((obj) => {
+        const key = obj.Key;
+        if (!key || key.endsWith('/')) return null;
+
+        const parts = key.split('/');
+        // materials/{materialSetId}/{fileType}/{id}-{filename}
+        if (parts.length < 4) return null;
+        const fileTypeRaw = parts[2] as MaterialFile['fileType'];
+        if (!allowedTypes.has(fileTypeRaw)) return null;
+
+        const baseName = parts.slice(3).join('/');
+        const dashIndex = baseName.indexOf('-');
+        const id = dashIndex > 0 ? baseName.slice(0, dashIndex) : baseName;
+        const filename = dashIndex > 0 ? baseName.slice(dashIndex + 1) : baseName;
+
+        const contentType = filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';
+        const createdAt = obj.LastModified ? obj.LastModified.toISOString() : now;
+
+        const item: MaterialFile = {
+          id,
+          materialSetId,
+          filename,
+          s3Key: key,
+          contentType,
+          fileType: fileTypeRaw,
+          createdAt,
+        };
+        return item;
+      })
+      .filter((x): x is MaterialFile => x !== null);
   },
 };

@@ -131,7 +131,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         setStatus,
         async () => {
           const response = await MATERIAL_API.listMaterialFiles(id);
-          updateMaterial({ files: Array.isArray(response) ? response : [] });
+          updateMaterial({ files: response });
         },
         '教材ファイル一覧の取得に失敗しました。',
         { rethrow: true }

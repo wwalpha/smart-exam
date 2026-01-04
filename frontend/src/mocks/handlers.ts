@@ -343,13 +343,14 @@ export const handlers = [
   }),
 
   http.get('/api/material-sets/:materialSetId/files', () => {
-    return HttpResponse.json([]);
+    return HttpResponse.json({ datas: [] });
   }),
 
   http.get('/api/material-sets/:materialSetId/questions', ({ params }) => {
     const materialSetId = String(params.materialSetId);
     const items = questionsByMaterialSetId[materialSetId] ?? [];
-    return HttpResponse.json(items);
+    const response: QuestionListResponse = { datas: items };
+    return HttpResponse.json(response);
   }),
 
   http.post('/api/material-sets/:materialSetId/questions', async ({ params, request }) => {

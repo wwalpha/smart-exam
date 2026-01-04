@@ -8,6 +8,11 @@ export type ListQuestionsParams = {
   materialSetId: string;
 };
 
+/** `GET /material-sets/:materialSetId/files` */
+export type ListMaterialFilesParams = {
+  materialSetId: string;
+};
+
 /** `POST /material-sets/:materialSetId/questions` */
 export type CreateQuestionParams = {
   materialSetId: string;
@@ -70,6 +75,11 @@ export type MaterialFile = {
   fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
   /** 作成日時 (ISO 8601) */
   createdAt: string;
+};
+
+/** `GET /material-sets/:materialSetId/files` */
+export type ListMaterialFilesResponse = {
+  datas: MaterialFile[];
 };
 
 /**

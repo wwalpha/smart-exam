@@ -5,7 +5,9 @@ import type {
   CreateMaterialSetRequest,
   UpdateMaterialSetRequest,
   MaterialFile,
+  ListMaterialFilesResponse,
   Question,
+  QuestionListResponse,
   CreateQuestionRequest,
   UpdateQuestionRequest,
 } from '@smart-exam/api-types';
@@ -59,17 +61,21 @@ export const updateMaterialSet = async (
 };
 
 export const listMaterialFiles = async (materialSetId: string): Promise<MaterialFile[]> => {
-  return apiRequest<MaterialFile[]>({
+  const response = await apiRequest<ListMaterialFilesResponse>({
     method: 'GET',
     path: `/api/material-sets/${materialSetId}/files`,
   });
+
+  return response.datas;
 };
 
 export const listQuestions = async (materialSetId: string): Promise<Question[]> => {
-  return apiRequest<Question[]>({
+  const response = await apiRequest<QuestionListResponse>({
     method: 'GET',
     path: `/api/material-sets/${materialSetId}/questions`,
   });
+
+  return response.datas;
 };
 
 export const createQuestion = async (

@@ -6,7 +6,8 @@ import type {
   CreateMaterialSetResponse,
   GetMaterialSetParams,
   GetMaterialSetResponse,
-  MaterialFile,
+  ListMaterialFilesParams,
+  ListMaterialFilesResponse,
   MaterialSetListResponse,
 } from '@smart-exam/api-types';
 
@@ -43,8 +44,11 @@ export const getMaterialSet: AsyncHandler<
   res.json(item);
 };
 
-export const listMaterialFiles: AsyncHandler<GetMaterialSetParams, MaterialFile[], {}, ParsedQs> = async (req, res) => {
+export const listMaterialFiles: AsyncHandler<ListMaterialFilesParams, ListMaterialFilesResponse, {}, ParsedQs> = async (
+  req,
+  res
+) => {
   const { materialSetId } = req.params;
   const items = await MaterialRepository.listMaterialFiles(materialSetId);
-  res.json(items);
+  res.json({ datas: items });
 };
