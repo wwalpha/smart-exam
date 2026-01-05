@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 import { nodeFileTrace } from '@vercel/nft';
 
@@ -59,13 +60,28 @@ const copyDir = async (srcAbs, dstAbs) => {
   );
 };
 
-const resolvePackageRoot = (pkgName) => {
+const resolvePackageRoot = async (pkgName) => {
+  const require = createRequire(import.meta.url);
+
+  let resolvedEntry;
   try {
-    const pkgJsonUrl = import.meta.resolve(`${pkgName}/package.json`);
-    const pkgJsonPath = fileURLToPath(pkgJsonUrl);
-    return path.dirname(pkgJsonPath);
+    resolvedEntry = require.resolve(pkgName, { paths: [backendRoot] });
   } catch {
     return null;
+  }
+
+  let dir = path.dirname(resolvedEntry);
+  for (;;) {
+    try {
+      await fs.stat(path.join(dir, 'package.json'));
+      return dir;
+    } catch {
+      // keep walking up
+    }
+
+    const parent = path.dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
   }
 };
 
@@ -90,7 +106,7 @@ const copyFile = async (srcRelative) => {
 await Promise.all(Array.from(fileList).map(copyFile));
 
 for (const pkgName of forceIncludePackages) {
-  const pkgRoot = resolvePackageRoot(pkgName);
+  const pkgRoot = await resolvePackageRoot(pkgName);
   if (!pkgRoot) {
     throw new Error(`Missing dependency for packaging: ${pkgName}. Install it in backend dependencies.`);
   }

@@ -83,17 +83,13 @@ jobs:
       - name: Build (Yarn)
         run: |
           yarn workspace @smart-exam/api-types build
-          yarn workspace smart-exam-backend build
-
-      - name: Install Production Dependencies (Yarn)
-        run: yarn workspaces focus smart-exam-backend --production
+          yarn workspace smart-exam-backend build:lambda
+          yarn workspace smart-exam-backend package:lambda
 
       - name: Zip Artifact
         run: |
-          cd backend/dist
+          cd backend/lambda
           zip -r ../function.zip .
-          cd ../..
-          zip -r backend/function.zip node_modules
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
