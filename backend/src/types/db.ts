@@ -1,9 +1,11 @@
+import type { SubjectId } from '@smart-exam/api-types';
+
 /**
  * 科目テーブル
  */
 export interface SubjectTable {
   /** 科目ID (PK) */
-  subjectId: string;
+  subjectId: SubjectId;
   /** 科目名 */
   name: string;
 }
@@ -15,7 +17,7 @@ export interface TestTable {
   /** テストID (PK) */
   testId: string;
   /** 科目ID (GSI1 PK) */
-  subjectId: string;
+  subjectId: SubjectId;
   /** タイトル */
   title: string;
   /** 説明 */
@@ -51,7 +53,7 @@ export interface QuestionTable {
   /** テストID (GSI1 PK) */
   testId: string;
   /** 科目ID */
-  subjectId: string;
+  subjectId: SubjectId;
   /** 問題番号 (GSI1 SK) */
   number: number;
   /** プロンプトS3キー */
@@ -90,7 +92,7 @@ export interface AttemptTable {
   /** テストID (GSI1 PK) */
   testId: string;
   /** 科目ID */
-  subjectId: string;
+  subjectId: SubjectId;
   /** ステータス */
   status: 'IN_PROGRESS' | 'SUBMITTED';
   /** 開始日時 (GSI1 SK) */
@@ -110,7 +112,7 @@ export interface GradedSheetTable {
   /** テストID */
   testId: string;
   /** 科目ID */
-  subjectId: string;
+  subjectId: SubjectId;
   /** 画像S3キー */
   imageS3Key: string;
   /** ステータス */
@@ -134,7 +136,7 @@ export interface WordTable {
   /** 解答 */
   answer: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
 
   /** 登録日 (YYYY-MM-DD) */
   registeredDate?: string;
@@ -147,7 +149,7 @@ export interface ReviewTestTable {
   /** テストID (PK) */
   testId: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** モード */
   mode: 'QUESTION' | 'KANJI';
   /** ステータス */
@@ -225,7 +227,7 @@ export interface ReviewAttemptTable {
   /** 対象ID */
   targetId: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** 状態 */
   state: 'CORRECT' | 'INCORRECT';
   /** メモ */
@@ -251,7 +253,7 @@ export interface WordTestTable {
   /** テストID (表示用) */
   testId: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** ステータス */
   status: string;
 }
@@ -283,7 +285,7 @@ export interface ExamPaperTable {
   /** 学年 */
   grade: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** カテゴリ */
   category: string;
   /** 名称 */
@@ -305,7 +307,7 @@ export interface ExamResultTable {
   /** 学年 */
   grade: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** カテゴリ */
   category: string;
   /** 名称 */

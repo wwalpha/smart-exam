@@ -1,11 +1,12 @@
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
+import type { WordTestSubject } from '@typings/wordtest';
 
 type SearchFormValues = {
   q: string;
   reading: string;
-  subject: string;
+  subject: 'ALL' | WordTestSubject;
 };
 
 export const useKanjiList = () => {

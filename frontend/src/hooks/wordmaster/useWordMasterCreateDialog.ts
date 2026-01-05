@@ -20,6 +20,7 @@ export const useWordMasterCreateDialog = (params: { onClose: () => void }) => {
     register,
     handleSubmit,
     setValue,
+    formState,
   } = useForm<FormValues>({
     defaultValues: {
       title: '',
@@ -35,7 +36,7 @@ export const useWordMasterCreateDialog = (params: { onClose: () => void }) => {
   const getSubjectClickHandler = useCallback(
     (value: WordTestSubject) => {
       return () => {
-        setValue('subject', value, { shouldDirty: true });
+        setValue('subject', value, { shouldDirty: true, shouldValidate: true });
       };
     },
     [setValue]
@@ -70,6 +71,7 @@ export const useWordMasterCreateDialog = (params: { onClose: () => void }) => {
   }, [createWordGroup, handleSubmit, params, confirm]);
 
   return {
+    formState,
     register,
     selectedSubject,
     isSubmitting: status.isLoading,

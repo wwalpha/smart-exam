@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
+import type { SubjectId } from '@smart-exam/api-types';
 
 type FormValues = {
   grade: string;
-  subject: string;
+  subject: SubjectId;
   category: string;
   name: string;
   title: string;

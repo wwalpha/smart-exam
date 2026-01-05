@@ -28,8 +28,8 @@ describe('reviewTest handler', () => {
     vi.spyOn(ReviewTestRepository, 'createReviewTest').mockResolvedValue(mockItem as any);
 
     const req = {
-      body: { subject: 'sub1' },
-    } as Request<Record<string, never>, unknown, CreateReviewTestRequest>;
+      body: { subject: '1', mode: 'QUESTION', count: 20 },
+    } as unknown as Request<Record<string, never>, unknown, CreateReviewTestRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),

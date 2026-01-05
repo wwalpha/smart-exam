@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
+import { SUBJECT } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 type FormValues = {
   kanji: string;
   reading: string;
-  subject: string;
+  subject: WordTestSubject;
 };
 
 export const useKanjiCreate = () => {
@@ -21,7 +23,7 @@ export const useKanjiCreate = () => {
     defaultValues: {
       kanji: '',
       reading: '',
-      subject: '国語',
+      subject: SUBJECT.japanese,
     },
   });
   const { reset } = form;
@@ -39,7 +41,7 @@ export const useKanjiCreate = () => {
       reset({
         kanji: detail.kanji,
         reading: detail.reading || '',
-        subject: detail.subject || '国語',
+        subject: detail.subject || SUBJECT.japanese,
       });
     }
   }, [isEdit, detail, reset]);

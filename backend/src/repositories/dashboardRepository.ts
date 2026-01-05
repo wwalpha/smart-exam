@@ -32,13 +32,15 @@ export const DashboardRepository = {
       .map(([questionId, s]) => {
         const incorrectRate = s.incorrect / s.total;
         const q = questionById.get(questionId);
+        if (!q?.subjectId) return null;
         return {
           id: questionId,
-          displayLabel: q?.displayLabel ?? q?.canonicalKey ?? questionId,
+          displayLabel: q.displayLabel ?? q.canonicalKey ?? questionId,
           incorrectRate,
-          subject: q?.subjectId ?? '',
+          subject: q.subjectId,
         };
       })
+      .filter((x) => x !== null)
       .sort((a, b) => b.incorrectRate - a.incorrectRate)
       .slice(0, 10);
 

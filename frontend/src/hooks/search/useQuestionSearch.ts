@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { apiRequest } from '@/services/apiClient';
 import type { QuestionSearchResult, SearchQuestionsRequest, SearchQuestionsResponse } from '@smart-exam/api-types';
+import type { WordTestSubject } from '@typings/wordtest';
 
 type SearchFormValues = {
   keyword: string;
-  subject: string;
+  subject: 'ALL' | WordTestSubject;
 };
 
 export const useQuestionSearch = () => {

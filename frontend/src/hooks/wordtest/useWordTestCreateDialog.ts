@@ -19,7 +19,7 @@ export const useWordTestCreateDialog = (params: { onClose: () => void }) => {
     },
   });
 
-  const { register, handleSubmit, setValue, watch } = form;
+  const { register, handleSubmit, setValue, watch, formState } = form;
 
   const onCreateClick = handleSubmit(async (data) => {
     await createWordTest({
@@ -32,6 +32,7 @@ export const useWordTestCreateDialog = (params: { onClose: () => void }) => {
   });
 
   return {
+    formState,
     register,
     setValue,
     watch,

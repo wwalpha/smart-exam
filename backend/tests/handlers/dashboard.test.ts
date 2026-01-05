@@ -15,7 +15,7 @@ describe('dashboard handler', () => {
           id: 'q1',
           displayLabel: 'Q1',
           incorrectRate: 1,
-          subject: 'math',
+          subject: '4',
         },
       ],
       lockedCount: 0,

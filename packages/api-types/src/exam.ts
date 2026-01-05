@@ -1,3 +1,5 @@
+import type { SubjectId } from './subject';
+
 /**
  * 試験問題（過去問など）
  */
@@ -7,7 +9,7 @@ export type ExamPaper = {
   /** 学年 */
   grade: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** カテゴリ（例: 合不合判定テスト） */
   category: string;
   /** 試験名 */
@@ -29,7 +31,7 @@ export type ExamResult = {
   /** 学年 */
   grade: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** カテゴリ */
   category: string;
   /** 受験者名 */

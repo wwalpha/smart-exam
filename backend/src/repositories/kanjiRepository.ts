@@ -100,7 +100,7 @@ export const KanjiRepository = {
   },
 
   importKanji: async (data: ImportKanjiRequest): Promise<ImportKanjiResponse> => {
-    if (!data.subject || String(data.subject).trim().length === 0) {
+    if (!data.subject) {
       return {
         successCount: 0,
         duplicateCount: 0,
@@ -108,6 +108,8 @@ export const KanjiRepository = {
         errors: [{ line: 1, content: '', reason: '科目は必須です' }],
       };
     }
+
+    const subject = data.subject;
 
     const lines = data.fileContent
       .split(/\r?\n/)
@@ -132,8 +134,6 @@ export const KanjiRepository = {
 
         const kanji = parsedPipe?.kanji ?? cols[0];
         const reading = parsedPipe?.reading ?? (cols[1] ?? '');
-        const subject = String(data.subject);
-
         if (!kanji) {
           errorCount += 1;
           errors.push({ line: index + 1, content: line, reason: '問題が空です' });

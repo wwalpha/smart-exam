@@ -1,13 +1,17 @@
 import type { GradingValue, WordTestSubject } from '@typings/wordtest'
 
 export const SUBJECT = {
-  society: '3',
   japanese: '1',
+  science: '2',
+  society: '3',
+  math: '4',
 } as const satisfies Record<string, WordTestSubject>
 
 export const SUBJECT_LABEL: Record<WordTestSubject, string> = {
-  [SUBJECT.society]: '社会',
   [SUBJECT.japanese]: '国語',
+  [SUBJECT.science]: '理科',
+  [SUBJECT.society]: '社会',
+  [SUBJECT.math]: '算数',
 }
 
 export const GRADING_VALUE = {

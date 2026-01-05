@@ -1,3 +1,5 @@
+import type { SubjectId } from './subject';
+
 /**
  * 漢字データ
  */
@@ -8,8 +10,8 @@ export type Kanji = {
   kanji: string;
   /** よみ */
   reading?: string;
-  /** 科目（国語/社会など） */
-  subject: string;
+  /** 科目（コード値） */
+  subject: SubjectId;
 };
 
 /** 漢字一覧取得レスポンス */
@@ -26,7 +28,7 @@ export type KanjiListResponse = {
 export type SearchKanjiRequest = {
   q?: string;
   reading?: string;
-  subject?: string;
+  subject?: SubjectId;
   limit?: number;
   cursor?: string;
 };
@@ -49,7 +51,7 @@ export type CreateKanjiRequest = {
   /** よみ */
   reading?: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
 };
 
 /** 漢字作成レスポンス */
@@ -81,7 +83,7 @@ export type ImportKanjiRequest = {
   /** インポートモード (SKIP: 重複スキップ, UPDATE: 上書き) */
   mode: 'SKIP' | 'UPDATE';
   /** 科目（指定時は全行に適用） */
-  subject?: string;
+  subject?: SubjectId;
 };
 
 /** 漢字インポートレスポンス */

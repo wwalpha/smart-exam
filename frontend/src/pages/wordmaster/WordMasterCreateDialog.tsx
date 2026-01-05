@@ -11,8 +11,9 @@ type WordMasterCreateDialogProps = {
 };
 
 export const WordMasterCreateDialog = ({ open, onClose }: WordMasterCreateDialogProps) => {
-  const { register, selectedSubject, isCreateDisabled, getSubjectClickHandler, onCreateClick, ConfirmDialog } =
+  const { register, formState, selectedSubject, isCreateDisabled, getSubjectClickHandler, onCreateClick, error, ConfirmDialog } =
     useWordMasterCreateDialog({ onClose });
+  const { errors } = formState;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -27,12 +28,16 @@ export const WordMasterCreateDialog = ({ open, onClose }: WordMasterCreateDialog
             <Input
               id="title"
               placeholder="例：4年_Daily"
-              {...register('title', { required: true })}
+              {...register('title', { required: '必須です' })}
+              aria-invalid={!!errors.title}
+              className={errors.title ? 'border-destructive focus-visible:ring-destructive' : undefined}
             />
+            {errors.title?.message ? <p className="text-sm text-destructive">{String(errors.title.message)}</p> : null}
           </div>
 
           <div className="space-y-2">
             <Label>科目選択</Label>
+            <input type="hidden" {...register('subject', { required: '必須です' })} />
             <div className="flex flex-wrap gap-2">
               {([subjects.society, subjects.japanese] as const).map((value) => {
                 const isActive = selectedSubject === value;
@@ -49,6 +54,9 @@ export const WordMasterCreateDialog = ({ open, onClose }: WordMasterCreateDialog
                 );
               })}
             </div>
+            {errors.subject?.message ? (
+              <p className="text-sm text-destructive">{String(errors.subject.message)}</p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -58,8 +66,12 @@ export const WordMasterCreateDialog = ({ open, onClose }: WordMasterCreateDialog
               id="wordmaster-file"
               type="file"
               accept=".txt"
-              {...register('file', { required: true })}
+              {...register('file', { required: '必須です' })}
+              aria-invalid={!!errors.file}
+              className={errors.file ? 'border-destructive focus-visible:ring-destructive' : undefined}
             />
+            {errors.file?.message ? <p className="text-sm text-destructive">{String(errors.file.message)}</p> : null}
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
         </div>
         <DialogFooter>

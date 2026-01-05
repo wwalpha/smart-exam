@@ -19,7 +19,7 @@ export const AppLayout = ({ title, pageTitle, sidebarItems, children }: AppLayou
           <Sidebar items={sidebarItems} />
 
           <main className="min-w-0 flex-1 bg-background p-6">
-            <div className="mx-auto w-full max-w-5xl">{children}</div>
+            <div className="w-full">{children}</div>
           </main>
         </div>
       </div>

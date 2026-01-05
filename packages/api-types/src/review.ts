@@ -1,3 +1,5 @@
+import type { SubjectId } from './subject';
+
 /** `GET /review-tests/:testId` */
 export type GetReviewTestParams = {
   testId: string;
@@ -21,7 +23,7 @@ export type SubmitReviewTestResultsParams = {
 /** 復習テスト作成リクエスト */
 export type CreateReviewTestRequest = {
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** 出題数 */
   count: number;
   /** モード (QUESTION: 問題, KANJI: 漢字) */
@@ -107,7 +109,7 @@ export type ReviewTest = {
   /** 表示用ID */
   testId: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** ステータス */
   status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
   /** 出題数 */

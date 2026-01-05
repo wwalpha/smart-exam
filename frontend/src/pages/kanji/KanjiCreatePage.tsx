@@ -4,10 +4,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useKanjiCreate } from '@/hooks/kanji';
+import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 export const KanjiCreatePage = () => {
   const { form, submit, isSubmitting } = useKanjiCreate();
-  const { register, setValue, watch } = form;
+  const {
+    register,
+    setValue,
+    watch,
+    formState: { errors },
+  } = form;
   const subject = watch('subject');
 
   return (
@@ -15,30 +22,54 @@ export const KanjiCreatePage = () => {
       <Card>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 pt-4">
               <Label>科目</Label>
-              <input type="hidden" {...register('subject', { required: true })} />
+              <input type="hidden" {...register('subject', { required: '必須です' })} />
               <Select
                 value={subject}
-                onValueChange={(v) => setValue('subject', v, { shouldDirty: true, shouldValidate: true })}>
-                <SelectTrigger>
+                onValueChange={(v) =>
+                  setValue('subject', v as WordTestSubject, { shouldDirty: true, shouldValidate: true })
+                }>
+                <SelectTrigger
+                  aria-invalid={!!errors.subject}
+                  className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}
+                >
                   <SelectValue placeholder="選択してください" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="国語">国語</SelectItem>
-                  <SelectItem value="社会">社会</SelectItem>
+                  <SelectItem value={SUBJECT.japanese}>{SUBJECT_LABEL[SUBJECT.japanese]}</SelectItem>
+                  <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.subject?.message ? (
+                <p className="text-sm text-destructive">{String(errors.subject.message)}</p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
               <Label>問題 *</Label>
-              <Input {...register('kanji', { required: true })} placeholder="例: 憂鬱" />
+              <Input
+                {...register('kanji', { required: '必須です' })}
+                aria-invalid={!!errors.kanji}
+                className={errors.kanji ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                placeholder="例: 憂鬱"
+              />
+              {errors.kanji?.message ? (
+                <p className="text-sm text-destructive">{String(errors.kanji.message)}</p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
-              <Label>答え</Label>
-              <Input {...register('reading')} placeholder="例: ゆううつ" />
+              <Label>答え *</Label>
+              <Input
+                {...register('reading', { required: '必須です' })}
+                aria-invalid={!!errors.reading}
+                className={errors.reading ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                placeholder="例: ゆううつ"
+              />
+              {errors.reading?.message ? (
+                <p className="text-sm text-destructive">{String(errors.reading.message)}</p>
+              ) : null}
             </div>
 
             <div className="flex justify-end gap-4 pt-4">

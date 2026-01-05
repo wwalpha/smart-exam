@@ -1,6 +1,7 @@
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
 import { WordTable } from '../types/db';
+import type { SubjectId } from '@smart-exam/api-types';
 
 const TABLE_NAME = ENV.TABLE_WORDS;
 
@@ -54,7 +55,7 @@ export const WordsService = {
     });
   },
 
-  listKanji: async (subject?: string): Promise<WordTable[]> => {
+  listKanji: async (subject?: SubjectId): Promise<WordTable[]> => {
     if (subject) {
       const result = await dbHelper.query<WordTable>({
         TableName: TABLE_NAME,

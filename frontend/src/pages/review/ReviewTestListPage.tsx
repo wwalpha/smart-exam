@@ -5,6 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useReviewList } from '@/hooks/review';
+import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 export const ReviewTestListPage = () => {
   const { isKanji, basePath, reviews, form, search, remove, ConfirmDialog } = useReviewList();
@@ -45,7 +47,7 @@ export const ReviewTestListPage = () => {
           <form onSubmit={search} className="flex flex-wrap gap-4 items-end">
             <div className="w-40">
               <label className="text-sm font-medium">科目</label>
-              <Select onValueChange={(v) => setValue('subject', v)} defaultValue="ALL">
+              <Select onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)} defaultValue="ALL">
                 <SelectTrigger>
                   <SelectValue placeholder="科目" />
                 </SelectTrigger>
@@ -53,14 +55,14 @@ export const ReviewTestListPage = () => {
                   <SelectItem value="ALL">全て</SelectItem>
                   {isKanji ? (
                     <>
-                      <SelectItem value="国語">国語</SelectItem>
-                      <SelectItem value="社会">社会</SelectItem>
+                      <SelectItem value={SUBJECT.japanese}>{SUBJECT_LABEL[SUBJECT.japanese]}</SelectItem>
+                      <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                     </>
                   ) : (
                     <>
-                      <SelectItem value="算数">算数</SelectItem>
-                      <SelectItem value="理科">理科</SelectItem>
-                      <SelectItem value="社会">社会</SelectItem>
+                      <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
+                      <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
+                      <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                     </>
                   )}
                 </SelectContent>
@@ -114,7 +116,9 @@ export const ReviewTestListPage = () => {
                   </Link>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{test.subject}</Badge>
+                  <Badge variant="outline">
+                    {SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                  </Badge>
                 </TableCell>
                 <TableCell>{test.itemCount}問</TableCell>
                 <TableCell>{getStatusBadge(test.status)}</TableCell>

@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useKanjiList } from '@/hooks/kanji';
+import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 export const KanjiListPage = () => {
   const { kanjiList, total, form, runSearch, remove, ConfirmDialog } = useKanjiList();
@@ -29,41 +31,46 @@ export const KanjiListPage = () => {
   });
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 px-6">
       <ConfirmDialog />
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle className="sr-only">検索</CardTitle>
-          <div className="flex gap-2">
-            <Button type="submit" form="kanji-search-form">検索</Button>
-            <Button asChild variant="outline">
-              <Link to="/kanji/new">新規登録</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/kanji/import">一括インポート</Link>
-            </Button>
-          </div>
         </CardHeader>
         <CardContent>
-          <form id="kanji-search-form" onSubmit={onSearch} className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-end">
-            <div>
-              <input type="hidden" {...register('subject')} />
-              <Select value={subject} onValueChange={(v) => setValue('subject', v, { shouldDirty: true })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="科目" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">全て</SelectItem>
-                  <SelectItem value="国語">国語</SelectItem>
-                  <SelectItem value="社会">社会</SelectItem>
-                </SelectContent>
-              </Select>
+          <form id="kanji-search-form" onSubmit={onSearch} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-end">
+              <div>
+                <input type="hidden" {...register('subject')} />
+                <Select
+                  value={subject}
+                  onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject, { shouldDirty: true })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="科目" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">全て</SelectItem>
+                    <SelectItem value={SUBJECT.japanese}>{SUBJECT_LABEL[SUBJECT.japanese]}</SelectItem>
+                    <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Input {...register('q')} placeholder="問題" />
+              </div>
+              <div>
+                <Input {...register('reading')} placeholder="解答" />
+              </div>
             </div>
-            <div>
-              <Input {...register('q')} placeholder="問題" />
-            </div>
-            <div>
-              <Input {...register('reading')} placeholder="解答" />
+
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button type="submit">検索</Button>
+              <Button asChild variant="outline">
+                <Link to="/kanji/new">新規登録</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link to="/kanji/import">一括インポート</Link>
+              </Button>
             </div>
           </form>
         </CardContent>
@@ -111,12 +118,12 @@ export const KanjiListPage = () => {
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
+      <div className="w-full rounded-md border">
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead>操作</TableHead>
-              <TableHead>科目</TableHead>
+              <TableHead className="w-24">操作</TableHead>
+              <TableHead className="w-24">科目</TableHead>
               <TableHead>問題</TableHead>
               <TableHead>解答</TableHead>
             </TableRow>
@@ -124,7 +131,7 @@ export const KanjiListPage = () => {
           <TableBody>
             {pagedList.map((kanji) => (
               <TableRow key={kanji.id}>
-                <TableCell>
+                <TableCell className="px-3 py-2">
                   <div className="flex gap-2">
                     <Button asChild variant="ghost" size="icon" aria-label="編集">
                       <Link to={`/kanji/${kanji.id}`}>
@@ -141,9 +148,21 @@ export const KanjiListPage = () => {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell className="text-sm">{kanji.subject}</TableCell>
-                <TableCell className="text-sm font-medium">{kanji.kanji}</TableCell>
-                <TableCell className="text-sm">{kanji.reading}</TableCell>
+                <TableCell className="px-3 py-2 text-sm">
+                  <div className="truncate" title={SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}>
+                    {SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                  </div>
+                </TableCell>
+                <TableCell className="px-3 py-2 text-sm font-medium">
+                  <div className="truncate" title={kanji.kanji}>
+                    {kanji.kanji}
+                  </div>
+                </TableCell>
+                <TableCell className="px-3 py-2 text-sm">
+                  <div className="truncate" title={kanji.reading}>
+                    {kanji.reading}
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
             {kanjiList.length === 0 && (

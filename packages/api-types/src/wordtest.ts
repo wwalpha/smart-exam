@@ -1,7 +1,9 @@
+import type { SubjectId } from './subject';
+
 /**
- * 単語テストの科目コード（社会=3、国語=1）
+ * 単語テストの科目コード
  */
-export type WordTestSubject = '3' | '1';
+export type WordTestSubject = SubjectId;
 
 /**
  * 単語テスト一覧で扱うサマリ型（詳細は含まない）

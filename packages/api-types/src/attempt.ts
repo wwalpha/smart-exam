@@ -1,3 +1,5 @@
+import type { SubjectId } from './subject';
+
 /**
  * `POST /tests/:testId/attempts`
  * テストの解答(Attempt)を新規作成する
@@ -13,7 +15,7 @@ export type CreateAttemptParams = {
  */
 export type CreateAttemptRequest = {
   /** 科目ID */
-  subjectId: string;
+  subjectId: SubjectId;
 };
 
 /**
@@ -78,7 +80,7 @@ export type Attempt = {
   /** テストID */
   testId: string;
   /** 科目ID */
-  subjectId: string;
+  subjectId: SubjectId;
   /** ステータス */
   status: 'IN_PROGRESS' | 'SUBMITTED';
   /** 開始日時(ISO文字列) */

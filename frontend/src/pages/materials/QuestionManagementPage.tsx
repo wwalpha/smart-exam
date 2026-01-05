@@ -21,7 +21,10 @@ export const QuestionManagementPage = () => {
     remove,
     ConfirmDialog,
   } = useQuestionManagement();
-  const { register } = form;
+  const {
+    register,
+    formState: { errors },
+  } = form;
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -54,11 +57,27 @@ export const QuestionManagementPage = () => {
               <form onSubmit={submit} className="space-y-4">
                 <div className="space-y-2">
                   <Label>表示番号 (displayLabel)</Label>
-                  <Input {...register('displayLabel', { required: true })} placeholder="例: 1(1)" />
+                  <Input
+                    {...register('displayLabel', { required: '必須です' })}
+                    aria-invalid={!!errors.displayLabel}
+                    className={errors.displayLabel ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                    placeholder="例: 1(1)"
+                  />
+                  {errors.displayLabel?.message ? (
+                    <p className="text-sm text-destructive">{String(errors.displayLabel.message)}</p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label>正規化キー (canonicalKey)</Label>
-                  <Input {...register('canonicalKey', { required: true })} placeholder="例: 1-1" />
+                  <Input
+                    {...register('canonicalKey', { required: '必須です' })}
+                    aria-invalid={!!errors.canonicalKey}
+                    className={errors.canonicalKey ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                    placeholder="例: 1-1"
+                  />
+                  {errors.canonicalKey?.message ? (
+                    <p className="text-sm text-destructive">{String(errors.canonicalKey.message)}</p>
+                  ) : null}
                   <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-A)</p>
                 </div>
                 <div className="space-y-2">
@@ -99,8 +118,7 @@ export const QuestionManagementPage = () => {
                       variant="outline"
                       size="sm"
                       className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => remove(q.id)}
-                    >
+                      onClick={() => remove(q.id)}>
                       削除
                     </Button>
                   </TableCell>

@@ -4,10 +4,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useReviewCreate } from '@/hooks/review';
+import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 export const ReviewTestCreatePage = () => {
   const { isKanji, form, submit } = useReviewCreate();
-  const { register, setValue, watch } = form;
+  const {
+    register,
+    setValue,
+    watch,
+    formState: { errors },
+  } = form;
   const subject = watch('subject');
 
   return (
@@ -22,43 +29,62 @@ export const ReviewTestCreatePage = () => {
           <form onSubmit={submit} className="space-y-6">
             <div className="space-y-2">
               <Label>科目</Label>
-              <input type="hidden" {...register('subject', { required: true })} />
+              <input type="hidden" {...register('subject', { required: '必須です' })} />
               <Select
                 value={subject}
-                onValueChange={(v) => setValue('subject', v, { shouldDirty: true, shouldValidate: true })}
-              >
-                <SelectTrigger>
+                onValueChange={(v) =>
+                  setValue('subject', v as WordTestSubject | '', { shouldDirty: true, shouldValidate: true })
+                }>
+                <SelectTrigger
+                  aria-invalid={!!errors.subject}
+                  className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}>
                   <SelectValue placeholder="科目を選択" />
                 </SelectTrigger>
                 <SelectContent>
                   {isKanji ? (
                     <>
-                      <SelectItem value="国語">国語</SelectItem>
-                      <SelectItem value="社会">社会</SelectItem>
+                      <SelectItem value={SUBJECT.japanese}>{SUBJECT_LABEL[SUBJECT.japanese]}</SelectItem>
+                      <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                     </>
                   ) : (
                     <>
-                      <SelectItem value="算数">算数</SelectItem>
-                      <SelectItem value="理科">理科</SelectItem>
-                      <SelectItem value="社会">社会</SelectItem>
+                      <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
+                      <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
+                      <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                     </>
                   )}
                 </SelectContent>
               </Select>
+              {errors.subject?.message ? (
+                <p className="text-sm text-destructive">{String(errors.subject.message)}</p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
               <Label>出題数</Label>
-              <Input type="number" {...register('count')} min={1} max={100} />
+              <Input
+                type="number"
+                min={1}
+                max={100}
+                {...register('count', {
+                  required: '必須です',
+                  valueAsNumber: true,
+                  min: { value: 1, message: '1以上で入力してください' },
+                  max: { value: 100, message: '100以下で入力してください' },
+                })}
+                aria-invalid={!!errors.count}
+                className={errors.count ? 'border-destructive focus-visible:ring-destructive' : undefined}
+              />
+              {errors.count?.message ? (
+                <p className="text-sm text-destructive">{String(errors.count.message)}</p>
+              ) : null}
             </div>
 
             <div className="flex justify-end gap-4 pt-4">
               <Button type="button" variant="outline" onClick={() => window.history.back()}>
                 キャンセル
               </Button>
-              <Button type="submit">
-                テスト生成
-              </Button>
+              <Button type="submit">テスト生成</Button>
             </div>
           </form>
         </CardContent>

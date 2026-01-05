@@ -72,10 +72,10 @@ describe('question handler', () => {
   });
 
   it('searchQuestions returns datas', async () => {
-    const mockItems = [
+    const mockItems: SearchQuestionsResponse['datas'] = [
       {
         id: 'q1',
-        subject: '算数',
+        subject: '4',
         unit: '速さ',
         questionText: 'Q1',
         sourceMaterialId: 'm1',
@@ -86,7 +86,7 @@ describe('question handler', () => {
     vi.spyOn(QuestionRepository, 'searchQuestions').mockResolvedValue(mockItems as any);
 
     const req = {
-      body: { keyword: 'Q1', subject: '算数' },
+      body: { keyword: 'Q1', subject: '4' },
     } as unknown as Request;
     const res = {
       json: vi.fn(),

@@ -1,9 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
+import type { WordTestSubject } from '@typings/wordtest';
 
 type CreateFormValues = {
-  subject: string;
+  subject: WordTestSubject | '';
   count: number;
 };
 
@@ -25,6 +26,10 @@ export const useReviewCreate = () => {
   });
 
   const submit = async (data: CreateFormValues) => {
+    if (!data.subject) {
+      form.setError('subject', { type: 'required', message: '必須です' });
+      return;
+    }
     const newTest = await createReviewTest({
       mode,
       subject: data.subject,

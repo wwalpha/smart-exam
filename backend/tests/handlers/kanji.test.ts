@@ -27,7 +27,7 @@ describe('kanji handler', () => {
     vi.mocked(KanjiRepository.createKanji).mockResolvedValue(mockItem as any);
 
     const req = {
-      body: { kanji: '漢', subject: '国語' },
+      body: { kanji: '漢', subject: '1' },
     } as Request;
     const res = {
       json: vi.fn(),

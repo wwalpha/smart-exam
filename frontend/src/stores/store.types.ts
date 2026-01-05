@@ -29,6 +29,7 @@ import type {
   ImportKanjiRequest,
   ImportKanjiResponse,
   DashboardData,
+  SubjectId,
 } from '@smart-exam/api-types';
 
 /**
@@ -138,7 +139,7 @@ export type ExamSlice = {
   createExamPaper: (request: CreateExamPaperRequest) => Promise<void>;
   createExamPaperWithUpload: (params: {
     grade: string;
-    subject: string;
+    subject: SubjectId;
     category: string;
     name: string;
     questionFile: File;
@@ -148,7 +149,7 @@ export type ExamSlice = {
   createExamResult: (request: CreateExamResultRequest) => Promise<void>;
   createExamResultWithUpload: (params: {
     grade: string;
-    subject: string;
+    subject: SubjectId;
     category: string;
     name: string;
     title: string;

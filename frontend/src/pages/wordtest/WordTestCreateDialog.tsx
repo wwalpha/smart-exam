@@ -12,7 +12,9 @@ type WordTestCreateDialogProps = {
 };
 
 export const WordTestCreateDialog = ({ open, onClose }: WordTestCreateDialogProps) => {
-  const { register, setValue, watch, groups, isCreateDisabled, onCreateClick } = useWordTestCreateDialog({ onClose });
+  const { register, setValue, watch, formState, groups, isCreateDisabled, onCreateClick, error } =
+    useWordTestCreateDialog({ onClose });
+  const { errors } = formState;
 
   const selectedSubject = watch('subject');
 
@@ -25,13 +27,24 @@ export const WordTestCreateDialog = ({ open, onClose }: WordTestCreateDialogProp
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="name">テスト名</Label>
-            <Input id="name" placeholder="例：4年_Daily_テスト" {...register('name', { required: true })} />
+            <Input
+              id="name"
+              placeholder="例：4年_Daily_テスト"
+              {...register('name', { required: '必須です' })}
+              aria-invalid={!!errors.name}
+              className={errors.name ? 'border-destructive focus-visible:ring-destructive' : undefined}
+            />
+            {errors.name?.message ? <p className="text-sm text-destructive">{String(errors.name.message)}</p> : null}
           </div>
 
           <div className="space-y-2">
             <Label>科目</Label>
-            <Select onValueChange={(v) => setValue('subject', v)}>
-              <SelectTrigger>
+            <input type="hidden" {...register('subject', { required: '必須です' })} />
+            <Select onValueChange={(v) => setValue('subject', v, { shouldValidate: true })}>
+              <SelectTrigger
+                aria-invalid={!!errors.subject}
+                className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}
+              >
                 <SelectValue placeholder="選択してください" />
               </SelectTrigger>
               <SelectContent>
@@ -42,12 +55,17 @@ export const WordTestCreateDialog = ({ open, onClose }: WordTestCreateDialogProp
                 ))}
               </SelectContent>
             </Select>
+            {errors.subject?.message ? <p className="text-sm text-destructive">{String(errors.subject.message)}</p> : null}
           </div>
 
           <div className="space-y-2">
             <Label>単語データ選択</Label>
-            <Select onValueChange={(v) => setValue('sourceId', v)} disabled={!selectedSubject}>
-              <SelectTrigger>
+            <input type="hidden" {...register('sourceId', { required: '必須です' })} />
+            <Select onValueChange={(v) => setValue('sourceId', v, { shouldValidate: true })} disabled={!selectedSubject}>
+              <SelectTrigger
+                aria-invalid={!!errors.sourceId}
+                className={errors.sourceId ? 'border-destructive focus:ring-destructive' : undefined}
+              >
                 <SelectValue placeholder={selectedSubject ? '選択してください' : '先に科目を選択してください'} />
               </SelectTrigger>
               <SelectContent>
@@ -60,6 +78,7 @@ export const WordTestCreateDialog = ({ open, onClose }: WordTestCreateDialogProp
                   ))}
               </SelectContent>
             </Select>
+            {errors.sourceId?.message ? <p className="text-sm text-destructive">{String(errors.sourceId.message)}</p> : null}
           </div>
 
           <div className="space-y-2">
@@ -69,8 +88,17 @@ export const WordTestCreateDialog = ({ open, onClose }: WordTestCreateDialogProp
               type="number"
               min={1}
               max={50}
-              {...register('count', { required: true, min: 1, max: 50 })}
+              {...register('count', {
+                required: '必須です',
+                valueAsNumber: true,
+                min: { value: 1, message: '1以上で入力してください' },
+                max: { value: 50, message: '50以下で入力してください' },
+              })}
+              aria-invalid={!!errors.count}
+              className={errors.count ? 'border-destructive focus-visible:ring-destructive' : undefined}
             />
+            {errors.count?.message ? <p className="text-sm text-destructive">{String(errors.count.message)}</p> : null}
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
         </div>
         <DialogFooter>

@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useQuestionSearch } from '@/hooks/search';
+import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 export const QuestionSearchPage = () => {
   const { results, isSearching, form, submit } = useQuestionSearch();
@@ -27,15 +29,15 @@ export const QuestionSearchPage = () => {
             </div>
             <div className="w-40 space-y-2">
               <Label>科目</Label>
-              <Select onValueChange={(v) => setValue('subject', v)} defaultValue="ALL">
+              <Select onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)} defaultValue="ALL">
                 <SelectTrigger>
                   <SelectValue placeholder="科目" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">全て</SelectItem>
-                  <SelectItem value="算数">算数</SelectItem>
-                  <SelectItem value="理科">理科</SelectItem>
-                  <SelectItem value="社会">社会</SelectItem>
+                  <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
+                  <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
+                  <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -67,7 +69,9 @@ export const QuestionSearchPage = () => {
               results.map((result) => (
                 <TableRow key={result.id}>
                   <TableCell>
-                    <Badge variant="outline">{result.subject}</Badge>
+                    <Badge variant="outline">
+                      {SUBJECT_LABEL[result.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                    </Badge>
                   </TableCell>
                   <TableCell>{result.unit}</TableCell>
                   <TableCell>{result.questionText}</TableCell>

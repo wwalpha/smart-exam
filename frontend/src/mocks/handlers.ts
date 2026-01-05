@@ -81,6 +81,18 @@ const subject_definitions: Record<WordTestSubject, { seed_items: WordTestItem[] 
       },
     ],
   },
+  [SUBJECT.science]: {
+    seed_items: [
+      { qid: 'science_1', question: '光合成', answer: '光合成' },
+      { qid: 'science_2', question: '月の満ち欠け', answer: '満ち欠け' },
+    ],
+  },
+  [SUBJECT.math]: {
+    seed_items: [
+      { qid: 'math_1', question: '120÷3', answer: '40' },
+      { qid: 'math_2', question: '時速4kmで2時間', answer: '8km' },
+    ],
+  },
 };
 
 function clone_seed_items(subject: WordTestSubject): WordTestItem[] {
@@ -148,7 +160,7 @@ let examPapers: ExamPaper[] = [
   {
     paperId: 'paper_1',
     grade: '6',
-    subject: 'math',
+    subject: SUBJECT.math,
     category: 'mock',
     name: 'Mock Exam Paper',
     questionPdfKey: 'uploads/mock-question.pdf',
@@ -162,7 +174,7 @@ let materialSets: MaterialSet[] = [
   {
     id: 'mat_1',
     name: 'Mock Material Set',
-    subject: 'math',
+    subject: SUBJECT.math,
     yearMonth: '2025-12',
     date: '2025-12-01',
   },
@@ -175,7 +187,7 @@ let questionsByMaterialSetId: Record<string, Question[]> = {
       materialSetId: 'mat_1',
       canonicalKey: 'mock-1',
       displayLabel: '1',
-      subject: 'math',
+      subject: SUBJECT.math,
     },
   ],
 };
@@ -185,7 +197,7 @@ let kanjiItems: Kanji[] = [
     id: 'k_1',
     kanji: '試',
     reading: 'し',
-    subject: '国語',
+    subject: SUBJECT.japanese,
   },
 ];
 
@@ -493,7 +505,7 @@ export const handlers = [
   http.post('/api/kanji/import', async ({ request }) => {
     const body = (await request.json()) as ImportKanjiRequest;
 
-    if (!body.subject || String(body.subject).trim().length === 0) {
+    if (!body.subject) {
       const response: ImportKanjiResponse = {
         successCount: 0,
         duplicateCount: 0,
@@ -502,6 +514,8 @@ export const handlers = [
       };
       return HttpResponse.json(response);
     }
+
+    const subject = body.subject;
 
     const lines = body.fileContent
       .split('\n')
@@ -518,7 +532,6 @@ export const handlers = [
       const cols = (isPipe ? line.split('|') : line.split(',')).map((x: string) => x.trim());
       const kanji = cols[0] ?? '';
       const reading = cols[1] ?? '';
-      const subject = String(body.subject).trim();
 
       if (!kanji) {
         errorCount += 1;
@@ -526,7 +539,7 @@ export const handlers = [
         return;
       }
 
-      const exists = kanjiItems.some((x) => x.kanji === kanji && (subject ? x.subject === subject : true));
+      const exists = kanjiItems.some((x) => x.kanji === kanji && x.subject === subject);
       if (exists && body.mode === 'SKIP') {
         duplicateCount += 1;
         return;
@@ -535,11 +548,11 @@ export const handlers = [
       if (exists && body.mode === 'UPDATE') {
         kanjiItems = kanjiItems.map((x) => {
           if (x.kanji !== kanji) return x;
-          if (subject && x.subject !== subject) return x;
+          if (x.subject !== subject) return x;
           return {
             ...x,
             reading: reading || x.reading,
-            subject: subject || x.subject,
+            subject,
           };
         });
         successCount += 1;
@@ -816,7 +829,7 @@ export const handlers = [
     const all = [
       {
         id: '1',
-        subject: '算数',
+        subject: SUBJECT.math,
         unit: '速さ',
         questionText: '時速4kmで2時間歩くと何km進みますか？',
         sourceMaterialId: 'm1',
@@ -824,7 +837,7 @@ export const handlers = [
       },
       {
         id: '2',
-        subject: '理科',
+        subject: SUBJECT.science,
         unit: '植物',
         questionText: '光合成に必要なものは何ですか？',
         sourceMaterialId: 'm2',

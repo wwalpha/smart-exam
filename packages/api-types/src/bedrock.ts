@@ -1,6 +1,8 @@
+import type { SubjectId } from './subject';
+
 export type AnalyzePaperRequest = {
   s3Key: string;
-  subject: string;
+  subject: SubjectId;
 };
 
 export type AnalyzePaperResponse = {

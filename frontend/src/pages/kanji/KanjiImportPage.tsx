@@ -4,15 +4,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useKanjiImport } from '@/hooks/kanji';
+import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 export const KanjiImportPage = () => {
-  const { form, submit, isSubmitting, error } = useKanjiImport();
+  const { form, submit, isSubmitting, error, validationErrors } = useKanjiImport();
   const { register, setValue, watch } = form;
   const subject = watch('subject');
+  const subjectErrorMessage = form.formState.errors.subject?.message;
   const fileErrorMessage = form.formState.errors.file?.message;
 
   return (
-    <div className="space-y-6 p-8 max-w-2xl mx-auto">
+    <div className="space-y-6 p-8 max-w-3xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle>ファイルアップロード</CardTitle>
@@ -21,27 +24,46 @@ export const KanjiImportPage = () => {
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
               <Label>科目（必須）</Label>
-              <input type="hidden" {...register('subject')} />
+              <input type="hidden" {...register('subject', { required: '必須です' })} />
               <Select
                 value={subject}
-                onValueChange={(v) => setValue('subject', v, { shouldDirty: true })}
-              >
-                <SelectTrigger>
+                onValueChange={(v) =>
+                  setValue('subject', v as WordTestSubject, { shouldDirty: true, shouldValidate: true })
+                }>
+                <SelectTrigger
+                  aria-invalid={!!form.formState.errors.subject}
+                  className={form.formState.errors.subject ? 'border-destructive focus:ring-destructive' : undefined}>
                   <SelectValue placeholder="科目を選択" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="国語">国語</SelectItem>
-                  <SelectItem value="社会">社会</SelectItem>
+                  <SelectItem value={SUBJECT.japanese}>{SUBJECT_LABEL[SUBJECT.japanese]}</SelectItem>
+                  <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                 </SelectContent>
               </Select>
+              {subjectErrorMessage ? <p className="text-sm text-destructive">{String(subjectErrorMessage)}</p> : null}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3 rounded-md border p-4">
               <Label>ファイル</Label>
-              <p className="text-sm text-muted-foreground">形式: 問題|解答|YYYY/MM/DD,OK|YYYY/MM/DD,NG (1行1件 / DATEは任意)</p>
-              <Input type="file" accept="text/plain,.txt,.csv" {...register('file', { required: true })} />
-              {fileErrorMessage ? (
-                <p className="text-sm text-destructive">{fileErrorMessage}</p>
+              <p className="text-sm text-muted-foreground">
+                形式: 問題|解答|YYYY/MM/DD,OK|YYYY/MM/DD,NG (1行1件 / DATEは任意)
+              </p>
+              <Input
+                type="file"
+                accept="text/plain,.txt"
+                {...register('file', { required: '必須です' })}
+                aria-invalid={!!form.formState.errors.file}
+                className={form.formState.errors.file ? 'border-destructive focus-visible:ring-destructive' : undefined}
+              />
+              {fileErrorMessage ? <p className="text-sm text-destructive">{fileErrorMessage}</p> : null}
+              {validationErrors.length > 0 ? (
+                <div className="space-y-1">
+                  {validationErrors.map((message, index) => (
+                    <p key={index} className="text-sm text-destructive break-words">
+                      {message}
+                    </p>
+                  ))}
+                </div>
               ) : null}
               {error ? <p className="text-sm text-destructive">{error}</p> : null}
             </div>

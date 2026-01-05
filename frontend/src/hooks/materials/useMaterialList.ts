@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
+import type { WordTestSubject } from '@typings/wordtest';
 
 type SearchFormValues = {
-  subject: string;
+  subject: 'ALL' | WordTestSubject;
   grade: string;
   q: string;
 };

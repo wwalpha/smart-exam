@@ -3,9 +3,10 @@ import { AttemptTable, AttemptResultItem } from '../types/db';
 import { Attempt, AttemptResult } from './repo.types';
 import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
+import type { SubjectId } from '@smart-exam/api-types';
 
 export const AttemptsRepository = {
-  createAttempt: async (testId: string, subjectId: string): Promise<Attempt> => {
+  createAttempt: async (testId: string, subjectId: SubjectId): Promise<Attempt> => {
     const now = DateUtils.now();
     const id = createUuid();
     

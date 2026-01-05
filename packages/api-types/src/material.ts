@@ -1,3 +1,5 @@
+import type { SubjectId } from './subject';
+
 /** `GET /material-sets/:materialSetId` */
 export type GetMaterialSetParams = {
   materialSetId: string;
@@ -31,7 +33,7 @@ export type UpdateQuestionParams = {
 /** 教材セット作成リクエスト */
 export type CreateMaterialSetRequest = {
   name: string;
-  subject: string;
+  subject: SubjectId;
   /** 教材年月 (YYYY-MM) */
   yearMonth: string;
   grade?: string;
@@ -67,7 +69,7 @@ export type MaterialSetListResponse = {
 
 /** `POST /material-sets/search` */
 export type SearchMaterialSetsRequest = {
-  subject?: string;
+  subject?: SubjectId;
   grade?: string;
   provider?: string;
   from?: string;
@@ -118,7 +120,7 @@ export type Question = {
   /** 表示ラベル（問題番号など） */
   displayLabel: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** カテゴリ/分野 */
   category?: string;
   /** タグ */
@@ -129,7 +131,7 @@ export type Question = {
 export type CreateQuestionRequest = {
   canonicalKey: string;
   displayLabel: string;
-  subject: string;
+  subject: SubjectId;
   category?: string;
   tags?: string[];
 };
@@ -152,7 +154,7 @@ export type MaterialSet = {
   /** 名称 */
   name: string;
   /** 科目 */
-  subject: string;
+  subject: SubjectId;
   /** 学年 */
   grade?: string;
   /** 提供元（SAPIX, YOTSUYA, etc.） */

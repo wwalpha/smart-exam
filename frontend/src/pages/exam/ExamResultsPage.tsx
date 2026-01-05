@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useExamResults } from '@/hooks/exam';
 import { SUBJECT_LABEL } from '@/lib/Consts';
+import type { SubjectId } from '@smart-exam/api-types';
 
 export const ExamResultsPage = () => {
   const {
@@ -14,11 +15,14 @@ export const ExamResultsPage = () => {
     fieldArray,
     submit,
   } = useExamResults();
-  const { register, setValue, formState: { isSubmitting } } = form;
+  const {
+    register,
+    setValue,
+    formState: { isSubmitting, errors },
+    watch,
+  } = form;
   const { fields, append } = fieldArray;
-
-  // Watch fields to auto-fill or filter if needed (not implemented in original, but good practice)
-  // For now just basic implementation matching original logic
+  const subject = watch('subject');
 
   return (
     <div className="space-y-6 p-8">
@@ -33,11 +37,25 @@ export const ExamResultsPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>タイトル</Label>
-                <Input {...register('title', { required: true })} placeholder="例: 初回挑戦" />
+                <Input
+                  {...register('title', { required: '必須です' })}
+                  aria-invalid={!!errors.title}
+                  className={errors.title ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                  placeholder="例: 初回挑戦"
+                />
+                {errors.title?.message ? <p className="text-sm text-destructive">{String(errors.title.message)}</p> : null}
               </div>
               <div className="space-y-2">
                 <Label>実施日</Label>
-                <Input type="date" {...register('testDate', { required: true })} />
+                <Input
+                  type="date"
+                  {...register('testDate', { required: '必須です' })}
+                  aria-invalid={!!errors.testDate}
+                  className={errors.testDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                />
+                {errors.testDate?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.testDate.message)}</p>
+                ) : null}
               </div>
               <div className="col-span-2 space-y-2">
                 <Label>採点済み回答用紙 (PDF)</Label>
@@ -48,12 +66,22 @@ export const ExamResultsPage = () => {
             <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-4">
               <div className="space-y-2">
                 <Label>学年</Label>
-                <Input {...register('grade', { required: true })} placeholder="例: 4年" />
+                <Input
+                  {...register('grade', { required: '必須です' })}
+                  aria-invalid={!!errors.grade}
+                  className={errors.grade ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                  placeholder="例: 4年"
+                />
+                {errors.grade?.message ? <p className="text-sm text-destructive">{String(errors.grade.message)}</p> : null}
               </div>
               <div className="space-y-2">
                 <Label>科目</Label>
-                <Select onValueChange={(v) => setValue('subject', v)}>
-                  <SelectTrigger>
+                <input type="hidden" {...register('subject', { required: '必須です' })} />
+                <Select value={subject} onValueChange={(v) => setValue('subject', v as SubjectId, { shouldValidate: true })}>
+                  <SelectTrigger
+                    aria-invalid={!!errors.subject}
+                    className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}
+                  >
                     <SelectValue placeholder="選択してください" />
                   </SelectTrigger>
                   <SelectContent>
@@ -64,14 +92,29 @@ export const ExamResultsPage = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.subject?.message ? <p className="text-sm text-destructive">{String(errors.subject.message)}</p> : null}
               </div>
               <div className="space-y-2">
                 <Label>カテゴリ</Label>
-                <Input {...register('category', { required: true })} placeholder="例: Daily" />
+                <Input
+                  {...register('category', { required: '必須です' })}
+                  aria-invalid={!!errors.category}
+                  className={errors.category ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                  placeholder="例: Daily"
+                />
+                {errors.category?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.category.message)}</p>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <Label>回数/名前</Label>
-                <Input {...register('name', { required: true })} placeholder="例: No.10" />
+                <Input
+                  {...register('name', { required: '必須です' })}
+                  aria-invalid={!!errors.name}
+                  className={errors.name ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                  placeholder="例: No.10"
+                />
+                {errors.name?.message ? <p className="text-sm text-destructive">{String(errors.name.message)}</p> : null}
               </div>
             </div>
 

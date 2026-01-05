@@ -1,6 +1,8 @@
 /**
  * ダッシュボード表示用データ
  */
+import type { SubjectId } from './subject';
+
 export type DashboardData = {
   /** 本日のテスト実施回数 */
   todayTestCount: number;
@@ -13,7 +15,7 @@ export type DashboardData = {
     /** 不正解率 (0.0 - 1.0) */
     incorrectRate: number;
     /** 科目 */
-    subject: string;
+    subject: SubjectId;
   }[];
   /** ロック中のアイテム数 */
   lockedCount: number;
