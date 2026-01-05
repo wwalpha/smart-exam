@@ -9,13 +9,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const backendRoot = path.resolve(__dirname, '..');
+const monorepoRoot = path.resolve(backendRoot, '..');
 const distDir = path.join(backendRoot, 'dist');
 const outDir = path.join(backendRoot, 'lambda');
 
 const entryFiles = [path.join(distDir, 'index.js'), path.join(distDir, 'handlers', 'bedrock.js')];
-
-// Layerを使わない前提のため、確実に同梱したい依存はここで固定指定する
-const forceIncludePackages = ['@sparticuz/chromium', 'puppeteer-core'];
 
 const ensureExists = async (filePath) => {
   try {
@@ -48,7 +46,15 @@ const copyDir = async (srcAbs, dstAbs) => {
 
       if (entry.isSymbolicLink()) {
         const linkTarget = await fs.readlink(srcChild);
-        await fs.symlink(linkTarget, dstChild);
+        const resolvedTarget = path.resolve(path.dirname(srcChild), linkTarget);
+
+        const stat = await fs.stat(resolvedTarget);
+        if (stat.isDirectory()) {
+          await copyDir(resolvedTarget, dstChild);
+          return;
+        }
+
+        await fs.copyFile(resolvedTarget, dstChild);
         return;
       }
 
@@ -82,6 +88,44 @@ const resolvePackageRoot = async (pkgName) => {
   }
 };
 
+const resolvePhysicalNodeModulesPackageRoot = async (pkgName) => {
+  const physicalPath = path.join(monorepoRoot, 'node_modules', ...pkgName.split('/'));
+  try {
+    const stat = await fs.stat(physicalPath);
+    return stat.isDirectory() ? physicalPath : null;
+  } catch {
+    return null;
+  }
+};
+
+const pruneNonRuntimeFiles = async (rootAbs) => {
+  const entries = await fs.readdir(rootAbs, { withFileTypes: true });
+  await Promise.all(
+    entries.map(async (entry) => {
+      const absPath = path.join(rootAbs, entry.name);
+
+      if (entry.isDirectory()) {
+        await pruneNonRuntimeFiles(absPath);
+        return;
+      }
+
+      const lower = entry.name.toLowerCase();
+      const isRemovable =
+        lower.endsWith('.d.ts') ||
+        lower.endsWith('.map') ||
+        lower.endsWith('.md') ||
+        lower === 'license' ||
+        lower.startsWith('license.') ||
+        lower === 'readme' ||
+        lower.startsWith('readme.');
+
+      if (isRemovable) {
+        await fs.rm(absPath, { force: true });
+      }
+    })
+  );
+};
+
 const { fileList, warnings } = await nodeFileTrace(entryFiles, {
   base: backendRoot,
   processCwd: backendRoot,
@@ -106,15 +150,15 @@ const copyFile = async (srcRelative) => {
 
 await Promise.all(Array.from(fileList).map(copyFile));
 
-for (const pkgName of forceIncludePackages) {
-  const pkgRoot = await resolvePackageRoot(pkgName);
-  if (!pkgRoot) {
-    throw new Error(`Missing dependency for packaging: ${pkgName}. Install it in backend dependencies.`);
+// Runtimeで参照する静的アセット（フォント等）を同梱する
+try {
+  const assetsDir = path.join(backendRoot, 'assets');
+  const stat = await fs.stat(assetsDir);
+  if (stat.isDirectory()) {
+    await copyDir(assetsDir, path.join(outDir, 'assets'));
   }
-
-  const pkgOutPath = path.join(outDir, 'node_modules', ...pkgName.split('/'));
-  // nodeFileTrace が拾いきれないケース（動的require等）でも確実に同梱する
-  await copyDir(pkgRoot, pkgOutPath);
+} catch {
+  // assets が無い環境でも動作させる（PDF生成時に読み込みで失敗する）
 }
 
 // Lambda Node.js runtime: CommonJSで動かす（handlerが module.exports 前提）

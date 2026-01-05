@@ -1,7 +1,4 @@
 import { ReviewTestRepository } from '@/repositories';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { s3Client } from '@/lib/aws';
-import { ENV } from '@/lib/env';
 import { ReviewTestPdfService } from '@/services/ReviewTestPdfService';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
@@ -127,18 +124,6 @@ export const getReviewTestPdf: AsyncHandler<
   }
 
   const pdfBuffer = await ReviewTestPdfService.generatePdfBuffer(review);
-
-  if (ENV.FILES_BUCKET_NAME) {
-    const key = `review-tests/${testId}.pdf`;
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: ENV.FILES_BUCKET_NAME,
-        Key: key,
-        Body: pdfBuffer,
-        ContentType: 'application/pdf',
-      })
-    );
-  }
 
   const wantDownload =
     req.query.download === '1' || req.query.download === 'true' || req.query.disposition === 'attachment';

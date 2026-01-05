@@ -30,12 +30,5 @@ await build({
       tsconfig: path.join(backendRoot, 'tsconfig.json'),
     }),
   ],
-  external: [
-    // 要望: AWS SDK をビルド成果物に含めない
-    '@aws-sdk/*',
-
-    // Lambda上でファイル同梱が必要な大型依存（nodeFileTrace側で必要ファイルを集める）
-    '@sparticuz/chromium',
-    'puppeteer-core',
-  ],
+  external: [],
 });

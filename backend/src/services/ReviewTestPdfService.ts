@@ -1,110 +1,218 @@
-import chromium from '@sparticuz/chromium';
-import puppeteer from 'puppeteer-core';
-
-import { ENV } from '@/lib/env';
-import { logger } from '@/lib/logger';
 import type { ReviewTestDetail } from '@smart-exam/api-types';
-
-const escapeHtml = (value: string): string => {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-};
-
-const buildHtml = (review: ReviewTestDetail): string => {
-  const title = `復習テスト (${review.subject})`;
-  const createdAt = escapeHtml(review.createdAt);
-
-  const itemsHtml = review.items
-    .map((item, idx) => {
-      const questionText =
-        item.questionText ?? item.displayLabel ?? item.canonicalKey ?? item.kanji ?? item.targetId ?? '';
-
-      return `
-<div class="item">
-  <div class="q">
-    <span class="no">${idx + 1}.</span>
-    <span class="text">${escapeHtml(questionText)}</span>
-  </div>
-  <div class="lines">
-    <div class="line"></div>
-    <div class="line"></div>
-  </div>
-</div>`;
-    })
-    .join('\n');
-
-  return `<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(title)}</title>
-  <style>
-    @page { size: A4; margin: 12mm; }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif; color: #000; }
-    .header { display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10mm; }
-    .title { font-size: 18px; font-weight: 700; }
-    .meta { font-size: 12px; }
-    .items { display:flex; flex-direction: column; gap: 8mm; }
-    .item { break-inside: avoid; }
-    .q { display:flex; gap: 6px; font-size: 14px; }
-    .no { width: 26px; text-align: right; flex: 0 0 auto; }
-    .text { flex: 1 1 auto; white-space: pre-wrap; word-break: break-word; }
-    .lines { margin-left: 32px; margin-top: 4mm; display:flex; flex-direction: column; gap: 4mm; }
-    /* 要望: 解答欄を2倍長く -> 用紙幅いっぱいに引く */
-    .line { width: 100%; border-bottom: 1px solid #000; height: 10mm; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="title">${escapeHtml(title)}</div>
-    <div class="meta">作成日時: ${createdAt}</div>
-  </div>
-
-  <div class="items">
-    ${itemsHtml}
-  </div>
-</body>
-</html>`;
-};
 
 export const ReviewTestPdfService = {
   generatePdfBuffer: async (review: ReviewTestDetail): Promise<Buffer> => {
-    const html = buildHtml(review);
+    const { PDFDocument, rgb } = await import('pdf-lib');
+    const fontkit = (await import('@pdf-lib/fontkit')).default;
 
-    const executablePath = await chromium.executablePath();
+    const mmToPt = (mm: number): number => (mm * 72) / 25.4;
 
-    const browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath,
-      headless: true,
-    });
+    const a4Width = 595.28;
+    const a4Height = 841.89;
 
-    try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+    const margin = mmToPt(12);
+    const headerGap = mmToPt(10);
+    const itemGap = mmToPt(8);
+    const afterQuestionGap = mmToPt(4);
+    const answerLineGap = mmToPt(4);
+    const answerBoxHeight = mmToPt(10);
 
-      const pdf = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        preferCSSPageSize: true,
+    const numberColWidth = 26;
+    const numberGap = 6;
+
+    const titleFontSize = 18;
+    const metaFontSize = 12;
+    const questionFontSize = 14;
+    const questionLineHeight = questionFontSize * 1.35;
+
+    const title = `復習テスト (${review.subject})`;
+    const meta = `作成日時: ${review.createdAt}`;
+
+    const fontBytes = await loadJapaneseFontBytes();
+
+    const pdfDoc = await PDFDocument.create();
+    pdfDoc.registerFontkit(fontkit);
+
+    // CJKフォントはサイズが大きいので、使用グリフのみ埋め込み（zipもPDFも小さくする）
+    const jpFont = await pdfDoc.embedFont(fontBytes, { subset: true });
+
+    const createPage = () => {
+      const page = pdfDoc.addPage([a4Width, a4Height]);
+      const contentWidth = a4Width - margin * 2;
+
+      const titleY = a4Height - margin - titleFontSize;
+      page.drawText(title, {
+        x: margin,
+        y: titleY,
+        size: titleFontSize,
+        font: jpFont,
+        color: rgb(0, 0, 0),
       });
 
-      return Buffer.from(pdf);
-    } catch (e) {
-      logger.error('Failed to generate review test PDF', {
-        err: e,
-        testId: review.testId,
-        bucket: ENV.FILES_BUCKET_NAME,
+      const metaWidth = jpFont.widthOfTextAtSize(meta, metaFontSize);
+      page.drawText(meta, {
+        x: margin + contentWidth - metaWidth,
+        y: titleY,
+        size: metaFontSize,
+        font: jpFont,
+        color: rgb(0, 0, 0),
       });
-      throw e;
-    } finally {
-      await browser.close();
+
+      let cursorY = titleY - headerGap;
+      return { page, contentWidth, cursorY };
+    };
+
+    const wrapTextByChar = (text: string, maxWidth: number): string[] => {
+      const normalized = text.replaceAll('\r\n', '\n');
+      const paragraphs = normalized.split('\n');
+      const lines: string[] = [];
+
+      for (const paragraph of paragraphs) {
+        if (paragraph.length === 0) {
+          lines.push('');
+          continue;
+        }
+
+        let current = '';
+        for (const ch of Array.from(paragraph)) {
+          const candidate = current + ch;
+          const width = jpFont.widthOfTextAtSize(candidate, questionFontSize);
+
+          if (width <= maxWidth) {
+            current = candidate;
+            continue;
+          }
+
+          if (current.length === 0) {
+            // 1文字でも幅を超えるケースはそのまま描画
+            lines.push(candidate);
+            current = '';
+            continue;
+          }
+
+          lines.push(current);
+          current = ch;
+        }
+
+        if (current.length > 0) {
+          lines.push(current);
+        }
+      }
+
+      return lines;
+    };
+
+    const getQuestionText = (item: ReviewTestDetail['items'][number]): string => {
+      return (
+        item.questionText ??
+        item.displayLabel ??
+        item.canonicalKey ??
+        item.kanji ??
+        item.targetId ??
+        ''
+      );
+    };
+
+    let { page, contentWidth, cursorY } = createPage();
+
+    const answerX = margin + numberColWidth + numberGap;
+    const answerRightX = margin + contentWidth;
+    const questionWidth = contentWidth - numberColWidth - numberGap;
+
+    for (let idx = 0; idx < review.items.length; idx += 1) {
+      const item = review.items[idx];
+      const questionText = getQuestionText(item);
+      const wrapped = wrapTextByChar(questionText, questionWidth);
+      const questionHeight = wrapped.length * questionLineHeight;
+      const requiredHeight =
+        questionHeight +
+        afterQuestionGap +
+        answerBoxHeight * 2 +
+        answerLineGap +
+        itemGap;
+
+      if (cursorY - requiredHeight < margin) {
+        ({ page, contentWidth, cursorY } = createPage());
+      }
+
+      // Question number
+      const noText = `${idx + 1}.`;
+      const noWidth = jpFont.widthOfTextAtSize(noText, questionFontSize);
+      page.drawText(noText, {
+        x: margin + numberColWidth - noWidth,
+        y: cursorY - questionFontSize,
+        size: questionFontSize,
+        font: jpFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Question text (wrapped)
+      for (const line of wrapped) {
+        page.drawText(line, {
+          x: answerX,
+          y: cursorY - questionFontSize,
+          size: questionFontSize,
+          font: jpFont,
+          color: rgb(0, 0, 0),
+        });
+        cursorY -= questionLineHeight;
+      }
+
+      cursorY -= afterQuestionGap;
+
+      // Answer lines (2)
+      for (let i = 0; i < 2; i += 1) {
+        cursorY -= answerBoxHeight;
+        page.drawLine({
+          start: { x: answerX, y: cursorY },
+          end: { x: answerRightX, y: cursorY },
+          thickness: 1,
+          color: rgb(0, 0, 0),
+        });
+        cursorY -= answerLineGap;
+      }
+
+      cursorY -= itemGap;
     }
+
+    const bytes = await pdfDoc.save();
+    return Buffer.from(bytes);
   },
+};
+
+let cachedJapaneseFontBytes: Uint8Array | null = null;
+
+const loadJapaneseFontBytes = async (): Promise<Uint8Array> => {
+  if (cachedJapaneseFontBytes) return cachedJapaneseFontBytes;
+
+  const { gunzip } = await import('node:zlib');
+  const { promisify } = await import('node:util');
+  const gunzipAsync = promisify(gunzip);
+  const { readFile, stat } = await import('node:fs/promises');
+  const path = await import('node:path');
+
+  const fontRelativePath = path.join('assets', 'fonts', 'NotoSansJP-wght.ttf.gz');
+  const candidates = [path.join(process.cwd(), fontRelativePath), path.join(process.cwd(), 'backend', fontRelativePath)];
+
+  let fontGzPath: string | null = null;
+  for (const candidate of candidates) {
+    try {
+      const s = await stat(candidate);
+      if (s.isFile()) {
+        fontGzPath = candidate;
+        break;
+      }
+    } catch {
+      // try next
+    }
+  }
+
+  if (!fontGzPath) {
+    throw new Error(`Font asset is missing: ${fontRelativePath}`);
+  }
+
+  const gz = await readFile(fontGzPath);
+  const font = (await gunzipAsync(gz)) as Buffer;
+  cachedJapaneseFontBytes = new Uint8Array(font);
+  return cachedJapaneseFontBytes;
 };
