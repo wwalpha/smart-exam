@@ -622,11 +622,41 @@ export const handlers = [
       id: x.id,
       testId: x.testId,
       subject: x.subject,
+      mode: x.mode,
       createdAt: x.createdAt,
       createdDate: x.createdDate,
       status: x.status,
+      pdf: x.pdf,
       itemCount: x.itemCount,
     }));
+    const response: ReviewTestListResponse = { items, total: items.length };
+    return HttpResponse.json(response);
+  }),
+
+  http.post('/api/review-tests/search', async ({ request }) => {
+    const body = (await request.json().catch(() => null)) as
+      | { subject?: string; status?: string; mode?: 'QUESTION' | 'KANJI' }
+      | null;
+
+    const filtered = reviewTests.filter((x) => {
+      if (body?.mode && x.mode !== body.mode) return false;
+      if (body?.subject && body.subject !== 'ALL' && x.subject !== body.subject) return false;
+      if (body?.status && body.status !== 'ALL' && x.status !== body.status) return false;
+      return true;
+    });
+
+    const items = filtered.map((x) => ({
+      id: x.id,
+      testId: x.testId,
+      subject: x.subject,
+      mode: x.mode,
+      createdAt: x.createdAt,
+      createdDate: x.createdDate,
+      status: x.status,
+      pdf: x.pdf,
+      itemCount: x.itemCount,
+    }));
+
     const response: ReviewTestListResponse = { items, total: items.length };
     return HttpResponse.json(response);
   }),
@@ -635,13 +665,19 @@ export const handlers = [
     const body = (await request.json()) as CreateReviewTestRequest;
     const id = `rt_${newId()}`;
     const createdAt = new Date().toISOString();
+    const mode = body.mode;
     const detail: ReviewTestDetail = {
       id,
       testId: id,
       subject: body.subject,
+      mode,
       createdAt,
       createdDate: new Date().toISOString().slice(0, 10),
       status: 'IN_PROGRESS',
+      pdf: {
+        url: `/api/review-tests/${id}/pdf`,
+        downloadUrl: `/api/review-tests/${id}/pdf?download=1`,
+      },
       itemCount: body.count,
       items: Array.from({ length: body.count }).map((_, i) => ({
         id: `${id}_item_${i + 1}`,
@@ -657,9 +693,11 @@ export const handlers = [
       id: detail.id,
       testId: detail.testId,
       subject: detail.subject,
+      mode: detail.mode,
       createdAt: detail.createdAt,
       createdDate: detail.createdDate,
       status: detail.status,
+      pdf: detail.pdf,
       itemCount: detail.itemCount,
     };
     return HttpResponse.json(response, { status: 201 });
@@ -690,9 +728,11 @@ export const handlers = [
       id: updated.id,
       testId: updated.testId,
       subject: updated.subject,
+      mode: updated.mode,
       createdAt: updated.createdAt,
       createdDate: updated.createdDate,
       status: updated.status,
+      pdf: updated.pdf,
       itemCount: updated.itemCount,
     };
     return HttpResponse.json(response);

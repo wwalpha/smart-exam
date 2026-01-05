@@ -80,6 +80,7 @@ app.get('/api/tests/:testId/attempts/latest', handleRequest(attemptHandler.getLa
 
 // Review Tests
 app.get('/api/review-tests', handleRequest(reviewTestHandler.listReviewTests));
+app.post('/api/review-tests/search', handleRequest(reviewTestHandler.searchReviewTests));
 app.post('/api/review-tests', handleRequest(reviewTestHandler.createReviewTest));
 app.get('/api/review-tests/:testId', handleRequest(reviewTestHandler.getReviewTest));
 app.get('/api/review-tests/:testId/pdf', handleRequest(reviewTestHandler.getReviewTestPdf));

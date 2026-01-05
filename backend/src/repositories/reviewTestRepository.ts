@@ -247,9 +247,14 @@ const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
   id: row.testId,
   testId: row.testId,
   subject: row.subject,
+  mode: row.mode,
   createdDate: row.createdDate,
   createdAt: row.createdAt ?? DateUtils.format(`${row.createdDate}T00:00:00+09:00`),
-  status: row.status,
+  status: row.status === 'CANCELED' ? 'IN_PROGRESS' : row.status,
+  pdf: {
+    url: `/api/review-tests/${row.testId}/pdf`,
+    downloadUrl: `/api/review-tests/${row.testId}/pdf?download=1`,
+  },
   itemCount: row.generatedCount,
 });
 
@@ -440,12 +445,6 @@ export const ReviewTestRepository = {
   updateReviewTestStatus: async (testId: string, req: UpdateReviewTestStatusRequest): Promise<ReviewTest | null> => {
     const existing = await getReviewTestRow(testId);
     if (!existing) return null;
-
-    // 要件 8.5: CANCELED のときだけロック解除
-    if (req.status === 'CANCELED') {
-      const items = await listReviewTestItemRows(testId);
-      await Promise.all(items.map((i) => releaseLock(i.targetType, i.targetId)));
-    }
 
     const result = await dbHelper.update({
       TableName: TABLE_REVIEW_TESTS,

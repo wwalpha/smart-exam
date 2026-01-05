@@ -20,8 +20,6 @@ export const ReviewTestListPage = () => {
         return <Badge variant="default">完了</Badge>;
       case 'IN_PROGRESS':
         return <Badge variant="secondary">実施中</Badge>;
-      case 'CANCELED':
-        return <Badge variant="destructive">中止</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -67,7 +65,6 @@ export const ReviewTestListPage = () => {
                     <SelectItem value="ALL">全て</SelectItem>
                     <SelectItem value="IN_PROGRESS">実施中</SelectItem>
                     <SelectItem value="COMPLETED">完了</SelectItem>
-                    <SelectItem value="CANCELED">中止</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

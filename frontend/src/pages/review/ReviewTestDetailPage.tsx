@@ -1,24 +1,18 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewDetail } from '@/hooks/review';
 import { formatYmdHmSlash } from '@/utils/date';
-
-type ReviewTestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
+import { SUBJECT_LABEL } from '@/lib/Consts';
 
 export const ReviewTestDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewDetail();
-  const [statusDraft, setStatusDraft] = useState<ReviewTestStatus>('IN_PROGRESS');
-
-  useEffect(() => {
-    if (review) {
-      setStatusDraft(review.status);
-    }
-  }, [review]);
+  const complete = useCallback(async () => {
+    if (!review) return;
+    await updateReviewTestStatus(review.id, { status: 'COMPLETED' });
+  }, [review, updateReviewTestStatus]);
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -45,7 +39,15 @@ export const ReviewTestDetailPage = () => {
             <Link to={`${basePath}/${review.id}/grading`}>結果入力</Link>
           </Button>
           <Button asChild>
-            <Link to={`${basePath}/${review.id}/pdf`}>PDF出力</Link>
+            <Link to={`${basePath}/${review.id}/pdf`}>PDFプレビュー</Link>
+          </Button>
+          <Button
+            type="button"
+            variant="default"
+            disabled={review.status === 'COMPLETED'}
+            onClick={complete}
+          >
+            完了
           </Button>
           <Button
             variant="outline"
@@ -62,44 +64,26 @@ export const ReviewTestDetailPage = () => {
             <CardTitle>基本情報</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">科目</span>
-              <span>{review.subject}</span>
-            </div>
-            <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">問題数</span>
-              <span>{review.itemCount}問</span>
-            </div>
-            <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">作成日時</span>
-              <span>{formatYmdHmSlash(review.createdAt)}</span>
-            </div>
-            <div className="space-y-2 border-b pb-2">
+            <div className="grid grid-cols-1 gap-3 border-b pb-3 md:grid-cols-2">
+              <div className="flex justify-between">
+                <span className="font-medium">科目</span>
+                <span>
+                  {review.mode === 'KANJI'
+                    ? '漢字'
+                    : (SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? '')}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">問題数</span>
+                <span>{review.itemCount}問</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">作成日時</span>
+                <span>{formatYmdHmSlash(review.createdAt)}</span>
+              </div>
               <div className="flex justify-between">
                 <span className="font-medium">ステータス</span>
                 <Badge variant="outline">{review.status}</Badge>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Select value={statusDraft} onValueChange={(v) => setStatusDraft(v as ReviewTestStatus)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="ステータス" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
-                    <SelectItem value="COMPLETED">COMPLETED</SelectItem>
-                    <SelectItem value="CANCELED">CANCELED</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={statusDraft === review.status}
-                  onClick={async () => {
-                    await updateReviewTestStatus(review.id, { status: statusDraft });
-                  }}
-                >
-                  保存
-                </Button>
               </div>
             </div>
           </CardContent>
@@ -111,28 +95,24 @@ export const ReviewTestDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="max-h-[400px] overflow-y-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">No.</TableHead>
-                    <TableHead>問題</TableHead>
-                    <TableHead className="w-24">結果</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {review.items.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{item.questionText}</TableCell>
-                      <TableCell>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                {review.items.map((item, index) => (
+                  <div key={item.id} className="rounded border px-3 py-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">
+                          {index + 1}. {item.questionText}
+                        </div>
+                      </div>
+                      <div className="shrink-0">
                         {item.isCorrect === true && <Badge variant="default">正解</Badge>}
                         {item.isCorrect === false && <Badge variant="destructive">不正解</Badge>}
                         {item.isCorrect === undefined && <span className="text-muted-foreground">-</span>}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -12,6 +12,8 @@ import type {
   GetReviewTestParams,
   GetReviewTestResponse,
   ReviewTestListResponse,
+  SearchReviewTestsRequest,
+  SearchReviewTestsResponse,
   SubmitReviewTestResultsRequest,
   UpdateReviewTestStatusRequest,
   UpdateReviewTestStatusParams,
@@ -28,6 +30,21 @@ export const listReviewTests: AsyncHandler<{}, ReviewTestListResponse, {}, Parse
 ) => {
   const items = await ReviewTestRepository.listReviewTests();
   res.json({ items, total: items.length });
+};
+
+export const searchReviewTests: AsyncHandler<{}, SearchReviewTestsResponse, SearchReviewTestsRequest, ParsedQs> = async (
+  req,
+  res
+) => {
+  const items = await ReviewTestRepository.listReviewTests();
+  const filtered = items.filter((x) => {
+    if (req.body?.mode && x.mode !== req.body.mode) return false;
+    if (req.body?.subject && req.body.subject !== 'ALL' && x.subject !== (req.body.subject as any)) return false;
+    if (req.body?.status && req.body.status !== 'ALL' && x.status !== (req.body.status as any)) return false;
+    return true;
+  });
+
+  res.json({ items: filtered, total: filtered.length });
 };
 
 export const createReviewTest: AsyncHandler<

@@ -1,25 +1,74 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useReviewPdf } from '@/hooks/review';
+import { apiRequestBlob } from '@/services/apiClient';
+import { toast } from 'sonner';
 
 export const ReviewTestPdfPage = () => {
   const { review, isLoading, error, basePath, navigate, id, pdfUrl } = useReviewPdf();
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string>('');
+  const [isFetching, setIsFetching] = useState(false);
+
+  useEffect(() => {
+    if (!pdfUrl) return;
+
+    let aborted = false;
+
+    const run = async () => {
+      try {
+        setIsFetching(true);
+        const blob = await apiRequestBlob({ method: 'GET', path: pdfUrl });
+        if (aborted) return;
+        const nextUrl = URL.createObjectURL(blob);
+        setBlobUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return nextUrl;
+        });
+      } catch (e) {
+        toast.error('PDFの取得に失敗しました', {
+          description: e instanceof Error ? e.message : undefined,
+        });
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    run();
+
+    return () => {
+      aborted = true;
+      setBlobUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return '';
+      });
+    };
+  }, [pdfUrl]);
 
   const handleDownload = useCallback(() => {
-    if (!pdfUrl) return;
-    window.location.assign(`${pdfUrl}?download=1`);
-  }, [pdfUrl]);
+    if (!blobUrl) return;
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `review-test-${id ?? 'unknown'}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }, [blobUrl, id]);
 
   const handlePrint = useCallback(() => {
-    if (!pdfUrl) return;
+    const frame = iframeRef.current;
+    if (!frame) return;
 
-    // ポップアップがブロックされる場合は同一タブで開く
-    const win = window.open(pdfUrl, '_blank', 'noopener,noreferrer');
-    if (!win) {
-      window.location.assign(pdfUrl);
+    try {
+      frame.contentWindow?.focus();
+      frame.contentWindow?.print();
+    } catch (e) {
+      toast.error('PDFの印刷に失敗しました', {
+        description: e instanceof Error ? e.message : undefined,
+      });
     }
-  }, [pdfUrl]);
+  }, []);
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -41,10 +90,10 @@ export const ReviewTestPdfPage = () => {
           <Button variant="outline" onClick={() => navigate(`${basePath}/${id}`)}>
             戻る
           </Button>
-          <Button variant="outline" onClick={handlePrint}>
+          <Button variant="outline" onClick={handlePrint} disabled={!blobUrl || isFetching}>
             印刷
           </Button>
-          <Button onClick={handleDownload}>
+          <Button onClick={handleDownload} disabled={!blobUrl || isFetching}>
             ダウンロード
           </Button>
         </div>
@@ -63,7 +112,12 @@ export const ReviewTestPdfPage = () => {
             </div>
 
             <div className="rounded-md border overflow-hidden">
-              <iframe title="review-test-pdf" src={pdfUrl} className="h-[75vh] w-full bg-white" />
+              <iframe
+                ref={iframeRef}
+                title="review-test-pdf"
+                src={blobUrl}
+                className="h-[75vh] w-full bg-white"
+              />
             </div>
           </div>
         </CardContent>

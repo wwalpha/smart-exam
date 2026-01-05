@@ -6,6 +6,11 @@ export type ApiClientRequestParams<TBody> = {
   body?: TBody;
 };
 
+export type ApiClientBlobRequestParams = {
+  method: 'GET' | 'POST';
+  path: string;
+};
+
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APIGW_URL ?? import.meta.env.VITE_API_ENDPOINT,
 });
@@ -28,6 +33,16 @@ export async function apiRequest<TResponse, TBody = undefined>(
   if (response.status === 204) {
     return undefined as unknown as TResponse;
   }
+
+  return response.data;
+}
+
+export async function apiRequestBlob(params: ApiClientBlobRequestParams): Promise<Blob> {
+  const response = await axiosInstance.request<Blob>({
+    method: params.method,
+    url: params.path,
+    responseType: 'blob',
+  });
 
   return response.data;
 }

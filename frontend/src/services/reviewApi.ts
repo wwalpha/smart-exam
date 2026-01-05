@@ -15,15 +15,10 @@ export const listReviewTests = async (params?: {
   limit?: number;
   cursor?: string;
 }): Promise<ReviewTestListResponse> => {
-  const query = new URLSearchParams();
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) query.append(key, String(value));
-    });
-  }
-  return apiRequest<ReviewTestListResponse>({
-    method: 'GET',
-    path: `/api/review-tests?${query.toString()}`,
+  return apiRequest<ReviewTestListResponse, typeof params>({
+    method: 'POST',
+    path: '/api/review-tests/search',
+    body: params,
   });
 };
 
@@ -71,10 +66,4 @@ export const submitReviewTestResults = async (
   });
 };
 
-export const getReviewTestPdfUrl = async (testId: string, type?: 'QUESTION' | 'ANSWER'): Promise<{ url: string }> => {
-  const query = type ? `?type=${type}` : '';
-  return apiRequest<{ url: string }>({
-    method: 'GET',
-    path: `/api/review-tests/${testId}/pdf${query}`,
-  });
-};
+// PDFは /api/review-tests/:testId/pdf (binary) を利用する

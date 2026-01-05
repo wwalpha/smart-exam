@@ -13,12 +13,14 @@ export const useReviewPdf = () => {
   const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);
 
   useEffect(() => {
-    if (id) {
-      fetchReviewTest(id);
-    }
-  }, [id, fetchReviewTest]);
+    if (!id) return;
 
-  const pdfUrl = id ? `/api/review-tests/${id}/pdf` : '';
+    // 既に同一IDの詳細を保持している場合は再取得しない（PDF遷移時の無駄な呼び出し防止）
+    if (currentTest?.id === id || currentTest?.testId === id) return;
+    fetchReviewTest(id);
+  }, [id, fetchReviewTest, currentTest?.id, currentTest?.testId]);
+
+  const pdfUrl = currentTest?.pdf?.url ?? (id ? `/api/review-tests/${id}/pdf` : '');
 
   return {
     id,

@@ -54,6 +54,18 @@ export type ReviewTestListResponse = {
   cursor?: string;
 };
 
+/** `POST /review-tests/search` */
+export type SearchReviewTestsRequest = {
+  subject?: string;
+  status?: string;
+  mode?: 'QUESTION' | 'KANJI';
+  limit?: number;
+  cursor?: string;
+};
+
+/** `POST /review-tests/search` */
+export type SearchReviewTestsResponse = ReviewTestListResponse;
+
 /**
  * 復習テストの出題アイテム
  */
@@ -94,7 +106,7 @@ export type ReviewTestDetail = ReviewTest & {
 
 /** 復習テストステータス更新リクエスト */
 export type UpdateReviewTestStatusRequest = {
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
+  status: 'IN_PROGRESS' | 'COMPLETED';
 };
 
 /** 復習テストステータス更新レスポンス */
@@ -110,12 +122,21 @@ export type ReviewTest = {
   testId: string;
   /** 科目 */
   subject: SubjectId;
+  /** モード */
+  mode: 'QUESTION' | 'KANJI';
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
   /** ステータス */
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
+  status: 'IN_PROGRESS' | 'COMPLETED';
   /** 作成日時 (ISO8601) */
   createdAt: string;
+  /** PDF情報 */
+  pdf: {
+    /** PDF表示用URL */
+    url: string;
+    /** PDFダウンロード用URL */
+    downloadUrl: string;
+  };
   /** 出題数 */
   itemCount: number;
 };
