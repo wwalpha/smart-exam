@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,10 +9,13 @@ import { SUBJECT_LABEL } from '@/lib/Consts';
 
 export const ReviewTestDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewDetail();
+  const navigate = useNavigate();
+
   const complete = useCallback(async () => {
     if (!review) return;
     await updateReviewTestStatus(review.id, { status: 'COMPLETED' });
-  }, [review, updateReviewTestStatus]);
+    navigate(basePath);
+  }, [review, updateReviewTestStatus, navigate, basePath]);
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -32,26 +35,28 @@ export const ReviewTestDetailPage = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">テスト詳細: {review.testId}</h1>
         <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link to={basePath}>一覧へ戻る</Link>
+          <Button asChild variant="outline" className="w-[100px]">
+            <Link to={basePath}>戻る</Link>
           </Button>
-          <Button asChild>
-            <Link to={`${basePath}/${review.id}/grading`}>結果入力</Link>
+          {review.status !== 'COMPLETED' ? (
+            <Button asChild className="w-[100px]">
+              <Link to={`${basePath}/${review.id}/grading`}>結果入力</Link>
+            </Button>
+          ) : null}
+
+          <Button asChild className="w-[100px]">
+            <Link to={`${basePath}/${review.id}/pdf`}>印刷</Link>
           </Button>
-          <Button asChild>
-            <Link to={`${basePath}/${review.id}/pdf`}>PDFプレビュー</Link>
-          </Button>
-          <Button
-            type="button"
-            variant="default"
-            disabled={review.status === 'COMPLETED'}
-            onClick={complete}
-          >
-            完了
-          </Button>
+
+          {review.status !== 'COMPLETED' ? (
+            <Button type="button" variant="default" className="w-[100px]" onClick={complete}>
+              完了
+            </Button>
+          ) : null}
+
           <Button
             variant="outline"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="w-[100px] text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={remove}>
             削除
           </Button>
@@ -64,26 +69,26 @@ export const ReviewTestDetailPage = () => {
             <CardTitle>基本情報</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-3 border-b pb-3 md:grid-cols-2">
-              <div className="flex justify-between">
-                <span className="font-medium">科目</span>
-                <span>
-                  {review.mode === 'KANJI'
-                    ? '漢字'
-                    : (SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? '')}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="flex items-start gap-4">
+                <span className="w-24 shrink-0 font-medium">科目</span>
+                <span className="flex-1 text-left">
+                  {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium">問題数</span>
-                <span>{review.itemCount}問</span>
+              <div className="flex items-start gap-4">
+                <span className="w-24 shrink-0 font-medium">問題数</span>
+                <span className="flex-1 text-left">{review.itemCount}問</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium">作成日時</span>
-                <span>{formatYmdHmSlash(review.createdAt)}</span>
+              <div className="flex items-start gap-4">
+                <span className="w-24 shrink-0 font-medium">作成日時</span>
+                <span className="flex-1 text-left">{formatYmdHmSlash(review.createdAt)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium">ステータス</span>
-                <Badge variant="outline">{review.status}</Badge>
+              <div className="flex items-start gap-4">
+                <span className="w-24 shrink-0 font-medium">ステータス</span>
+                <div className="flex-1 text-left">
+                  <Badge variant="outline">{review.status}</Badge>
+                </div>
               </div>
             </div>
           </CardContent>

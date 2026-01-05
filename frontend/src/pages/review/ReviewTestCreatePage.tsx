@@ -22,9 +22,11 @@ export const ReviewTestCreatePage = () => {
       <h1 className="text-2xl font-bold">{isKanji ? '漢字復習テスト作成' : '問題復習テスト作成'}</h1>
 
       <Card>
-        <CardHeader>
-          <CardTitle>条件設定</CardTitle>
-        </CardHeader>
+        {isKanji ? null : (
+          <CardHeader>
+            <CardTitle>条件設定</CardTitle>
+          </CardHeader>
+        )}
         <CardContent>
           <form onSubmit={submit} className="space-y-6">
             <div className="space-y-2">

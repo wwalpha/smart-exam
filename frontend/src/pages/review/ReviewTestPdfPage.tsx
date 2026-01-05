@@ -5,6 +5,19 @@ import { useReviewPdf } from '@/hooks/review';
 import { apiRequestBlob } from '@/services/apiClient';
 import { toast } from 'sonner';
 
+const isPdfBlob = async (blob: Blob): Promise<boolean> => {
+  // `%PDF-` マジックヘッダで最低限の妥当性を確認
+  const prefix = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
+  return (
+    prefix.length === 5 &&
+    prefix[0] === 0x25 &&
+    prefix[1] === 0x50 &&
+    prefix[2] === 0x44 &&
+    prefix[3] === 0x46 &&
+    prefix[4] === 0x2d
+  );
+};
+
 export const ReviewTestPdfPage = () => {
   const { review, isLoading, error, basePath, navigate, id, pdfUrl } = useReviewPdf();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -21,6 +34,15 @@ export const ReviewTestPdfPage = () => {
         setIsFetching(true);
         const blob = await apiRequestBlob({ method: 'GET', path: pdfUrl });
         if (aborted) return;
+
+        if (!(await isPdfBlob(blob))) {
+          const text = await blob.text().catch(() => '');
+          toast.error('PDFの生成に失敗しました', {
+            description: text ? text.slice(0, 200) : undefined,
+          });
+          return;
+        }
+
         const nextUrl = URL.createObjectURL(blob);
         setBlobUrl((prev) => {
           if (prev) URL.revokeObjectURL(prev);
@@ -85,7 +107,7 @@ export const ReviewTestPdfPage = () => {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">PDFプレビュー</h1>
+        <h1 className="text-2xl font-semibold">印刷</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate(`${basePath}/${id}`)}>
             戻る
@@ -101,7 +123,7 @@ export const ReviewTestPdfPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>復習テスト ({review.subject})</CardTitle>
+          <CardTitle>復習テスト</CardTitle>
           <CardDescription>印刷・ダウンロード用のプレビューです。内容を確認してください。</CardDescription>
         </CardHeader>
         <CardContent>

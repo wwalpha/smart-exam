@@ -21,7 +21,7 @@ export const useReviewCreate = () => {
   const form = useForm<CreateFormValues>({
     defaultValues: {
       subject: '',
-      count: 20,
+      count: isKanji ? 60 : 20,
     },
   });
 
