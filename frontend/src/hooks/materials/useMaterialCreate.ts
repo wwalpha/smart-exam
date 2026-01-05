@@ -24,14 +24,12 @@ export const useMaterialCreate = () => {
         yearMonth: data.yearMonth,
         grade: data.grade,
         provider: data.provider,
-        testType: data.testType,
-        unit: data.unit,
       },
       questionFile: data.questionFile?.[0],
       answerFile: data.answerFile?.[0],
       gradedFile: data.gradedFile?.[0],
     });
-    
+
     if (materialSet) {
       navigate(`/materials/${materialSet.id}`);
     }

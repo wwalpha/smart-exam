@@ -20,10 +20,12 @@ export const listMaterialSets: AsyncHandler<{}, MaterialSetListResponse, {}, Par
   res.json({ items, total: items.length });
 };
 
-export const searchMaterialSets: AsyncHandler<{}, SearchMaterialSetsResponse, SearchMaterialSetsRequest, ParsedQs> = async (
-  req,
-  res
-) => {
+export const searchMaterialSets: AsyncHandler<
+  {},
+  SearchMaterialSetsResponse,
+  SearchMaterialSetsRequest,
+  ParsedQs
+> = async (req, res) => {
   const items = await MaterialRepository.listMaterialSets();
 
   const subject = (req.body.subject ?? '').trim();
@@ -38,7 +40,7 @@ export const searchMaterialSets: AsyncHandler<{}, SearchMaterialSetsResponse, Se
     if (grade && String(x.grade ?? '') !== grade) return false;
     if (!qLower) return true;
 
-    const haystack = [x.name, x.testType, x.provider, x.unit, x.course, x.description, x.yearMonth]
+    const haystack = [x.name, x.provider, x.course, x.description, x.yearMonth]
       .filter((v): v is string => typeof v === 'string' && v.length > 0)
       .join(' ')
       .toLowerCase();

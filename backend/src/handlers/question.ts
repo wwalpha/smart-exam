@@ -5,6 +5,8 @@ import type {
   CreateQuestionRequest,
   CreateQuestionResponse,
   CreateQuestionParams,
+  DeleteQuestionParams,
+  DeleteQuestionResponse,
   ListQuestionsParams,
   UpdateQuestionParams,
   QuestionListResponse,
@@ -62,4 +64,13 @@ export const updateQuestion: AsyncHandler<
     return;
   }
   res.json(item);
+};
+
+export const deleteQuestion: AsyncHandler<DeleteQuestionParams, DeleteQuestionResponse, {}, ParsedQs> = async (
+  req,
+  res
+) => {
+  const { questionId } = req.params;
+  await QuestionRepository.deleteQuestion(questionId);
+  res.status(204).end();
 };

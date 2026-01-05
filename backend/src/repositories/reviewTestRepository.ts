@@ -126,12 +126,9 @@ const computeDueDate = (params: {
   const { latestState, streak, lastCorrectDate, lastIncorrectDate, lastAttemptDate } = calcStreakAndLastDates(attempts);
   const lastAttempt = lastAttemptDate ?? registeredDate;
 
-  // 3連続正解: 単語(漢字)は将来日に送る (2099-12-31)
+  // 3連続正解: 将来日に送る (2099-12-31)
   if (streak >= 3) {
-    if (targetType === 'KANJI') {
-      return { dueDate: '2099-12-31', lastAttemptDate: lastAttempt };
-    }
-    return { dueDate: null, lastAttemptDate: lastAttempt };
+    return { dueDate: '2099-12-31', lastAttemptDate: lastAttempt };
   }
 
   if (targetType === 'QUESTION') {
@@ -415,11 +412,11 @@ export const ReviewTestRepository = {
           targetType: 'QUESTION',
           targetId: c.targetId,
           targetKey: targetKeyOf('QUESTION', c.targetId),
-          displayLabel: q?.displayLabel,
+          displayLabel: q?.canonicalKey,
           canonicalKey: q?.canonicalKey,
           materialSetName: m?.title,
           materialSetDate: m?.date,
-          questionText: q?.displayLabel || q?.canonicalKey,
+          questionText: q?.canonicalKey,
         });
       });
     }
@@ -464,6 +461,16 @@ export const ReviewTestRepository = {
 
     const items = await listReviewTestItemRows(testId);
     await Promise.all(items.map((i) => releaseLock(i.targetType, i.targetId)));
+
+    // アイテム行が欠損している等のケースでもロックが残らないように、testId で紐づくロックを念のため解放する
+    const lockScan = await dbHelper.scan<ReviewLockTable>({
+      TableName: TABLE_REVIEW_LOCKS,
+      FilterExpression: '#testId = :testId',
+      ExpressionAttributeNames: { '#testId': 'testId' },
+      ExpressionAttributeValues: { ':testId': testId },
+    });
+    const locks = lockScan.Items ?? [];
+    await Promise.all(locks.map((l) => dbHelper.delete({ TableName: TABLE_REVIEW_LOCKS, Key: { targetKey: l.targetKey } })));
 
     for (const i of items) {
       await dbHelper.delete({ TableName: TABLE_REVIEW_TEST_ITEMS, Key: { testId, itemKey: i.itemKey } });

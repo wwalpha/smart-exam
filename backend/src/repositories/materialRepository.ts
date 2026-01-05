@@ -7,6 +7,16 @@ import { createUuid } from '@/lib/uuid';
 import { ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { s3Client } from '@/lib/aws';
 import { ENV } from '@/lib/env';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import type { Readable } from 'stream';
+
+const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+};
 
 export const MaterialRepository = {
   createMaterialSet: async (data: CreateMaterialSetRequest): Promise<MaterialSet> => {
@@ -25,8 +35,6 @@ export const MaterialRepository = {
       questionCount: 0,
       grade: data.grade,
       provider: data.provider,
-      testType: data.testType,
-      unit: data.unit,
       course: data.course,
       keywords: data.keywords,
       yearMonth: data.yearMonth,
@@ -48,8 +56,6 @@ export const MaterialRepository = {
       subject: dbItem.subjectId,
       grade: dbItem.grade,
       provider: dbItem.provider,
-      testType: dbItem.testType,
-      unit: dbItem.unit,
       course: dbItem.course,
       description: dbItem.description,
       keywords: dbItem.keywords,
@@ -67,8 +73,6 @@ export const MaterialRepository = {
       subject: dbItem.subjectId,
       grade: dbItem.grade,
       provider: dbItem.provider,
-      testType: dbItem.testType,
-      unit: dbItem.unit,
       course: dbItem.course,
       description: dbItem.description,
       keywords: dbItem.keywords,
@@ -133,5 +137,27 @@ export const MaterialRepository = {
         return item;
       })
       .filter((x): x is MaterialFile => x !== null);
+  },
+
+  getMaterialFileByKey: async (s3Key: string): Promise<{ body: Buffer; contentType: string; filename: string } | null> => {
+    const bucket = ENV.FILES_BUCKET_NAME;
+    if (!bucket) return null;
+
+    const filename = s3Key.split('/').pop() || 'file.pdf';
+
+    const response = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: s3Key,
+      })
+    );
+
+    const bodyStream = response.Body;
+    if (!bodyStream || typeof (bodyStream as any)?.on !== 'function') return null;
+
+    const body = await streamToBuffer(bodyStream as Readable);
+    const contentType = response.ContentType || (filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+
+    return { body, contentType, filename };
   },
 };

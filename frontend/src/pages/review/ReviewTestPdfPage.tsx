@@ -43,7 +43,10 @@ export const ReviewTestPdfPage = () => {
           return;
         }
 
-        const nextUrl = URL.createObjectURL(blob);
+        // mime type が正しく付かない環境でも PDF として扱えるようにする
+        const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
+
+        const nextUrl = URL.createObjectURL(pdfBlob);
         setBlobUrl((prev) => {
           if (prev) URL.revokeObjectURL(prev);
           return nextUrl;
@@ -109,13 +112,13 @@ export const ReviewTestPdfPage = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">印刷</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate(`${basePath}/${id}`)}>
+          <Button variant="outline" className="w-[100px]" onClick={() => navigate(`${basePath}/${id}`)}>
             戻る
           </Button>
-          <Button variant="outline" onClick={handlePrint} disabled={!blobUrl || isFetching}>
+          <Button variant="outline" className="w-[100px]" onClick={handlePrint} disabled={!blobUrl || isFetching}>
             印刷
           </Button>
-          <Button onClick={handleDownload} disabled={!blobUrl || isFetching}>
+          <Button className="w-[100px]" onClick={handleDownload} disabled={!blobUrl || isFetching}>
             ダウンロード
           </Button>
         </div>
@@ -134,12 +137,18 @@ export const ReviewTestPdfPage = () => {
             </div>
 
             <div className="rounded-md border overflow-hidden">
-              <iframe
-                ref={iframeRef}
-                title="review-test-pdf"
-                src={blobUrl}
-                className="h-[75vh] w-full bg-white"
-              />
+              {blobUrl ? (
+                <iframe
+                  ref={iframeRef}
+                  title="review-test-pdf"
+                  src={blobUrl}
+                  className="h-[75vh] w-full bg-white"
+                />
+              ) : (
+                <div className="flex h-[75vh] items-center justify-center text-sm text-muted-foreground">
+                  {isFetching ? 'PDFを読み込み中...' : 'PDFの読み込みに失敗しました。'}
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

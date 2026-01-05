@@ -73,7 +73,7 @@ export const MaterialSetListPage = () => {
             </div>
             <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium">キーワード</label>
-              <Input {...register('q')} placeholder="教材名、回・テスト名など" />
+              <Input {...register('q')} placeholder="教材名など" />
             </div>
             <div className="flex items-center gap-2">
               <Button type="submit">検索</Button>
@@ -114,8 +114,7 @@ export const MaterialSetListPage = () => {
               <TableHead />
               <TableHead>教材名</TableHead>
               <TableHead>科目</TableHead>
-              <TableHead>教材年月</TableHead>
-              <TableHead>回・テスト名</TableHead>
+              <TableHead>実施年月日</TableHead>
               <TableHead>学年</TableHead>
             </TableRow>
           </TableHeader>
@@ -143,13 +142,12 @@ export const MaterialSetListPage = () => {
                   </Badge>
                 </TableCell>
                 <TableCell>{material.yearMonth}</TableCell>
-                <TableCell>{material.testType}</TableCell>
                 <TableCell>{material.grade}年</TableCell>
               </TableRow>
             ))}
             {materials.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

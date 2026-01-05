@@ -56,21 +56,15 @@ export const QuestionManagementPage = () => {
               </DialogHeader>
               <form onSubmit={submit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>表示番号 (displayLabel)</Label>
+                  <Label>問題番号 *</Label>
                   <Input
-                    {...register('displayLabel', { required: '必須です' })}
-                    aria-invalid={!!errors.displayLabel}
-                    className={errors.displayLabel ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                    placeholder="例: 1(1)"
-                  />
-                  {errors.displayLabel?.message ? (
-                    <p className="text-sm text-destructive">{String(errors.displayLabel.message)}</p>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <Label>正規化キー (canonicalKey)</Label>
-                  <Input
-                    {...register('canonicalKey', { required: '必須です' })}
+                    {...register('canonicalKey', {
+                      required: '必須です',
+                      pattern: {
+                        value: /^\d+(?:-\d+)*$/,
+                        message: 'ハイフン区切りの数字で入力してください (例: 1-1)',
+                      },
+                    })}
                     aria-invalid={!!errors.canonicalKey}
                     className={errors.canonicalKey ? 'border-destructive focus-visible:ring-destructive' : undefined}
                     placeholder="例: 1-1"
@@ -78,11 +72,7 @@ export const QuestionManagementPage = () => {
                   {errors.canonicalKey?.message ? (
                     <p className="text-sm text-destructive">{String(errors.canonicalKey.message)}</p>
                   ) : null}
-                  <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-A)</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>分野 (任意)</Label>
-                  <Input {...register('category')} placeholder="例: 計算問題" />
+                  <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1)</p>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -101,18 +91,14 @@ export const QuestionManagementPage = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>表示番号</TableHead>
-                <TableHead>正規化キー</TableHead>
-                <TableHead>分野</TableHead>
+                <TableHead>問題番号</TableHead>
                 <TableHead className="text-right">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {questions.map((q) => (
                 <TableRow key={q.id}>
-                  <TableCell>{q.displayLabel}</TableCell>
                   <TableCell>{q.canonicalKey}</TableCell>
-                  <TableCell>{q.category || '-'}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="outline"
@@ -126,7 +112,7 @@ export const QuestionManagementPage = () => {
               ))}
               {questions.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">
                     問題が登録されていません
                   </TableCell>
                 </TableRow>

@@ -12,6 +12,13 @@ export const QuestionsService = {
     });
   },
 
+  delete: async (questionId: string): Promise<void> => {
+    await dbHelper.delete({
+      TableName: TABLE_NAME,
+      Key: { questionId },
+    });
+  },
+
   scanAll: async (): Promise<QuestionTable[]> => {
     const result = await dbHelper.scan<QuestionTable>({
       TableName: TABLE_NAME,

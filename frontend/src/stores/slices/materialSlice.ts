@@ -2,7 +2,34 @@ import type { StateCreator } from 'zustand';
 import type { MaterialSlice } from '@/stores/store.types';
 import * as MATERIAL_API from '@/services/materialApi';
 import * as EXAM_API from '@/services/examApi';
+import * as BEDROCK_API from '@/services/bedrockApi';
 import { withStatus } from '../utils';
+
+const normalizeQuestionNumber = (raw: string): string | null => {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const replaced = trimmed
+    .replace(/[（）()]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-/, '')
+    .replace(/-$/, '');
+
+  if (!/^\d+(?:-\d+)*$/.test(replaced)) return null;
+  return replaced;
+};
+
+const compareQuestionNumber = (a: string, b: string): number => {
+  const pa = a.split('-').map((x) => Number.parseInt(x, 10));
+  const pb = b.split('-').map((x) => Number.parseInt(x, 10));
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i += 1) {
+    const av = pa[i] ?? 0;
+    const bv = pb[i] ?? 0;
+    if (av !== bv) return av - bv;
+  }
+  return 0;
+};
 
 export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSlice> = (set, get) => {
   type MaterialState = MaterialSlice['material'];
@@ -56,8 +83,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           const response = await MATERIAL_API.listMaterialSets(params);
 
           const hasSearchParams =
-            !!params &&
-            Object.values(params).some((v) => v !== undefined && v !== null && String(v).trim().length > 0);
+            !!params && Object.values(params).some((v) => v !== undefined && v !== null && String(v).trim().length > 0);
 
           if (hasSearchParams && response.items.length === 0) {
             return;
@@ -177,6 +203,46 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         },
         '問題一覧の取得に失敗しました。',
         { rethrow: true }
+      );
+    },
+
+    extractQuestionsFromGradedAnswer: async (materialSetId) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          const current = getMaterial();
+          if (current.detail?.id !== materialSetId) return;
+          if (current.questions.length > 0) return;
+
+          const graded = current.files.find(
+            (f) => f.fileType === 'GRADED_ANSWER' && f.filename.toLowerCase().endsWith('.pdf')
+          );
+          if (!graded) return;
+
+          const response = await BEDROCK_API.analyzePaper({
+            s3Key: graded.s3Key,
+            subject: current.detail.subject,
+          });
+
+          const normalized = (response.questions ?? [])
+            .map(normalizeQuestionNumber)
+            .filter((x): x is string => typeof x === 'string');
+
+          const unique = Array.from(new Set(normalized)).sort(compareQuestionNumber);
+          if (unique.length === 0) return;
+
+          for (const key of unique) {
+            await MATERIAL_API.createQuestion(materialSetId, {
+              canonicalKey: key,
+              subject: current.detail.subject,
+            });
+          }
+
+          const nextQuestions = await MATERIAL_API.listQuestions(materialSetId);
+          updateMaterial({ questions: nextQuestions });
+        },
+        '問題番号の抽出に失敗しました。',
+        { rethrow: false }
       );
     },
 

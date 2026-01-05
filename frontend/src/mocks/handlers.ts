@@ -185,8 +185,7 @@ let questionsByMaterialSetId: Record<string, Question[]> = {
     {
       id: 'q_1',
       materialSetId: 'mat_1',
-      canonicalKey: 'mock-1',
-      displayLabel: '1',
+      canonicalKey: '1-1',
       subject: SUBJECT.math,
     },
   ],
@@ -337,15 +336,7 @@ export const handlers = [
       if (grade && (item.grade ?? '') !== grade) return false;
       if (!q) return true;
 
-      const haystack = [
-        item.name,
-        item.testType,
-        item.provider,
-        item.unit,
-        item.course,
-        item.description,
-        item.yearMonth,
-      ]
+      const haystack = [item.name, item.provider, item.course, item.description, item.yearMonth]
         .filter((v): v is string => typeof v === 'string' && v.length > 0)
         .join(' ')
         .toLowerCase();
@@ -390,6 +381,16 @@ export const handlers = [
     return HttpResponse.json({ datas: [] });
   }),
 
+  http.get('/api/material-files', () => {
+    const data = new TextEncoder().encode('%PDF-1.4\n%mock\n');
+    return new HttpResponse(data, {
+      status: 200,
+      headers: {
+        'content-type': 'application/pdf',
+      },
+    });
+  }),
+
   http.get('/api/material-sets/:materialSetId/questions', ({ params }) => {
     const materialSetId = String(params.materialSetId);
     const items = questionsByMaterialSetId[materialSetId] ?? [];
@@ -432,6 +433,16 @@ export const handlers = [
     if (!updated) return new HttpResponse(null, { status: 404 });
     const response: UpdateQuestionResponse = updated;
     return HttpResponse.json(response);
+  }),
+
+  http.delete('/api/questions/:questionId', ({ params }) => {
+    const questionId = String(params.questionId);
+    Object.keys(questionsByMaterialSetId).forEach((materialSetId) => {
+      questionsByMaterialSetId[materialSetId] = (questionsByMaterialSetId[materialSetId] ?? []).filter(
+        (q) => q.id !== questionId
+      );
+    });
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.post('/api/kanji/search', async ({ request }) => {
@@ -634,9 +645,11 @@ export const handlers = [
   }),
 
   http.post('/api/review-tests/search', async ({ request }) => {
-    const body = (await request.json().catch(() => null)) as
-      | { subject?: string; status?: string; mode?: 'QUESTION' | 'KANJI' }
-      | null;
+    const body = (await request.json().catch(() => null)) as {
+      subject?: string;
+      status?: string;
+      mode?: 'QUESTION' | 'KANJI';
+    } | null;
 
     const filtered = reviewTests.filter((x) => {
       if (body?.mode && x.mode !== body.mode) return false;

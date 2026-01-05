@@ -35,7 +35,7 @@ export const DashboardRepository = {
         if (!q?.subjectId) return null;
         return {
           id: questionId,
-          displayLabel: q.displayLabel ?? q.canonicalKey ?? questionId,
+          displayLabel: q.canonicalKey ?? questionId,
           incorrectRate,
           subject: q.subjectId,
         };

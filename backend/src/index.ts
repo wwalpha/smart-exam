@@ -6,6 +6,7 @@ import * as bedrockHandler from '@/handlers/bedrock';
 import * as examPaperHandler from '@/handlers/examPaper';
 import * as examResultHandler from '@/handlers/examResult';
 import * as materialHandler from '@/handlers/material';
+import * as materialFileHandler from '@/handlers/materialFile';
 import * as kanjiHandler from '@/handlers/kanji';
 import * as questionHandler from '@/handlers/question';
 import * as attemptHandler from '@/handlers/attempt';
@@ -45,6 +46,7 @@ app.post('/api/material-sets', handleRequest(materialHandler.createMaterialSet))
 app.get('/api/material-sets/:materialSetId', handleRequest(materialHandler.getMaterialSet));
 app.delete('/api/material-sets/:materialSetId', handleRequest(materialHandler.deleteMaterialSet));
 app.get('/api/material-sets/:materialSetId/files', handleRequest(materialHandler.listMaterialFiles));
+app.get('/api/material-files', handleRequest(materialFileHandler.getMaterialFile));
 
 // Kanji
 app.get('/api/kanji', handleRequest(kanjiHandler.listKanji));
@@ -60,6 +62,7 @@ app.post('/api/questions/search', handleRequest(questionHandler.searchQuestions)
 app.get('/api/material-sets/:materialSetId/questions', handleRequest(questionHandler.listQuestions));
 app.post('/api/material-sets/:materialSetId/questions', handleRequest(questionHandler.createQuestion));
 app.patch('/api/questions/:questionId', handleRequest(questionHandler.updateQuestion));
+app.delete('/api/questions/:questionId', handleRequest(questionHandler.deleteQuestion));
 
 // Attempts
 app.post('/api/questions/:testId/attempts', handleRequest(attemptHandler.createAttempt)); // Note: testId here might be questionId based on path, but handler expects testId param.
@@ -88,4 +91,9 @@ app.patch('/api/review-tests/:testId', handleRequest(reviewTestHandler.updateRev
 app.delete('/api/review-tests/:testId', handleRequest(reviewTestHandler.deleteReviewTest));
 app.post('/api/review-tests/:testId/results', handleRequest(reviewTestHandler.submitReviewTestResults));
 
-export const handler = serverlessExpress({ app });
+export const handler = serverlessExpress({
+  app,
+  binarySettings: {
+    contentTypes: ['application/pdf'],
+  },
+});

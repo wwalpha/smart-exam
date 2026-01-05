@@ -6,6 +6,12 @@ import { createUuid } from '@/lib/uuid';
 import type { QuestionSearchResult, SearchQuestionsRequest } from '@smart-exam/api-types';
 import { DateUtils } from '@/lib/dateUtils';
 
+const toSortNumber = (canonicalKey: string): number => {
+  const head = canonicalKey.split('-')[0] ?? '';
+  const value = Number.parseInt(head, 10);
+  return Number.isFinite(value) ? value : 0;
+};
+
 export const QuestionRepository = {
   createQuestion: async (data: CreateQuestionRequest & { materialSetId: string }): Promise<Question> => {
     const id = createUuid();
@@ -19,10 +25,8 @@ export const QuestionRepository = {
       questionId: id,
       testId: data.materialSetId,
       subjectId: data.subject,
-      number: 0, // Default number
+      number: toSortNumber(data.canonicalKey),
       canonicalKey: data.canonicalKey,
-      displayLabel: data.displayLabel,
-      category: data.category,
       tags: data.tags,
       registeredDate: DateUtils.todayYmd(),
     };
@@ -39,15 +43,14 @@ export const QuestionRepository = {
       id: dbItem.questionId,
       materialSetId: dbItem.testId,
       canonicalKey: dbItem.canonicalKey,
-      displayLabel: dbItem.displayLabel,
       subject: dbItem.subjectId,
-      category: dbItem.category,
       tags: dbItem.tags,
     }));
   },
 
   updateQuestion: async (id: string, data: UpdateQuestionRequest): Promise<Question | null> => {
     const result = await QuestionsService.update(id, {
+      ...(typeof data.canonicalKey === 'string' ? { number: toSortNumber(data.canonicalKey) } : {}),
       ...data,
     });
 
@@ -58,11 +61,13 @@ export const QuestionRepository = {
       id: dbItem.questionId, 
       materialSetId: dbItem.testId,
       canonicalKey: dbItem.canonicalKey,
-      displayLabel: dbItem.displayLabel,
       subject: dbItem.subjectId,
-      category: dbItem.category,
       tags: dbItem.tags,
     };
+  },
+
+  deleteQuestion: async (id: string): Promise<void> => {
+    await QuestionsService.delete(id);
   },
 
   searchQuestions: async (params: SearchQuestionsRequest): Promise<QuestionSearchResult[]> => {
@@ -76,7 +81,7 @@ export const QuestionRepository = {
       if (subject && String(q.subjectId ?? '').toLowerCase() !== subject) return false;
       if (!keyword) return true;
 
-      const haystack = [q.displayLabel, q.canonicalKey, q.category]
+      const haystack = [q.canonicalKey]
         .filter((v): v is string => typeof v === 'string' && v.length > 0)
         .join(' ')
         .toLowerCase();
@@ -91,8 +96,8 @@ export const QuestionRepository = {
       return {
         id: q.questionId,
         subject: q.subjectId,
-        unit: material?.unit ?? q.category ?? '',
-        questionText: q.displayLabel || q.canonicalKey,
+        unit: '',
+        questionText: q.canonicalKey,
         sourceMaterialId: q.testId,
         sourceMaterialName: material?.title ?? '',
       };

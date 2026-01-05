@@ -33,7 +33,7 @@ export const ReviewTestDetailPage = () => {
     <div className="space-y-6 p-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">テスト詳細: {review.testId}</h1>
+        <h1 className="text-2xl font-bold">テスト詳細</h1>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>
@@ -110,7 +110,17 @@ export const ReviewTestDetailPage = () => {
                         </div>
                       </div>
                       <div className="shrink-0">
-                        {item.isCorrect === true && <Badge variant="default">正解</Badge>}
+                        {item.isCorrect === true && (
+                          <Badge
+                            variant="default"
+                            className={
+                              review.mode === 'KANJI'
+                                ? 'border-transparent bg-emerald-600 text-white hover:bg-emerald-600/90'
+                                : undefined
+                            }>
+                            正解
+                          </Badge>
+                        )}
                         {item.isCorrect === false && <Badge variant="destructive">不正解</Badge>}
                         {item.isCorrect === undefined && <span className="text-muted-foreground">-</span>}
                       </div>

@@ -30,6 +30,11 @@ export type UpdateQuestionParams = {
   questionId: string;
 };
 
+/** `DELETE /questions/:questionId` */
+export type DeleteQuestionParams = {
+  questionId: string;
+};
+
 /** 教材セット作成リクエスト */
 export type CreateMaterialSetRequest = {
   name: string;
@@ -38,8 +43,6 @@ export type CreateMaterialSetRequest = {
   yearMonth: string;
   grade?: string;
   provider?: string;
-  testType?: string;
-  unit?: string;
   course?: string;
   description?: string;
   keywords?: string[];
@@ -117,12 +120,8 @@ export type Question = {
   materialSetId: string;
   /** 識別キー（正規化されたキー） */
   canonicalKey: string;
-  /** 表示ラベル（問題番号など） */
-  displayLabel: string;
   /** 科目 */
   subject: SubjectId;
-  /** カテゴリ/分野 */
-  category?: string;
   /** タグ */
   tags?: string[];
 };
@@ -130,9 +129,7 @@ export type Question = {
 /** 問題作成リクエスト */
 export type CreateQuestionRequest = {
   canonicalKey: string;
-  displayLabel: string;
   subject: SubjectId;
-  category?: string;
   tags?: string[];
 };
 
@@ -144,6 +141,9 @@ export type UpdateQuestionRequest = Partial<CreateQuestionRequest>;
 
 /** 問題更新レスポンス */
 export type UpdateQuestionResponse = Question;
+
+/** `DELETE /questions/:questionId` */
+export type DeleteQuestionResponse = Record<string, never>;
 
 /**
  * 教材セット（テスト一回分など）
@@ -159,10 +159,6 @@ export type MaterialSet = {
   grade?: string;
   /** 提供元（SAPIX, YOTSUYA, etc.） */
   provider?: string;
-  /** テスト種別（回・テスト名） */
-  testType?: string;
-  /** 単元 */
-  unit?: string;
   /** コース/クラス */
   course?: string;
   /** 説明/メモ */

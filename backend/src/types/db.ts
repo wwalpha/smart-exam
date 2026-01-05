@@ -28,10 +28,6 @@ export interface TestTable {
   grade?: string;
   /** 提供元 */
   provider?: string;
-  /** テスト種別 */
-  testType?: string;
-  /** 単元 */
-  unit?: string;
   /** コース */
   course?: string;
   /** キーワード */
@@ -60,10 +56,6 @@ export interface QuestionTable {
   promptS3Key?: string;
   /** 識別キー */
   canonicalKey: string;
-  /** 表示ラベル */
-  displayLabel: string;
-  /** カテゴリ */
-  category?: string;
   /** タグ */
   tags?: string[];
 
