@@ -57,6 +57,8 @@ export const useKanjiCreate = () => {
 
   return {
     isEdit,
+    kanjiId: id ?? null,
+    detail,
     form,
     submit: form.handleSubmit(submit),
     isSubmitting: status.isLoading,

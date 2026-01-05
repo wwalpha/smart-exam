@@ -31,12 +31,8 @@ export const MaterialSetListPage = () => {
   };
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 px-8 py-4">
       <ConfirmDialog />
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">教材</h1>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>検索条件</CardTitle>
@@ -143,9 +139,7 @@ export const MaterialSetListPage = () => {
                 <TableCell>{material.grade}年</TableCell>
                 <TableCell>{material.provider ?? ''}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">
-                    {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}
-                  </Badge>
+                  <Badge variant="outline">{SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                 </TableCell>
                 <TableCell>{material.yearMonth}</TableCell>
                 <TableCell>

@@ -1,6 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { ReviewSlice } from '@/stores/store.types';
 import * as REVIEW_API from '@/services/reviewApi';
+import * as REVIEW_ATTEMPT_API from '@/services/reviewAttemptApi';
 import { withStatus } from '../utils';
 
 export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> = (set, get) => {
@@ -40,6 +41,14 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       list: [],
       total: 0,
       detail: null,
+      status: {
+        isLoading: false,
+        error: null,
+      },
+    },
+
+    reviewAttempt: {
+      items: [],
       status: {
         isLoading: false,
         error: null,
@@ -115,6 +124,60 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
           await REVIEW_API.submitReviewTestResults(id, request);
         },
         'テスト結果の送信に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    fetchReviewAttempts: async (params) => {
+      const setAttemptStatus = (next: Partial<ReviewSlice['reviewAttempt']['status']>) => {
+        const current = get().reviewAttempt;
+        set({
+          reviewAttempt: {
+            ...current,
+            status: {
+              ...current.status,
+              ...next,
+            },
+          },
+        });
+      };
+
+      await withStatus(
+        setAttemptStatus,
+        async () => {
+          const response = await REVIEW_ATTEMPT_API.listReviewAttempts(params);
+          set({
+            reviewAttempt: {
+              items: response.items,
+              status: get().reviewAttempt.status,
+            },
+          });
+        },
+        '履歴の取得に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    upsertReviewAttempt: async (request) => {
+      const setAttemptStatus = (next: Partial<ReviewSlice['reviewAttempt']['status']>) => {
+        const current = get().reviewAttempt;
+        set({
+          reviewAttempt: {
+            ...current,
+            status: {
+              ...current.status,
+              ...next,
+            },
+          },
+        });
+      };
+
+      await withStatus(
+        setAttemptStatus,
+        async () => {
+          await REVIEW_ATTEMPT_API.upsertReviewAttempt(request);
+        },
+        '履歴の保存に失敗しました。',
         { rethrow: true }
       );
     },

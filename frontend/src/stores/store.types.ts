@@ -23,6 +23,8 @@ import type {
   ReviewTestDetail,
   UpdateReviewTestStatusRequest,
   SubmitReviewTestResultsRequest,
+  ReviewAttempt,
+  UpsertReviewAttemptRequest,
   Kanji,
   CreateKanjiRequest,
   UpdateKanjiRequest,
@@ -92,6 +94,11 @@ export type ReviewState = {
   list: ReviewTest[];
   total: number;
   detail: ReviewTestDetail | null;
+  status: ApiStatus;
+};
+
+export type ReviewAttemptState = {
+  items: ReviewAttempt[];
   status: ApiStatus;
 };
 
@@ -188,12 +195,15 @@ export type MaterialSlice = {
  */
 export type ReviewSlice = {
   review: ReviewState;
+  reviewAttempt: ReviewAttemptState;
   fetchReviewTests: (params?: Record<string, unknown>) => Promise<void>;
   createReviewTest: (request: CreateReviewTestRequest) => Promise<ReviewTest>;
   fetchReviewTest: (id: string) => Promise<void>;
   updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest) => Promise<void>;
   deleteReviewTest: (id: string) => Promise<void>;
   submitReviewTestResults: (id: string, request: SubmitReviewTestResultsRequest) => Promise<void>;
+  fetchReviewAttempts: (params: { targetType: 'QUESTION' | 'KANJI'; targetId: string }) => Promise<void>;
+  upsertReviewAttempt: (request: UpsertReviewAttemptRequest) => Promise<void>;
 };
 
 /**

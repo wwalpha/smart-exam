@@ -11,6 +11,7 @@ import * as kanjiHandler from '@/handlers/kanji';
 import * as questionHandler from '@/handlers/question';
 import * as attemptHandler from '@/handlers/attempt';
 import * as reviewTestHandler from '@/handlers/reviewTest';
+import * as reviewAttemptHandler from '@/handlers/reviewAttempt';
 import * as dashboardHandler from '@/handlers/dashboard';
 import { handleRequest } from '@/lib/handler';
 
@@ -90,6 +91,10 @@ app.get('/api/review-tests/:testId/pdf', handleRequest(reviewTestHandler.getRevi
 app.patch('/api/review-tests/:testId', handleRequest(reviewTestHandler.updateReviewTestStatus));
 app.delete('/api/review-tests/:testId', handleRequest(reviewTestHandler.deleteReviewTest));
 app.post('/api/review-tests/:testId/results', handleRequest(reviewTestHandler.submitReviewTestResults));
+
+// Review Attempts (per target history)
+app.get('/api/review-attempts', handleRequest(reviewAttemptHandler.listReviewAttempts));
+app.put('/api/review-attempts', handleRequest(reviewAttemptHandler.upsertReviewAttempt));
 
 export const handler = serverlessExpress({
   app,

@@ -158,3 +158,46 @@ export type SubmitReviewTestResultsRequest = {
   /** 実施日 (ISO 8601) */
   date?: string;
 };
+
+/**
+ * 復習履歴 (対象ごと)
+ */
+export type ReviewAttempt = {
+  /** 対象種別 */
+  targetType: 'QUESTION' | 'KANJI';
+  /** 対象ID */
+  targetId: string;
+  /** 科目 */
+  subject: SubjectId;
+  /** 実施日 (YYYY-MM-DD) */
+  dateYmd: string;
+  /** 実施日時 (ISO8601) */
+  attemptedAt: string;
+  /** 正誤 */
+  isCorrect: boolean;
+  /** メモ */
+  memo?: string;
+  /** 復習テストID (由来がある場合) */
+  reviewTestId?: string;
+};
+
+/** `GET /review-attempts?targetType=...&targetId=...` */
+export type ListReviewAttemptsResponse = {
+  items: ReviewAttempt[];
+};
+
+/** `PUT /review-attempts` */
+export type UpsertReviewAttemptRequest = {
+  targetType: 'QUESTION' | 'KANJI';
+  targetId: string;
+  subject: SubjectId;
+  /** 実施日 (YYYY-MM-DD) */
+  dateYmd: string;
+  isCorrect: boolean;
+  memo?: string;
+  /** 実施日を変更する場合に指定 (YYYY-MM-DD) */
+  previousDateYmd?: string;
+};
+
+/** `PUT /review-attempts` */
+export type UpsertReviewAttemptResponse = ReviewAttempt;

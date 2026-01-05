@@ -20,7 +20,7 @@ export const MaterialSetCreatePage = () => {
       <Card>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-4 py-6">
               <div className="space-y-2">
                 <Label>学年 *</Label>
                 <input type="hidden" {...register('grade', { required: '必須です' })} />

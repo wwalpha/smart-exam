@@ -1,10 +1,17 @@
 # コーディング規約
 
 ## その他
+
 - AWS CLI を利用する際は常に `--no-cli-pager` オプションを付与してください。
 - CI（Ubuntu/Linux）はファイル名の大小文字を区別するため、TypeScript の import パスは git 管理されている実ファイル名と **大小文字まで完全一致** させてください（大小文字だけのリネームは `git mv` で確実に反映）。
 
+### Yarn (workspace)
+
+- このリポジトリは Yarn Berry (v4) の workspace 構成です。`yarn -C` は使わず、`yarn workspace <workspaceName> <script>` を使用してください。
+- workspace 名の例: `frontend`, `smart-exam-backend`, `@smart-exam/api-types`。
+
 ## フロントエンド実装ルール（仕様以外）
+
 - ブラウザ遷移（`window.location` / `window.open` / `<a href>`）で `/api/...` を直接開かないでください。
   - 開発環境は Vite の proxy 設定が無い前提のため、SPA ルーティングに吸われて「空白画面」になります。
   - バイナリ（PDF など）は `frontend/src/services/apiClient.ts` の `apiRequestBlob` 等を使って取得し、Blob URL でプレビュー/ダウンロード/印刷してください。
@@ -17,23 +24,27 @@
     - API 呼び出し
     - データ整形/ソート/正規化
     - 画面状態（読み込み/確認ダイアログ等）の制御
-    は Hook（`frontend/src/hooks/**`）または `frontend/src/utils/**` に寄せてください。
+      は Hook（`frontend/src/hooks/**`）または `frontend/src/utils/**` に寄せてください。
   - ミューテーション（作成/更新/削除）中に全画面を `Loading...` に切り替えて白画面のように見える挙動は避け、初回ロードのみ全画面 Loading にしてください。
 
 ## 復習テスト（要件準拠の固定ルール）
 
 ### dueDate
+
 - dueDate は日付（YYYY-MM-DD）単位で扱い、比較・選択順に時刻は使わない。
 - 未実施の基準日は「登録日（registeredDate）」を使用する（単なる createdAt/updatedAt とは別の業務フィールド）。
 - **3回連続正解** の場合は、次回の dueDate を `2099-12-31` とする（除外ではなく将来日に送る）。
 
 ### 単語取得（Full scan 禁止）
+
 - 単語テスト/復習テストの作成時、科目（subject）で対象を絞れる場合は DynamoDB の Query（GSI 等）を使用し、Scan + フィルタで代替しない。
 
 ### テスト生成の選択順（決定論）
+
 - 選択順は必ず固定：`dueDate` 昇順 → 同一 `dueDate` は `最終実施日` 昇順 → それでも同率なら `ID` 昇順。
 
 ### 排他制御（ロック）
+
 - ロックは内部的に `targetKey -> testId` の紐付けとして保持し、多重ロックは禁止。
 - ロックは自動解除しない。
 - ロック解除は以下のみ：
@@ -41,22 +52,26 @@
   - テストが削除された時点
 
 ## テスト
+
 - `describe.skip` / `it.skip` 等でスキップしたテストは残さず、不要なら削除してください（Skip のテストケースは直接削除する）。
 
 ## Terraform
 
 ### 1. 一般
+
 - 変更をコミットする前に必ず `terraform fmt` を実行してください。
 - [Standard Module Structure](https://developer.hashicorp.com/terraform/language/modules/develop/structure) に従ってください。
 - `terraform validate` を使用して構文エラーをチェックしてください。
 - `terraform apply` を実行してエラーが発生した場合は、エラーが解消するまで対応を継続してください。
 
 ### 2. 命名規則
+
 - すべてのリソース名、データソース、変数、出力には `snake_case` を使用してください。
 - リソース名にリソースタイプを繰り返さないでください（例: `resource "aws_route_table" "public_route_table"` は避け、`resource "aws_route_table" "public"` としてください）。
 - 変数名は値を説明するものにしてください（例: `region`, `instance_type`）。
 
 ### 3. ファイル構造
+
 - 原則として、サービス（責務）ごとにファイルを分割してください（巨大な `main.tf` に集約しない）。
 - 例: `cognito.tf`, `s3.tf`, `dynamodb.tf`, `iam.tf`, `lambda.tf`, `apigw.tf`, `data.tf`
 - `main.tf` を使う場合でも、最小限（薄い集約/説明）に留めてください。
@@ -67,19 +82,24 @@
 - `backend.tf`: バックエンドの設定（State ロック用の S3 + DynamoDB）。
 
 ### 4. 変数と出力
+
 - 変数と出力には必ず `description` を含めてください。
 - 変数には必ず `type` を指定してください。
 - `default` 値は、適切なデフォルト値が存在する場合にのみ使用してください。
 
 ### 5. リソース設定
+
 - 明示的な依存関係（`depends_on`）は必要な場合にのみ使用し、補間による暗黙的な依存関係を利用してください。
 
 ### 6. セキュリティ
+
 - シークレットや認証情報を git にコミットしないでください。環境変数やシークレットマネージャーを使用してください。
 - State 保存用の S3 バケットは暗号化し、プライベートに設定してください。
 
 ### 7. コメント
+
 - すべてのリソース定義・データソース定義・変数定義（`variables.tf`）・出力定義（`outputs.tf`）の直上に、以下の形式でコメントブロックを必ず追加してください：
+
   ```
   # ----------------------------------------------------------------------------------------------
   # <リソースの説明>
@@ -91,6 +111,7 @@
 ## React (Frontend)
 
 ### 1. 一般・コンポーネント
+
 - ES6 モジュール構文 + TypeScript を必須とします。
 - 関数コンポーネント（Functional Components）を使用してください。
 - コンポーネント名とファイル名には `PascalCase` を使用してください（例: `MyComponent.tsx`）。
@@ -101,16 +122,19 @@
 - エクスポートは名前付きエクスポート（Named Export）を推奨します。
 
 ### 2. TypeScript
+
 - すべてのファイルで TypeScript を使用してください。
 - `any` 型の使用は避け、適切な型定義を行ってください。
 - 型定義は `frontend/typings` ディレクトリへ集約してください。
 - `frontend/src` 配下の import は相対パス（`./`, `../`）を使用せず、alias import を使用してください（例: `@/...`, `@typings/...`）。
 
 ### 3. スタイリング & UI
+
 - UI コンポーネントライブラリとして **shadcn/ui** を使用してください。
 - スタイリングには **Tailwind CSS** または **CSS Modules** を使用し、インラインスタイルは避けてください。
 
 ### 4. 状態管理 & API
+
 - グローバルな状態管理には **Zustand** を使用してください。
 - Zustand store は slice 方式で実装してください（例: `createXxxSlice` を定義し、`create()` で結合する）。
 - API 呼び出しは Zustand 側に集約し、コンポーネントから直接呼び出さないでください。
@@ -119,13 +143,16 @@
 - store の `create()` による定義は `frontend/src/stores/index.ts` に集約し、各画面/機能は `@/stores` から import してください。
 
 ### 4.1 型定義
+
 - store が扱う state / action / 戻り値の型は省略せず、正しく型を定義してください（戻り値の型も明示）。
 
 ### 4.2 ES Modules（書き方統一）
+
 - `frontend/src` 配下は default export を使わず、named export で統一してください。
 - 型の import は `import type` を使用してください。
 
 ### 5. ディレクトリ構造 & ユーティリティ
+
 - 画面（ルーティング単位）は `frontend/src/pages` 配下へ配置してください（例: `src/pages/auth`, `src/pages/exam`）。
 - Custom Hook は `frontend/src/hooks` 配下に集約し、必要に応じて機能（責務）ごとにサブフォルダを切ってください（例: `src/hooks/wordtest`）。
 - 共通コンポーネントは `src/components/ui` (shadcn/ui) または `src/components/common` に配置してください。
@@ -133,6 +160,7 @@
 - 変換やフォーマット処理は `src/utils` 配下の共通関数へ切り出し、各コンポーネントから再利用してください。
 
 #### 5.1 フォルダ構造（再発防止）
+
 - `frontend/src/pages`: 画面（ルーティング単位）
 - `frontend/src/hooks`: UI から切り出したロジック（Custom Hook）
 - `frontend/src/stores`: Zustand store（slice）
@@ -142,60 +170,73 @@
 - `frontend/typings`: 型定義（Request/Response、Slice 型など）
 
 ### 6. フック (Hooks)
+
 - React Hooks のルール（トップレベルでの呼び出しなど）を厳守してください。
 - Custom Hook を積極的に活用し、ロジックの再利用性を高めてください。
 - カスタムフックの名前は `use` で始めてください。
 
 ### 7. コメント
+
 - 日本語コメントは対象のソースコード行の直上に記載してください（行末コメントは避けてください）。
 - `import` 文に対してはコメントを付与しないでください。
 
 #### 7.0 行レベルコメント（再発防止）
+
 - 非自明な分岐・副作用・ワークアラウンド（例: `useEffect` の多重実行防止、API の制約回避）には、対象行の直上に 1 行の日本語コメントを付与してください。
 - 原則として「何をしているか」ではなく「なぜ必要か」を説明してください。
 
 #### 7.1 適用範囲（再発防止）
+
 - このコメントルールは `frontend/src` 配下の手書きコードに適用します。
 - `frontend/dist` などの自動生成ファイル（ビルド成果物）は編集・整形・コメント修正の対象外です。
 
 #### 7.2 書き方（再発防止）
+
 - 原則として「コードで意図が伝わる」状態を優先し、不要なコメントは書かないでください。
 - コメントが必要な場合は `//` の日本語コメントを「対象行の直上」に 1 行で付けてください。
 - 行末コメント（例: `const x = 1 // ...`）は禁止です。
 
 ### 8. ストアと型定義
+
 - Zustand Slice の型定義（`XxxSlice`）は `frontend/typings` ディレクトリに配置してください（`src` 配下に置かない）。
 - コンポーネントから直接 `useStore` を呼び出してロジックを書くのではなく、カスタムフック（`useXxx`）を作成してロジックを分離してください。
 
 ## Backend (Node.js)
 
 ### 1. 言語・環境
+
 - すべてのファイルで **TypeScript** を使用してください。
 - ES Modules (`import` / `export`) を使用してください。
 - 非同期処理には `async` / `await` を使用し、Promise チェーンは避けてください。
 
 ### 1.1 型定義
+
 - 型定義は `backend/typings` ディレクトリへ集約してください。
 
 ### 2. アーキテクチャ (Lambda)
+
 - ハンドラー関数は薄く保ち、ビジネスロジックは Service 層や UseCase 層に分離してください。
 - 責務の分離（Separation of Concerns）を意識し、コードの再利用性とテスト容易性を高めてください。
 
 ### 3. エラーハンドリング
+
 - 適切な HTTP ステータスコードを返してください。
 - エラーログは構造化ログ（JSON形式など）で出力してください。
 - `try-catch` ブロックを使用して例外を適切に捕捉し、エラーレスポンスを統一してください。
 
 ### 4. データベース (DynamoDB)
+
 - **AWS SDK v3** を使用してください。
 - データアクセスロジックは Repository 層などの専用モジュールに集約してください。
 - 型定義を活用し、DynamoDB のアイテムと TypeScript の型を一致させてください。
 
 ### 5. テスト
+
 - 単体テストを作成し、ビジネスロジックを検証してください。
 - テストフレームワークには **Vitest** または **Jest** を使用してください。
 
 ### 6. API URI 設計
+
 - API URI（パス設計）はベストプラクティス（RESTの原則）を優先してください。
 - パスはリソース（名詞）を表現し、動詞を含めないでください（操作はHTTPメソッドで表現）。
 - リソース名は複数形を基本とし、親子関係が明確な場合のみ階層化してください。
@@ -206,10 +247,12 @@
 - パスにはハイフン（`-`）やアンダースコア（`_`）を使用しないでください。
 
 ### 7. 日付・時刻
+
 - Backend の日付操作は **dayjs** を優先して使用してください。
 - 日付関連の処理は `backend/src/lib/dateUtils.ts`（`DateUtils`）へ集約し、各所で独自実装しないでください。
 
 ### 8. データモデル（今後の方針）
+
 - `backend/src/types/db.ts` の Table 型から `createdAt` / `updatedAt` を削除する方針（実施時は API 型や既存データ移行も含めて整合を取る）。
 - `WordTable` から `answerHiragana` / `wordType` / `meaning` / `source` / `createdAt` / `updatedAt` を削除し、`subject` は必須にする方針（Terraform の GSI/属性定義も合わせて見直す）。
 - `ExamResultTable` / `WordTestAttemptTable` は「最後に間違った単語一覧」がフルスキャン不要になるようにキー設計・インデックス設計を改善する（GSI 追加や別テーブル化を含む）。
