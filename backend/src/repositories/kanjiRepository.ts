@@ -58,6 +58,7 @@ export const KanjiRepository = {
       question: data.kanji,
       answer: data.reading || '',
       subject: data.subject,
+      registeredDate: DateUtils.todayYmd(),
     };
 
     await WordsService.create(dbItem);

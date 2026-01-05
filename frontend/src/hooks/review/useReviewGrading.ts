@@ -25,7 +25,7 @@ export const useReviewGrading = () => {
     defaultValues: { items: [] },
   });
   
-  const { control, handleSubmit, reset } = form;
+  const { control, handleSubmit, reset, setValue, getValues, watch } = form;
   
   const { fields } = useFieldArray({
     control,
@@ -59,6 +59,13 @@ export const useReviewGrading = () => {
     navigate(`${basePath}/${id}`);
   };
 
+  const setAllCorrect = () => {
+    const current = getValues('items');
+    current.forEach((_, index) => {
+      setValue(`items.${index}.isCorrect`, true, { shouldDirty: true });
+    });
+  };
+
   return {
     id,
     review: currentTest,
@@ -67,6 +74,9 @@ export const useReviewGrading = () => {
     basePath,
     form,
     register: form.register,
+    setValue,
+    watch,
+    setAllCorrect,
     fields,
     submit: handleSubmit(submit),
   };

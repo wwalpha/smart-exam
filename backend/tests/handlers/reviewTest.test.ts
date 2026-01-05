@@ -43,7 +43,7 @@ describe('reviewTest handler', () => {
   });
 
   it('getReviewTest returns item', async () => {
-    const mockItem = { id: '1', status: 'IN_PROGRESS' };
+    const mockItem = { id: '1', status: 'IN_PROGRESS', items: [] };
     vi.spyOn(ReviewTestRepository, 'getReviewTest').mockResolvedValue(mockItem as any);
 
     const req = {
@@ -57,6 +57,6 @@ describe('reviewTest handler', () => {
 
     await getReviewTest(req, res, next);
 
-    expect(res.json).toHaveBeenCalledWith({ ...mockItem, items: [] });
+    expect(res.json).toHaveBeenCalledWith(mockItem);
   });
 });

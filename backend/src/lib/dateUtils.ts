@@ -44,4 +44,23 @@ export const DateUtils = {
     if (!parsed.isValid()) return null;
     return parsed.toISOString();
   },
+
+  /** 今日の日付 (YYYY-MM-DD) を返す */
+  todayYmd: (): string => {
+    return dayjs().format('YYYY-MM-DD');
+  },
+
+  /** ISO8601 などの日時から日付 (YYYY-MM-DD) を返す */
+  toYmd: (date: string | Date | number): string => {
+    return dayjs(date).format('YYYY-MM-DD');
+  },
+
+  /** YYYY-MM-DD に日数を加算して YYYY-MM-DD を返す */
+  addDaysYmd: (ymd: string, days: number): string => {
+    const parsed = dayjs(ymd.trim(), 'YYYY-MM-DD', true);
+    if (!parsed.isValid()) {
+      throw new Error(`Invalid YYYY-MM-DD: ${ymd}`);
+    }
+    return parsed.add(days, 'day').format('YYYY-MM-DD');
+  },
 };

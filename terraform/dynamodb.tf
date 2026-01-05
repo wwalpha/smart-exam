@@ -285,3 +285,71 @@ resource "aws_dynamodb_table" "exam_results" {
     projection_type = "ALL"
   }
 }
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for review tests.
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "review_tests" {
+  name         = "${var.project_name}_review_tests"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "testId"
+
+  attribute {
+    name = "testId"
+    type = "S"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for review test items.
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "review_test_items" {
+  name         = "${var.project_name}_review_test_items"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "testId"
+  range_key    = "itemKey"
+
+  attribute {
+    name = "testId"
+    type = "S"
+  }
+
+  attribute {
+    name = "itemKey"
+    type = "S"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for review locks (targetKey -> testId).
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "review_locks" {
+  name         = "${var.project_name}_review_locks"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "targetKey"
+
+  attribute {
+    name = "targetKey"
+    type = "S"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for review attempts (append-only).
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "review_attempts" {
+  name         = "${var.project_name}_review_attempts"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "targetKey"
+  range_key    = "attemptedAt"
+
+  attribute {
+    name = "targetKey"
+    type = "S"
+  }
+
+  attribute {
+    name = "attemptedAt"
+    type = "S"
+  }
+}

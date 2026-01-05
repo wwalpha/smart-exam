@@ -13,6 +13,11 @@ export type DeleteReviewTestParams = {
   testId: string;
 };
 
+/** `POST /review-tests/:testId/results` */
+export type SubmitReviewTestResultsParams = {
+  testId: string;
+};
+
 /** 復習テスト作成リクエスト */
 export type CreateReviewTestRequest = {
   /** 科目 */

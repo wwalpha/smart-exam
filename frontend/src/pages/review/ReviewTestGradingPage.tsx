@@ -11,7 +11,9 @@ export const ReviewTestGradingPage = () => {
     error,
     basePath,
     fields,
-    register,
+    watch,
+    setValue,
+    setAllCorrect,
     submit,
     id,
   } = useReviewGrading();
@@ -43,28 +45,37 @@ export const ReviewTestGradingPage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={submit}>
+            <div className="mb-4 flex items-center justify-end gap-2">
+              <Button type="button" variant="outline" onClick={setAllCorrect}>
+                全問正解
+              </Button>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">No.</TableHead>
                   <TableHead>問題</TableHead>
                   <TableHead>正解</TableHead>
-                  <TableHead className="w-24 text-center">正誤</TableHead>
+                  <TableHead className="w-24 text-center">不正解</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {fields.map((field, index) => {
                   const question = review.items.find((i) => i.itemId === field.itemId);
+                  const isCorrect = watch(`items.${index}.isCorrect`);
                   return (
                     <TableRow key={field.id}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{question?.questionText}</TableCell>
                       <TableCell>{question?.answerText}</TableCell>
                       <TableCell className="text-center">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          {...register(`items.${index}.isCorrect`)} 
+                          checked={!isCorrect}
+                          onChange={(e) => {
+                            setValue(`items.${index}.isCorrect`, !e.target.checked, { shouldDirty: true });
+                          }}
                         />
                       </TableCell>
                     </TableRow>

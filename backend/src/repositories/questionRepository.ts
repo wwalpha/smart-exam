@@ -4,6 +4,7 @@ import { QuestionTable } from '../types/db';
 import { Question, CreateQuestionRequest, UpdateQuestionRequest } from './repo.types';
 import { createUuid } from '@/lib/uuid';
 import type { QuestionSearchResult, SearchQuestionsRequest } from '@smart-exam/api-types';
+import { DateUtils } from '@/lib/dateUtils';
 
 export const QuestionRepository = {
   createQuestion: async (data: CreateQuestionRequest & { materialSetId: string }): Promise<Question> => {
@@ -23,6 +24,7 @@ export const QuestionRepository = {
       displayLabel: data.displayLabel,
       category: data.category,
       tags: data.tags,
+      registeredDate: DateUtils.todayYmd(),
     };
 
     await QuestionsService.create(dbItem);

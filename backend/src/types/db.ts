@@ -64,6 +64,9 @@ export interface QuestionTable {
   category?: string;
   /** タグ */
   tags?: string[];
+
+  /** 登録日 (YYYY-MM-DD) */
+  registeredDate?: string;
 }
 
 /**
@@ -132,6 +135,103 @@ export interface WordTable {
   answer: string;
   /** 科目 */
   subject: string;
+
+  /** 登録日 (YYYY-MM-DD) */
+  registeredDate?: string;
+}
+
+/**
+ * 復習テストテーブル
+ */
+export interface ReviewTestTable {
+  /** テストID (PK) */
+  testId: string;
+  /** 科目 */
+  subject: string;
+  /** モード */
+  mode: 'QUESTION' | 'KANJI';
+  /** ステータス */
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+  /** 指定出題数 */
+  requestedCount: number;
+  /** 生成出題数 */
+  generatedCount: number;
+  /** 作成日 (YYYY-MM-DD) */
+  createdDate: string;
+  /** 得点 */
+  score?: number;
+}
+
+/**
+ * 復習テスト項目テーブル
+ */
+export interface ReviewTestItemTable {
+  /** テストID (PK) */
+  testId: string;
+  /** アイテムキー (SK) */
+  itemKey: string;
+  /** 表示順 */
+  order: number;
+  /** 対象種別 */
+  targetType: 'QUESTION' | 'KANJI';
+  /** 対象ID */
+  targetId: string;
+  /** ロックキー */
+  targetKey: string;
+  /** 表示ラベル */
+  displayLabel?: string;
+  /** 識別キー */
+  canonicalKey?: string;
+  /** 漢字 */
+  kanji?: string;
+  /** よみ */
+  reading?: string;
+  /** 出典教材名 */
+  materialSetName?: string;
+  /** 出典教材日付 */
+  materialSetDate?: string;
+  /** 問題文 */
+  questionText?: string;
+  /** 解答 */
+  answerText?: string;
+  /** 正誤 (採点後) */
+  isCorrect?: boolean;
+}
+
+/**
+ * 復習ロックテーブル (targetKey -> testId)
+ */
+export interface ReviewLockTable {
+  /** 対象キー (PK) */
+  targetKey: string;
+  /** テストID */
+  testId: string;
+  /** 対象種別 */
+  targetType: 'QUESTION' | 'KANJI';
+  /** 対象ID */
+  targetId: string;
+}
+
+/**
+ * 復習履歴テーブル (append-only)
+ */
+export interface ReviewAttemptTable {
+  /** 対象キー (PK) */
+  targetKey: string;
+  /** 実施日時 (SK, ISO8601) */
+  attemptedAt: string;
+  /** 対象種別 */
+  targetType: 'QUESTION' | 'KANJI';
+  /** 対象ID */
+  targetId: string;
+  /** 科目 */
+  subject: string;
+  /** 状態 */
+  state: 'CORRECT' | 'INCORRECT';
+  /** メモ */
+  memo?: string;
+  /** 復習テストID */
+  reviewTestId?: string;
 }
 
 /**

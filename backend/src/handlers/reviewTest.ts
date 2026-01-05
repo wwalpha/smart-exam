@@ -7,12 +7,16 @@ import type {
   DeleteReviewTestParams,
   GetReviewTestParams,
   GetReviewTestResponse,
-  ReviewTestDetail,
   ReviewTestListResponse,
+  SubmitReviewTestResultsRequest,
   UpdateReviewTestStatusRequest,
   UpdateReviewTestStatusParams,
   UpdateReviewTestStatusResponse,
 } from '@smart-exam/api-types';
+
+type SubmitReviewTestResultsParams = {
+  testId: string;
+};
 
 export const listReviewTests: AsyncHandler<{}, ReviewTestListResponse, {}, ParsedQs> = async (
   req,
@@ -44,11 +48,7 @@ export const getReviewTest: AsyncHandler<
     res.status(404).json({ error: 'Not Found' });
     return;
   }
-  const detail: ReviewTestDetail = {
-    ...item,
-    items: [],
-  };
-  res.json(detail);
+  res.json(item);
 };
 
 export const updateReviewTestStatus: AsyncHandler<
@@ -59,21 +59,31 @@ export const updateReviewTestStatus: AsyncHandler<
 > = async (req, res) => {
   const { testId } = req.params;
   const { status } = req.body;
-  void testId;
-  void status;
-  // const item = await service.updateReviewTestStatus(testId, status); // Not implemented yet
-  // if (!item) {
-  //   res.status(404).json({ error: 'Not Found' });
-  //   return;
-  // }
-  // res.json(item);
-  res.status(501).json({ error: 'Not Implemented' });
+  const item = await ReviewTestRepository.updateReviewTestStatus(testId, { status });
+  if (!item) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
+  }
+  res.json(item);
 };
 
 export const deleteReviewTest: AsyncHandler<DeleteReviewTestParams, void, {}, ParsedQs> = async (req, res) => {
   const { testId } = req.params;
-  // await service.deleteReviewTest(testId); // Not implemented in service yet
-  // For now, just return 204 to satisfy interface, or implement delete in service
-  void testId;
+  await ReviewTestRepository.deleteReviewTest(testId);
+  res.status(204).send();
+};
+
+export const submitReviewTestResults: AsyncHandler<
+  SubmitReviewTestResultsParams,
+  void | { error: string },
+  SubmitReviewTestResultsRequest,
+  ParsedQs
+> = async (req, res) => {
+  const { testId } = req.params;
+  const ok = await ReviewTestRepository.submitReviewTestResults(testId, req.body);
+  if (!ok) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
+  }
   res.status(204).send();
 };

@@ -47,6 +47,10 @@ resource "aws_lambda_function" "api" {
       TABLE_WORD_GROUPS        = aws_dynamodb_table.word_groups.name
       TABLE_WORD_TESTS         = aws_dynamodb_table.word_tests.name
       TABLE_WORD_TEST_ATTEMPTS = aws_dynamodb_table.word_test_attempts.name
+      TABLE_REVIEW_TESTS       = aws_dynamodb_table.review_tests.name
+      TABLE_REVIEW_TEST_ITEMS  = aws_dynamodb_table.review_test_items.name
+      TABLE_REVIEW_LOCKS       = aws_dynamodb_table.review_locks.name
+      TABLE_REVIEW_ATTEMPTS    = aws_dynamodb_table.review_attempts.name
       TABLE_EXAM_PAPERS        = aws_dynamodb_table.exam_papers.name
       TABLE_EXAM_RESULTS       = aws_dynamodb_table.exam_results.name
       BEDROCK_REGION           = "us-east-1"
@@ -96,6 +100,10 @@ resource "aws_lambda_function" "bedrock" {
       TABLE_WORD_GROUPS        = aws_dynamodb_table.word_groups.name
       TABLE_WORD_TESTS         = aws_dynamodb_table.word_tests.name
       TABLE_WORD_TEST_ATTEMPTS = aws_dynamodb_table.word_test_attempts.name
+      TABLE_REVIEW_TESTS       = aws_dynamodb_table.review_tests.name
+      TABLE_REVIEW_TEST_ITEMS  = aws_dynamodb_table.review_test_items.name
+      TABLE_REVIEW_LOCKS       = aws_dynamodb_table.review_locks.name
+      TABLE_REVIEW_ATTEMPTS    = aws_dynamodb_table.review_attempts.name
       TABLE_EXAM_PAPERS        = aws_dynamodb_table.exam_papers.name
       TABLE_EXAM_RESULTS       = aws_dynamodb_table.exam_results.name
     }

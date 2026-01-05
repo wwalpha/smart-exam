@@ -84,5 +84,6 @@ app.post('/api/review-tests', handleRequest(reviewTestHandler.createReviewTest))
 app.get('/api/review-tests/:testId', handleRequest(reviewTestHandler.getReviewTest));
 app.patch('/api/review-tests/:testId', handleRequest(reviewTestHandler.updateReviewTestStatus));
 app.delete('/api/review-tests/:testId', handleRequest(reviewTestHandler.deleteReviewTest));
+app.post('/api/review-tests/:testId/results', handleRequest(reviewTestHandler.submitReviewTestResults));
 
 export const handler = serverlessExpress({ app });

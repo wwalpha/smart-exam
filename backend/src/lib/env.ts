@@ -14,6 +14,10 @@ export const ENV = {
   TABLE_WORD_GROUPS: process.env.TABLE_WORD_GROUPS || 'word_groups',
   TABLE_WORD_TEST_ATTEMPTS: process.env.TABLE_WORD_TEST_ATTEMPTS || 'word_test_attempts',
   TABLE_WORD_INCORRECTS: process.env.TABLE_WORD_INCORRECTS || 'word_incorrects',
+  TABLE_REVIEW_TESTS: process.env.TABLE_REVIEW_TESTS || 'review_tests',
+  TABLE_REVIEW_TEST_ITEMS: process.env.TABLE_REVIEW_TEST_ITEMS || 'review_test_items',
+  TABLE_REVIEW_LOCKS: process.env.TABLE_REVIEW_LOCKS || 'review_locks',
+  TABLE_REVIEW_ATTEMPTS: process.env.TABLE_REVIEW_ATTEMPTS || 'review_attempts',
   TABLE_EXAM_PAPERS: process.env.TABLE_EXAM_PAPERS || 'exam_papers',
   TABLE_EXAM_RESULTS: process.env.TABLE_EXAM_RESULTS || 'exam_results',
 };
