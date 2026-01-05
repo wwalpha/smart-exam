@@ -94,7 +94,7 @@ export type ReviewTestDetail = ReviewTest & {
 
 /** 復習テストステータス更新リクエスト */
 export type UpdateReviewTestStatusRequest = {
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
 };
 
 /** 復習テストステータス更新レスポンス */
@@ -113,7 +113,9 @@ export type ReviewTest = {
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
   /** ステータス */
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
+  /** 作成日時 (ISO8601) */
+  createdAt: string;
   /** 出題数 */
   itemCount: number;
 };

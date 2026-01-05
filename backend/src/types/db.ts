@@ -153,11 +153,13 @@ export interface ReviewTestTable {
   /** モード */
   mode: 'QUESTION' | 'KANJI';
   /** ステータス */
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
   /** 指定出題数 */
   requestedCount: number;
   /** 生成出題数 */
   generatedCount: number;
+  /** 作成日時 (ISO8601) */
+  createdAt?: string;
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
 }

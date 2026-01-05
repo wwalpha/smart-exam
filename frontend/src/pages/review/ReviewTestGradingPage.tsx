@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewGrading } from '@/hooks/review';
 
@@ -35,14 +35,11 @@ export const ReviewTestGradingPage = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">採点入力: {review.testId}</h1>
         <Button asChild variant="outline">
-          <Link to={`${basePath}/${id}`}>キャンセル</Link>
+          <Link to={`${basePath}/${id}`}>戻る</Link>
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>回答チェック</CardTitle>
-        </CardHeader>
         <CardContent>
           <form onSubmit={submit}>
             <div className="mb-4 flex items-center justify-end gap-2">

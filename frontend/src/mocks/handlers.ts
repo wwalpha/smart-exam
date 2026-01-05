@@ -622,6 +622,7 @@ export const handlers = [
       id: x.id,
       testId: x.testId,
       subject: x.subject,
+      createdAt: x.createdAt,
       createdDate: x.createdDate,
       status: x.status,
       itemCount: x.itemCount,
@@ -633,10 +634,12 @@ export const handlers = [
   http.post('/api/review-tests', async ({ request }) => {
     const body = (await request.json()) as CreateReviewTestRequest;
     const id = `rt_${newId()}`;
+    const createdAt = new Date().toISOString();
     const detail: ReviewTestDetail = {
       id,
       testId: id,
       subject: body.subject,
+      createdAt,
       createdDate: new Date().toISOString().slice(0, 10),
       status: 'IN_PROGRESS',
       itemCount: body.count,
@@ -654,6 +657,7 @@ export const handlers = [
       id: detail.id,
       testId: detail.testId,
       subject: detail.subject,
+      createdAt: detail.createdAt,
       createdDate: detail.createdDate,
       status: detail.status,
       itemCount: detail.itemCount,
@@ -686,6 +690,7 @@ export const handlers = [
       id: updated.id,
       testId: updated.testId,
       subject: updated.subject,
+      createdAt: updated.createdAt,
       createdDate: updated.createdDate,
       status: updated.status,
       itemCount: updated.itemCount,

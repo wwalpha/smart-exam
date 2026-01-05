@@ -19,12 +19,14 @@
     "@aws-sdk/lib-dynamodb": "^3.0.0",
     "@aws-sdk/s3-request-presigner": "^3.956.0",
     "@smart-exam/api-types": "workspace:*",
+    "@sparticuz/chromium": "^143.0.4",
     "@vendia/serverless-express": "^4.12.6",
     "cors": "^2.8.5",
     "dayjs": "^1.11.19",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "pdf-to-png-converter": "^3.11.0"
+    "pdf-to-png-converter": "^3.11.0",
+    "puppeteer-core": "^24.34.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.158",

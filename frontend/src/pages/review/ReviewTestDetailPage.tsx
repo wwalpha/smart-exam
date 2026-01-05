@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewDetail } from '@/hooks/review';
+import { formatYmdHmSlash } from '@/utils/date';
 
-type ReviewTestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+type ReviewTestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
 
 export const ReviewTestDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewDetail();
@@ -55,7 +56,7 @@ export const ReviewTestDetailPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>基本情報</CardTitle>
@@ -70,19 +71,21 @@ export const ReviewTestDetailPage = () => {
               <span>{review.itemCount}問</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">作成日</span>
-              <span>{review.createdDate}</span>
+              <span className="font-medium">作成日時</span>
+              <span>{formatYmdHmSlash(review.createdAt)}</span>
             </div>
-            <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">ステータス</span>
-              <div className="flex items-center gap-2">
+            <div className="space-y-2 border-b pb-2">
+              <div className="flex justify-between">
+                <span className="font-medium">ステータス</span>
+                <Badge variant="outline">{review.status}</Badge>
+              </div>
+              <div className="flex justify-end gap-2">
                 <Select value={statusDraft} onValueChange={(v) => setStatusDraft(v as ReviewTestStatus)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="ステータス" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
-                    <SelectItem value="PAUSED">PAUSED</SelectItem>
                     <SelectItem value="COMPLETED">COMPLETED</SelectItem>
                     <SelectItem value="CANCELED">CANCELED</SelectItem>
                   </SelectContent>
@@ -97,9 +100,6 @@ export const ReviewTestDetailPage = () => {
                 >
                   保存
                 </Button>
-                <Badge variant="outline" className="ml-2">
-                  {review.status}
-                </Badge>
               </div>
             </div>
           </CardContent>
@@ -121,7 +121,7 @@ export const ReviewTestDetailPage = () => {
                 </TableHeader>
                 <TableBody>
                   {review.items.map((item, index) => (
-                    <TableRow key={item.itemId}>
+                    <TableRow key={item.id}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{item.questionText}</TableCell>
                       <TableCell>

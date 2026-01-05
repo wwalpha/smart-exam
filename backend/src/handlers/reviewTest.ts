@@ -1,4 +1,8 @@
 import { ReviewTestRepository } from '@/repositories';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { s3Client } from '@/lib/aws';
+import { ENV } from '@/lib/env';
+import { ReviewTestPdfService } from '@/services/ReviewTestPdfService';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type {
@@ -86,4 +90,46 @@ export const submitReviewTestResults: AsyncHandler<
     return;
   }
   res.status(204).send();
+};
+
+type GetReviewTestPdfParams = {
+  testId: string;
+};
+
+export const getReviewTestPdf: AsyncHandler<
+  GetReviewTestPdfParams,
+  Buffer | { error: string },
+  {},
+  ParsedQs
+> = async (req, res) => {
+  const { testId } = req.params;
+  const review = await ReviewTestRepository.getReviewTest(testId);
+  if (!review) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
+  }
+
+  const pdfBuffer = await ReviewTestPdfService.generatePdfBuffer(review);
+
+  if (ENV.FILES_BUCKET_NAME) {
+    const key = `review-tests/${testId}.pdf`;
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: ENV.FILES_BUCKET_NAME,
+        Key: key,
+        Body: pdfBuffer,
+        ContentType: 'application/pdf',
+      })
+    );
+  }
+
+  const wantDownload =
+    req.query.download === '1' || req.query.download === 'true' || req.query.disposition === 'attachment';
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `${wantDownload ? 'attachment' : 'inline'}; filename="review-test-${testId}.pdf"`
+  );
+  res.status(200).send(pdfBuffer);
 };

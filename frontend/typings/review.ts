@@ -2,7 +2,7 @@ export type ReviewTest = {
   id: string;
   testId: string; // Display ID
   subject: string;
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
   itemCount: number;
   createdAt: string;
   updatedAt: string;

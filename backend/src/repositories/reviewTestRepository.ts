@@ -248,6 +248,7 @@ const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
   testId: row.testId,
   subject: row.subject,
   createdDate: row.createdDate,
+  createdAt: row.createdAt ?? DateUtils.format(`${row.createdDate}T00:00:00+09:00`),
   status: row.status,
   itemCount: row.generatedCount,
 });
@@ -285,6 +286,7 @@ export const ReviewTestRepository = {
   createReviewTest: async (req: CreateReviewTestRequest): Promise<ReviewTest> => {
     const testId = createUuid();
     const createdDate = DateUtils.todayYmd();
+    const createdAt = DateUtils.now();
     const range = parseFilterRange(req);
 
     const candidates: ReviewCandidate[] = [];
@@ -366,6 +368,7 @@ export const ReviewTestRepository = {
       status: 'IN_PROGRESS',
       requestedCount: req.count,
       generatedCount: selected.length,
+      createdAt,
       createdDate,
     };
 

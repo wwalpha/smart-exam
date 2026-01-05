@@ -82,6 +82,7 @@ app.get('/api/tests/:testId/attempts/latest', handleRequest(attemptHandler.getLa
 app.get('/api/review-tests', handleRequest(reviewTestHandler.listReviewTests));
 app.post('/api/review-tests', handleRequest(reviewTestHandler.createReviewTest));
 app.get('/api/review-tests/:testId', handleRequest(reviewTestHandler.getReviewTest));
+app.get('/api/review-tests/:testId/pdf', handleRequest(reviewTestHandler.getReviewTestPdf));
 app.patch('/api/review-tests/:testId', handleRequest(reviewTestHandler.updateReviewTestStatus));
 app.delete('/api/review-tests/:testId', handleRequest(reviewTestHandler.deleteReviewTest));
 app.post('/api/review-tests/:testId/results', handleRequest(reviewTestHandler.submitReviewTestResults));

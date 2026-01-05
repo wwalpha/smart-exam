@@ -131,34 +131,34 @@ export const KanjiListPage = () => {
           <TableBody>
             {pagedList.map((kanji) => (
               <TableRow key={kanji.id}>
-                <TableCell className="px-3 py-2">
+                <TableCell className="px-2 py-1">
                   <div className="flex gap-2">
-                    <Button asChild variant="ghost" size="icon" aria-label="編集">
+                    <Button asChild variant="ghost" size="icon" className="h-8 w-8" aria-label="編集">
                       <Link to={`/kanji/${kanji.id}`}>
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3.5 w-3.5" />
                       </Link>
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       aria-label="削除"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => remove(kanji.id)}>
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell className="px-3 py-2 text-sm">
+                <TableCell className="px-2 py-1 text-sm">
                   <div className="truncate" title={SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}>
                     {SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}
                   </div>
                 </TableCell>
-                <TableCell className="px-3 py-2 text-sm font-medium">
+                <TableCell className="px-2 py-1 text-sm font-medium">
                   <div className="truncate" title={kanji.kanji}>
                     {kanji.kanji}
                   </div>
                 </TableCell>
-                <TableCell className="px-3 py-2 text-sm">
+                <TableCell className="px-2 py-1 text-sm">
                   <div className="truncate" title={kanji.reading}>
                     {kanji.reading}
                   </div>

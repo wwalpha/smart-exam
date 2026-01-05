@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useReviewList } from '@/hooks/review';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import { formatYmdHmSlash } from '@/utils/date';
 import type { WordTestSubject } from '@typings/wordtest';
 import { FileText, Trash2 } from 'lucide-react';
 
@@ -19,8 +20,6 @@ export const ReviewTestListPage = () => {
         return <Badge variant="default">完了</Badge>;
       case 'IN_PROGRESS':
         return <Badge variant="secondary">実施中</Badge>;
-      case 'PAUSED':
-        return <Badge variant="outline">中断</Badge>;
       case 'CANCELED':
         return <Badge variant="destructive">中止</Badge>;
       default:
@@ -31,14 +30,7 @@ export const ReviewTestListPage = () => {
   return (
     <div className="space-y-6 p-8">
       <ConfirmDialog />
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">復習テスト一覧</h1>
-      </div>
-
       <Card>
-        <CardHeader>
-          <CardTitle>検索条件</CardTitle>
-        </CardHeader>
         <CardContent>
           <form onSubmit={search} className="space-y-4">
             <div className="flex flex-wrap gap-4 items-end">
@@ -75,7 +67,6 @@ export const ReviewTestListPage = () => {
                     <SelectItem value="ALL">全て</SelectItem>
                     <SelectItem value="IN_PROGRESS">実施中</SelectItem>
                     <SelectItem value="COMPLETED">完了</SelectItem>
-                    <SelectItem value="PAUSED">中断</SelectItem>
                     <SelectItem value="CANCELED">中止</SelectItem>
                   </SelectContent>
                 </Select>
@@ -98,7 +89,7 @@ export const ReviewTestListPage = () => {
             <TableRow>
               <TableHead className="w-24" />
               <TableHead>科目</TableHead>
-              <TableHead>作成日</TableHead>
+              <TableHead>作成日時</TableHead>
               <TableHead>問題数</TableHead>
               <TableHead>ステータス</TableHead>
             </TableRow>
@@ -125,13 +116,11 @@ export const ReviewTestListPage = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">
-                    {SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL] ?? ''}
-                  </Badge>
+                  <Badge variant="outline">{SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                 </TableCell>
                 <TableCell>
                   <Link to={`${basePath}/${test.id}`} className="font-medium hover:underline">
-                    {test.createdDate}
+                    {formatYmdHmSlash(test.createdAt)}
                   </Link>
                 </TableCell>
                 <TableCell>{test.itemCount}問</TableCell>
