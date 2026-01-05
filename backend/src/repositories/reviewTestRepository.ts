@@ -247,9 +247,9 @@ const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
   id: row.testId,
   testId: row.testId,
   subject: row.subject,
+  createdDate: row.createdDate,
   status: row.status,
   itemCount: row.generatedCount,
-  ...(row.score !== undefined ? { score: row.score } : {}),
 });
 
 const toApiReviewTestItem = (row: ReviewTestItemTable): ReviewTestItem => ({

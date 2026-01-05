@@ -64,13 +64,13 @@ export const KanjiListPage = () => {
             </div>
 
             <div className="flex flex-wrap justify-end gap-2">
-              <Button type="submit">検索</Button>
-              <Button asChild variant="outline">
-                <Link to="/kanji/new">新規登録</Link>
-              </Button>
               <Button asChild variant="outline">
                 <Link to="/kanji/import">一括インポート</Link>
               </Button>
+              <Button asChild variant="outline">
+                <Link to="/kanji/new">新規登録</Link>
+              </Button>
+              <Button type="submit">検索</Button>
             </div>
           </form>
         </CardContent>
@@ -124,8 +124,8 @@ export const KanjiListPage = () => {
             <TableRow>
               <TableHead className="w-24">操作</TableHead>
               <TableHead className="w-24">科目</TableHead>
-              <TableHead>問題</TableHead>
-              <TableHead>解答</TableHead>
+              <TableHead className="w-[45%]">問題</TableHead>
+              <TableHead className="w-[35%]">解答</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

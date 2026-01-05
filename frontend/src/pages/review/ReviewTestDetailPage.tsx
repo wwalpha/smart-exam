@@ -1,12 +1,23 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewDetail } from '@/hooks/review';
 
+type ReviewTestStatus = 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
+
 export const ReviewTestDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, ConfirmDialog } = useReviewDetail();
+  const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewDetail();
+  const [statusDraft, setStatusDraft] = useState<ReviewTestStatus>('IN_PROGRESS');
+
+  useEffect(() => {
+    if (review) {
+      setStatusDraft(review.status);
+    }
+  }, [review]);
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -59,15 +70,38 @@ export const ReviewTestDetailPage = () => {
               <span>{review.itemCount}問</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">ステータス</span>
-              <Badge variant="outline">{review.status}</Badge>
+              <span className="font-medium">作成日</span>
+              <span>{review.createdDate}</span>
             </div>
-            {review.score !== undefined && (
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">スコア</span>
-                <span className="text-lg font-bold">{review.score}点</span>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium">ステータス</span>
+              <div className="flex items-center gap-2">
+                <Select value={statusDraft} onValueChange={(v) => setStatusDraft(v as ReviewTestStatus)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="ステータス" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
+                    <SelectItem value="PAUSED">PAUSED</SelectItem>
+                    <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                    <SelectItem value="CANCELED">CANCELED</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={statusDraft === review.status}
+                  onClick={async () => {
+                    await updateReviewTestStatus(review.id, { status: statusDraft });
+                  }}
+                >
+                  保存
+                </Button>
+                <Badge variant="outline" className="ml-2">
+                  {review.status}
+                </Badge>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 

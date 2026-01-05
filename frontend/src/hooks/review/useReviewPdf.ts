@@ -25,6 +25,7 @@ export const useReviewPdf = () => {
     review: currentTest,
     isLoading: status.isLoading,
     error: status.error,
+    isKanji,
     basePath,
     pdfUrl,
     navigate,

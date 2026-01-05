@@ -110,12 +110,12 @@ export type ReviewTest = {
   testId: string;
   /** 科目 */
   subject: SubjectId;
+  /** 作成日 (YYYY-MM-DD) */
+  createdDate: string;
   /** ステータス */
   status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
   /** 出題数 */
   itemCount: number;
-  /** 得点 (完了時のみ) */
-  score?: number;
 };
 
 /**

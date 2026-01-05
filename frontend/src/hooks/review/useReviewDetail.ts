@@ -13,6 +13,7 @@ export const useReviewDetail = () => {
   const { detail, status } = useWordTestStore((s) => s.review);
   const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);
   const deleteReviewTest = useWordTestStore((s) => s.deleteReviewTest);
+  const updateReviewTestStatus = useWordTestStore((s) => s.updateReviewTestStatus);
   const { confirm, ConfirmDialog } = useConfirm();
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export const useReviewDetail = () => {
     error: status.error,
     basePath,
     remove,
+    updateReviewTestStatus,
     ConfirmDialog,
   };
 };

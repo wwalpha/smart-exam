@@ -622,9 +622,9 @@ export const handlers = [
       id: x.id,
       testId: x.testId,
       subject: x.subject,
+      createdDate: x.createdDate,
       status: x.status,
       itemCount: x.itemCount,
-      score: x.score,
     }));
     const response: ReviewTestListResponse = { items, total: items.length };
     return HttpResponse.json(response);
@@ -637,6 +637,7 @@ export const handlers = [
       id,
       testId: id,
       subject: body.subject,
+      createdDate: new Date().toISOString().slice(0, 10),
       status: 'IN_PROGRESS',
       itemCount: body.count,
       items: Array.from({ length: body.count }).map((_, i) => ({
@@ -653,9 +654,9 @@ export const handlers = [
       id: detail.id,
       testId: detail.testId,
       subject: detail.subject,
+      createdDate: detail.createdDate,
       status: detail.status,
       itemCount: detail.itemCount,
-      score: detail.score,
     };
     return HttpResponse.json(response, { status: 201 });
   }),
@@ -685,9 +686,9 @@ export const handlers = [
       id: updated.id,
       testId: updated.testId,
       subject: updated.subject,
+      createdDate: updated.createdDate,
       status: updated.status,
       itemCount: updated.itemCount,
-      score: updated.score,
     };
     return HttpResponse.json(response);
   }),

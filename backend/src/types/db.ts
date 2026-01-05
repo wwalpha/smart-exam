@@ -160,8 +160,6 @@ export interface ReviewTestTable {
   generatedCount: number;
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
-  /** 得点 */
-  score?: number;
 }
 
 /**
