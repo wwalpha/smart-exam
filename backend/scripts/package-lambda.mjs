@@ -12,10 +12,7 @@ const backendRoot = path.resolve(__dirname, '..');
 const distDir = path.join(backendRoot, 'dist');
 const outDir = path.join(backendRoot, 'lambda');
 
-const entryFiles = [
-  path.join(distDir, 'index.js'),
-  path.join(distDir, 'handlers', 'bedrock.js'),
-];
+const entryFiles = [path.join(distDir, 'index.js'), path.join(distDir, 'handlers', 'bedrock.js')];
 
 // Layerを使わない前提のため、確実に同梱したい依存はここで固定指定する
 const forceIncludePackages = ['@sparticuz/chromium', 'puppeteer-core'];
@@ -96,6 +93,10 @@ if (warnings.length > 0) {
 }
 
 const copyFile = async (srcRelative) => {
+  if (srcRelative === 'package.json') {
+    return;
+  }
+
   const srcAbs = path.join(backendRoot, srcRelative);
   const dstRelative = srcRelative.startsWith('dist/') ? srcRelative.slice('dist/'.length) : srcRelative;
   const dstAbs = path.join(outDir, dstRelative);
@@ -115,6 +116,13 @@ for (const pkgName of forceIncludePackages) {
   // nodeFileTrace が拾いきれないケース（動的require等）でも確実に同梱する
   await copyDir(pkgRoot, pkgOutPath);
 }
+
+// Lambda Node.js runtime: CommonJSで動かす（handlerが module.exports 前提）
+await fs.writeFile(
+  path.join(outDir, 'package.json'),
+  JSON.stringify({ name: 'smart-exam-lambda', private: true, type: 'commonjs' }, null, 2) + '\n',
+  'utf8'
+);
 
 // Lambda handler resolution: ensure these paths exist in the zip root.
 // - index.handler => index.js
