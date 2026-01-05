@@ -3,33 +3,9 @@ import type { MaterialSlice } from '@/stores/store.types';
 import * as MATERIAL_API from '@/services/materialApi';
 import * as EXAM_API from '@/services/examApi';
 import * as BEDROCK_API from '@/services/bedrockApi';
+import { compareQuestionNumber, normalizeQuestionNumber } from '@/utils/questionNumber';
+import { toBedrockPromptSubject } from '@/utils/bedrockSubject';
 import { withStatus } from '../utils';
-
-const normalizeQuestionNumber = (raw: string): string | null => {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-
-  const replaced = trimmed
-    .replace(/[（）()]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-/, '')
-    .replace(/-$/, '');
-
-  if (!/^\d+(?:-\d+)*$/.test(replaced)) return null;
-  return replaced;
-};
-
-const compareQuestionNumber = (a: string, b: string): number => {
-  const pa = a.split('-').map((x) => Number.parseInt(x, 10));
-  const pb = b.split('-').map((x) => Number.parseInt(x, 10));
-  const len = Math.max(pa.length, pb.length);
-  for (let i = 0; i < len; i += 1) {
-    const av = pa[i] ?? 0;
-    const bv = pb[i] ?? 0;
-    if (av !== bv) return av - bv;
-  }
-  return 0;
-};
 
 export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSlice> = (set, get) => {
   type MaterialState = MaterialSlice['material'];
@@ -221,7 +197,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
 
           const response = await BEDROCK_API.analyzePaper({
             s3Key: graded.s3Key,
-            subject: current.detail.subject,
+            subject: toBedrockPromptSubject(current.detail.subject),
           });
 
           const normalized = (response.questions ?? [])

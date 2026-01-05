@@ -34,7 +34,7 @@ export const MaterialSetListPage = () => {
     <div className="space-y-6 p-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">教材セット</h1>
+        <h1 className="text-2xl font-bold">教材</h1>
       </div>
 
       <Card>
@@ -70,6 +70,14 @@ export const MaterialSetListPage = () => {
                   <SelectItem value="6">6年</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="w-48">
+              <label className="text-sm font-medium">教材種別</label>
+              <Input {...register('provider')} placeholder="例: SAPIX" />
+            </div>
+            <div className="w-44">
+              <label className="text-sm font-medium">実施年月日</label>
+              <Input type="date" {...register('date')} />
             </div>
             <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium">キーワード</label>
@@ -112,10 +120,11 @@ export const MaterialSetListPage = () => {
           <TableHeader>
             <TableRow>
               <TableHead />
-              <TableHead>教材名</TableHead>
+              <TableHead>学年</TableHead>
+              <TableHead>教材種別</TableHead>
               <TableHead>科目</TableHead>
               <TableHead>実施年月日</TableHead>
-              <TableHead>学年</TableHead>
+              <TableHead>教材名</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -131,23 +140,24 @@ export const MaterialSetListPage = () => {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </TableCell>
-                <TableCell>
-                  <Link to={`/materials/${material.id}`} className="font-medium underline underline-offset-4">
-                    {material.name}
-                  </Link>
-                </TableCell>
+                <TableCell>{material.grade}年</TableCell>
+                <TableCell>{material.provider ?? ''}</TableCell>
                 <TableCell>
                   <Badge variant="outline">
                     {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}
                   </Badge>
                 </TableCell>
                 <TableCell>{material.yearMonth}</TableCell>
-                <TableCell>{material.grade}年</TableCell>
+                <TableCell>
+                  <Link to={`/materials/${material.id}`} className="font-medium underline underline-offset-4">
+                    {material.name}
+                  </Link>
+                </TableCell>
               </TableRow>
             ))}
             {materials.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

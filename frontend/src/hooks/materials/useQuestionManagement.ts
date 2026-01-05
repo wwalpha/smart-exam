@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
+import { compareQuestionNumber } from '@/utils/questionNumber';
 
 type QuestionFormValues = {
   canonicalKey: string;
@@ -24,6 +25,10 @@ export const useQuestionManagement = () => {
   const { confirm, ConfirmDialog } = useConfirm();
 
   const extractedRef = useRef(false);
+
+  const sortedQuestions = useMemo(() => {
+    return [...questions].sort((a, b) => compareQuestionNumber(a.canonicalKey, b.canonicalKey));
+  }, [questions]);
 
   useEffect(() => {
     if (id) {
@@ -64,8 +69,9 @@ export const useQuestionManagement = () => {
   return {
     id,
     material: detail,
-    questions,
-    isLoading: status.isLoading,
+    questions: sortedQuestions,
+    isInitialLoading: status.isLoading && !detail,
+    isBusy: status.isLoading,
     error: status.error,
     isDialogOpen,
     setIsDialogOpen,

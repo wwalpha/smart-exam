@@ -3,44 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useMaterialDetail } from '@/hooks/materials';
-import { apiRequestBlob } from '@/services/apiClient';
-import { toast } from 'sonner';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 
-const isPdfBlob = async (blob: Blob): Promise<boolean> => {
-  const prefix = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
-  return String.fromCharCode(...prefix) === '%PDF-';
-};
-
-const fileTypeLabel = (fileType: string): string => {
-  if (fileType === 'QUESTION') return '問題';
-  if (fileType === 'ANSWER') return '解答';
-  if (fileType === 'GRADED_ANSWER') return '採点済み答案';
-  return fileType;
-};
-
 export const MaterialSetDetailPage = () => {
-  const { material, files, isLoading, error, id } = useMaterialDetail();
-
-  const preview = async (key: string) => {
-    try {
-      const blob = await apiRequestBlob({
-        method: 'GET',
-        path: `/api/material-files?key=${encodeURIComponent(key)}`,
-      });
-
-      if (!(await isPdfBlob(blob))) {
-        const text = await blob.text().catch(() => '');
-        toast.error('PDFの取得に失敗しました', { description: text.slice(0, 200) });
-        return;
-      }
-
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch (e) {
-      toast.error('PDFの取得に失敗しました');
-    }
-  };
+  const { material, files, isLoading, error, id, fileTypeLabel, previewFile } = useMaterialDetail();
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -55,9 +21,9 @@ export const MaterialSetDetailPage = () => {
   }
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 px-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">教材セット詳細</h1>
+        <h1 className="text-2xl font-bold">{material.name}</h1>
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link to="/materials">一覧へ戻る</Link>
@@ -110,7 +76,11 @@ export const MaterialSetDetailPage = () => {
                   <div className="font-medium">{fileTypeLabel(file.fileType)}</div>
                   <div className="text-sm text-muted-foreground">{file.filename}</div>
                 </div>
-                <Button variant="outline" size="sm" className="w-[100px]" onClick={() => preview(file.s3Key)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-[100px]"
+                  onClick={() => previewFile(file.s3Key)}>
                   プレビュー
                 </Button>
               </div>

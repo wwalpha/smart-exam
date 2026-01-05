@@ -30,6 +30,9 @@ export const searchMaterialSets: AsyncHandler<
 
   const subject = (req.body.subject ?? '').trim();
   const grade = (req.body.grade ?? '').trim();
+  const provider = (req.body.provider ?? '').trim();
+  const from = (req.body.from ?? '').trim();
+  const to = (req.body.to ?? '').trim();
   const q = (req.body.q ?? '').trim();
 
   const subjectLower = subject.toLowerCase();
@@ -38,6 +41,14 @@ export const searchMaterialSets: AsyncHandler<
   const filtered = items.filter((x) => {
     if (subjectLower && String(x.subject ?? '').toLowerCase() !== subjectLower) return false;
     if (grade && String(x.grade ?? '') !== grade) return false;
+    if (provider && String(x.provider ?? '') !== provider) return false;
+
+    if (from || to) {
+      const performed = String(x.date ?? x.yearMonth ?? '');
+      if (!performed) return false;
+      if (from && performed < from) return false;
+      if (to && performed > to) return false;
+    }
     if (!qLower) return true;
 
     const haystack = [x.name, x.provider, x.course, x.description, x.yearMonth]

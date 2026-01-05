@@ -9,6 +9,17 @@
   - 開発環境は Vite の proxy 設定が無い前提のため、SPA ルーティングに吸われて「空白画面」になります。
   - バイナリ（PDF など）は `frontend/src/services/apiClient.ts` の `apiRequestBlob` 等を使って取得し、Blob URL でプレビュー/ダウンロード/印刷してください。
 
+  ### 表示/変換ロジックの配置（仕様以外）
+  - 「表示用/外部サービス用の変換（例: Bedrock 向け subject の正規化）」は Frontend 側（`frontend/src/utils` など）で行い、Backend には業務データの生値を渡す前提にしてください。
+
+  ### TSX と Hook の責務分離（仕様以外）
+  - TSX（Page/Component）には描画とイベント紐付けのみを置き、
+    - API 呼び出し
+    - データ整形/ソート/正規化
+    - 画面状態（読み込み/確認ダイアログ等）の制御
+    は Hook（`frontend/src/hooks/**`）または `frontend/src/utils/**` に寄せてください。
+  - ミューテーション（作成/更新/削除）中に全画面を `Loading...` に切り替えて白画面のように見える挙動は避け、初回ロードのみ全画面 Loading にしてください。
+
 ## 復習テスト（要件準拠の固定ルール）
 
 ### dueDate

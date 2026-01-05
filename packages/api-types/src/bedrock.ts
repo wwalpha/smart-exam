@@ -1,8 +1,6 @@
-import type { SubjectId } from './subject';
-
 export type AnalyzePaperRequest = {
   s3Key: string;
-  subject: SubjectId;
+  subject: 'math' | 'science' | 'society';
 };
 
 export type AnalyzePaperResponse = {

@@ -30,19 +30,17 @@ export const ReviewTestDetailPage = () => {
   }
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 px-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">テスト詳細</h1>
+        <h1 className="text-2xl font-bold"></h1>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>
           </Button>
-          {review.status !== 'COMPLETED' ? (
-            <Button asChild className="w-[100px]">
-              <Link to={`${basePath}/${review.id}/grading`}>結果入力</Link>
-            </Button>
-          ) : null}
+          <Button asChild className="w-[100px]">
+            <Link to={`${basePath}/${review.id}/grading`}>結果入力</Link>
+          </Button>
 
           <Button asChild className="w-[100px]">
             <Link to={`${basePath}/${review.id}/pdf`}>印刷</Link>

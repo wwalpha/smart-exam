@@ -7,6 +7,8 @@ import type { WordTestSubject } from '@typings/wordtest';
 type SearchFormValues = {
   subject: 'ALL' | WordTestSubject;
   grade: string;
+  provider: string;
+  date: string;
   q: string;
 };
 
@@ -19,6 +21,8 @@ export const useMaterialList = () => {
     defaultValues: {
       subject: 'ALL',
       grade: 'ALL',
+      provider: '',
+      date: '',
       q: '',
     }
   });
@@ -27,6 +31,8 @@ export const useMaterialList = () => {
     fetchMaterialSets({
       subject: data.subject === 'ALL' ? undefined : data.subject,
       grade: data.grade === 'ALL' ? undefined : data.grade,
+      provider: data.provider.trim() ? data.provider.trim() : undefined,
+      ...(data.date ? { from: data.date, to: data.date } : {}),
       q: data.q,
     });
   };

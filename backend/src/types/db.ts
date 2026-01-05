@@ -58,7 +58,6 @@ export interface QuestionTable {
   canonicalKey: string;
   /** タグ */
   tags?: string[];
-
   /** 登録日 (YYYY-MM-DD) */
   registeredDate?: string;
 }

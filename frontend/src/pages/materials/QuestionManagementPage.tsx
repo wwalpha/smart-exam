@@ -12,7 +12,8 @@ export const QuestionManagementPage = () => {
     id,
     material,
     questions,
-    isLoading,
+    isInitialLoading,
+    isBusy,
     error,
     isDialogOpen,
     setIsDialogOpen,
@@ -26,7 +27,7 @@ export const QuestionManagementPage = () => {
     formState: { errors },
   } = form;
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return <div className="p-8">Loading...</div>;
   }
 
@@ -48,7 +49,7 @@ export const QuestionManagementPage = () => {
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>手動追加</Button>
+              <Button disabled={isBusy}>手動追加</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -75,10 +76,10 @@ export const QuestionManagementPage = () => {
                   <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1)</p>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isBusy}>
                     キャンセル
                   </Button>
-                  <Button type="submit">追加</Button>
+                  <Button type="submit" disabled={isBusy}>追加</Button>
                 </div>
               </form>
             </DialogContent>
@@ -86,27 +87,29 @@ export const QuestionManagementPage = () => {
         </div>
       </div>
 
-      <Card>
+      <Card className="max-w-xl">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>問題番号</TableHead>
-                <TableHead className="text-right">操作</TableHead>
+                <TableHead className="w-[96px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {questions.map((q) => (
-                <TableRow key={q.id}>
-                  <TableCell>{q.canonicalKey}</TableCell>
-                  <TableCell className="text-right">
+                <TableRow key={q.id} className="h-10">
+                  <TableCell className="py-2">{q.canonicalKey}</TableCell>
+                  <TableCell className="py-2">
+                    <div className="flex justify-end">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => remove(q.id)}>
                       削除
                     </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

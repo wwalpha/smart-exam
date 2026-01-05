@@ -30,24 +30,6 @@ export const ReviewTestGradingPage = () => {
     return <div className="p-8">データの取得に失敗しました。</div>;
   }
 
-  if (review.status === 'COMPLETED') {
-    return (
-      <div className="max-w-4xl mx-auto p-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">採点入力: {review.testId}</h1>
-          <Button asChild variant="outline">
-            <Link to={`${basePath}/${id}`}>戻る</Link>
-          </Button>
-        </div>
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            完了済みのテストは結果を再入力できません。
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
       <div className="flex items-center justify-between">
