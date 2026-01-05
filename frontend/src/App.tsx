@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
+import { Toaster } from '@/components/ui/sonner';
 import { matchPath, Route, Routes, useLocation } from 'react-router-dom';
 
 // Dashboard
@@ -79,6 +80,7 @@ export const App = () => {
 
   return (
     <AppLayout title="Smart Exam" pageTitle={pageTitle} sidebarItems={sidebarItems}>
+      <Toaster />
       <Routes>
         {/* Dashboard */}
         <Route path="/" element={<DashboardPage />} />

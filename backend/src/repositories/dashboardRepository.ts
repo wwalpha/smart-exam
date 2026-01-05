@@ -2,8 +2,6 @@ import type { DashboardData } from '@smart-exam/api-types';
 import { AttemptsService } from '@/services/AttemptsService';
 import { QuestionsService } from '@/services/QuestionsService';
 import { DateUtils } from '@/lib/dateUtils';
-import { WordsService } from '@/services/WordsService';
-import { WordIncorrectRepository } from '@/repositories';
 
 const toUtcDateKey = (iso: string): string => iso.slice(0, 10);
 
@@ -44,35 +42,9 @@ export const DashboardRepository = {
       .sort((a, b) => b.incorrectRate - a.incorrectRate)
       .slice(0, 10);
 
-    const recentIncorrects = await WordIncorrectRepository.listRecentIncorrects(10);
-    const wordById = new Map(
-      (
-        await Promise.all(
-          recentIncorrects.map(async (x) => {
-            const w = await WordsService.get(x.wordId);
-            return w ? ([x.wordId, w] as const) : null;
-          })
-        )
-      ).filter((x): x is readonly [string, NonNullable<Awaited<ReturnType<typeof WordsService.get>>>] => x !== null)
-    );
-
-    const topIncorrectKanji = recentIncorrects
-      .map((x) => {
-        const w = wordById.get(x.wordId);
-        if (!w) return null;
-        return {
-          id: x.wordId,
-          kanji: w.question,
-          subject: x.subject,
-          lastIncorrectAt: x.lastIncorrectAt,
-        };
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null);
-
     return {
       todayTestCount,
       topIncorrectQuestions,
-      topIncorrectKanji,
       lockedCount: 0,
       inventoryCount: 0,
     };

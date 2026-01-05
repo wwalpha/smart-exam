@@ -22,7 +22,6 @@ export const DashboardPage = () => {
   }
 
   const topIncorrectQuestions = Array.isArray(data.topIncorrectQuestions) ? data.topIncorrectQuestions : [];
-  const topIncorrectKanji = Array.isArray(data.topIncorrectKanji) ? data.topIncorrectKanji : [];
 
   return (
     <div className="space-y-6 p-8">
@@ -49,7 +48,7 @@ export const DashboardPage = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4">
         <Card>
           <CardHeader>
             <CardTitle>不正解率が高い問題 (Top 5)</CardTitle>
@@ -74,35 +73,6 @@ export const DashboardPage = () => {
             <div className="mt-4">
               <Button asChild variant="outline" size="sm">
                 <Link to="/reviewtests/questions">問題テスト一覧へ</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>最後に間違えた漢字 (Top 5)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {topIncorrectKanji.map((k) => (
-                <div key={k.id} className="flex items-center justify-between border-b pb-2 last:border-0">
-                  <div>
-                    <div className="font-medium text-lg">{k.kanji}</div>
-                    <div className="text-sm text-muted-foreground">{k.subject}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-muted-foreground">{new Date(k.lastIncorrectAt).toLocaleDateString()}</div>
-                  </div>
-                </div>
-              ))}
-              {topIncorrectKanji.length === 0 && (
-                <div className="text-sm text-muted-foreground">データがありません</div>
-              )}
-            </div>
-            <div className="mt-4">
-              <Button asChild variant="outline" size="sm">
-                <Link to="/reviewtests/kanji">漢字テスト一覧へ</Link>
               </Button>
             </div>
           </CardContent>

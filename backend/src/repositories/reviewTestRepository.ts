@@ -126,8 +126,11 @@ const computeDueDate = (params: {
   const { latestState, streak, lastCorrectDate, lastIncorrectDate, lastAttemptDate } = calcStreakAndLastDates(attempts);
   const lastAttempt = lastAttemptDate ?? registeredDate;
 
-  // 3連続正解は永久除外
+  // 3連続正解: 単語(漢字)は将来日に送る (2099-12-31)
   if (streak >= 3) {
+    if (targetType === 'KANJI') {
+      return { dueDate: '2099-12-31', lastAttemptDate: lastAttempt };
+    }
     return { dueDate: null, lastAttemptDate: lastAttempt };
   }
 

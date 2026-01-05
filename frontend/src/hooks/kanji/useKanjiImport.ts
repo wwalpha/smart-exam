@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import type { ImportKanjiResponse } from '@smart-exam/api-types';
+import { toast } from 'sonner';
 
 type FormValues = {
   mode: 'SKIP' | 'UPDATE';
@@ -28,6 +29,16 @@ export const useKanjiImport = () => {
     const file = data.file?.[0];
     if (!subject || !file) return;
 
+    const fileName = String(file.name ?? '').toLowerCase();
+    const extOk = fileName.endsWith('.txt') || fileName.endsWith('.csv');
+    if (!extOk) {
+      form.setError('file', {
+        type: 'validate',
+        message: 'テキストファイル（.txt / .csv）を選択してください。',
+      });
+      return;
+    }
+
     const fileContent = await file.text();
 
     const response = await importKanji({
@@ -35,6 +46,13 @@ export const useKanjiImport = () => {
       mode: data.mode,
       subject,
     });
+
+    if (response.errorCount === 0) {
+      toast.success('登録完了');
+      navigate('/kanji');
+      return;
+    }
+
     setResult(response);
   };
 

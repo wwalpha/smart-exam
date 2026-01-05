@@ -2,8 +2,6 @@ import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
 import { createUuid } from '../lib/uuid';
 import type { WordTestAttemptTable } from '../types/db';
-import { WordsService } from '../services/WordsService';
-import { WordIncorrectRepository } from './wordIncorrectRepository';
 
 const TABLE_NAME = ENV.TABLE_WORD_TEST_ATTEMPTS;
 
@@ -33,18 +31,6 @@ export const WordTestAttemptRepository = {
       TableName: TABLE_NAME,
       Item: item,
     });
-
-    const incorrectResults = input.results.filter((r) => !r.isCorrect);
-    for (const r of incorrectResults) {
-      const subject = r.subject ?? (await WordsService.get(r.wordId))?.subject;
-      if (!subject) continue;
-
-      await WordIncorrectRepository.upsertLastIncorrectAt({
-        wordId: r.wordId,
-        subject,
-        occurredAt: input.submittedAt,
-      });
-    }
 
     return { wordTestAttemptId };
   },

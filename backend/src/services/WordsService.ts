@@ -55,15 +55,19 @@ export const WordsService = {
   },
 
   listKanji: async (subject?: string): Promise<WordTable[]> => {
+    if (subject) {
+      const result = await dbHelper.query<WordTable>({
+        TableName: TABLE_NAME,
+        IndexName: 'gsi_subject_word_id',
+        KeyConditionExpression: '#subject = :subject',
+        ExpressionAttributeNames: { '#subject': 'subject' },
+        ExpressionAttributeValues: { ':subject': subject },
+      });
+      return result.Items || [];
+    }
+
     const result = await dbHelper.scan<WordTable>({
       TableName: TABLE_NAME,
-      ...(subject
-        ? {
-            FilterExpression: '#subject = :subject',
-            ExpressionAttributeNames: { '#subject': 'subject' },
-            ExpressionAttributeValues: { ':subject': subject },
-          }
-        : {}),
     });
     return result.Items || [];
   }

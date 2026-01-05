@@ -14,7 +14,7 @@ export const KanjiListPage = () => {
   const subject = watch('subject');
 
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const [pageSize, setPageSize] = useState(10);
   const totalPages = Math.max(1, Math.ceil(kanjiList.length / pageSize));
   const currentPage = Math.min(page, totalPages);
 
@@ -29,7 +29,7 @@ export const KanjiListPage = () => {
   });
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 p-6">
       <ConfirmDialog />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -45,14 +45,8 @@ export const KanjiListPage = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <form id="kanji-search-form" onSubmit={onSearch} className="flex flex-wrap gap-4 items-end">
-            <div className="w-40">
-              <Input {...register('q')} placeholder="問題" />
-            </div>
-            <div className="w-40">
-              <Input {...register('reading')} placeholder="解答" />
-            </div>
-            <div className="w-40">
+          <form id="kanji-search-form" onSubmit={onSearch} className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-end">
+            <div>
               <input type="hidden" {...register('subject')} />
               <Select value={subject} onValueChange={(v) => setValue('subject', v, { shouldDirty: true })}>
                 <SelectTrigger>
@@ -65,15 +59,64 @@ export const KanjiListPage = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Input {...register('q')} placeholder="問題" />
+            </div>
+            <div>
+              <Input {...register('reading')} placeholder="解答" />
+            </div>
           </form>
         </CardContent>
       </Card>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm text-muted-foreground">全{total}件</div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-28">
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v) => {
+                const n = Number(v);
+                setPage(1);
+                setPageSize(Number.isFinite(n) && n > 0 ? n : 10);
+              }}>
+              <SelectTrigger>
+                <SelectValue placeholder="件数" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10件</SelectItem>
+                <SelectItem value="50">50件</SelectItem>
+                <SelectItem value="100">100件</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}>
+            前へ
+          </Button>
+          <div className="text-sm">
+            {currentPage} / {totalPages}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage >= totalPages}>
+            次へ
+          </Button>
+        </div>
+      </div>
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>操作</TableHead>
+              <TableHead>科目</TableHead>
               <TableHead>問題</TableHead>
               <TableHead>解答</TableHead>
             </TableRow>
@@ -98,45 +141,20 @@ export const KanjiListPage = () => {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <div className="font-medium text-lg">{kanji.kanji}</div>
-                  {kanji.subject ? <div className="text-xs text-muted-foreground">{kanji.subject}</div> : null}
-                </TableCell>
-                <TableCell>{kanji.reading}</TableCell>
+                <TableCell className="text-sm">{kanji.subject}</TableCell>
+                <TableCell className="text-sm font-medium">{kanji.kanji}</TableCell>
+                <TableCell className="text-sm">{kanji.reading}</TableCell>
               </TableRow>
             ))}
             {kanjiList.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">全{total}件</div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage <= 1}>
-            前へ
-          </Button>
-          <div className="text-sm">
-            {currentPage} / {totalPages}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage >= totalPages}>
-            次へ
-          </Button>
-        </div>
       </div>
     </div>
   );

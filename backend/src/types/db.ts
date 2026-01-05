@@ -235,18 +235,6 @@ export interface ReviewAttemptTable {
 }
 
 /**
- * 単語の「最後に間違えた日時」インデックス
- */
-export interface WordIncorrectTable {
-  /** 単語ID (PK) */
-  wordId: string;
-  /** 科目 (GSI1 PK) */
-  subject: string;
-  /** 最後に間違えた日時 (GSI1 SK) */
-  lastIncorrectAt: string;
-}
-
-/**
  * 単語テストテーブル
  */
 export interface WordTestTable {

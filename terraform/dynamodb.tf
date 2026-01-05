@@ -141,37 +141,6 @@ resource "aws_dynamodb_table" "words" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for last incorrect per word (avoids full scan on attempts).
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "word_incorrects" {
-  name         = "${var.project_name}_word_incorrects"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "wordId"
-
-  attribute {
-    name = "wordId"
-    type = "S"
-  }
-
-  attribute {
-    name = "subject"
-    type = "S"
-  }
-
-  attribute {
-    name = "lastIncorrectAt"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "gsi_subject_last_incorrect_at"
-    hash_key        = "subject"
-    range_key       = "lastIncorrectAt"
-    projection_type = "ALL"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
 # DynamoDB table for word groups (Word Sets).
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "word_groups" {

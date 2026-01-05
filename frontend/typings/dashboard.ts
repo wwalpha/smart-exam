@@ -6,12 +6,6 @@ export type DashboardData = {
     incorrectRate: number;
     subject: string;
   }[];
-  topIncorrectKanji: {
-    id: string;
-    kanji: string;
-    subject: string;
-    lastIncorrectAt: string;
-  }[];
   lockedCount: number;
   inventoryCount: number;
 };

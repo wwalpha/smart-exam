@@ -18,7 +18,6 @@ describe('dashboard handler', () => {
           subject: 'math',
         },
       ],
-      topIncorrectKanji: [],
       lockedCount: 0,
       inventoryCount: 0,
     };
@@ -38,7 +37,6 @@ describe('dashboard handler', () => {
       expect.objectContaining({
         todayTestCount: 1,
         topIncorrectQuestions: expect.any(Array),
-        topIncorrectKanji: expect.any(Array),
         lockedCount: 0,
         inventoryCount: 0,
       })

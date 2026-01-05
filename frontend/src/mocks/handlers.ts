@@ -198,7 +198,6 @@ const dashboardData: DashboardData = {
   inventoryCount: 0,
   lockedCount: 0,
   topIncorrectQuestions: [],
-  topIncorrectKanji: [],
 };
 
 async function readJsonSafely(request: Request): Promise<unknown | null> {
