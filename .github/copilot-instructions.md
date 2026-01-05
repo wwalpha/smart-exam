@@ -164,3 +164,12 @@
 - パスやパラメータ命名はプロジェクト内で一貫させてください（既存のAPI定義と揃える）。
 - パス/クエリ/パスパラメータ名はすべて小文字で定義してください。
 - パスにはハイフン（`-`）やアンダースコア（`_`）を使用しないでください。
+
+### 7. 日付・時刻
+- Backend の日付操作は **dayjs** を優先して使用してください。
+- 日付関連の処理は `backend/src/lib/dateUtils.ts`（`DateUtils`）へ集約し、各所で独自実装しないでください。
+
+### 8. データモデル（今後の方針）
+- `backend/src/types/db.ts` の Table 型から `createdAt` / `updatedAt` を削除する方針（実施時は API 型や既存データ移行も含めて整合を取る）。
+- `WordTable` から `answerHiragana` / `wordType` / `meaning` / `source` / `createdAt` / `updatedAt` を削除し、`subject` は必須にする方針（Terraform の GSI/属性定義も合わせて見直す）。
+- `ExamResultTable` / `WordTestAttemptTable` は「最後に間違った単語一覧」がフルスキャン不要になるようにキー設計・インデックス設計を改善する（GSI 追加や別テーブル化を含む）。
