@@ -2,11 +2,9 @@ import { WordTestsService } from '../services/WordTestsService';
 import { WordTestTable } from '../types/db';
 import { ReviewTest, CreateReviewTestRequest } from './repo.types';
 import { createUuid } from '@/lib/uuid';
-import { DateUtils } from '@/lib/dateUtils';
 
 export const ReviewTestRepository = {
   createReviewTest: async (data: CreateReviewTestRequest): Promise<ReviewTest> => {
-    const now = DateUtils.now();
     const id = createUuid();
     
     const item: ReviewTest = {
@@ -15,8 +13,6 @@ export const ReviewTestRepository = {
       subject: data.subject,
       status: 'IN_PROGRESS',
       itemCount: data.count,
-      createdAt: now,
-      updatedAt: now,
     };
 
     const dbItem: WordTestTable = {
@@ -27,8 +23,6 @@ export const ReviewTestRepository = {
       testId: id,
       subject: data.subject,
       status: 'IN_PROGRESS',
-      createdAt: now,
-      updatedAt: now,
     };
 
     await WordTestsService.create(dbItem);
@@ -45,8 +39,6 @@ export const ReviewTestRepository = {
       subject: dbItem.subject,
       status: dbItem.status as 'IN_PROGRESS' | 'COMPLETED',
       itemCount: dbItem.count,
-      createdAt: dbItem.createdAt,
-      updatedAt: dbItem.updatedAt,
     }));
   },
 
@@ -61,8 +53,6 @@ export const ReviewTestRepository = {
       subject: dbItem.subject,
       status: dbItem.status as 'IN_PROGRESS' | 'COMPLETED',
       itemCount: dbItem.count,
-      createdAt: dbItem.createdAt,
-      updatedAt: dbItem.updatedAt,
     };
   }
 };

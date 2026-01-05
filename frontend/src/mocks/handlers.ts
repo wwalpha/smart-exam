@@ -153,7 +153,6 @@ let examPapers: ExamPaper[] = [
     name: 'Mock Exam Paper',
     questionPdfKey: 'uploads/mock-question.pdf',
     answerPdfKey: 'uploads/mock-answer.pdf',
-    createdAt: '2025-12-01T00:00:00.000Z',
   },
 ];
 
@@ -166,8 +165,6 @@ let materialSets: MaterialSet[] = [
     subject: 'math',
     yearMonth: '2025-12',
     date: '2025-12-01',
-    createdAt: '2025-12-01T00:00:00.000Z',
-    updatedAt: '2025-12-01T00:00:00.000Z',
   },
 ];
 
@@ -179,8 +176,6 @@ let questionsByMaterialSetId: Record<string, Question[]> = {
       canonicalKey: 'mock-1',
       displayLabel: '1',
       subject: 'math',
-      createdAt: '2025-12-01T00:00:00.000Z',
-      updatedAt: '2025-12-01T00:00:00.000Z',
     },
   ],
 };
@@ -190,10 +185,7 @@ let kanjiItems: Kanji[] = [
     id: 'k_1',
     kanji: '試',
     reading: 'し',
-    meaning: 'ためす',
     subject: '国語',
-    createdAt: '2025-12-01T00:00:00.000Z',
-    updatedAt: '2025-12-01T00:00:00.000Z',
   },
 ];
 
@@ -295,7 +287,6 @@ export const handlers = [
     const body = (await request.json()) as CreateExamPaperRequest;
     const item: ExamPaper = {
       paperId: `paper_${newId()}`,
-      createdAt: nowIso(),
       ...body,
     };
     examPapers = [item, ...examPapers];
@@ -310,7 +301,6 @@ export const handlers = [
     const body = (await request.json()) as CreateExamResultRequest;
     const item: ExamResult = {
       resultId: `result_${newId()}`,
-      createdAt: nowIso(),
       ...body,
     };
     examResults = [item, ...examResults];
@@ -364,8 +354,6 @@ export const handlers = [
     const body = (await request.json()) as CreateMaterialSetRequest;
     const item: MaterialSet = {
       id: `mat_${newId()}`,
-      createdAt: nowIso(),
-      updatedAt: nowIso(),
       ...body,
     };
     materialSets = [item, ...materialSets];
@@ -405,8 +393,6 @@ export const handlers = [
     const item: Question = {
       id: `q_${newId()}`,
       materialSetId,
-      createdAt: nowIso(),
-      updatedAt: nowIso(),
       ...body,
     };
     questionsByMaterialSetId[materialSetId] = [item, ...(questionsByMaterialSetId[materialSetId] ?? [])];
@@ -427,7 +413,6 @@ export const handlers = [
         updated = {
           ...q,
           ...body,
-          updatedAt: nowIso(),
         };
         return updated;
       });
@@ -477,8 +462,6 @@ export const handlers = [
     const body = (await request.json()) as CreateKanjiRequest;
     const item: Kanji = {
       id: `k_${newId()}`,
-      createdAt: nowIso(),
-      updatedAt: nowIso(),
       ...body,
     };
     kanjiItems = [item, ...kanjiItems];
@@ -494,7 +477,6 @@ export const handlers = [
     const updated: Kanji = {
       ...kanjiItems[idx],
       ...body,
-      updatedAt: nowIso(),
     };
     kanjiItems = kanjiItems.map((x) => (x.id === kanjiId ? updated : x));
     const response: UpdateKanjiResponse = updated;
@@ -537,7 +519,6 @@ export const handlers = [
       const cols = (isPipe ? line.split('|') : line.split(',')).map((x: string) => x.trim());
       const kanji = cols[0] ?? '';
       const reading = cols[1] ?? '';
-      const meaning = isPipe ? '' : (cols[2] ?? '');
       const subject = String(body.subject).trim();
 
       if (!kanji) {
@@ -559,9 +540,7 @@ export const handlers = [
           return {
             ...x,
             reading: reading || x.reading,
-            meaning: meaning || x.meaning,
             subject: subject || x.subject,
-            updatedAt: nowIso(),
           };
         });
         successCount += 1;
@@ -572,10 +551,7 @@ export const handlers = [
         id: `k_${newId()}`,
         kanji,
         reading: reading || undefined,
-        meaning: meaning || undefined,
-        subject: subject || undefined,
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
+        subject,
       };
       kanjiItems = [item, ...kanjiItems];
       successCount += 1;
@@ -636,8 +612,6 @@ export const handlers = [
       subject: x.subject,
       status: x.status,
       itemCount: x.itemCount,
-      createdAt: x.createdAt,
-      updatedAt: x.updatedAt,
       score: x.score,
     }));
     const response: ReviewTestListResponse = { items, total: items.length };
@@ -647,15 +621,12 @@ export const handlers = [
   http.post('/api/review-tests', async ({ request }) => {
     const body = (await request.json()) as CreateReviewTestRequest;
     const id = `rt_${newId()}`;
-    const createdAt = nowIso();
     const detail: ReviewTestDetail = {
       id,
       testId: id,
       subject: body.subject,
       status: 'IN_PROGRESS',
       itemCount: body.count,
-      createdAt,
-      updatedAt: createdAt,
       items: Array.from({ length: body.count }).map((_, i) => ({
         id: `${id}_item_${i + 1}`,
         testId: id,
@@ -672,8 +643,6 @@ export const handlers = [
       subject: detail.subject,
       status: detail.status,
       itemCount: detail.itemCount,
-      createdAt: detail.createdAt,
-      updatedAt: detail.updatedAt,
       score: detail.score,
     };
     return HttpResponse.json(response, { status: 201 });
@@ -696,7 +665,6 @@ export const handlers = [
         ? {
             ...x,
             status: body.status,
-            updatedAt: nowIso(),
           }
         : x
     );
@@ -707,8 +675,6 @@ export const handlers = [
       subject: updated.subject,
       status: updated.status,
       itemCount: updated.itemCount,
-      createdAt: updated.createdAt,
-      updatedAt: updated.updatedAt,
       score: updated.score,
     };
     return HttpResponse.json(response);
@@ -737,7 +703,6 @@ export const handlers = [
       return {
         ...x,
         items: nextItems,
-        updatedAt: nowIso(),
       };
     });
 

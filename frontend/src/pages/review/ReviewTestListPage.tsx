@@ -5,7 +5,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useReviewList } from '@/hooks/review';
-import { formatYmdSlash } from '@/utils/date';
 
 export const ReviewTestListPage = () => {
   const { isKanji, basePath, reviews, form, search, remove, ConfirmDialog } = useReviewList();
@@ -100,7 +99,6 @@ export const ReviewTestListPage = () => {
             <TableRow>
               <TableHead>ID</TableHead>
               <TableHead>科目</TableHead>
-              <TableHead>作成日</TableHead>
               <TableHead>問題数</TableHead>
               <TableHead>ステータス</TableHead>
               <TableHead>スコア</TableHead>
@@ -118,7 +116,6 @@ export const ReviewTestListPage = () => {
                 <TableCell>
                   <Badge variant="outline">{test.subject}</Badge>
                 </TableCell>
-                <TableCell>{formatYmdSlash(test.createdAt)}</TableCell>
                 <TableCell>{test.itemCount}問</TableCell>
                 <TableCell>{getStatusBadge(test.status)}</TableCell>
                 <TableCell>{test.score !== undefined ? `${test.score}点` : '-'}</TableCell>
@@ -140,7 +137,7 @@ export const ReviewTestListPage = () => {
             ))}
             {reviews.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

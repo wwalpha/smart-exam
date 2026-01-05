@@ -3,17 +3,14 @@ import { ExamResultsService } from '../services/ExamResultsService';
 import { ExamPaperTable, ExamResultTable } from '../types/db';
 import { ExamPaper, ExamResult } from './repo.types';
 import { createUuid } from '@/lib/uuid';
-import { DateUtils } from '@/lib/dateUtils';
 
 export const ExamPapersRepository = {
-  createExamPaper: async (paper: Omit<ExamPaper, 'paperId' | 'createdAt'>): Promise<ExamPaper> => {
+  createExamPaper: async (paper: Omit<ExamPaper, 'paperId'>): Promise<ExamPaper> => {
     const id = createUuid();
-    const now = DateUtils.now();
 
     const newPaper: ExamPaper = {
       ...paper,
       paperId: id,
-      createdAt: now,
     };
 
     const dbItem: ExamPaperTable = {
@@ -24,7 +21,6 @@ export const ExamPapersRepository = {
       name: paper.name,
       questionPdfPath: paper.questionPdfKey,
       answerPdfPath: paper.answerPdfKey,
-      createdAt: now,
     };
 
     await ExamPapersService.create(dbItem);
@@ -43,20 +39,17 @@ export const ExamPapersRepository = {
       name: dbItem.name,
       questionPdfKey: dbItem.questionPdfPath,
       answerPdfKey: dbItem.answerPdfPath,
-      createdAt: dbItem.createdAt,
     }));
   }
 };
 
 export const ExamResultsRepository = {
-  createExamResult: async (result: Omit<ExamResult, 'resultId' | 'createdAt'>): Promise<ExamResult> => {
+  createExamResult: async (result: Omit<ExamResult, 'resultId'>): Promise<ExamResult> => {
     const id = createUuid();
-    const now = DateUtils.now();
 
     const newResult: ExamResult = {
       ...result,
       resultId: id,
-      createdAt: now,
     };
 
     const dbItem: ExamResultTable = {
@@ -71,7 +64,6 @@ export const ExamResultsRepository = {
       totalScore: result.score ?? 0,
       details: result.details.map((d) => ({ number: d.number, isCorrect: d.isCorrect })),
       gradedImagePath: result.gradedPdfKey,
-      createdAt: now,
     };
 
     await ExamResultsService.create(dbItem);
@@ -94,7 +86,6 @@ export const ExamResultsRepository = {
       score: dbItem.totalScore,
       details: dbItem.details.map((d) => ({ number: d.number, isCorrect: d.isCorrect })),
       gradedPdfKey: dbItem.gradedImagePath,
-      createdAt: dbItem.createdAt,
     }));
   }
 };

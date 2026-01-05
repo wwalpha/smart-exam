@@ -19,11 +19,10 @@ describeIf('WordsService (DynamoDB Local)', () => {
       wordId,
       question: '肺は呼吸きかんの一部である。',
       answer: '器官',
-      answerHiragana: 'きかん',
-      wordType: 'KANJI',
+      subject: '国語',
     });
 
-    const items = await WordsService.listKanji();
+    const items = await WordsService.listKanji('国語');
     expect(items.some((x) => x.wordId === wordId)).toBe(true);
   });
 });

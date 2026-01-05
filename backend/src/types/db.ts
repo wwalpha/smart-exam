@@ -40,10 +40,6 @@ export interface TestTable {
   yearMonth?: string;
   /** 実施日 - 旧データ互換用 */
   date?: string;
-  /** 作成日時 */
-  createdAt: string;
-  /** 更新日時 */
-  updatedAt: string;
 }
 
 /**
@@ -68,10 +64,6 @@ export interface QuestionTable {
   category?: string;
   /** タグ */
   tags?: string[];
-  /** 作成日時 */
-  createdAt: string;
-  /** 更新日時 */
-  updatedAt: string;
 }
 
 /**
@@ -138,21 +130,20 @@ export interface WordTable {
   question: string;
   /** 解答 */
   answer: string;
-  /** 解答（ひらがな） */
-  answerHiragana: string;
-  /** 単語種別 (GSI1 PK) */
-  wordType: 'KANJI';
+  /** 科目 */
+  subject: string;
+}
 
-  /** 科目（任意） */
-  subject?: string;
-  /** 意味（任意） */
-  meaning?: string;
-  /** 出典/メモ（任意） */
-  source?: string;
-  /** 作成日時 (ISO 8601) */
-  createdAt?: string;
-  /** 更新日時 (ISO 8601) */
-  updatedAt?: string;
+/**
+ * 単語の「最後に間違えた日時」インデックス
+ */
+export interface WordIncorrectTable {
+  /** 単語ID (PK) */
+  wordId: string;
+  /** 科目 (GSI1 PK) */
+  subject: string;
+  /** 最後に間違えた日時 (GSI1 SK) */
+  lastIncorrectAt: string;
 }
 
 /**
@@ -175,10 +166,6 @@ export interface WordTestTable {
   subject: string;
   /** ステータス */
   status: string;
-  /** 作成日時 */
-  createdAt: string;
-  /** 更新日時 */
-  updatedAt: string;
 }
 
 /**
@@ -217,8 +204,6 @@ export interface ExamPaperTable {
   questionPdfPath: string;
   /** 解答PDFパス */
   answerPdfPath: string;
-  /** 作成日時 */
-  createdAt: string;
 }
 
 /**
@@ -247,6 +232,4 @@ export interface ExamResultTable {
   details: { number: number; isCorrect: boolean }[];
   /** 採点済み画像パス */
   gradedImagePath?: string;
-  /** 作成日時 */
-  createdAt: string;
 }

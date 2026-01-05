@@ -9,8 +9,8 @@ export type DashboardData = {
   topIncorrectKanji: {
     id: string;
     kanji: string;
-    incorrectRate: number;
     subject: string;
+    lastIncorrectAt: string;
   }[];
   lockedCount: number;
   inventoryCount: number;

@@ -23,8 +23,6 @@ describeIf('WordTestsService (DynamoDB Local)', () => {
       testId: wordTestId,
       subject: 'japanese',
       status: 'IN_PROGRESS',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     });
 
     const got = await WordTestsService.get(wordTestId);

@@ -16,8 +16,6 @@ export type ExamPaper = {
   questionPdfKey: string;
   /** 解答PDFのS3キー */
   answerPdfKey: string;
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
 };
 
 /**
@@ -53,18 +51,16 @@ export type ExamResult = {
     /** 配点/得点 */
     score?: number;
   }[];
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
 };
 
 /** 試験問題作成リクエスト */
-export type CreateExamPaperRequest = Omit<ExamPaper, 'paperId' | 'createdAt'>;
+export type CreateExamPaperRequest = Omit<ExamPaper, 'paperId'>;
 
 /** 試験問題作成レスポンス */
 export type CreateExamPaperResponse = ExamPaper;
 
 /** 試験結果作成リクエスト */
-export type CreateExamResultRequest = Omit<ExamResult, 'resultId' | 'createdAt'>;
+export type CreateExamResultRequest = Omit<ExamResult, 'resultId'>;
 
 /** 試験結果作成レスポンス */
 export type CreateExamResultResponse = ExamResult;

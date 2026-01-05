@@ -20,15 +20,7 @@ const parseOkNg = (raw: string): boolean | null => {
 };
 
 const parseYmdToIso = (ymd: string): string | null => {
-  const m = /^([0-9]{4})\/([0-9]{2})\/([0-9]{2})$/.exec(ymd.trim());
-  if (!m) return null;
-  const year = Number(m[1]);
-  const month = Number(m[2]);
-  const day = Number(m[3]);
-  const ms = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
-  const dt = new Date(ms);
-  if (dt.getUTCFullYear() !== year || dt.getUTCMonth() !== month - 1 || dt.getUTCDate() !== day) return null;
-  return dt.toISOString();
+  return DateUtils.parseYmdSlashToIso(ymd);
 };
 
 const parsePipeLine = (line: string): { kanji: string; reading: string; histories: ImportedHistoryEntry[] } => {
@@ -57,27 +49,15 @@ const parsePipeLine = (line: string): { kanji: string; reading: string; historie
 
 export const KanjiRepository = {
   createKanji: async (data: CreateKanjiRequest): Promise<Kanji> => {
-    const now = DateUtils.now();
     const id = createUuid();
     
-    const item: Kanji = {
-      id,
-      ...data,
-      createdAt: now,
-      updatedAt: now,
-    };
+    const item: Kanji = { id, ...data };
 
     const dbItem: WordTable = {
       wordId: id,
       question: data.kanji,
       answer: data.reading || '',
-      answerHiragana: data.reading || '',
-      wordType: 'KANJI',
       subject: data.subject,
-      meaning: data.meaning,
-      source: data.source,
-      createdAt: now,
-      updatedAt: now,
     };
 
     await WordsService.create(dbItem);
@@ -87,45 +67,33 @@ export const KanjiRepository = {
 
   getKanji: async (id: string): Promise<Kanji | null> => {
     const dbItem = await WordsService.get(id);
-    if (!dbItem || dbItem.wordType !== 'KANJI') return null;
+    if (!dbItem) return null;
     return {
       id: dbItem.wordId,
       kanji: dbItem.question,
       reading: dbItem.answer,
-      meaning: dbItem.meaning,
       subject: dbItem.subject,
-      source: dbItem.source,
-      createdAt: dbItem.createdAt || DateUtils.now(),
-      updatedAt: dbItem.updatedAt || DateUtils.now(),
     };
   },
 
   updateKanji: async (id: string, data: UpdateKanjiRequest): Promise<Kanji | null> => {
-    const now = DateUtils.now();
     const updated = await WordsService.update(id, {
       ...(data.kanji !== undefined ? { question: data.kanji } : {}),
-      ...(data.reading !== undefined ? { answer: data.reading, answerHiragana: data.reading } : {}),
+      ...(data.reading !== undefined ? { answer: data.reading } : {}),
       ...(data.subject !== undefined ? { subject: data.subject } : {}),
-      ...(data.meaning !== undefined ? { meaning: data.meaning } : {}),
-      ...(data.source !== undefined ? { source: data.source } : {}),
-      updatedAt: now,
     });
     if (!updated) return null;
     return {
       id: updated.wordId,
       kanji: updated.question,
       reading: updated.answer,
-      meaning: updated.meaning,
       subject: updated.subject,
-      source: updated.source,
-      createdAt: updated.createdAt || now,
-      updatedAt: updated.updatedAt || now,
     };
   },
 
   deleteKanji: async (id: string): Promise<boolean> => {
     const existing = await WordsService.get(id);
-    if (!existing || existing.wordType !== 'KANJI') return false;
+    if (!existing) return false;
     await WordsService.delete(id);
     return true;
   },
@@ -163,9 +131,7 @@ export const KanjiRepository = {
 
         const kanji = parsedPipe?.kanji ?? cols[0];
         const reading = parsedPipe?.reading ?? (cols[1] ?? '');
-        const meaning = parsedPipe ? undefined : (cols[2] || undefined);
         const subject = String(data.subject);
-        const source = parsedPipe ? undefined : (cols[4] || undefined);
 
         if (!kanji) {
           errorCount += 1;
@@ -185,9 +151,7 @@ export const KanjiRepository = {
           await KanjiRepository.updateKanji(existingId, {
             kanji,
             reading,
-            meaning,
             subject,
-            source,
           });
           wordId = existingId;
           successCount += 1;
@@ -195,9 +159,7 @@ export const KanjiRepository = {
           const created = await KanjiRepository.createKanji({
             kanji,
             reading,
-            meaning,
             subject,
-            source,
           });
           wordId = created.id;
           successCount += 1;
@@ -211,7 +173,7 @@ export const KanjiRepository = {
               wordTestId,
               startedAt: h.startedAtIso,
               submittedAt: h.submittedAtIso,
-              results: [{ wordId, isCorrect: h.isCorrect }],
+              results: [{ wordId, isCorrect: h.isCorrect, subject }],
             });
           }
         }
@@ -236,11 +198,7 @@ export const KanjiRepository = {
       id: dbItem.wordId,
       kanji: dbItem.question,
       reading: dbItem.answer,
-      meaning: dbItem.meaning,
       subject: dbItem.subject,
-      source: dbItem.source,
-      createdAt: dbItem.createdAt || DateUtils.now(),
-      updatedAt: dbItem.updatedAt || DateUtils.now(),
     }));
   }
 };

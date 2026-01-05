@@ -8,16 +8,8 @@ export type Kanji = {
   kanji: string;
   /** よみ */
   reading?: string;
-  /** 意味 */
-  meaning?: string;
   /** 科目（国語/社会など） */
-  subject?: string;
-  /** 出典/メモ */
-  source?: string;
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
-  /** 更新日時 (ISO 8601) */
-  updatedAt: string;
+  subject: string;
 };
 
 /** 漢字一覧取得レスポンス */
@@ -56,12 +48,8 @@ export type CreateKanjiRequest = {
   kanji: string;
   /** よみ */
   reading?: string;
-  /** 意味 */
-  meaning?: string;
   /** 科目 */
-  subject?: string;
-  /** 出典 */
-  source?: string;
+  subject: string;
 };
 
 /** 漢字作成レスポンス */

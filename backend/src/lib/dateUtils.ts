@@ -1,9 +1,11 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
 // Set default timezone to Asia/Tokyo
 dayjs.tz.setDefault('Asia/Tokyo');
@@ -32,5 +34,14 @@ export const DateUtils = {
    */
   unix: (): number => {
     return dayjs().unix();
+  },
+
+  /**
+   * `YYYY/MM/DD` を厳密に解釈して ISO8601(UTC) に変換する
+   */
+  parseYmdSlashToIso: (ymd: string): string | null => {
+    const parsed = dayjs.utc(ymd.trim(), 'YYYY/MM/DD', true);
+    if (!parsed.isValid()) return null;
+    return parsed.toISOString();
   },
 };

@@ -26,7 +26,6 @@ describeIf('ExamResultsService (DynamoDB Local)', () => {
       testDate: '2025-12-01',
       totalScore: 80,
       details: [{ number: 1, isCorrect: true }],
-      createdAt: new Date().toISOString(),
     });
 
     const items = await ExamResultsService.list();

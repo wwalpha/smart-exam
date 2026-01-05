@@ -107,10 +107,6 @@ export type ReviewTest = {
   status: 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'CANCELED';
   /** 出題数 */
   itemCount: number;
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
-  /** 更新日時 (ISO 8601) */
-  updatedAt: string;
   /** 得点 (完了時のみ) */
   score?: number;
 };

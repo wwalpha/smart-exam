@@ -81,7 +81,7 @@ export const DashboardPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>不正解率が高い漢字 (Top 5)</CardTitle>
+            <CardTitle>最後に間違えた漢字 (Top 5)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -92,7 +92,7 @@ export const DashboardPage = () => {
                     <div className="text-sm text-muted-foreground">{k.subject}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-red-500">{(k.incorrectRate * 100).toFixed(1)}%</div>
+                    <div className="text-sm text-muted-foreground">{new Date(k.lastIncorrectAt).toLocaleDateString()}</div>
                   </div>
                 </div>
               ))}

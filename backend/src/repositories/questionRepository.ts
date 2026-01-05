@@ -3,19 +3,15 @@ import { TestsService } from '../services/TestsService';
 import { QuestionTable } from '../types/db';
 import { Question, CreateQuestionRequest, UpdateQuestionRequest } from './repo.types';
 import { createUuid } from '@/lib/uuid';
-import { DateUtils } from '@/lib/dateUtils';
 import type { QuestionSearchResult, SearchQuestionsRequest } from '@smart-exam/api-types';
 
 export const QuestionRepository = {
   createQuestion: async (data: CreateQuestionRequest & { materialSetId: string }): Promise<Question> => {
-    const now = DateUtils.now();
     const id = createUuid();
     
     const item: Question = {
       id,
       ...data,
-      createdAt: now,
-      updatedAt: now,
     };
 
     const dbItem: QuestionTable = {
@@ -27,8 +23,6 @@ export const QuestionRepository = {
       displayLabel: data.displayLabel,
       category: data.category,
       tags: data.tags,
-      createdAt: now,
-      updatedAt: now,
     };
 
     await QuestionsService.create(dbItem);
@@ -47,17 +41,12 @@ export const QuestionRepository = {
       subject: dbItem.subjectId,
       category: dbItem.category,
       tags: dbItem.tags,
-      createdAt: dbItem.createdAt,
-      updatedAt: dbItem.updatedAt,
     }));
   },
 
   updateQuestion: async (id: string, data: UpdateQuestionRequest): Promise<Question | null> => {
-    const now = DateUtils.now();
-    
     const result = await QuestionsService.update(id, {
       ...data,
-      updatedAt: now,
     });
 
     if (!result) return null;
@@ -71,8 +60,6 @@ export const QuestionRepository = {
       subject: dbItem.subjectId,
       category: dbItem.category,
       tags: dbItem.tags,
-      createdAt: dbItem.createdAt,
-      updatedAt: dbItem.updatedAt,
     };
   },
 

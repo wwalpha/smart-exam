@@ -54,12 +54,16 @@ export const WordsService = {
     });
   },
 
-  listKanji: async (): Promise<WordTable[]> => {
+  listKanji: async (subject?: string): Promise<WordTable[]> => {
     const result = await dbHelper.scan<WordTable>({
       TableName: TABLE_NAME,
-      FilterExpression: '#wordType = :wordType',
-      ExpressionAttributeNames: { '#wordType': 'wordType' },
-      ExpressionAttributeValues: { ':wordType': 'KANJI' },
+      ...(subject
+        ? {
+            FilterExpression: '#subject = :subject',
+            ExpressionAttributeNames: { '#subject': 'subject' },
+            ExpressionAttributeValues: { ':subject': subject },
+          }
+        : {}),
     });
     return result.Items || [];
   }

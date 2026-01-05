@@ -23,7 +23,6 @@ describeIf('ExamPapersService (DynamoDB Local)', () => {
       name: 'Paper',
       questionPdfPath: 'uploads/q.pdf',
       answerPdfPath: 'uploads/a.pdf',
-      createdAt: new Date().toISOString(),
     });
 
     const items = await ExamPapersService.list();

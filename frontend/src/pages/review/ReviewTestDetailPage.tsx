@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewDetail } from '@/hooks/review';
-import { formatYmdSlash } from '@/utils/date';
 
 export const ReviewTestDetailPage = () => {
   const { review, isLoading, error, basePath, remove, ConfirmDialog } = useReviewDetail();
@@ -54,10 +53,6 @@ export const ReviewTestDetailPage = () => {
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium">科目</span>
               <span>{review.subject}</span>
-            </div>
-            <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">作成日</span>
-              <span>{formatYmdSlash(review.createdAt)}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium">問題数</span>

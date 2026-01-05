@@ -87,7 +87,6 @@ export const ExamPapersPage = () => {
                 <TableHead>科目</TableHead>
                 <TableHead>カテゴリ</TableHead>
                 <TableHead>名前</TableHead>
-                <TableHead>登録日</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -97,7 +96,6 @@ export const ExamPapersPage = () => {
                   <TableCell>{SUBJECT_LABEL[paper.subject as keyof typeof SUBJECT_LABEL] || paper.subject}</TableCell>
                   <TableCell>{paper.category}</TableCell>
                   <TableCell>{paper.name}</TableCell>
-                  <TableCell>{new Date(paper.createdAt).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

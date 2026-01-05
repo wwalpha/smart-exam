@@ -47,10 +47,19 @@ export const searchKanji: AsyncHandler<ParamsDictionary, SearchKanjiResponse, Se
   res.json({ items: filtered, total: filtered.length });
 };
 
-export const createKanji: AsyncHandler<ParamsDictionary, CreateKanjiResponse, CreateKanjiRequest, ParsedQs> = async (
+export const createKanji: AsyncHandler<
+  ParamsDictionary,
+  CreateKanjiResponse | { error: string },
+  CreateKanjiRequest,
+  ParsedQs
+> = async (
   req,
   res
 ) => {
+  if (!req.body.subject || String(req.body.subject).trim().length === 0) {
+    res.status(400).json({ error: 'subject is required' });
+    return;
+  }
   const item = await KanjiRepository.createKanji(req.body);
   res.status(201).json(item);
 };

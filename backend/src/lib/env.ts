@@ -13,6 +13,7 @@ export const ENV = {
   TABLE_WORDS: process.env.TABLE_WORDS || 'words',
   TABLE_WORD_GROUPS: process.env.TABLE_WORD_GROUPS || 'word_groups',
   TABLE_WORD_TEST_ATTEMPTS: process.env.TABLE_WORD_TEST_ATTEMPTS || 'word_test_attempts',
+  TABLE_WORD_INCORRECTS: process.env.TABLE_WORD_INCORRECTS || 'word_incorrects',
   TABLE_EXAM_PAPERS: process.env.TABLE_EXAM_PAPERS || 'exam_papers',
   TABLE_EXAM_RESULTS: process.env.TABLE_EXAM_RESULTS || 'exam_results',
 };

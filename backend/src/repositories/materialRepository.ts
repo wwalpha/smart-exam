@@ -10,14 +10,11 @@ import { ENV } from '@/lib/env';
 
 export const MaterialRepository = {
   createMaterialSet: async (data: CreateMaterialSetRequest): Promise<MaterialSet> => {
-    const now = DateUtils.now();
     const id = createUuid();
 
     const item: MaterialSet = {
       id,
       ...data,
-      createdAt: now,
-      updatedAt: now,
     };
 
     const dbItem: TestTable = {
@@ -33,8 +30,6 @@ export const MaterialRepository = {
       course: data.course,
       keywords: data.keywords,
       yearMonth: data.yearMonth,
-      createdAt: now,
-      updatedAt: now,
     };
 
     await TestsService.create(dbItem);
@@ -58,10 +53,8 @@ export const MaterialRepository = {
       course: dbItem.course,
       description: dbItem.description,
       keywords: dbItem.keywords,
-      yearMonth: dbItem.yearMonth ?? (dbItem.date ? dbItem.date.slice(0, 7) : dbItem.createdAt.slice(0, 7)),
+      yearMonth: dbItem.yearMonth ?? (dbItem.date ? dbItem.date.slice(0, 7) : DateUtils.now().slice(0, 7)),
       date: dbItem.date,
-      createdAt: dbItem.createdAt,
-      updatedAt: dbItem.updatedAt,
     };
   },
 
@@ -79,10 +72,8 @@ export const MaterialRepository = {
       course: dbItem.course,
       description: dbItem.description,
       keywords: dbItem.keywords,
-      yearMonth: dbItem.yearMonth ?? (dbItem.date ? dbItem.date.slice(0, 7) : dbItem.createdAt.slice(0, 7)),
+      yearMonth: dbItem.yearMonth ?? (dbItem.date ? dbItem.date.slice(0, 7) : DateUtils.now().slice(0, 7)),
       date: dbItem.date,
-      createdAt: dbItem.createdAt,
-      updatedAt: dbItem.updatedAt,
     }));
   },
 

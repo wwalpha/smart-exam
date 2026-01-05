@@ -21,10 +21,10 @@ export type DashboardData = {
     id: string;
     /** 漢字 */
     kanji: string;
-    /** 不正解率 (0.0 - 1.0) */
-    incorrectRate: number;
     /** 科目 */
     subject: string;
+    /** 最後に間違えた日時 (ISO 8601) */
+    lastIncorrectAt: string;
   }[];
   /** ロック中のアイテム数 */
   lockedCount: number;

@@ -21,8 +21,6 @@ describeIf('TestsService (DynamoDB Local)', () => {
       title: 'Mock Test',
       questionCount: 10,
       date: '2025-12-01',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     });
 
     const got = await TestsService.get(testId);

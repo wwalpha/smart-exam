@@ -22,8 +22,6 @@ describeIf('QuestionsService (DynamoDB Local)', () => {
       number: 1,
       canonicalKey: 'k1',
       displayLabel: '1',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     });
 
     await QuestionsService.create({
@@ -33,8 +31,6 @@ describeIf('QuestionsService (DynamoDB Local)', () => {
       number: 2,
       canonicalKey: 'k2',
       displayLabel: '2',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     });
 
     const items = await QuestionsService.listByTestId(testId);
@@ -53,8 +49,6 @@ describeIf('QuestionsService (DynamoDB Local)', () => {
       number: 1,
       canonicalKey: 'k1',
       displayLabel: '1',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     });
 
     const updated = await QuestionsService.update(questionId, { displayLabel: '1-updated' });

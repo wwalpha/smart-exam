@@ -14,6 +14,7 @@ describe('KanjiRepository.importKanji (pipe format)', () => {
 
     const res = await KanjiRepository.importKanji({
       subject: '国語',
+      mode: 'SKIP',
       fileContent: '漢字|かんじ|2016/01/01,OK|2015/11/01,NG|2015/10/01,OK',
     });
 
@@ -27,6 +28,7 @@ describe('KanjiRepository.importKanji (pipe format)', () => {
   it('fails when subject is missing', async () => {
     const res = await KanjiRepository.importKanji({
       subject: '',
+      mode: 'SKIP',
       fileContent: '漢字|かんじ',
     });
 

@@ -123,10 +123,6 @@ export type Question = {
   category?: string;
   /** タグ */
   tags?: string[];
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
-  /** 更新日時 (ISO 8601) */
-  updatedAt: string;
 };
 
 /** 問題作成リクエスト */
@@ -175,8 +171,4 @@ export type MaterialSet = {
   yearMonth: string;
   /** 実施日 (YYYY-MM-DD) - 旧データ互換用 */
   date?: string;
-  /** 作成日時 (ISO 8601) */
-  createdAt: string;
-  /** 更新日時 (ISO 8601) */
-  updatedAt: string;
 };
