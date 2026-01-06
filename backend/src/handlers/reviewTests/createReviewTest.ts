@@ -4,8 +4,7 @@ import type { ParsedQs } from 'qs';
 import type { CreateReviewTestRequest, CreateReviewTestResponse } from '@smart-exam/api-types';
 import { z } from 'zod';
 import type { ValidatedBody } from '@/types/express';
-
-const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+import { SubjectIdSchema } from '@/lib/zodSchemas';
 const ReviewModeSchema = z.enum(['QUESTION', 'KANJI']);
 
 export const CreateReviewTestBodySchema = z.object({

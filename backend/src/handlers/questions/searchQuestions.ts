@@ -5,7 +5,7 @@ import type { SearchQuestionsRequest, SearchQuestionsResponse } from '@smart-exa
 import { z } from 'zod';
 import type { ValidatedBody } from '@/types/express';
 
-const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 export const SearchQuestionsBodySchema = z.object({
   keyword: z.string().optional(),

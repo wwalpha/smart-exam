@@ -4,8 +4,7 @@ import type { ParsedQs } from 'qs';
 import type { UpdateQuestionParams, UpdateQuestionRequest, UpdateQuestionResponse } from '@smart-exam/api-types';
 import { z } from 'zod';
 import type { ValidatedBody } from '@/types/express';
-
-const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 export const UpdateQuestionBodySchema = z.object({
   canonicalKey: z.string().min(1).optional(),

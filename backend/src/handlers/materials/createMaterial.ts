@@ -5,10 +5,11 @@ import type { CreateMaterialRequest, CreateMaterialResponse } from '@smart-exam/
 import { z } from 'zod';
 import type { ValidatedBody } from '@/types/express';
 import { DateUtils } from '@/lib/dateUtils';
+import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 export const CreateMaterialBodySchema = z.object({
   name: z.string().min(1),
-  subject: z.enum(['1', '2', '3', '4']),
+  subject: SubjectIdSchema,
   materialDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
   grade: z.string().min(1),
   provider: z.string().min(1),

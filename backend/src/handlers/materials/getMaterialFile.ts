@@ -10,9 +10,6 @@ type GetMaterialFileParams = {
 
 export const getMaterialFile: AsyncHandler<GetMaterialFileParams, unknown, {}, ParsedQs> = async (req, res) => {
   const { materialId, fileId } = req.params;
-  if (!materialId || !fileId) {
-    throw new ApiError('materialId and fileId are required', 400, ['invalid_request']);
-  }
 
   const file = await MaterialRepository.getMaterialFile(materialId, fileId);
   if (!file) {

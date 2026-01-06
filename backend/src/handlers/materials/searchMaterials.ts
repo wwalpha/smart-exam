@@ -5,8 +5,7 @@ import type { SearchMaterialsRequest, SearchMaterialsResponse } from '@smart-exa
 import { z } from 'zod';
 import type { ValidatedBody } from '@/types/express';
 import { DateUtils } from '@/lib/dateUtils';
-
-const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 export const SearchMaterialsBodySchema = z.object({
   subject: SubjectIdSchema.optional(),

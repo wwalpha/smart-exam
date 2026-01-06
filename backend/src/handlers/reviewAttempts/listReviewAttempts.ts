@@ -5,9 +5,9 @@ import { REVIEW_MODE } from '@smart-exam/api-types';
 import type { ListReviewAttemptsResponse, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
 import { z } from 'zod';
 import type { ValidatedQuery } from '@/types/express';
+import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 const ReviewModeSchema = z.enum([REVIEW_MODE.QUESTION, REVIEW_MODE.KANJI]);
-const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
 
 const queryString = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string());
 const queryStringOptional = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string().optional());
