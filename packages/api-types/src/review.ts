@@ -267,6 +267,8 @@ export type ReviewTestCandidate = {
   targetId: string;
   /** モード */
   mode: 'QUESTION' | 'KANJI';
+  /** 連続正解回数（streak相当） */
+  correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
   /** ロック: 紐付けられた復習テストID */

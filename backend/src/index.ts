@@ -52,6 +52,14 @@ app.post('/api/questions/search', handleRequest(questionHandler.searchQuestions)
 app.get('/api/materials/:materialId/questions', handleRequest(questionHandler.listQuestions));
 app.post('/api/materials/:materialId/questions', handleRequest(questionHandler.createQuestion));
 app.patch('/api/questions/:questionId', handleRequest(questionHandler.updateQuestion));
+app.put(
+  '/api/questions/:questionId/review-candidate',
+  handleRequest(questionHandler.upsertQuestionReviewCandidate)
+);
+app.delete(
+  '/api/questions/:questionId/review-candidate',
+  handleRequest(questionHandler.deleteQuestionReviewCandidate)
+);
 app.delete('/api/questions/:questionId', handleRequest(questionHandler.deleteQuestion));
 
 // Review Tests

@@ -18,6 +18,8 @@ export const useQuestionManagement = () => {
   const createQuestion = useWordTestStore((s) => s.createQuestion);
   const createQuestionsBulk = useWordTestStore((s) => s.createQuestionsBulk);
   const deleteQuestion = useWordTestStore((s) => s.deleteQuestion);
+  const markQuestionCorrect = useWordTestStore((s) => s.markQuestionCorrect);
+  const markQuestionIncorrect = useWordTestStore((s) => s.markQuestionIncorrect);
   const extractQuestionsFromGradedAnswer = useWordTestStore((s) => s.extractQuestionsFromGradedAnswer);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -91,6 +93,14 @@ export const useQuestionManagement = () => {
     }
   };
 
+  const markCorrect = async (questionId: string) => {
+    await markQuestionCorrect(questionId);
+  };
+
+  const markIncorrect = async (questionId: string) => {
+    await markQuestionIncorrect(questionId);
+  };
+
   return {
     id,
     material: detail,
@@ -108,6 +118,8 @@ export const useQuestionManagement = () => {
     submit: form.handleSubmit(submit),
     submitBulk,
     remove,
+    markCorrect,
+    markIncorrect,
     ConfirmDialog,
   };
 };

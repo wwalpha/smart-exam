@@ -5,9 +5,15 @@ import type {
   CreateQuestionRequest,
   CreateQuestionResponse,
   CreateQuestionParams,
+  DeleteQuestionReviewCandidateParams,
+  DeleteQuestionReviewCandidateRequest,
+  DeleteQuestionReviewCandidateResponse,
   DeleteQuestionParams,
   DeleteQuestionResponse,
   ListQuestionsParams,
+  UpsertQuestionReviewCandidateParams,
+  UpsertQuestionReviewCandidateRequest,
+  UpsertQuestionReviewCandidateResponse,
   UpdateQuestionParams,
   QuestionListResponse,
   SearchQuestionsRequest,
@@ -73,4 +79,42 @@ export const deleteQuestion: AsyncHandler<DeleteQuestionParams, DeleteQuestionRe
   const { questionId } = req.params;
   await QuestionRepository.deleteQuestion(questionId);
   res.status(204).end();
+};
+
+// PUT /questions/:questionId/review-candidate
+export const upsertQuestionReviewCandidate: AsyncHandler<
+  UpsertQuestionReviewCandidateParams,
+  UpsertQuestionReviewCandidateResponse | { error: string },
+  UpsertQuestionReviewCandidateRequest,
+  ParsedQs
+> = async (
+  req,
+  res
+) => {
+  const { questionId } = req.params;
+  const ok = await QuestionRepository.markQuestionIncorrect(questionId);
+  if (!ok) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
+  }
+  res.json({ ok: true });
+};
+
+// DELETE /questions/:questionId/review-candidate
+export const deleteQuestionReviewCandidate: AsyncHandler<
+  DeleteQuestionReviewCandidateParams,
+  DeleteQuestionReviewCandidateResponse | { error: string },
+  DeleteQuestionReviewCandidateRequest,
+  ParsedQs
+> = async (
+  req,
+  res
+) => {
+  const { questionId } = req.params;
+  const ok = await QuestionRepository.markQuestionCorrect(questionId);
+  if (!ok) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
+  }
+  res.json({ ok: true });
 };

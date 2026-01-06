@@ -1,8 +1,7 @@
 import { DateUtils } from '@/lib/dateUtils';
+import { ReviewNextTime } from '@/lib/reviewNextTime';
 import type { SubmitReviewTestResultsRequest } from '@smart-exam/api-types';
-import { MaterialsService } from '@/services/MaterialsService';
-import { QuestionsService } from '@/services/QuestionsService';
-import { ReviewTestsService } from '@/services/ReviewTestsService';
+import { ReviewTestsService } from '@/services';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 
 export const submitReviewTestResults = async (testId: string, req: SubmitReviewTestResultsRequest): Promise<boolean> => {
@@ -30,30 +29,16 @@ export const submitReviewTestResults = async (testId: string, req: SubmitReviewT
   const items = Array.isArray(test.items) ? test.items : [];
   const resultByTargetId = new Map(req.results.map((r) => [r.id, r.isCorrect] as const));
 
-  const performedDateYmdByQuestionId = new Map<string, string>();
-  if (test.mode === 'QUESTION' && items.length > 0) {
-    const questionIds = Array.from(new Set(items.map((i) => i.targetId)));
-    const questions = await Promise.all(questionIds.map((qid) => QuestionsService.get(qid)));
-    const byId = new Map(questions.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const));
-
-    const materialIds = Array.from(new Set(Array.from(byId.values()).map((q) => q.materialId)));
-    const materials = await Promise.all(materialIds.map((mid) => MaterialsService.get(mid)));
-    const materialById = new Map(materials.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m.materialId, m] as const));
-
-    for (const qid of questionIds) {
-      const q = byId.get(qid);
-      const m = q ? materialById.get(q.materialId) : null;
-
-      const raw = (m?.executionDate ?? (m as any)?.date ?? (m as any)?.yearMonth)?.trim();
-      const performed = (() => {
-        if (!raw) return dateYmd;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-        if (/^\d{4}-\d{2}$/.test(raw)) return `${raw}-01`;
-        return dateYmd;
-      })();
-
-      performedDateYmdByQuestionId.set(qid, performed);
-    }
+  const candidateByTargetId = new Map<string, { correctCount: number }>();
+  if (items.length > 0) {
+    const uniqueTargets = Array.from(new Set(items.map((i) => i.targetId)));
+    const candidates = await Promise.all(
+      uniqueTargets.map((qid) => ReviewTestCandidatesService.getCandidate({ subject: test.subject, questionId: qid }))
+    );
+    uniqueTargets.forEach((qid, idx) => {
+      const c = candidates[idx];
+      candidateByTargetId.set(qid, { correctCount: typeof c?.correctCount === 'number' ? c.correctCount : 0 });
+    });
   }
 
   await Promise.all(
@@ -61,21 +46,23 @@ export const submitReviewTestResults = async (testId: string, req: SubmitReviewT
       const isCorrect = resultByTargetId.get(i.targetId);
 
       try {
-        if (isCorrect === true) {
-          await ReviewTestCandidatesService.deleteIfLocked({ subject: test.subject, questionId: i.targetId, testId });
-          return;
-        }
-
-        if (isCorrect === false) {
-          const performed = performedDateYmdByQuestionId.get(i.targetId) ?? dateYmd;
-          const nextTime = DateUtils.addDaysYmd(performed, 1);
+        if (typeof isCorrect === 'boolean') {
+          const baseDateYmd = dateYmd;
+          const currentCorrectCount = candidateByTargetId.get(i.targetId)?.correctCount ?? 0;
+          const computed = ReviewNextTime.compute({
+            mode: test.mode,
+            baseDateYmd,
+            isCorrect,
+            currentCorrectCount,
+          });
 
           await ReviewTestCandidatesService.updateNextTimeAndReleaseLockIfMatch({
             subject: test.subject,
             questionId: i.targetId,
             testId,
-            nextTime,
+            nextTime: computed.nextTime,
             mode: test.mode,
+            correctCount: computed.nextCorrectCount,
           });
           return;
         }

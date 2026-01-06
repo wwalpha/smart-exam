@@ -1,4 +1,4 @@
-import { ReviewTestsService } from '@/services/ReviewTestsService';
+import { ReviewTestsService } from '@/services';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 
 export const deleteReviewTest = async (testId: string): Promise<boolean> => {

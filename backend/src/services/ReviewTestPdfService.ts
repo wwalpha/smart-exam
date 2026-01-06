@@ -17,7 +17,7 @@ export const ReviewTestPdfService = {
     const answerLineGap = mmToPt(4);
     const answerBoxHeight = mmToPt(10);
 
-    const numberColWidth = 26;
+    const numberColWidth = 60;
     const numberGap = 6;
 
     const titleFontSize = 18;
@@ -151,7 +151,7 @@ export const ReviewTestPdfService = {
       }
 
       // Question number
-      const noText = `${idx + 1}.`;
+      const noText = item.canonicalKey ? `${item.canonicalKey}` : `${idx + 1}.`;
       const noWidth = jpFont.widthOfTextAtSize(noText, questionFontSize);
       page.drawText(noText, {
         x: margin + numberColWidth - noWidth,

@@ -25,3 +25,19 @@ export type SearchQuestionsRequest = {
 export type SearchQuestionsResponse = {
   datas: QuestionSearchResult[];
 };
+
+/** `PUT /questions/:questionId/review-candidate` */
+export type UpsertQuestionReviewCandidateRequest = {};
+
+/** `PUT /questions/:questionId/review-candidate` */
+export type UpsertQuestionReviewCandidateResponse = {
+  ok: true;
+};
+
+/** `DELETE /questions/:questionId/review-candidate` */
+export type DeleteQuestionReviewCandidateRequest = {};
+
+/** `DELETE /questions/:questionId/review-candidate` */
+export type DeleteQuestionReviewCandidateResponse = {
+  ok: true;
+};

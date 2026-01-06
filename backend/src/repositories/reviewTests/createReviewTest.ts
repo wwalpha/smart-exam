@@ -2,7 +2,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
 import { MaterialsService } from '@/services/MaterialsService';
 import { QuestionsService } from '@/services/QuestionsService';
-import { ReviewTestsService } from '@/services/ReviewTestsService';
+import { ReviewTestsService } from '@/services';
 import { WordsService } from '@/services/WordsService';
 import type { CreateReviewTestRequest, ReviewTest } from '@smart-exam/api-types';
 import type { ReviewTestItemEmbedded, ReviewTestTable, WordMasterTable } from '@/types/db';

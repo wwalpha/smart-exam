@@ -11,6 +11,10 @@ import type {
   QuestionListResponse,
   CreateQuestionRequest,
   UpdateQuestionRequest,
+  UpsertQuestionReviewCandidateRequest,
+  UpsertQuestionReviewCandidateResponse,
+  DeleteQuestionReviewCandidateRequest,
+  DeleteQuestionReviewCandidateResponse,
 } from '@smart-exam/api-types';
 
 export const listMaterials = async (params?: SearchMaterialsRequest): Promise<MaterialListResponse> => {
@@ -95,5 +99,27 @@ export const deleteQuestion = async (questionId: string): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
     path: `/api/questions/${questionId}`,
+  });
+};
+
+export const markQuestionIncorrect = async (
+  questionId: string,
+  request: UpsertQuestionReviewCandidateRequest = {}
+): Promise<UpsertQuestionReviewCandidateResponse> => {
+  return apiRequest<UpsertQuestionReviewCandidateResponse, UpsertQuestionReviewCandidateRequest>({
+    method: 'PUT',
+    path: `/api/questions/${questionId}/review-candidate`,
+    body: request,
+  });
+};
+
+export const markQuestionCorrect = async (
+  questionId: string,
+  request: DeleteQuestionReviewCandidateRequest = {}
+): Promise<DeleteQuestionReviewCandidateResponse> => {
+  return apiRequest<DeleteQuestionReviewCandidateResponse, DeleteQuestionReviewCandidateRequest>({
+    method: 'DELETE',
+    path: `/api/questions/${questionId}/review-candidate`,
+    body: request,
   });
 };

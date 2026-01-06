@@ -1,7 +1,7 @@
 import type { ReviewTest } from '@smart-exam/api-types';
 import type { ReviewTestTable } from '@/types/db';
 import { toApiReviewTest } from './internal';
-import { ReviewTestsService } from '@/services/ReviewTestsService';
+import { ReviewTestsService } from '@/services';
 
 export const listReviewTests = async (): Promise<ReviewTest[]> => {
   const items: ReviewTestTable[] = await ReviewTestsService.scanAll();

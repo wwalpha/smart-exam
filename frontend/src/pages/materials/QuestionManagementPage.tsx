@@ -26,6 +26,8 @@ export const QuestionManagementPage = () => {
     submit,
     submitBulk,
     remove,
+    markCorrect,
+    markIncorrect,
     ConfirmDialog,
   } = useQuestionManagement();
   const {
@@ -141,13 +143,32 @@ export const QuestionManagementPage = () => {
                   <TableCell className="py-2">{q.canonicalKey}</TableCell>
                   <TableCell className="py-2">
                     <div className="flex justify-end">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => remove(q.id)}>
-                        削除
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3"
+                          disabled={isBusy}
+                          onClick={() => markIncorrect(q.id)}>
+                          不正解
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3"
+                          disabled={isBusy}
+                          onClick={() => markCorrect(q.id)}>
+                          正解
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={isBusy}
+                          onClick={() => remove(q.id)}>
+                          削除
+                        </Button>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>

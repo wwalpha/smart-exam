@@ -163,6 +163,8 @@ export type MaterialSlice = {
   createQuestionsBulk: (materialId: string, requests: CreateQuestionRequest[]) => Promise<void>;
   updateQuestion: (questionId: string, request: UpdateQuestionRequest) => Promise<void>;
   deleteQuestion: (questionId: string) => Promise<void>;
+  markQuestionCorrect: (questionId: string) => Promise<void>;
+  markQuestionIncorrect: (questionId: string) => Promise<void>;
 };
 
 /**

@@ -8,6 +8,14 @@ const TABLE_NAME = ENV.TABLE_REVIEW_TEST_CANDIDATES;
 const INDEX_GSI_SUBJECT_NEXT_TIME = 'gsi_subject_next_time';
 
 export const ReviewTestCandidatesService = {
+  getCandidate: async (params: { subject: SubjectId; questionId: string }): Promise<ReviewTestCandidateTable | null> => {
+    const result = await dbHelper.get<ReviewTestCandidateTable>({
+      TableName: TABLE_NAME,
+      Key: { subject: params.subject, questionId: params.questionId },
+    });
+    return result?.Item ?? null;
+  },
+
   putCandidate: async (params: {
     subject: SubjectId;
     questionId: string;
@@ -21,7 +29,7 @@ export const ReviewTestCandidatesService = {
     await dbHelper.update({
       TableName: TABLE_NAME,
       Key: { subject: params.subject, questionId: params.questionId },
-      UpdateExpression: `SET #id = if_not_exists(#id, :id), #mode = :mode, #nextTime = :nextTime${setTestId}`,
+      UpdateExpression: `SET #id = if_not_exists(#id, :id), #mode = :mode, #nextTime = :nextTime, #correctCount = if_not_exists(#correctCount, :zero)${setTestId}`,
       ...(params.testId
         ? {
             ConditionExpression: 'attribute_not_exists(#testId) OR #testId = :testId',
@@ -31,12 +39,14 @@ export const ReviewTestCandidatesService = {
         '#id': 'id',
         '#mode': 'mode',
         '#nextTime': 'nextTime',
+        '#correctCount': 'correctCount',
         ...(params.testId ? { '#testId': 'testId' } : {}),
       },
       ExpressionAttributeValues: {
         ':id': id,
         ':mode': params.mode,
         ':nextTime': params.nextTime,
+        ':zero': 0,
         ...(params.testId ? { ':testId': params.testId } : {}),
       },
     });
@@ -132,23 +142,66 @@ export const ReviewTestCandidatesService = {
     });
   },
 
+  deleteAny: async (params: { subject: SubjectId; questionId: string }): Promise<void> => {
+    await dbHelper.delete({
+      TableName: TABLE_NAME,
+      Key: { subject: params.subject, questionId: params.questionId },
+    });
+  },
+
   updateNextTimeAndReleaseLockIfMatch: async (params: {
     subject: SubjectId;
     questionId: string;
     testId: string;
     nextTime: string;
     mode: 'QUESTION' | 'KANJI';
+    correctCount: number;
   }): Promise<void> => {
     await dbHelper.update({
       TableName: TABLE_NAME,
       Key: { subject: params.subject, questionId: params.questionId },
       ConditionExpression: '#testId = :testId',
-      UpdateExpression: 'SET #nextTime = :nextTime, #mode = :mode REMOVE #testId',
-      ExpressionAttributeNames: { '#testId': 'testId', '#nextTime': 'nextTime', '#mode': 'mode' },
+      UpdateExpression: 'SET #nextTime = :nextTime, #mode = :mode, #correctCount = :correctCount REMOVE #testId',
+      ExpressionAttributeNames: {
+        '#testId': 'testId',
+        '#nextTime': 'nextTime',
+        '#mode': 'mode',
+        '#correctCount': 'correctCount',
+      },
       ExpressionAttributeValues: {
         ':testId': params.testId,
         ':nextTime': params.nextTime,
         ':mode': params.mode,
+        ':correctCount': params.correctCount,
+      },
+    });
+  },
+
+  upsertCandidate: async (params: {
+    subject: SubjectId;
+    questionId: string;
+    mode: 'QUESTION' | 'KANJI';
+    nextTime: string;
+    correctCount: number;
+  }): Promise<void> => {
+    const id = createUuid();
+    await dbHelper.update({
+      TableName: TABLE_NAME,
+      Key: { subject: params.subject, questionId: params.questionId },
+      UpdateExpression:
+        'SET #id = if_not_exists(#id, :id), #mode = :mode, #nextTime = :nextTime, #correctCount = :correctCount REMOVE #testId',
+      ExpressionAttributeNames: {
+        '#id': 'id',
+        '#mode': 'mode',
+        '#nextTime': 'nextTime',
+        '#correctCount': 'correctCount',
+        '#testId': 'testId',
+      },
+      ExpressionAttributeValues: {
+        ':id': id,
+        ':mode': params.mode,
+        ':nextTime': params.nextTime,
+        ':correctCount': params.correctCount,
       },
     });
   },

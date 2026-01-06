@@ -307,5 +307,27 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         { rethrow: true }
       );
     },
+
+    markQuestionCorrect: async (questionId) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          await MATERIAL_API.markQuestionCorrect(questionId);
+        },
+        '採点結果（正解）の登録に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    markQuestionIncorrect: async (questionId) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          await MATERIAL_API.markQuestionIncorrect(questionId);
+        },
+        '採点結果（不正解）の登録に失敗しました。',
+        { rethrow: true }
+      );
+    },
   };
 };

@@ -1,6 +1,6 @@
 import type { ReviewTestDetail } from '@smart-exam/api-types';
 import { toApiReviewTest, toApiReviewTestItem } from './internal';
-import { ReviewTestsService } from '@/services/ReviewTestsService';
+import { ReviewTestsService } from '@/services';
 
 export const getReviewTest = async (testId: string): Promise<ReviewTestDetail | null> => {
   const test = await ReviewTestsService.get(testId);

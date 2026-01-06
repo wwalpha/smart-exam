@@ -1,7 +1,7 @@
 import type { ReviewTestTarget } from '@smart-exam/api-types';
 import type { ReviewTestTable, WordMasterTable } from '@/types/db';
 import { sortTargets, toReviewTargetKey } from './internal';
-import { ReviewTestsService } from '@/services/ReviewTestsService';
+import { ReviewTestsService } from '@/services';
 
 export const listReviewTestTargets = async (params: {
   mode: 'QUESTION' | 'KANJI';

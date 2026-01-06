@@ -84,6 +84,7 @@ export const listReviewTestCandidates: AsyncHandler<{}, ListReviewTestCandidates
       subject: x.subject,
       targetId: x.questionId,
       mode: x.mode,
+      correctCount: typeof x.correctCount === 'number' ? x.correctCount : 0,
       nextTime: x.nextTime,
       testId: x.testId,
     })),

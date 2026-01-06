@@ -5,6 +5,6 @@ export const normalizeUuid = (value: string): string => {
 };
 
 export const createUuid = (): string => {
-  // 16桁 (16文字) のIDに統一する
-  return randomBytes(8).toString('hex');
+  // UUID相当の 32桁 (ハイフン無し) に統一する
+  return randomBytes(16).toString('hex');
 };

@@ -1,6 +1,6 @@
 import type { ReviewAttempt } from '@smart-exam/api-types';
 import type { ReviewTestItemEmbedded, ReviewTestTable } from '@/types/db';
-import { ReviewTestsService } from '@/services/ReviewTestsService';
+import { ReviewTestsService } from '@/services';
 
 const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
 

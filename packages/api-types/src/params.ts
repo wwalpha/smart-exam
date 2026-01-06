@@ -14,6 +14,16 @@ export type UpdateQuestionParams = {
   questionId: string;
 };
 
+/** `PUT /questions/:questionId/review-candidate` */
+export type UpsertQuestionReviewCandidateParams = {
+  questionId: string;
+};
+
+/** `DELETE /questions/:questionId/review-candidate` */
+export type DeleteQuestionReviewCandidateParams = {
+  questionId: string;
+};
+
 /** `GET /materials/:materialId/questions` */
 export type ListQuestionsParams = {
   materialId: string;
