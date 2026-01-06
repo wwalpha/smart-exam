@@ -28,6 +28,165 @@
 
 ---
 
+## 2.1 テーブル関係図（db.ts ベース）
+
+`backend/src/types/db.ts` の型定義に含まれる「ID参照（例: testId / questionId / paperId / subject）」を元に、テーブル間の論理的な関係を Mermaid で可視化します。
+
+- DynamoDB は RDB の外部キー制約を持たないため、本図は **実装上の参照関係（論理ER）** です
+- `AttemptTable.results` / `GradedSheetTable.results` / `WordTestAttemptTable.results` は **配列で埋め込み** のため、図では `*_RESULT_ITEM` として疑似エンティティ化しています
+- `Review*` 系の `targetType` が `KANJI` の場合、参照先は専用テーブルではなく `WordTable`（漢字データも words に格納）です
+
+```mermaid
+erDiagram
+  SUBJECT ||--o{ TEST : subjectId
+  SUBJECT ||--o{ QUESTION : subjectId
+  TEST ||--o{ QUESTION : testId
+
+  TEST ||--o{ ATTEMPT : testId
+  ATTEMPT ||--o{ ATTEMPT_RESULT_ITEM : results
+  QUESTION ||--o{ ATTEMPT_RESULT_ITEM : questionId
+
+  TEST ||--o{ GRADED_SHEET : testId
+  GRADED_SHEET ||--o{ GRADED_SHEET_RESULT_ITEM : results
+  QUESTION ||--o{ GRADED_SHEET_RESULT_ITEM : questionId
+
+  SUBJECT ||--o{ WORD : subject
+  WORD_TEST ||--o{ WORD_TEST_ATTEMPT : wordTestId
+  WORD_TEST ||--o{ WORD_TEST_WORD_LINK : wordIds
+  WORD ||--o{ WORD_TEST_WORD_LINK : wordId
+  WORD_TEST_ATTEMPT ||--o{ WORD_TEST_ATTEMPT_RESULT_ITEM : results
+  WORD ||--o{ WORD_TEST_ATTEMPT_RESULT_ITEM : wordId
+
+  SUBJECT ||--o{ REVIEW_TEST : subject
+  REVIEW_TEST ||--o{ REVIEW_TEST_ITEM : testId
+  REVIEW_TEST ||--o{ REVIEW_LOCK : testId
+  REVIEW_TEST ||--o{ REVIEW_ATTEMPT : reviewTestId
+  QUESTION ||--o{ REVIEW_TEST_ITEM : targetId
+  WORD ||--o{ REVIEW_TEST_ITEM : targetId
+  QUESTION ||--o{ REVIEW_LOCK : targetId
+  WORD ||--o{ REVIEW_LOCK : targetId
+  QUESTION ||--o{ REVIEW_ATTEMPT : targetId
+  WORD ||--o{ REVIEW_ATTEMPT : targetId
+
+  SUBJECT ||--o{ EXAM_PAPER : subject
+  EXAM_PAPER ||--o{ EXAM_RESULT : paperId
+  SUBJECT ||--o{ EXAM_RESULT : subject
+
+  SUBJECT {
+    string subjectId PK
+    string name
+  }
+
+  TEST {
+    string testId PK
+    string subjectId
+    string title
+  }
+
+  QUESTION {
+    string questionId PK
+    string testId
+    string subjectId
+    int number
+  }
+
+  ATTEMPT {
+    string attemptId PK
+    string testId
+    string subjectId
+    string startedAt
+  }
+
+  ATTEMPT_RESULT_ITEM {
+    string questionId
+    int number
+    boolean isCorrect
+  }
+
+  GRADED_SHEET {
+    string gradedSheetId PK
+    string testId
+    string subjectId
+    string imageS3Key
+  }
+
+  GRADED_SHEET_RESULT_ITEM {
+    string questionId
+    int number
+    boolean isCorrect
+  }
+
+  WORD {
+    string wordId PK
+    string subject
+    string question
+    string answer
+  }
+
+  WORD_TEST {
+    string wordTestId PK
+    string subject
+  }
+
+  WORD_TEST_ATTEMPT {
+    string wordTestAttemptId PK
+    string wordTestId
+    string startedAt
+  }
+
+  WORD_TEST_WORD_LINK {
+    string wordTestId
+    string wordId
+  }
+
+  WORD_TEST_ATTEMPT_RESULT_ITEM {
+    string wordId
+    boolean isCorrect
+  }
+
+  REVIEW_TEST {
+    string testId PK
+    string subject
+    string mode
+  }
+
+  REVIEW_TEST_ITEM {
+    string testId PK
+    string itemKey_SK
+    string targetType
+    string targetId
+  }
+
+  REVIEW_LOCK {
+    string targetKey PK
+    string testId
+    string targetType
+    string targetId
+  }
+
+  REVIEW_ATTEMPT {
+    string targetKey PK
+    string attemptedAt_SK
+    string targetType
+    string targetId
+    string subject
+  }
+
+  EXAM_PAPER {
+    string paperId PK
+    string subject
+  }
+
+  EXAM_RESULT {
+    string resultId PK
+    string paperId
+    string subject
+  }
+
+```
+
+---
+
 ## 3. テーブル定義
 
 ## 3.1 subjects
