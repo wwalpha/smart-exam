@@ -28,7 +28,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "pdf-lib": "^1.17.1",
-    "pdf-to-png-converter": "^3.11.0"
+    "pdf-to-png-converter": "^3.11.0",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@esbuild-plugins/tsconfig-paths": "^0.1.2",

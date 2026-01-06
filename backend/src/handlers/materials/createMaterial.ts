@@ -2,25 +2,19 @@ import { MaterialRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type { CreateMaterialRequest, CreateMaterialResponse } from '@smart-exam/api-types';
+import { z } from 'zod';
+import type { ValidatedBody } from '@/types/express';
 
-const isValidYmd = (value: unknown): value is string => {
-  if (typeof value !== 'string') return false;
-  const trimmed = value.trim();
-  return /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
-};
+export const CreateMaterialBodySchema = z.object({
+  name: z.string().min(1),
+  subject: z.enum(['1', '2', '3', '4']),
+  materialDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  grade: z.string().min(1),
+  provider: z.string().min(1),
+});
 
-const isNonEmptyString = (value: unknown): value is string => {
-  return typeof value === 'string' && value.trim().length > 0;
-};
-
-export const createMaterial: AsyncHandler<{}, CreateMaterialResponse | { error: string }, CreateMaterialRequest, ParsedQs> = async (
-  req,
-  res
-) => {
-  if (!isNonEmptyString(req.body?.grade) || !isNonEmptyString(req.body?.provider) || !isValidYmd(req.body?.materialDate)) {
-    res.status(400).json({ error: 'grade/provider/materialDate are required' });
-    return;
-  }
-  const item = await MaterialRepository.createMaterial(req.body);
+export const createMaterial: AsyncHandler<{}, CreateMaterialResponse, CreateMaterialRequest, ParsedQs> = async (req, res) => {
+  const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateMaterialBodySchema>;
+  const item = await MaterialRepository.createMaterial(body);
   res.status(201).json(item);
 };

@@ -10,6 +10,7 @@ import * as reviewTestHandler from '@/handlers/reviewTests';
 import * as reviewAttemptHandler from '@/handlers/reviewAttempts';
 import * as dashboardHandler from '@/handlers/dashboard';
 import { handleRequest } from '@/lib/handler';
+import { validateBody } from '@/middlewares/validateZod';
 
 const app = express();
 app.use(cors());
@@ -31,7 +32,7 @@ app.get('/api/dashboard', handleRequest(dashboardHandler.getDashboard));
 // Materials
 app.get('/api/materials', handleRequest(materialHandler.listMaterials));
 app.post('/api/materials/search', handleRequest(materialHandler.searchMaterials));
-app.post('/api/materials', handleRequest(materialHandler.createMaterial));
+app.post('/api/materials', validateBody(materialHandler.CreateMaterialBodySchema), handleRequest(materialHandler.createMaterial));
 app.get('/api/materials/:materialId', handleRequest(materialHandler.getMaterial));
 app.patch('/api/materials/:materialId', handleRequest(materialHandler.updateMaterial));
 app.delete('/api/materials/:materialId', handleRequest(materialHandler.deleteMaterial));
