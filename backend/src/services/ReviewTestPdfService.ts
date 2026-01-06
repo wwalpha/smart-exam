@@ -26,7 +26,7 @@ export const ReviewTestPdfService = {
     const questionLineHeight = questionFontSize * 1.35;
 
     const title = `復習テスト (${review.subject})`;
-    const meta = `作成日時: ${review.createdAt}`;
+    const meta = `作成日: ${review.createdDate}`;
 
     const fontBytes = await loadJapaneseFontBytes();
 

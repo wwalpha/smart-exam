@@ -1,11 +1,11 @@
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
-import { QuestionTable } from '../types/db';
+import { MaterialQuestionTable } from '../types/db';
 
-const TABLE_NAME = ENV.TABLE_QUESTIONS;
+const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
 
 export const QuestionsService = {
-  create: async (item: QuestionTable): Promise<void> => {
+  create: async (item: MaterialQuestionTable): Promise<void> => {
     await dbHelper.put({
       TableName: TABLE_NAME,
       Item: item,
@@ -19,15 +19,15 @@ export const QuestionsService = {
     });
   },
 
-  scanAll: async (): Promise<QuestionTable[]> => {
-    const result = await dbHelper.scan<QuestionTable>({
+  scanAll: async (): Promise<MaterialQuestionTable[]> => {
+    const result = await dbHelper.scan<MaterialQuestionTable>({
       TableName: TABLE_NAME,
     });
     return result.Items || [];
   },
 
-  listByMaterialId: async (materialId: string): Promise<QuestionTable[]> => {
-    const result = await dbHelper.query<QuestionTable>({
+  listByMaterialId: async (materialId: string): Promise<MaterialQuestionTable[]> => {
+    const result = await dbHelper.query<MaterialQuestionTable>({
       TableName: TABLE_NAME,
       IndexName: 'gsi_material_id_number',
       KeyConditionExpression: '#materialId = :materialId',
@@ -37,7 +37,10 @@ export const QuestionsService = {
     return result.Items || [];
   },
 
-  update: async (questionId: string, updates: Partial<QuestionTable>): Promise<QuestionTable | null> => {
+  update: async (
+    questionId: string,
+    updates: Partial<MaterialQuestionTable>
+  ): Promise<MaterialQuestionTable | null> => {
     const expAttrNames: Record<string, string> = {};
     const expAttrValues: Record<string, unknown> = {};
     let updateExp = 'SET';
@@ -61,6 +64,6 @@ export const QuestionsService = {
         ReturnValues: 'ALL_NEW'
     });
     
-    return (result.Attributes as QuestionTable) || null;
+    return (result.Attributes as MaterialQuestionTable) || null;
   }
 };

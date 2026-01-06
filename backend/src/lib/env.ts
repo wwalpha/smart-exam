@@ -2,19 +2,12 @@ export const ENV = {
   AWS_REGION: process.env.AWS_REGION || 'ap-northeast-1',
   BEDROCK_REGION: process.env.BEDROCK_REGION || 'us-east-1',
   FILES_BUCKET_NAME: process.env.FILES_BUCKET_NAME || '',
-  
+
   // DynamoDB Tables
   TABLE_MATERIALS: process.env.TABLE_MATERIALS || 'materials',
-  TABLE_WORD_TESTS: process.env.TABLE_WORD_TESTS || 'word_tests',
-  TABLE_QUESTIONS: process.env.TABLE_QUESTIONS || 'questions',
-  TABLE_ATTEMPTS: process.env.TABLE_ATTEMPTS || 'attempts',
-  TABLE_GRADED_SHEETS: process.env.TABLE_GRADED_SHEETS || 'graded_sheets',
-  TABLE_WORDS: process.env.TABLE_WORDS || 'words',
-  TABLE_WORD_GROUPS: process.env.TABLE_WORD_GROUPS || 'word_groups',
-  TABLE_WORD_TEST_ATTEMPTS: process.env.TABLE_WORD_TEST_ATTEMPTS || 'word_test_attempts',
+  TABLE_MATERIAL_QUESTIONS: process.env.TABLE_MATERIAL_QUESTIONS || 'material_questions',
   TABLE_REVIEW_TESTS: process.env.TABLE_REVIEW_TESTS || 'review_tests',
-  TABLE_REVIEW_TEST_ITEMS: process.env.TABLE_REVIEW_TEST_ITEMS || 'review_test_items',
-  TABLE_REVIEW_LOCKS: process.env.TABLE_REVIEW_LOCKS || 'review_locks',
-  TABLE_REVIEW_ATTEMPTS: process.env.TABLE_REVIEW_ATTEMPTS || 'review_attempts',
+  TABLE_REVIEW_TEST_CANDIDATES: process.env.TABLE_REVIEW_TEST_CANDIDATES || 'review_test_candidates',
+  TABLE_WORD_MASTER: process.env.TABLE_WORD_MASTER || 'word_master',
   TABLE_EXAM_RESULTS: process.env.TABLE_EXAM_RESULTS || 'exam_results',
 };

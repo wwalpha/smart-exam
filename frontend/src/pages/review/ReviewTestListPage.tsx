@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useReviewList } from '@/hooks/review';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
-import { formatYmdHmSlash } from '@/utils/date';
+import { formatYmdSlash } from '@/utils/date';
 import type { WordTestSubject } from '@typings/wordtest';
 import { FileText, Trash2 } from 'lucide-react';
 
@@ -57,7 +57,9 @@ export const ReviewTestListPage = () => {
               </div>
               <div className="w-40">
                 <label className="text-sm font-medium">ステータス</label>
-                <Select onValueChange={(v) => setValue('status', v)} defaultValue="ALL">
+                <Select
+                  onValueChange={(v) => setValue('status', v as 'ALL' | 'IN_PROGRESS' | 'COMPLETED')}
+                  defaultValue="ALL">
                   <SelectTrigger>
                     <SelectValue placeholder="ステータス" />
                   </SelectTrigger>
@@ -117,10 +119,10 @@ export const ReviewTestListPage = () => {
                 </TableCell>
                 <TableCell>
                   <Link to={`${basePath}/${test.id}`} className="font-medium hover:underline">
-                    {formatYmdHmSlash(test.createdAt)}
+                    {formatYmdSlash(test.createdDate)}
                   </Link>
                 </TableCell>
-                <TableCell>{test.itemCount}問</TableCell>
+                <TableCell>{test.count}問</TableCell>
                 <TableCell>{getStatusBadge(test.status)}</TableCell>
               </TableRow>
             ))}

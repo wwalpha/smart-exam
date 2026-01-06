@@ -33,11 +33,16 @@ export const searchReviewTests: AsyncHandler<
   SearchReviewTestsRequest,
   ParsedQs
 > = async (req, res) => {
+  if (!req.body?.mode || !req.body?.subject) {
+    res.status(400).json({ items: [], total: 0 });
+    return;
+  }
+
   const items = await ReviewTestRepository.listReviewTests();
   const filtered = items.filter((x) => {
-    if (req.body?.mode && x.mode !== req.body.mode) return false;
-    if (req.body?.subject && req.body.subject !== 'ALL' && x.subject !== (req.body.subject as any)) return false;
-    if (req.body?.status && req.body.status !== 'ALL' && x.status !== (req.body.status as any)) return false;
+    if (x.mode !== req.body.mode) return false;
+    if (req.body.subject !== 'ALL' && x.subject !== (req.body.subject as any)) return false;
+    if (req.body.status && req.body.status !== 'ALL' && x.status !== (req.body.status as any)) return false;
     return true;
   });
 

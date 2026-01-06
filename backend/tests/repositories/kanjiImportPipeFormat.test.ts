@@ -1,16 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { KanjiRepository, WordTestAttemptRepository } from '@/repositories';
+import { KanjiRepository } from '@/repositories';
 import { WordsService } from '@/services/WordsService';
 
 vi.mock('@/services/WordsService');
 
-// WordTestAttemptRepository is spied per-test
-
 describe('KanjiRepository.importKanji (pipe format)', () => {
-  it('creates master and 3 history attempts for 3 dated tokens', async () => {
+  it('creates master and ignores imported histories', async () => {
     vi.mocked(WordsService.listKanji).mockResolvedValue([] as any);
     vi.mocked(WordsService.create).mockResolvedValue();
-    vi.spyOn(WordTestAttemptRepository, 'createSubmittedAttempt').mockResolvedValue({ wordTestAttemptId: 'a1' });
 
     const res = await KanjiRepository.importKanji({
       subject: '1',
@@ -22,7 +19,6 @@ describe('KanjiRepository.importKanji (pipe format)', () => {
     expect(res.errorCount).toBe(0);
 
     expect(WordsService.create).toHaveBeenCalledTimes(1);
-    expect(WordTestAttemptRepository.createSubmittedAttempt).toHaveBeenCalledTimes(3);
   });
 
   it('fails when subject is missing', async () => {

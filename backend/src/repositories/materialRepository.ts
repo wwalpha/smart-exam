@@ -1,6 +1,6 @@
 import { MaterialsService } from '@/services/MaterialsService';
 import type { MaterialTable } from '@/types/db';
-import { MaterialSet, CreateMaterialSetRequest } from './repo.types';
+import { Material, CreateMaterialRequest } from './repo.types';
 import { DateUtils } from '@/lib/dateUtils';
 import type { MaterialFile } from '@smart-exam/api-types';
 import { createUuid } from '@/lib/uuid';
@@ -19,10 +19,10 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
 };
 
 export const MaterialRepository = {
-  createMaterialSet: async (data: CreateMaterialSetRequest): Promise<MaterialSet> => {
+  createMaterial: async (data: CreateMaterialRequest): Promise<Material> => {
     const id = createUuid();
 
-    const item: MaterialSet = {
+    const item: Material = {
       id,
       ...data,
     };
@@ -45,7 +45,7 @@ export const MaterialRepository = {
     return item;
   },
 
-  getMaterialSet: async (id: string): Promise<MaterialSet | null> => {
+  getMaterial: async (id: string): Promise<Material | null> => {
     const dbItem = await MaterialsService.get(id);
 
     if (!dbItem) return null;
@@ -64,7 +64,7 @@ export const MaterialRepository = {
     };
   },
 
-  listMaterialSets: async (): Promise<MaterialSet[]> => {
+  listMaterials: async (): Promise<Material[]> => {
     const items = await MaterialsService.list();
 
     return items.map((dbItem: MaterialTable) => ({
@@ -81,7 +81,7 @@ export const MaterialRepository = {
     }));
   },
 
-  deleteMaterialSet: async (id: string): Promise<boolean> => {
+  deleteMaterial: async (id: string): Promise<boolean> => {
     const existing = await MaterialsService.get(id);
     if (!existing) return false;
     await MaterialsService.delete(id);

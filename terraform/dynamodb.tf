@@ -1,6 +1,6 @@
- # ----------------------------------------------------------------------------------------------
- # DynamoDB tables.
- # ----------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------
+# DynamoDB tables.
+# ----------------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------------
 # DynamoDB table for materials.
@@ -29,10 +29,10 @@ resource "aws_dynamodb_table" "materials" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for questions.
+# DynamoDB table for material questions.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "questions" {
-  name         = "${var.project_name}_questions"
+resource "aws_dynamodb_table" "material_questions" {
+  name         = "${var.project_name}_material_questions"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "questionId"
 
@@ -60,55 +60,10 @@ resource "aws_dynamodb_table" "questions" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for attempts.
+# DynamoDB table for word master.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "attempts" {
-  name         = "${var.project_name}_attempts"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "attemptId"
-
-  attribute {
-    name = "attemptId"
-    type = "S"
-  }
-
-  attribute {
-    name = "testId"
-    type = "S"
-  }
-
-  attribute {
-    name = "startedAt"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "gsi_test_id_started_at"
-    hash_key        = "testId"
-    range_key       = "startedAt"
-    projection_type = "ALL"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for graded sheets.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "graded_sheets" {
-  name         = "${var.project_name}_graded_sheets"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "gradedSheetId"
-
-  attribute {
-    name = "gradedSheetId"
-    type = "S"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for words.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "words" {
-  name         = "${var.project_name}_words"
+resource "aws_dynamodb_table" "word_master" {
+  name         = "${var.project_name}_word_master"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "wordId"
 
@@ -131,85 +86,33 @@ resource "aws_dynamodb_table" "words" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for word groups (Word Sets).
+# DynamoDB table for review test candidates.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "word_groups" {
-  name         = "${var.project_name}_word_groups"
+resource "aws_dynamodb_table" "review_test_candidates" {
+  name         = "${var.project_name}_review_test_candidates"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "groupId"
+  hash_key     = "subject"
+  range_key    = "questionId"
 
   attribute {
-    name = "groupId"
-    type = "S"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for word tests.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "word_tests" {
-  name         = "${var.project_name}_word_tests"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "wordTestId"
-
-  attribute {
-    name = "wordTestId"
-    type = "S"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for word test attempts.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "word_test_attempts" {
-  name         = "${var.project_name}_word_test_attempts"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "wordTestAttemptId"
-
-  attribute {
-    name = "wordTestAttemptId"
+    name = "subject"
     type = "S"
   }
 
   attribute {
-    name = "wordTestId"
+    name = "questionId"
     type = "S"
   }
 
   attribute {
-    name = "startedAt"
+    name = "nextTime"
     type = "S"
   }
 
   global_secondary_index {
-    name            = "gsi_word_test_id_started_at"
-    hash_key        = "wordTestId"
-    range_key       = "startedAt"
-    projection_type = "ALL"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for Exam Results.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "exam_results" {
-  name         = "${var.project_name}_exam_results"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "resultId"
-
-  attribute {
-    name = "resultId"
-    type = "S"
-  }
-
-  attribute {
-    name = "testDate"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "gsi_test_date"
-    hash_key        = "testDate"
+    name            = "gsi_subject_next_time"
+    hash_key        = "subject"
+    range_key       = "nextTime"
     projection_type = "ALL"
   }
 }
@@ -224,60 +127,6 @@ resource "aws_dynamodb_table" "review_tests" {
 
   attribute {
     name = "testId"
-    type = "S"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for review test items.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "review_test_items" {
-  name         = "${var.project_name}_review_test_items"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "testId"
-  range_key    = "itemKey"
-
-  attribute {
-    name = "testId"
-    type = "S"
-  }
-
-  attribute {
-    name = "itemKey"
-    type = "S"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for review locks (targetKey -> testId).
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "review_locks" {
-  name         = "${var.project_name}_review_locks"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "targetKey"
-
-  attribute {
-    name = "targetKey"
-    type = "S"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for review attempts (append-only).
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "review_attempts" {
-  name         = "${var.project_name}_review_attempts"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "targetKey"
-  range_key    = "attemptedAt"
-
-  attribute {
-    name = "targetKey"
-    type = "S"
-  }
-
-  attribute {
-    name = "attemptedAt"
     type = "S"
   }
 }

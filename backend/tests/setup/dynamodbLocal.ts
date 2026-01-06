@@ -30,30 +30,7 @@ const createTables = async (client: DynamoDBClient) => {
 
   await create(
     new CreateTableCommand({
-      TableName: 'attempts',
-      BillingMode: 'PAY_PER_REQUEST',
-      AttributeDefinitions: [
-        { AttributeName: 'attemptId', AttributeType: 'S' },
-        { AttributeName: 'testId', AttributeType: 'S' },
-        { AttributeName: 'startedAt', AttributeType: 'S' },
-      ],
-      KeySchema: [{ AttributeName: 'attemptId', KeyType: 'HASH' }],
-      GlobalSecondaryIndexes: [
-        {
-          IndexName: 'gsi_test_id_started_at',
-          KeySchema: [
-            { AttributeName: 'testId', KeyType: 'HASH' },
-            { AttributeName: 'startedAt', KeyType: 'RANGE' },
-          ],
-          Projection: { ProjectionType: 'ALL' },
-        },
-      ],
-    })
-  );
-
-  await create(
-    new CreateTableCommand({
-      TableName: 'questions',
+      TableName: 'material_questions',
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [
         { AttributeName: 'questionId', AttributeType: 'S' },
@@ -76,19 +53,36 @@ const createTables = async (client: DynamoDBClient) => {
 
   await create(
     new CreateTableCommand({
-      TableName: 'word_tests',
+      TableName: 'word_master',
       BillingMode: 'PAY_PER_REQUEST',
-      AttributeDefinitions: [{ AttributeName: 'wordTestId', AttributeType: 'S' }],
-      KeySchema: [{ AttributeName: 'wordTestId', KeyType: 'HASH' }],
+      AttributeDefinitions: [{ AttributeName: 'wordId', AttributeType: 'S' }],
+      KeySchema: [{ AttributeName: 'wordId', KeyType: 'HASH' }],
     })
   );
 
   await create(
     new CreateTableCommand({
-      TableName: 'words',
+      TableName: 'review_test_candidates',
       BillingMode: 'PAY_PER_REQUEST',
-      AttributeDefinitions: [{ AttributeName: 'wordId', AttributeType: 'S' }],
-      KeySchema: [{ AttributeName: 'wordId', KeyType: 'HASH' }],
+      AttributeDefinitions: [
+        { AttributeName: 'subject', AttributeType: 'S' },
+        { AttributeName: 'questionId', AttributeType: 'S' },
+        { AttributeName: 'nextTime', AttributeType: 'S' },
+      ],
+      KeySchema: [
+        { AttributeName: 'subject', KeyType: 'HASH' },
+        { AttributeName: 'questionId', KeyType: 'RANGE' },
+      ],
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: 'gsi_subject_next_time',
+          KeySchema: [
+            { AttributeName: 'subject', KeyType: 'HASH' },
+            { AttributeName: 'nextTime', KeyType: 'RANGE' },
+          ],
+          Projection: { ProjectionType: 'ALL' },
+        },
+      ],
     })
   );
 
@@ -136,9 +130,7 @@ const createTables = async (client: DynamoDBClient) => {
 export const getDynamoDbLocal = async (): Promise<DynamoLocal> => {
   if (!cached) {
     cached = (async () => {
-      const container = await new GenericContainer('amazon/dynamodb-local')
-        .withExposedPorts(8000)
-        .start();
+      const container = await new GenericContainer('amazon/dynamodb-local').withExposedPorts(8000).start();
 
       const endpoint = `http://${container.getHost()}:${container.getMappedPort(8000)}`;
       ensureEnvForLocal(endpoint);

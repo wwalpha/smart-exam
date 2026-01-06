@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Request, Response } from 'express';
-import { getMaterialFile } from '@/handlers/materialFile';
+import { getMaterialFile } from '@/handlers/material';
 import { MaterialRepository } from '@/repositories';
 
 describe('materialFile handler', () => {

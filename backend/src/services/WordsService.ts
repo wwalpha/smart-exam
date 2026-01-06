@@ -3,7 +3,7 @@ import { ENV } from '../lib/env';
 import { WordMasterTable } from '../types/db';
 import type { SubjectId } from '@smart-exam/api-types';
 
-const TABLE_NAME = ENV.TABLE_WORDS;
+const TABLE_NAME = ENV.TABLE_WORD_MASTER;
 
 export const WordsService = {
   create: async (item: WordMasterTable): Promise<void> => {

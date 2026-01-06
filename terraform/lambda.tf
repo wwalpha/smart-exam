@@ -38,20 +38,12 @@ resource "aws_lambda_function" "api" {
     variables = {
       FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
 
-      TABLE_MATERIALS          = aws_dynamodb_table.materials.name
-      TABLE_QUESTIONS          = aws_dynamodb_table.questions.name
-      TABLE_ATTEMPTS           = aws_dynamodb_table.attempts.name
-      TABLE_GRADED_SHEETS      = aws_dynamodb_table.graded_sheets.name
-      TABLE_WORDS              = aws_dynamodb_table.words.name
-      TABLE_WORD_GROUPS        = aws_dynamodb_table.word_groups.name
-      TABLE_WORD_TESTS         = aws_dynamodb_table.word_tests.name
-      TABLE_WORD_TEST_ATTEMPTS = aws_dynamodb_table.word_test_attempts.name
-      TABLE_REVIEW_TESTS       = aws_dynamodb_table.review_tests.name
-      TABLE_REVIEW_TEST_ITEMS  = aws_dynamodb_table.review_test_items.name
-      TABLE_REVIEW_LOCKS       = aws_dynamodb_table.review_locks.name
-      TABLE_REVIEW_ATTEMPTS    = aws_dynamodb_table.review_attempts.name
-      TABLE_EXAM_RESULTS       = aws_dynamodb_table.exam_results.name
-      BEDROCK_REGION           = "us-east-1"
+      TABLE_MATERIALS              = aws_dynamodb_table.materials.name
+      TABLE_MATERIAL_QUESTIONS     = aws_dynamodb_table.material_questions.name
+      TABLE_WORD_MASTER            = aws_dynamodb_table.word_master.name
+      TABLE_REVIEW_TEST_CANDIDATES = aws_dynamodb_table.review_test_candidates.name
+      TABLE_REVIEW_TESTS           = aws_dynamodb_table.review_tests.name
+      BEDROCK_REGION               = "us-east-1"
     }
   }
 
@@ -89,19 +81,11 @@ resource "aws_lambda_function" "bedrock" {
     variables = {
       FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
 
-      TABLE_MATERIALS          = aws_dynamodb_table.materials.name
-      TABLE_QUESTIONS          = aws_dynamodb_table.questions.name
-      TABLE_ATTEMPTS           = aws_dynamodb_table.attempts.name
-      TABLE_GRADED_SHEETS      = aws_dynamodb_table.graded_sheets.name
-      TABLE_WORDS              = aws_dynamodb_table.words.name
-      TABLE_WORD_GROUPS        = aws_dynamodb_table.word_groups.name
-      TABLE_WORD_TESTS         = aws_dynamodb_table.word_tests.name
-      TABLE_WORD_TEST_ATTEMPTS = aws_dynamodb_table.word_test_attempts.name
-      TABLE_REVIEW_TESTS       = aws_dynamodb_table.review_tests.name
-      TABLE_REVIEW_TEST_ITEMS  = aws_dynamodb_table.review_test_items.name
-      TABLE_REVIEW_LOCKS       = aws_dynamodb_table.review_locks.name
-      TABLE_REVIEW_ATTEMPTS    = aws_dynamodb_table.review_attempts.name
-      TABLE_EXAM_RESULTS       = aws_dynamodb_table.exam_results.name
+      TABLE_MATERIALS              = aws_dynamodb_table.materials.name
+      TABLE_MATERIAL_QUESTIONS     = aws_dynamodb_table.material_questions.name
+      TABLE_WORD_MASTER            = aws_dynamodb_table.word_master.name
+      TABLE_REVIEW_TEST_CANDIDATES = aws_dynamodb_table.review_test_candidates.name
+      TABLE_REVIEW_TESTS           = aws_dynamodb_table.review_tests.name
     }
   }
 

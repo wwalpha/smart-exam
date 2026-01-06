@@ -1,0 +1,56 @@
+import { ListObjectsV2Command } from '@aws-sdk/client-s3';
+import type { MaterialFile } from '@smart-exam/api-types';
+import { s3Client } from '@/lib/aws';
+import { DateUtils } from '@/lib/dateUtils';
+import { ENV } from '@/lib/env';
+
+export const listMaterialFiles = async (_materialSetId: string): Promise<MaterialFile[]> => {
+  const materialSetId = _materialSetId;
+  const bucket = ENV.FILES_BUCKET_NAME;
+  if (!bucket) return [];
+
+  const prefix = `materials/${materialSetId}/`;
+  const response = await s3Client.send(
+    new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: prefix,
+    })
+  );
+
+  const now = DateUtils.now();
+  const objects = response.Contents ?? [];
+
+  const allowedTypes = new Set<MaterialFile['fileType']>(['QUESTION', 'ANSWER', 'GRADED_ANSWER']);
+
+  return objects
+    .map((obj) => {
+      const key = obj.Key;
+      if (!key || key.endsWith('/')) return null;
+
+      const parts = key.split('/');
+      // materials/{materialSetId}/{fileType}/{id}-{filename}
+      if (parts.length < 4) return null;
+      const fileTypeRaw = parts[2] as MaterialFile['fileType'];
+      if (!allowedTypes.has(fileTypeRaw)) return null;
+
+      const baseName = parts.slice(3).join('/');
+      const dashIndex = baseName.indexOf('-');
+      const id = dashIndex > 0 ? baseName.slice(0, dashIndex) : baseName;
+      const filename = dashIndex > 0 ? baseName.slice(dashIndex + 1) : baseName;
+
+      const contentType = filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';
+      const createdAt = obj.LastModified ? obj.LastModified.toISOString() : now;
+
+      const item: MaterialFile = {
+        id,
+        materialSetId,
+        filename,
+        s3Key: key,
+        contentType,
+        fileType: fileTypeRaw,
+        createdAt,
+      };
+      return item;
+    })
+    .filter((x): x is MaterialFile => x !== null);
+};

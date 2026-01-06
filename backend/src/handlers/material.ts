@@ -1,32 +1,38 @@
 import { MaterialRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
+import { ApiError } from '@/lib/apiError';
 import type {
-  CreateMaterialSetRequest,
-  CreateMaterialSetResponse,
-  DeleteMaterialSetParams,
-  DeleteMaterialSetResponse,
-  GetMaterialSetParams,
-  GetMaterialSetResponse,
+  CreateMaterialRequest,
+  CreateMaterialResponse,
+  DeleteMaterialParams,
+  DeleteMaterialResponse,
+  GetMaterialParams,
+  GetMaterialResponse,
   ListMaterialFilesParams,
   ListMaterialFilesResponse,
-  MaterialSetListResponse,
-  SearchMaterialSetsRequest,
-  SearchMaterialSetsResponse,
+  MaterialListResponse,
+  SearchMaterialsRequest,
+  SearchMaterialsResponse,
 } from '@smart-exam/api-types';
 
-export const listMaterialSets: AsyncHandler<{}, MaterialSetListResponse, {}, ParsedQs> = async (req, res) => {
-  const items = await MaterialRepository.listMaterialSets();
+type GetMaterialFileParams = {
+  materialId: string;
+  fileId: string;
+};
+
+export const listMaterials: AsyncHandler<{}, MaterialListResponse, {}, ParsedQs> = async (req, res) => {
+  const items = await MaterialRepository.listMaterials();
   res.json({ items, total: items.length });
 };
 
-export const searchMaterialSets: AsyncHandler<
+export const searchMaterials: AsyncHandler<
   {},
-  SearchMaterialSetsResponse,
-  SearchMaterialSetsRequest,
+  SearchMaterialsResponse,
+  SearchMaterialsRequest,
   ParsedQs
 > = async (req, res) => {
-  const items = await MaterialRepository.listMaterialSets();
+  const items = await MaterialRepository.listMaterials();
 
   const subject = (req.body.subject ?? '').trim();
   const grade = (req.body.grade ?? '').trim();
@@ -64,24 +70,24 @@ export const searchMaterialSets: AsyncHandler<
   res.json({ items: filtered, total: filtered.length });
 };
 
-export const createMaterialSet: AsyncHandler<
+export const createMaterial: AsyncHandler<
   {},
-  CreateMaterialSetResponse,
-  CreateMaterialSetRequest,
+  CreateMaterialResponse,
+  CreateMaterialRequest,
   ParsedQs
 > = async (req, res) => {
-  const item = await MaterialRepository.createMaterialSet(req.body);
+  const item = await MaterialRepository.createMaterial(req.body);
   res.status(201).json(item);
 };
 
-export const getMaterialSet: AsyncHandler<
-  GetMaterialSetParams,
-  GetMaterialSetResponse | { error: string },
+export const getMaterial: AsyncHandler<
+  GetMaterialParams,
+  GetMaterialResponse | { error: string },
   {},
   ParsedQs
 > = async (req, res) => {
   const { materialId } = req.params;
-  const item = await MaterialRepository.getMaterialSet(materialId);
+  const item = await MaterialRepository.getMaterial(materialId);
   if (!item) {
     res.status(404).json({ error: 'Not Found' });
     return;
@@ -89,14 +95,14 @@ export const getMaterialSet: AsyncHandler<
   res.json(item);
 };
 
-export const deleteMaterialSet: AsyncHandler<
-  DeleteMaterialSetParams,
-  DeleteMaterialSetResponse | { error: string },
+export const deleteMaterial: AsyncHandler<
+  DeleteMaterialParams,
+  DeleteMaterialResponse | { error: string },
   {},
   ParsedQs
 > = async (req, res) => {
   const { materialId } = req.params;
-  const deleted = await MaterialRepository.deleteMaterialSet(materialId);
+  const deleted = await MaterialRepository.deleteMaterial(materialId);
   if (!deleted) {
     res.status(404).json({ error: 'Not Found' });
     return;
@@ -111,4 +117,21 @@ export const listMaterialFiles: AsyncHandler<ListMaterialFilesParams, ListMateri
   const { materialId } = req.params;
   const items = await MaterialRepository.listMaterialFiles(materialId);
   res.json({ datas: items });
+};
+
+export const getMaterialFile: AsyncHandler<GetMaterialFileParams, unknown, {}, ParsedQs> = async (req, res) => {
+  const { materialId, fileId } = req.params;
+  if (!materialId || !fileId) {
+    throw new ApiError('materialId and fileId are required', 400, ['invalid_request']);
+  }
+
+  const file = await MaterialRepository.getMaterialFile(materialId, fileId);
+  if (!file) {
+    throw new ApiError('not found', 404, ['not_found']);
+  }
+
+  res.status(200);
+  res.setHeader('content-type', file.contentType);
+  res.setHeader('content-disposition', `inline; filename="${file.filename}"`);
+  res.send(file.body);
 };

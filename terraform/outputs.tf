@@ -20,17 +20,11 @@ output "http_api_endpoint" {
 output "dynamodb_table_names" {
   description = "All DynamoDB table names created for the app."
   value = {
-    materials          = aws_dynamodb_table.materials.name
-    questions          = aws_dynamodb_table.questions.name
-    attempts           = aws_dynamodb_table.attempts.name
-    graded_sheets      = aws_dynamodb_table.graded_sheets.name
-    words              = aws_dynamodb_table.words.name
-    word_tests         = aws_dynamodb_table.word_tests.name
-    word_test_attempts = aws_dynamodb_table.word_test_attempts.name
-    review_tests       = aws_dynamodb_table.review_tests.name
-    review_test_items  = aws_dynamodb_table.review_test_items.name
-    review_locks       = aws_dynamodb_table.review_locks.name
-    review_attempts    = aws_dynamodb_table.review_attempts.name
+    materials              = aws_dynamodb_table.materials.name
+    material_questions     = aws_dynamodb_table.material_questions.name
+    word_master            = aws_dynamodb_table.word_master.name
+    review_test_candidates = aws_dynamodb_table.review_test_candidates.name
+    review_tests           = aws_dynamodb_table.review_tests.name
   }
 }
 

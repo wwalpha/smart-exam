@@ -40,7 +40,7 @@ export interface MaterialTable {
 /**
  * 問題テーブル
  */
-export interface QuestionTable {
+export interface MaterialQuestionTable {
   /** 問題ID (PK) */
   questionId: string;
   /** 教材ID (GSI1 PK) */
@@ -51,18 +51,6 @@ export interface QuestionTable {
   number: number;
   /** 識別キー */
   canonicalKey: string;
-}
-
-/**
- * 実施結果アイテム
- */
-export interface AttemptResultItem {
-  /** 問題ID */
-  questionId: string;
-  /** 問題番号 */
-  number: number;
-  /** 正誤 */
-  isCorrect: boolean;
 }
 
 /**
@@ -82,29 +70,7 @@ export interface AttemptTable {
   /** 提出日時 */
   submittedAt?: string;
   /** 結果リスト */
-  results: AttemptResultItem[];
-}
-
-/**
- * 採点済み用紙テーブル
- */
-export interface GradedSheetTable {
-  /** 採点済み用紙ID (PK) */
-  gradedSheetId: string;
-  /** テストID */
-  testId: string;
-  /** 科目ID */
-  subjectId: SubjectId;
-  /** 画像S3キー */
-  imageS3Key: string;
-  /** ステータス */
-  status: 'UPLOADED' | 'ANALYZING' | 'DONE' | 'FAILED';
-  /** AIプロバイダー */
-  aiProvider: 'BEDROCK' | 'OPENAI' | 'GOOGLE';
-  /** 結果リスト */
-  results?: AttemptResultItem[];
-  /** エラーメッセージ */
-  errorMessage?: string;
+  results: { questionId: string; number: number; isCorrect: boolean }[];
 }
 
 /**
@@ -132,24 +98,28 @@ export interface ReviewTestTable {
   /** モード */
   mode: 'QUESTION' | 'KANJI';
   /** ステータス */
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED';
-  /** 指定出題数 */
-  requestedCount: number;
-  /** 生成出題数 */
-  generatedCount: number;
-  /** 作成日時 (ISO8601) */
-  createdAt?: string;
+  status: 'IN_PROGRESS' | 'COMPLETED';
+  /** 出題数 */
+  count: number;
+  /** 出題IDリスト（mode に応じて questionId / wordId を格納） */
+  questions: string[];
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
+  /** 提出日 (YYYY-MM-DD) */
+  submittedDate?: string;
+  /** PDF S3キー */
+  pdfS3Key: string;
+  /** 採点結果 */
+  results?: { id: string; isCorrect: boolean }[];
+  /** 出題スナップショット（ReviewTestItemTable をマージ） */
+  items?: ReviewTestItemEmbedded[];
 }
 
 /**
- * 復習テスト項目テーブル
+ * 復習テスト項目（ReviewTestTable に埋め込み）
  */
-export interface ReviewTestItemTable {
-  /** テストID (PK) */
-  testId: string;
-  /** アイテムキー (SK) */
+export interface ReviewTestItemEmbedded {
+  /** アイテムキー（テスト内で一意） */
   itemKey: string;
   /** 表示順 */
   order: number;
@@ -180,77 +150,17 @@ export interface ReviewTestItemTable {
 }
 
 /**
- * 復習ロックテーブル (targetKey -> testId)
+ * 復習テスト候補テーブル
  */
-export interface ReviewLockTable {
-  /** 対象キー (PK) */
-  targetKey: string;
-  /** テストID */
-  testId: string;
-  /** 対象種別 */
-  targetType: 'QUESTION' | 'KANJI';
-  /** 対象ID */
-  targetId: string;
-}
-
-/**
- * 復習履歴テーブル (append-only)
- */
-export interface ReviewAttemptTable {
-  /** 対象キー (PK) */
-  targetKey: string;
-  /** 実施日時 (SK, ISO8601) */
-  attemptedAt: string;
-  /** 対象種別 */
-  targetType: 'QUESTION' | 'KANJI';
-  /** 対象ID */
-  targetId: string;
-  /** 科目 */
+export interface ReviewTestCandidateTable {
+  /** 科目 (PK) */
   subject: SubjectId;
-  /** 状態 */
-  state: 'CORRECT' | 'INCORRECT';
-  /** メモ */
-  memo?: string;
-  /** 復習テストID */
-  reviewTestId?: string;
-}
-
-/**
- * 単語テストテーブル
- */
-export interface WordTestTable {
-  /** 単語テストID (PK) */
-  wordTestId: string;
-  /** 問題数 */
-  count: number;
-  /** 単語IDリスト */
-  wordIds: string[];
-  /** PDF S3キー */
-  pdfS3Key: string;
-  /** テストID (表示用) */
-  testId: string;
-  /** 科目 */
-  subject: SubjectId;
-  /** ステータス */
-  status: string;
-}
-
-/**
- * 単語テスト実施テーブル
- */
-export interface WordTestAttemptTable {
-  /** 単語テスト実施ID (PK) */
-  wordTestAttemptId: string;
-  /** 単語テストID (GSI1 PK) */
-  wordTestId: string;
-  /** ステータス */
-  status: 'IN_PROGRESS' | 'SUBMITTED';
-  /** 開始日時 (GSI1 SK) */
-  startedAt: string;
-  /** 提出日時 */
-  submittedAt?: string;
-  /** 結果リスト */
-  results: { wordId: string; isCorrect: boolean }[];
+  /** 問題ID (SK) */
+  questionId: string;
+  /** モード */
+  mode: 'QUESTION' | 'KANJI';
+  /** 次回日付 (YYYY-MM-DD) */
+  nextTime: string;
 }
 
 /**
