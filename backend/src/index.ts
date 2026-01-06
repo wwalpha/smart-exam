@@ -33,6 +33,7 @@ app.get('/api/materials', handleRequest(materialHandler.listMaterials));
 app.post('/api/materials/search', handleRequest(materialHandler.searchMaterials));
 app.post('/api/materials', handleRequest(materialHandler.createMaterial));
 app.get('/api/materials/:materialId', handleRequest(materialHandler.getMaterial));
+app.patch('/api/materials/:materialId', handleRequest(materialHandler.updateMaterial));
 app.delete('/api/materials/:materialId', handleRequest(materialHandler.deleteMaterial));
 app.get('/api/materials/:materialId/files', handleRequest(materialHandler.listMaterialFiles));
 app.get('/api/materials/:materialId/files/:fileId', handleRequest(materialHandler.getMaterialFile));

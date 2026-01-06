@@ -15,13 +15,10 @@ export const createMaterial = async (data: CreateMaterialRequest): Promise<Mater
     materialId: id,
     subjectId: data.subject,
     title: data.name,
-    description: data.description,
     questionCount: 0,
     grade: data.grade,
     provider: data.provider,
-    course: data.course,
-    keywords: data.keywords,
-    yearMonth: data.yearMonth,
+    executionDate: data.executionDate,
   };
 
   await MaterialsService.create(dbItem);

@@ -16,10 +16,13 @@ export const useQuestionManagement = () => {
   const fetchMaterial = useWordTestStore((s) => s.fetchMaterial);
   const fetchMaterialFiles = useWordTestStore((s) => s.fetchMaterialFiles);
   const createQuestion = useWordTestStore((s) => s.createQuestion);
+  const createQuestionsBulk = useWordTestStore((s) => s.createQuestionsBulk);
   const deleteQuestion = useWordTestStore((s) => s.deleteQuestion);
   const extractQuestionsFromGradedAnswer = useWordTestStore((s) => s.extractQuestionsFromGradedAnswer);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+  const [bulkInput, setBulkInput] = useState('');
   const form = useForm<QuestionFormValues>();
   const { reset } = form;
   const { confirm, ConfirmDialog } = useConfirm();
@@ -59,6 +62,28 @@ export const useQuestionManagement = () => {
     setIsDialogOpen(false);
   };
 
+  const submitBulk = async () => {
+    if (!id || !detail) return;
+
+    const normalized = bulkInput
+      .split(/[\s,]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+      .map((s) => s.replace(/[^0-9\-]/g, ''))
+      .filter((s) => /^\d+(?:-\d+)*$/.test(s));
+
+    const unique = Array.from(new Set(normalized)).sort(compareQuestionNumber);
+    if (unique.length === 0) return;
+
+    await createQuestionsBulk(
+      id,
+      unique.map((canonicalKey) => ({ canonicalKey, subject: detail.subject }))
+    );
+
+    setBulkInput('');
+    setIsBulkDialogOpen(false);
+  };
+
   const remove = async (questionId: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
       await deleteQuestion(questionId);
@@ -75,8 +100,13 @@ export const useQuestionManagement = () => {
     error: status.error,
     isDialogOpen,
     setIsDialogOpen,
+    isBulkDialogOpen,
+    setIsBulkDialogOpen,
+    bulkInput,
+    setBulkInput,
     form,
     submit: form.handleSubmit(submit),
+    submitBulk,
     remove,
     ConfirmDialog,
   };

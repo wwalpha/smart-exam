@@ -1,7 +1,6 @@
 import type { ReviewAttempt } from '@smart-exam/api-types';
 import type { ReviewTestItemEmbedded, ReviewTestTable } from '@/types/db';
-import { dbHelper } from '@/lib/aws';
-import { TABLE_REVIEW_TESTS } from './internal';
+import { ReviewTestsService } from '@/services/ReviewTestsService';
 
 const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
 
@@ -32,8 +31,7 @@ export const listReviewAttempts = async (params: {
   targetId: string;
   subject?: string;
 }): Promise<ReviewAttempt[]> => {
-  const result = await dbHelper.scan<ReviewTestTable>({ TableName: TABLE_REVIEW_TESTS });
-  const items = result.Items ?? [];
+  const items: ReviewTestTable[] = await ReviewTestsService.scanAll();
 
   const filtered = items
     .filter((t) => {

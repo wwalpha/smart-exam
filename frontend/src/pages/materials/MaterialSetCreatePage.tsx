@@ -84,12 +84,12 @@ export const MaterialSetCreatePage = () => {
                 <Label>実施年月日 *</Label>
                 <Input
                   type="date"
-                  {...register('yearMonth', { required: '必須です' })}
-                  aria-invalid={!!errors.yearMonth}
-                  className={errors.yearMonth ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                  {...register('executionDate', { required: '必須です' })}
+                  aria-invalid={!!errors.executionDate}
+                  className={errors.executionDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
                 />
-                {errors.yearMonth?.message ? (
-                  <p className="text-sm text-destructive">{String(errors.yearMonth.message)}</p>
+                {errors.executionDate?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.executionDate.message)}</p>
                 ) : null}
               </div>
 

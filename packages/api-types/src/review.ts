@@ -84,10 +84,12 @@ export type ReviewTestItem = {
   canonicalKey?: string;
   /** 漢字（漢字テストの場合） */
   kanji?: string;
+  /** 出典教材ID */
+  materialId?: string;
   /** 出典教材名 */
-  materialSetName?: string;
-  /** 出典教材日付 */
-  materialSetDate?: string;
+  materialName?: string;
+  /** 出典教材の実施日 (YYYY-MM-DD) */
+  materialExecutionDate?: string;
   /** 問題文 */
   questionText?: string;
   /** 解答 */
@@ -237,9 +239,9 @@ export type ReviewTestTarget = {
   /** よみ（漢字テストの場合） */
   reading?: string;
   /** 出典教材名 */
-  materialSetName?: string;
-  /** 出典教材日付 */
-  materialSetDate?: string;
+  materialName?: string;
+  /** 出典教材の実施日 (YYYY-MM-DD) */
+  materialExecutionDate?: string;
   /** 問題文 */
   questionText?: string;
   /** 指定期間内で最後に出題された日 */

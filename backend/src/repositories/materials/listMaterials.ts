@@ -12,10 +12,14 @@ export const listMaterials = async (): Promise<Material[]> => {
     subject: dbItem.subjectId,
     grade: dbItem.grade,
     provider: dbItem.provider,
-    course: dbItem.course,
-    description: dbItem.description,
-    keywords: dbItem.keywords,
-    yearMonth: dbItem.yearMonth ?? (dbItem.date ? dbItem.date.slice(0, 7) : DateUtils.now().slice(0, 7)),
-    date: dbItem.date,
+    executionDate: (() => {
+      const raw =
+        dbItem.executionDate ?? (dbItem as unknown as { yearMonth?: string; date?: string }).date ?? (dbItem as any).yearMonth;
+      if (!raw) return DateUtils.todayYmd();
+      const trimmed = String(raw).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+      if (/^\d{4}-\d{2}$/.test(trimmed)) return `${trimmed}-01`;
+      return DateUtils.todayYmd();
+    })(),
   }));
 };

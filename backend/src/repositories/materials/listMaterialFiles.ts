@@ -4,12 +4,11 @@ import { s3Client } from '@/lib/aws';
 import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 
-export const listMaterialFiles = async (_materialSetId: string): Promise<MaterialFile[]> => {
-  const materialSetId = _materialSetId;
+export const listMaterialFiles = async (materialId: string): Promise<MaterialFile[]> => {
   const bucket = ENV.FILES_BUCKET_NAME;
   if (!bucket) return [];
 
-  const prefix = `materials/${materialSetId}/`;
+  const prefix = `materials/${materialId}/`;
   const response = await s3Client.send(
     new ListObjectsV2Command({
       Bucket: bucket,
@@ -28,7 +27,7 @@ export const listMaterialFiles = async (_materialSetId: string): Promise<Materia
       if (!key || key.endsWith('/')) return null;
 
       const parts = key.split('/');
-      // materials/{materialSetId}/{fileType}/{id}-{filename}
+      // materials/{materialId}/{fileType}/{id}-{filename}
       if (parts.length < 4) return null;
       const fileTypeRaw = parts[2] as MaterialFile['fileType'];
       if (!allowedTypes.has(fileTypeRaw)) return null;
@@ -43,7 +42,7 @@ export const listMaterialFiles = async (_materialSetId: string): Promise<Materia
 
       const item: MaterialFile = {
         id,
-        materialSetId,
+        materialId,
         filename,
         s3Key: key,
         contentType,

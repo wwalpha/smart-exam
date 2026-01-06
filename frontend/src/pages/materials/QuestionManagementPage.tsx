@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -17,8 +18,13 @@ export const QuestionManagementPage = () => {
     error,
     isDialogOpen,
     setIsDialogOpen,
+    isBulkDialogOpen,
+    setIsBulkDialogOpen,
+    bulkInput,
+    setBulkInput,
     form,
     submit,
+    submitBulk,
     remove,
     ConfirmDialog,
   } = useQuestionManagement();
@@ -47,6 +53,37 @@ export const QuestionManagementPage = () => {
           <Button asChild variant="outline">
             <Link to={`/materials/${id}`}>詳細へ戻る</Link>
           </Button>
+          <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={isBusy} variant="outline">
+                一括追加
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>問題追加（一括）</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2">
+                <Label>問題番号 *</Label>
+                <Textarea
+                  value={bulkInput}
+                  onChange={(e) => setBulkInput(e.target.value)}
+                  disabled={isBusy}
+                  placeholder={'例:\n1-1\n1-2\n2-1'}
+                  rows={8}
+                />
+                <p className="text-xs text-muted-foreground">改行/スペース/カンマ区切りで複数入力できます</p>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsBulkDialogOpen(false)} disabled={isBusy}>
+                  キャンセル
+                </Button>
+                <Button type="button" onClick={submitBulk} disabled={isBusy}>
+                  追加
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button disabled={isBusy}>手動追加</Button>

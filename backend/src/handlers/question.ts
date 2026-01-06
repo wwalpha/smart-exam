@@ -46,7 +46,7 @@ export const createQuestion: AsyncHandler<
   const { materialId } = req.params;
   const item = await QuestionRepository.createQuestion({
     ...req.body,
-    materialSetId: materialId,
+    materialId: materialId,
   });
   res.status(201).json(item);
 };

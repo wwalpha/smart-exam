@@ -60,7 +60,7 @@ export const MaterialSetDetailPage = () => {
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">実施年月日</div>
-              <div>{material.yearMonth || '-'}</div>
+              <div>{material.executionDate || '-'}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">教材名</div>

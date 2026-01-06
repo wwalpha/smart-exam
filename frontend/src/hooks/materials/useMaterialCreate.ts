@@ -21,7 +21,7 @@ export const useMaterialCreate = () => {
       request: {
         name: data.name,
         subject: data.subject,
-        yearMonth: data.yearMonth,
+        executionDate: data.executionDate,
         grade: data.grade,
         provider: data.provider,
       },

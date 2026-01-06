@@ -33,4 +33,50 @@ export const MaterialsService = {
     });
     return result.Items || [];
   },
+
+  update: async (materialId: string, updates: Partial<MaterialTable>): Promise<MaterialTable | null> => {
+    const entries = Object.entries(updates).filter(([, v]) => v !== undefined);
+    if (entries.length === 0) return await MaterialsService.get(materialId);
+
+    const expAttrNames: Record<string, string> = { '#materialId': 'materialId' };
+    const expAttrValues: Record<string, unknown> = { ':materialId': materialId };
+
+    const sets: string[] = [];
+    entries.forEach(([key, value], index) => {
+      const nameKey = `#attr${index}`;
+      const valueKey = `:val${index}`;
+      expAttrNames[nameKey] = key;
+      expAttrValues[valueKey] = value;
+      sets.push(`${nameKey} = ${valueKey}`);
+    });
+
+    const result = await dbHelper.update({
+      TableName: TABLE_NAME,
+      Key: { materialId },
+      ConditionExpression: '#materialId = :materialId',
+      UpdateExpression: `SET ${sets.join(', ')}`,
+      ExpressionAttributeNames: expAttrNames,
+      ExpressionAttributeValues: expAttrValues,
+      ReturnValues: 'ALL_NEW',
+    });
+
+    return (result.Attributes as MaterialTable) || null;
+  },
+
+  incrementQuestionCount: async (materialId: string, delta: number): Promise<void> => {
+    if (!Number.isFinite(delta) || delta === 0) return;
+
+    await dbHelper.update({
+      TableName: TABLE_NAME,
+      Key: { materialId },
+      UpdateExpression: 'SET #questionCount = if_not_exists(#questionCount, :zero) + :delta',
+      ExpressionAttributeNames: {
+        '#questionCount': 'questionCount',
+      },
+      ExpressionAttributeValues: {
+        ':zero': 0,
+        ':delta': delta,
+      },
+    });
+  },
 };

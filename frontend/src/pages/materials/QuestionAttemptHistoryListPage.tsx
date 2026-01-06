@@ -107,8 +107,10 @@ export const QuestionAttemptHistoryListPage = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="truncate" title={`${t.materialSetName ?? ''} ${t.materialSetDate ?? ''}`.trim()}>
-                    {[t.materialSetName, t.materialSetDate].filter(Boolean).join(' ')}
+                  <div
+                    className="truncate"
+                    title={`${t.materialName ?? ''} ${t.materialExecutionDate ?? ''}`.trim()}>
+                    {[t.materialName, t.materialExecutionDate].filter(Boolean).join(' ')}
                   </div>
                 </TableCell>
                 <TableCell>{t.lastTestCreatedDate}</TableCell>

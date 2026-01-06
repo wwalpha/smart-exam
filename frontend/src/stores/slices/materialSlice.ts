@@ -100,6 +100,12 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
             const prefix = `materials/${material.id}/${upload.fileType}`;
             const presigned = await S3_API.getUploadUrl(upload.file.name, upload.file.type, prefix);
             await S3_API.uploadFileToS3(presigned.uploadUrl, upload.file);
+
+            await MATERIAL_API.updateMaterial(material.id, {
+              ...(upload.fileType === 'QUESTION' ? { questionPdfPath: presigned.fileKey } : {}),
+              ...(upload.fileType === 'ANSWER' ? { answerPdfPath: presigned.fileKey } : {}),
+              ...(upload.fileType === 'GRADED_ANSWER' ? { answerSheetPath: presigned.fileKey } : {}),
+            });
           }
 
           // ファイル一覧を即時反映
@@ -124,6 +130,12 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           const prefix = `materials/${params.materialId}/${params.fileType}`;
           const presigned = await S3_API.getUploadUrl(params.file.name, params.file.type, prefix);
           await S3_API.uploadFileToS3(presigned.uploadUrl, params.file);
+
+          await MATERIAL_API.updateMaterial(params.materialId, {
+            ...(params.fileType === 'QUESTION' ? { questionPdfPath: presigned.fileKey } : {}),
+            ...(params.fileType === 'ANSWER' ? { answerPdfPath: presigned.fileKey } : {}),
+            ...(params.fileType === 'GRADED_ANSWER' ? { answerSheetPath: presigned.fileKey } : {}),
+          });
 
           const files = await MATERIAL_API.listMaterialFiles(params.materialId);
           updateMaterial({ files });
@@ -256,13 +268,29 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
+    createQuestionsBulk: async (materialId, requests) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          for (const request of requests) {
+            await MATERIAL_API.createQuestion(materialId, request);
+          }
+
+          const response = await MATERIAL_API.listQuestions(materialId);
+          updateMaterial({ questions: response });
+        },
+        '問題の作成に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
     updateQuestion: async (questionId, request) => {
       await withStatus(
         setStatus,
         async () => {
           await MATERIAL_API.updateQuestion(questionId, request);
           // Note: Ideally we should update the specific item in the list without refetching
-          // But for simplicity, we might rely on refetching or just updating local state if we had the materialSetId
+          // But for simplicity, we might rely on refetching or just updating local state if we had the materialId
         },
         '問題の更新に失敗しました。',
         { rethrow: true }

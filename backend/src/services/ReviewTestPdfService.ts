@@ -24,6 +24,8 @@ export const ReviewTestPdfService = {
     const metaFontSize = 12;
     const questionFontSize = 14;
     const questionLineHeight = questionFontSize * 1.35;
+    const metaLineFontSize = 10;
+    const metaLineHeight = metaLineFontSize * 1.3;
 
     const title = `復習テスト (${review.subject})`;
     const meta = `作成日: ${review.createdDate}`;
@@ -113,6 +115,15 @@ export const ReviewTestPdfService = {
       );
     };
 
+    const getMaterialLine = (item: ReviewTestDetail['items'][number]): string => {
+      const name = item.materialName ?? '';
+      const date = item.materialExecutionDate ?? '';
+      const key = item.canonicalKey ?? '';
+      const parts = [name, date ? `(${date})` : '', key].filter((v) => v.length > 0);
+      if (parts.length === 0) return '';
+      return `教材: ${parts.join(' ')}`;
+    };
+
     let { page, contentWidth, cursorY } = createPage();
 
     const answerX = margin + numberColWidth + numberGap;
@@ -123,9 +134,13 @@ export const ReviewTestPdfService = {
       const item = review.items[idx];
       const questionText = getQuestionText(item);
       const wrapped = wrapTextByChar(questionText, questionWidth);
+      const materialLine = getMaterialLine(item);
+      const materialWrapped = materialLine ? wrapTextByChar(materialLine, questionWidth) : [];
       const questionHeight = wrapped.length * questionLineHeight;
+      const materialHeight = materialWrapped.length * metaLineHeight;
       const requiredHeight =
         questionHeight +
+        materialHeight +
         afterQuestionGap +
         answerBoxHeight * 2 +
         answerLineGap +
@@ -156,6 +171,18 @@ export const ReviewTestPdfService = {
           color: rgb(0, 0, 0),
         });
         cursorY -= questionLineHeight;
+      }
+
+      // Material line (optional)
+      for (const line of materialWrapped) {
+        page.drawText(line, {
+          x: answerX,
+          y: cursorY - metaLineFontSize,
+          size: metaLineFontSize,
+          font: jpFont,
+          color: rgb(0, 0, 0),
+        });
+        cursorY -= metaLineHeight;
       }
 
       cursorY -= afterQuestionGap;

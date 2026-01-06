@@ -1,11 +1,10 @@
-import { dbHelper } from '@/lib/aws';
 import type { ReviewTest } from '@smart-exam/api-types';
 import type { ReviewTestTable } from '@/types/db';
-import { TABLE_REVIEW_TESTS, toApiReviewTest } from './internal';
+import { toApiReviewTest } from './internal';
+import { ReviewTestsService } from '@/services/ReviewTestsService';
 
 export const listReviewTests = async (): Promise<ReviewTest[]> => {
-  const result = await dbHelper.scan<ReviewTestTable>({ TableName: TABLE_REVIEW_TESTS });
-  const items = result.Items ?? [];
+  const items: ReviewTestTable[] = await ReviewTestsService.scanAll();
 
   // stable ordering: createdDate desc then testId desc
   items.sort((a, b) => {

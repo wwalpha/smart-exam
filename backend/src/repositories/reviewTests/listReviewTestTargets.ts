@@ -1,7 +1,7 @@
-import { dbHelper } from '@/lib/aws';
 import type { ReviewTestTarget } from '@smart-exam/api-types';
 import type { ReviewTestTable, WordMasterTable } from '@/types/db';
-import { sortTargets, TABLE_REVIEW_TESTS, toReviewTargetKey } from './internal';
+import { sortTargets, toReviewTargetKey } from './internal';
+import { ReviewTestsService } from '@/services/ReviewTestsService';
 
 export const listReviewTestTargets = async (params: {
   mode: 'QUESTION' | 'KANJI';
@@ -12,8 +12,7 @@ export const listReviewTestTargets = async (params: {
   const from = params.fromYmd;
   const to = params.toYmd;
 
-  const result = await dbHelper.scan<ReviewTestTable>({ TableName: TABLE_REVIEW_TESTS });
-  const rows = result.Items ?? [];
+  const rows: ReviewTestTable[] = await ReviewTestsService.scanAll();
 
   const filteredRows = rows.filter((t) => {
     if (t.mode !== params.mode) return false;
@@ -44,8 +43,8 @@ export const listReviewTestTargets = async (params: {
           canonicalKey: r.canonicalKey,
           kanji: r.kanji,
           reading,
-          materialSetName: r.materialSetName,
-          materialSetDate: r.materialSetDate,
+          materialName: r.materialName,
+          materialExecutionDate: r.materialExecutionDate,
           questionText: r.questionText,
           lastTestCreatedDate: t.createdDate,
           includedCount: 1,
@@ -61,8 +60,8 @@ export const listReviewTestTargets = async (params: {
         canonicalKey: current.canonicalKey ?? r.canonicalKey,
         kanji: current.kanji ?? r.kanji,
         reading: current.reading ?? reading,
-        materialSetName: current.materialSetName ?? r.materialSetName,
-        materialSetDate: current.materialSetDate ?? r.materialSetDate,
+        materialName: current.materialName ?? r.materialName,
+        materialExecutionDate: current.materialExecutionDate ?? r.materialExecutionDate,
         questionText: current.questionText ?? r.questionText,
         lastTestCreatedDate: nextLast,
         includedCount: (current.includedCount ?? 0) + 1,

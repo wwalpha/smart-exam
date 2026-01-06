@@ -38,12 +38,10 @@ export const App = () => {
 
   const sidebarItems = [
     { label: 'ダッシュボード', to: '/' },
-    { label: '教材管理', to: '/materials' },
-    { label: '問題テスト履歴', to: '/materials/attempts' },
     { label: '問題復習テスト', to: '/reviewtests/questions' },
     { label: '漢字復習テスト', to: '/reviewtests/kanji' },
+    { label: '教材管理', to: '/materials' },
     { label: '漢字管理', to: '/kanji' },
-    { label: '漢字テスト履歴', to: '/kanji/attempts' },
     { label: '問題検索', to: '/search/questions' },
     { label: '設定', to: '/settings/pdf' },
   ];

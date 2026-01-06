@@ -12,6 +12,14 @@ export const QuestionsService = {
     });
   },
 
+  get: async (questionId: string): Promise<MaterialQuestionTable | null> => {
+    const result = await dbHelper.get<MaterialQuestionTable>({
+      TableName: TABLE_NAME,
+      Key: { questionId },
+    });
+    return result?.Item || null;
+  },
+
   delete: async (questionId: string): Promise<void> => {
     await dbHelper.delete({
       TableName: TABLE_NAME,

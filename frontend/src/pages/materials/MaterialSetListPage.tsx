@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import { ChevronRight, Trash2 } from 'lucide-react';
+import { FileText, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -149,7 +149,7 @@ export const MaterialSetListPage = () => {
                   <div className="flex items-center gap-2">
                     <Button asChild variant="outline" size="icon" className="h-8 w-8" aria-label="詳細">
                       <Link to={`/materials/${material.id}`}>
-                        <ChevronRight className="h-4 w-4" />
+                        <FileText className="h-4 w-4" />
                       </Link>
                     </Button>
                     <Button
@@ -167,7 +167,7 @@ export const MaterialSetListPage = () => {
                 <TableCell>
                   <Badge variant="outline">{SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                 </TableCell>
-                <TableCell>{material.yearMonth}</TableCell>
+                <TableCell>{material.executionDate}</TableCell>
                 <TableCell className="font-medium">{material.name}</TableCell>
               </TableRow>
             ))}

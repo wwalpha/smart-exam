@@ -160,6 +160,7 @@ export type MaterialSlice = {
   fetchQuestions: (id: string) => Promise<void>;
   extractQuestionsFromGradedAnswer: (materialId: string) => Promise<void>;
   createQuestion: (materialId: string, request: CreateQuestionRequest) => Promise<void>;
+  createQuestionsBulk: (materialId: string, requests: CreateQuestionRequest[]) => Promise<void>;
   updateQuestion: (questionId: string, request: UpdateQuestionRequest) => Promise<void>;
   deleteQuestion: (questionId: string) => Promise<void>;
 };

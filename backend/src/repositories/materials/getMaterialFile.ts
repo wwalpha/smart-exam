@@ -13,13 +13,13 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
 };
 
 export const getMaterialFile = async (
-  materialSetId: string,
+  materialId: string,
   fileId: string
 ): Promise<{ body: Buffer; contentType: string; filename: string } | null> => {
   const bucket = ENV.FILES_BUCKET_NAME;
   if (!bucket) return null;
 
-  const files = await listMaterialFiles(materialSetId);
+  const files = await listMaterialFiles(materialId);
   const target = files.find((f) => f.id === fileId);
   if (!target) return null;
 

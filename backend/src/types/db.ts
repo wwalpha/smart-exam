@@ -10,24 +10,16 @@ export interface MaterialTable {
   subjectId: SubjectId;
   /** タイトル */
   title: string;
-  /** 説明 */
-  description?: string;
   /** 問題数 */
   questionCount: number;
   /** 学年 */
   grade?: string;
   /** 提供元 */
   provider?: string;
-  /** コース */
-  course?: string;
-  /** キーワード */
-  keywords?: string[];
   /** 解答用紙S3パス */
   answerSheetPath?: string;
-  /** 教材年月 (YYYY-MM) */
-  yearMonth?: string;
-  /** 実施日 - 旧データ互換用 */
-  date?: string;
+  /** 実施年月日 (YYYY-MM-DD) */
+  executionDate?: string;
 
   /** 試験カテゴリ（試験用紙の場合のみ） */
   category?: string;
@@ -137,10 +129,12 @@ export interface ReviewTestItemEmbedded {
   kanji?: string;
   /** よみ */
   reading?: string;
+  /** 出典教材ID */
+  materialId?: string;
   /** 出典教材名 */
-  materialSetName?: string;
-  /** 出典教材日付 */
-  materialSetDate?: string;
+  materialName?: string;
+  /** 出典教材の実施日 (YYYY-MM-DD) */
+  materialExecutionDate?: string;
   /** 問題文 */
   questionText?: string;
   /** 解答 */

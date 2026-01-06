@@ -234,6 +234,7 @@
 
 - **AWS SDK v3** を使用してください。
 - データアクセスロジックは Repository 層などの専用モジュールに集約してください。
+- DynamoDB の `Query` / `Scan` / `UpdateExpression` / `ExpressionAttributeNames` / `ExpressionAttributeValues` など「クエリ・更新式の組み立て」は Service 層に寄せ、Repository は呼び出し・合成・マッピングに留めてください。
 - 型定義を活用し、DynamoDB のアイテムと TypeScript の型を一致させてください。
 
 ### 5. テスト

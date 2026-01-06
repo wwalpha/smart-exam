@@ -16,7 +16,7 @@ export type MaterialSet = {
 
 export type MaterialFile = {
   id: string;
-  materialSetId: string;
+  materialId: string;
   filename: string;
   s3Key: string;
   contentType: string;
@@ -26,7 +26,7 @@ export type MaterialFile = {
 
 export type Question = {
   id: string;
-  materialSetId: string;
+  materialId: string;
   canonicalKey: string;
   displayLabel: string;
   subject: string;

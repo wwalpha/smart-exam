@@ -1,6 +1,4 @@
-import { dbHelper } from '@/lib/aws';
 import { DateUtils } from '@/lib/dateUtils';
-import { ENV } from '@/lib/env';
 import type {
   CreateReviewTestRequest,
   ReviewTest,
@@ -9,10 +7,6 @@ import type {
   SubjectId,
 } from '@smart-exam/api-types';
 import type { ReviewTestItemEmbedded, ReviewTestTable } from '@/types/db';
-
-export const TABLE_REVIEW_TESTS = ENV.TABLE_REVIEW_TESTS;
-export const TABLE_REVIEW_TEST_CANDIDATES = ENV.TABLE_REVIEW_TEST_CANDIDATES;
-export const INDEX_GSI_SUBJECT_NEXT_TIME = 'gsi_subject_next_time';
 
 export type ReviewTargetType = 'QUESTION' | 'KANJI';
 
@@ -65,11 +59,6 @@ export const computeDueDate = (params: {
   return { dueDate: params.registeredDate, lastAttemptDate: params.registeredDate };
 };
 
-export const getReviewTestRow = async (testId: string): Promise<ReviewTestTable | null> => {
-  const result = await dbHelper.get<ReviewTestTable>({ TableName: TABLE_REVIEW_TESTS, Key: { testId } });
-  return result?.Item ?? null;
-};
-
 export const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
   id: row.testId,
   testId: row.testId,
@@ -96,8 +85,9 @@ export const toApiReviewTestItem = (testId: string, row: ReviewTestItemEmbedded)
   displayLabel: row.displayLabel,
   canonicalKey: row.canonicalKey,
   kanji: row.kanji,
-  materialSetName: row.materialSetName,
-  materialSetDate: row.materialSetDate,
+  materialId: row.materialId,
+  materialName: row.materialName,
+  materialExecutionDate: row.materialExecutionDate,
   questionText: row.questionText,
   answerText: row.answerText,
   ...(row.isCorrect !== undefined ? { isCorrect: row.isCorrect } : {}),

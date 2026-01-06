@@ -45,20 +45,32 @@ export type DeleteQuestionParams = {
 export type CreateMaterialRequest = {
   name: string;
   subject: SubjectId;
-  /** 教材年月 (YYYY-MM) */
-  yearMonth: string;
+  /** 実施年月日 (YYYY-MM-DD) */
+  executionDate: string;
   grade?: string;
   provider?: string;
-  course?: string;
-  description?: string;
-  keywords?: string[];
 };
 
 /** 教材セット作成レスポンス */
 export type CreateMaterialResponse = Material;
 
 /** 教材セット更新リクエスト */
-export type UpdateMaterialRequest = Partial<CreateMaterialRequest>;
+export type UpdateMaterialRequest = Partial<CreateMaterialRequest> & {
+  /** 問題PDFのS3キー */
+  questionPdfPath?: string;
+  /** 解答PDFのS3キー */
+  answerPdfPath?: string;
+  /** 採点済み答案PDFのS3キー */
+  answerSheetPath?: string;
+};
+
+/** `PATCH /materials/:materialId` */
+export type UpdateMaterialParams = {
+  materialId: string;
+};
+
+/** 教材セット更新レスポンス */
+export type UpdateMaterialResponse = Material;
 
 /** 教材セット取得レスポンス */
 export type GetMaterialResponse = Material;
@@ -97,8 +109,8 @@ export type SearchMaterialsResponse = MaterialListResponse;
 export type MaterialFile = {
   /** ID */
   id: string;
-  /** 教材セットID */
-  materialSetId: string;
+  /** 教材ID */
+  materialId: string;
   /** ファイル名 */
   filename: string;
   /** S3キー */
@@ -122,8 +134,8 @@ export type ListMaterialFilesResponse = {
 export type Question = {
   /** ID */
   id: string;
-  /** 教材セットID */
-  materialSetId: string;
+  /** 教材ID */
+  materialId: string;
   /** 識別キー（正規化されたキー） */
   canonicalKey: string;
   /** 科目 */
@@ -165,14 +177,6 @@ export type Material = {
   grade?: string;
   /** 提供元（SAPIX, YOTSUYA, etc.） */
   provider?: string;
-  /** コース/クラス */
-  course?: string;
-  /** 説明/メモ */
-  description?: string;
-  /** キーワードタグ */
-  keywords?: string[];
-  /** 教材年月 (YYYY-MM) */
-  yearMonth: string;
-  /** 実施日 (YYYY-MM-DD) - 旧データ互換用 */
-  date?: string;
+  /** 実施年月日 (YYYY-MM-DD) */
+  executionDate: string;
 };

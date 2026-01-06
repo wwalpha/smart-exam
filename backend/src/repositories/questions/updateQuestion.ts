@@ -14,7 +14,7 @@ export const updateQuestion = async (id: string, data: UpdateQuestionRequest): P
   const dbItem = result;
   return {
     id: dbItem.questionId,
-    materialSetId: dbItem.materialId,
+    materialId: dbItem.materialId,
     canonicalKey: dbItem.canonicalKey,
     subject: dbItem.subjectId,
   };

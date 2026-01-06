@@ -14,6 +14,9 @@ import type {
   MaterialListResponse,
   SearchMaterialsRequest,
   SearchMaterialsResponse,
+  UpdateMaterialParams,
+  UpdateMaterialRequest,
+  UpdateMaterialResponse,
 } from '@smart-exam/api-types';
 
 type GetMaterialFileParams = {
@@ -50,24 +53,47 @@ export const searchMaterials: AsyncHandler<
     if (provider && String(x.provider ?? '') !== provider) return false;
 
     if (from || to) {
-      const performed = String(x.date ?? x.yearMonth ?? '');
+      const performed = String(x.executionDate ?? '');
       if (!performed) return false;
       if (from && performed < from) return false;
       if (to && performed > to) return false;
     }
     if (!qLower) return true;
 
-    const haystack = [x.name, x.provider, x.course, x.description, x.yearMonth]
+    const haystack = [x.name, x.provider, x.executionDate]
       .filter((v): v is string => typeof v === 'string' && v.length > 0)
       .join(' ')
       .toLowerCase();
 
-    const keywordText = Array.isArray(x.keywords) ? x.keywords.join(' ').toLowerCase() : '';
-
-    return haystack.includes(qLower) || keywordText.includes(qLower);
+    return haystack.includes(qLower);
   });
 
   res.json({ items: filtered, total: filtered.length });
+};
+
+export const updateMaterial: AsyncHandler<
+  UpdateMaterialParams,
+  UpdateMaterialResponse | { error: string },
+  UpdateMaterialRequest,
+  ParsedQs
+> = async (req, res) => {
+  const { materialId } = req.params;
+  const updates = req.body ?? {};
+  const updated = await MaterialRepository.updateMaterial(materialId, {
+    ...(typeof updates.executionDate === 'string' ? { executionDate: updates.executionDate } : {}),
+    ...(typeof updates.name === 'string' ? { title: updates.name } : {}),
+    ...(typeof updates.subject === 'string' ? { subjectId: updates.subject as any } : {}),
+    ...(typeof updates.grade === 'string' ? { grade: updates.grade } : {}),
+    ...(typeof updates.provider === 'string' ? { provider: updates.provider } : {}),
+    ...(typeof (updates as any).questionPdfPath === 'string' ? { questionPdfPath: (updates as any).questionPdfPath } : {}),
+    ...(typeof (updates as any).answerPdfPath === 'string' ? { answerPdfPath: (updates as any).answerPdfPath } : {}),
+    ...(typeof (updates as any).answerSheetPath === 'string' ? { answerSheetPath: (updates as any).answerSheetPath } : {}),
+  });
+  if (!updated) {
+    res.status(404).json({ error: 'Not Found' });
+    return;
+  }
+  res.json(updated);
 };
 
 export const createMaterial: AsyncHandler<

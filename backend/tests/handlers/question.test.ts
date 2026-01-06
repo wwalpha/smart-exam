@@ -20,7 +20,7 @@ describe('question handler', () => {
     vi.spyOn(QuestionRepository, 'listQuestions').mockResolvedValue(mockItems as any);
 
     const req = {
-      params: { materialSetId: 'mat1' },
+      params: { materialId: 'mat1' },
     } as unknown as Request<ListQuestionsParams>;
     const res = {
       json: vi.fn(),
@@ -38,7 +38,7 @@ describe('question handler', () => {
     vi.spyOn(QuestionRepository, 'createQuestion').mockResolvedValue(mockItem as any);
 
     const req = {
-      params: { materialSetId: 'mat1' },
+      params: { materialId: 'mat1' },
       body: { canonicalKey: '1-1', subject: '4' },
     } as unknown as Request<CreateQuestionParams, unknown, CreateQuestionRequest>;
     const res = {

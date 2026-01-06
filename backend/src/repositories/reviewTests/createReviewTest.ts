@@ -1,18 +1,18 @@
-import { dbHelper } from '@/lib/aws';
 import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
 import { MaterialsService } from '@/services/MaterialsService';
 import { QuestionsService } from '@/services/QuestionsService';
+import { ReviewTestsService } from '@/services/ReviewTestsService';
 import { WordsService } from '@/services/WordsService';
 import type { CreateReviewTestRequest, ReviewTest } from '@smart-exam/api-types';
-import type { MaterialQuestionTable, ReviewTestItemEmbedded, ReviewTestTable, WordMasterTable } from '@/types/db';
+import type { ReviewTestItemEmbedded, ReviewTestTable, WordMasterTable } from '@/types/db';
+import { listDueCandidates } from './listDueCandidates';
 import { putCandidate } from './putCandidate';
 import {
   computeDueDate,
   isWithinRange,
   parseFilterRange,
   ReviewCandidate,
-  TABLE_REVIEW_TESTS,
   targetKeyOf,
   toApiReviewTest,
 } from './internal';
@@ -43,23 +43,16 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
       });
     }
   } else {
-    const questions = await QuestionsService.scanAll();
-    for (const q of questions as MaterialQuestionTable[]) {
-      if (String(q.subjectId) !== String(req.subject)) continue;
-
-      const registeredDate = createdDate;
-      const { dueDate, lastAttemptDate } = computeDueDate({ targetType: 'QUESTION', registeredDate });
-
-      if (dueDate === null) continue;
-      if (!isWithinRange(lastAttemptDate, range)) continue;
-
+    const due = await listDueCandidates({ subject: req.subject, mode: 'QUESTION' });
+    for (const c of due) {
+      if (!c.nextTime) continue;
       candidates.push({
         targetType: 'QUESTION',
-        targetId: q.questionId,
-        subject: q.subjectId,
-        registeredDate,
-        dueDate,
-        lastAttemptDate,
+        targetId: c.questionId,
+        subject: c.subject,
+        registeredDate: createdDate,
+        dueDate: c.nextTime,
+        lastAttemptDate: '',
       });
     }
   }
@@ -75,28 +68,25 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
   const selected: ReviewCandidate[] = [];
   for (const c of candidates) {
     if (selected.length >= req.count) break;
-
-    const dueDate = c.dueDate;
-    if (!dueDate) continue;
+    if (!c.dueDate) continue;
 
     try {
       await putCandidate({
         subject: c.subject as any,
         questionId: c.targetId,
         mode: req.mode,
-        nextTime: dueDate,
+        nextTime: c.dueDate,
         testId,
       });
       selected.push(c);
     } catch (e: unknown) {
-      // 既に別テストに紐付いている候補はスキップする
       const name = (e as { name?: string } | null)?.name;
       if (name === 'ConditionalCheckFailedException') continue;
       throw e;
     }
   }
 
-  const questions = selected.map((c) => c.targetId);
+  const targetIds = selected.map((c) => c.targetId);
 
   const testRow: ReviewTestTable = {
     testId,
@@ -104,12 +94,13 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
     mode: req.mode,
     status: 'IN_PROGRESS',
     count: selected.length,
-    questions,
+    questions: targetIds,
     createdDate,
     pdfS3Key: `review-tests/${testId}.pdf`,
   };
 
   const embeddedItems: ReviewTestItemEmbedded[] = [];
+
   if (req.mode === 'KANJI') {
     const words = await WordsService.listKanji(req.subject);
     const byId = new Map((words as WordMasterTable[]).map((w) => [w.wordId, w] as const));
@@ -129,9 +120,16 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
       });
     });
   } else {
-    const [questions, materials] = await Promise.all([QuestionsService.scanAll(), MaterialsService.list()]);
-    const qById = new Map((questions as MaterialQuestionTable[]).map((q) => [q.questionId, q] as const));
-    const mById = new Map(materials.map((m) => [m.materialId, m] as const));
+    const questionRows = await Promise.all(targetIds.map((qid) => QuestionsService.get(qid)));
+    const qById = new Map(
+      questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const)
+    );
+
+    const materialIds = Array.from(new Set(Array.from(qById.values()).map((q) => q.materialId)));
+    const materialRows = await Promise.all(materialIds.map((mid) => MaterialsService.get(mid)));
+    const mById = new Map(
+      materialRows.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m.materialId, m] as const)
+    );
 
     selected.forEach((c, index) => {
       const q = qById.get(c.targetId);
@@ -144,8 +142,9 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
         targetKey: targetKeyOf('QUESTION', c.targetId),
         displayLabel: q?.canonicalKey,
         canonicalKey: q?.canonicalKey,
-        materialSetName: m?.title,
-        materialSetDate: m?.date,
+        materialId: q?.materialId,
+        materialName: m?.title,
+        materialExecutionDate: m?.executionDate,
         questionText: q?.canonicalKey,
       });
     });
@@ -157,7 +156,7 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
     results: [],
   };
 
-  await dbHelper.put({ TableName: TABLE_REVIEW_TESTS, Item: storedRow });
+  await ReviewTestsService.put(storedRow);
 
   return toApiReviewTest(storedRow);
 };

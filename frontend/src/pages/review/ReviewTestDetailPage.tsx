@@ -6,6 +6,21 @@ import { Badge } from '@/components/ui/badge';
 import { useReviewDetail } from '@/hooks/review';
 import { formatYmdSlash } from '@/utils/date';
 import { SUBJECT_LABEL } from '@/lib/Consts';
+import { apiRequestBlob } from '@/services/apiClient';
+import * as MATERIAL_API from '@/services/materialApi';
+import { toast } from 'sonner';
+import type { MaterialFile } from '@smart-exam/api-types';
+
+const isPdfBlob = async (blob: Blob): Promise<boolean> => {
+  const prefix = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
+  return String.fromCharCode(...prefix) === '%PDF-';
+};
+
+const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']): MaterialFile | null => {
+  const candidates = files.filter((f) => f.fileType === fileType);
+  if (candidates.length === 0) return null;
+  return [...candidates].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] ?? null;
+};
 
 export const ReviewTestDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewDetail();
@@ -16,6 +31,37 @@ export const ReviewTestDetailPage = () => {
     await updateReviewTestStatus(review.id, { status: 'COMPLETED' });
     navigate(basePath);
   }, [review, updateReviewTestStatus, navigate, basePath]);
+
+  const previewMaterialPdf = useCallback(
+    async (materialId: string, fileType: MaterialFile['fileType']) => {
+      try {
+        const files = await MATERIAL_API.listMaterialFiles(materialId);
+        const target = pickLatestPdf(files, fileType);
+        if (!target) {
+          toast.error('PDFが見つかりません');
+          return;
+        }
+
+        const blob = await apiRequestBlob({
+          method: 'GET',
+          path: `/api/materials/${encodeURIComponent(materialId)}/files/${encodeURIComponent(target.id)}`,
+        });
+
+        if (!(await isPdfBlob(blob))) {
+          const text = await blob.text().catch(() => '');
+          toast.error('PDFの取得に失敗しました', { description: text.slice(0, 200) });
+          return;
+        }
+
+        const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
+        const url = URL.createObjectURL(pdfBlob);
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch {
+        toast.error('PDFの取得に失敗しました');
+      }
+    },
+    []
+  );
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -106,6 +152,32 @@ export const ReviewTestDetailPage = () => {
                         <div className="text-sm font-medium">
                           {index + 1}. {item.questionText}
                         </div>
+
+                        {review.mode === 'QUESTION' ? (
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {item.materialName ? item.materialName : '-'}
+                            {item.materialExecutionDate ? ` (${formatYmdSlash(item.materialExecutionDate)})` : ''}
+                          </div>
+                        ) : null}
+
+                        {review.mode === 'QUESTION' && item.materialId ? (
+                          <div className="mt-2 flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => previewMaterialPdf(item.materialId as string, 'QUESTION')}>
+                              問題PDF
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => previewMaterialPdf(item.materialId as string, 'ANSWER')}>
+                              解答PDF
+                            </Button>
+                          </div>
+                        ) : null}
                       </div>
                       <div className="shrink-0">
                         {item.isCorrect === true && (
