@@ -1,10 +1,11 @@
 import { MaterialsService } from '@/services/MaterialsService';
 import type { MaterialTable } from '@/types/db';
 import type { Material } from '@/repositories/repo.types';
+import { DateUtils } from '@/lib/dateUtils';
 
 const requireYmd = (value: unknown, fieldName: string): string => {
   const trimmed = String(value ?? '').trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+  if (!DateUtils.isValidYmd(trimmed)) {
     throw new Error(`${fieldName} is required (YYYY-MM-DD)`);
   }
   return trimmed;

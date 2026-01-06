@@ -66,4 +66,11 @@ export const DateUtils = {
     }
     return parsed.add(days, 'day').format('YYYY-MM-DD');
   },
+
+  /** YYYY-MM-DD を厳密に検証する */
+  isValidYmd: (ymd: string): boolean => {
+    if (typeof ymd !== 'string') return false;
+    const parsed = dayjs(ymd.trim(), 'YYYY-MM-DD', true);
+    return parsed.isValid();
+  },
 };

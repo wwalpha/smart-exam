@@ -5,14 +5,23 @@ import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import type { GetUploadUrlRequest, GetUploadUrlResponse } from '@smart-exam/api-types';
 import { createUuid } from '@/lib/uuid';
+import { z } from 'zod';
+import type { ValidatedBody } from '@/types/express';
 
 const BUCKET_NAME = ENV.FILES_BUCKET_NAME;
+
+export const GetUploadUrlBodySchema = z.object({
+  fileName: z.string().min(1),
+  contentType: z.string().min(1),
+  prefix: z.string().optional(),
+});
 
 export const getUploadUrl: AsyncHandler<ParamsDictionary, GetUploadUrlResponse, GetUploadUrlRequest, ParsedQs> = async (
   req,
   res
 ) => {
-  const { fileName, contentType, prefix } = req.body;
+  const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof GetUploadUrlBodySchema>;
+  const { fileName, contentType, prefix } = body;
 
   const normalizedPrefix = typeof prefix === 'string' ? prefix.replace(/^\/+/, '').replace(/\/+$/, '') : '';
   const base = normalizedPrefix ? normalizedPrefix : 'uploads';

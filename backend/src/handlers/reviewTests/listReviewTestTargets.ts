@@ -2,42 +2,35 @@ import { ReviewTestRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import { REVIEW_MODE } from '@smart-exam/api-types';
-import type { ListReviewTestTargetsResponse, ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ListReviewTestTargetsResponse, SubjectId } from '@smart-exam/api-types';
+import { DateUtils } from '@/lib/dateUtils';
+import { z } from 'zod';
+import type { ValidatedQuery } from '@/types/express';
 
-type ListReviewTestTargetsQuery = {
-  mode?: ReviewMode;
-  from?: string;
-  to?: string;
-  subject?: string;
-};
+const ReviewModeSchema = z.enum([REVIEW_MODE.QUESTION, REVIEW_MODE.KANJI]);
+const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+
+const queryString = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string());
+const queryStringOptional = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string().optional());
+
+export const ListReviewTestTargetsQuerySchema = z.object({
+  mode: queryString().pipe(ReviewModeSchema),
+  from: queryString().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
+  to: queryString().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
+  subject: queryStringOptional().pipe(SubjectIdSchema.optional()),
+});
 
 export const listReviewTestTargets: AsyncHandler<{}, ListReviewTestTargetsResponse, {}, ParsedQs> = async (
   req,
   res
 ) => {
-  const q = req.query as unknown as ListReviewTestTargetsQuery;
-  if (!q.mode || !q.from || !q.to) {
-    res.status(400).json({ items: [] });
-    return;
-  }
-
-  if (q.mode !== REVIEW_MODE.QUESTION && q.mode !== REVIEW_MODE.KANJI) {
-    res.status(400).json({ items: [] });
-    return;
-  }
-
-  // createdDate(YYYY-MM-DD) の単純比較なので、YYYY-MM-DD 形式を前提とする
-  const ymdRe = /^\d{4}-\d{2}-\d{2}$/;
-  if (!ymdRe.test(q.from) || !ymdRe.test(q.to)) {
-    res.status(400).json({ items: [] });
-    return;
-  }
+  const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListReviewTestTargetsQuerySchema>;
 
   const items = await ReviewTestRepository.listReviewTestTargets({
     mode: q.mode,
     fromYmd: q.from,
     toYmd: q.to,
-    subject: typeof q.subject === 'string' ? (q.subject as SubjectId) : undefined,
+    subject: q.subject as SubjectId | undefined,
   });
 
   res.json({ items });

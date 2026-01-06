@@ -3,26 +3,28 @@ import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import { REVIEW_MODE } from '@smart-exam/api-types';
 import type { ListReviewTestCandidatesResponse, ReviewMode, SubjectId } from '@smart-exam/api-types';
+import { z } from 'zod';
+import type { ValidatedQuery } from '@/types/express';
 
-type ListReviewTestCandidatesQuery = {
-  subject?: string;
-  mode?: ReviewMode;
-};
+const ReviewModeSchema = z.enum([REVIEW_MODE.QUESTION, REVIEW_MODE.KANJI]);
+const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+
+const queryStringOptional = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string().optional());
+
+export const ListReviewTestCandidatesQuerySchema = z.object({
+  subject: queryStringOptional().pipe(SubjectIdSchema.optional()),
+  mode: queryStringOptional().pipe(ReviewModeSchema.optional()),
+});
 
 export const listReviewTestCandidates: AsyncHandler<{}, ListReviewTestCandidatesResponse, {}, ParsedQs> = async (
   req,
   res
 ) => {
-  const q = req.query as unknown as ListReviewTestCandidatesQuery;
-
-  if (q.mode && q.mode !== REVIEW_MODE.QUESTION && q.mode !== REVIEW_MODE.KANJI) {
-    res.status(400).json({ items: [] });
-    return;
-  }
+  const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListReviewTestCandidatesQuerySchema>;
 
   const items = await ReviewTestRepository.listReviewTestCandidates({
-    subject: typeof q.subject === 'string' ? (q.subject as SubjectId) : undefined,
-    mode: q.mode,
+    subject: q.subject as SubjectId | undefined,
+    mode: q.mode as ReviewMode | undefined,
   });
 
   res.json({

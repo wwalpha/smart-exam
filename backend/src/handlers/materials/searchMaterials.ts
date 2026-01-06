@@ -2,6 +2,20 @@ import { MaterialRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type { SearchMaterialsRequest, SearchMaterialsResponse } from '@smart-exam/api-types';
+import { z } from 'zod';
+import type { ValidatedBody } from '@/types/express';
+import { DateUtils } from '@/lib/dateUtils';
+
+const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+
+export const SearchMaterialsBodySchema = z.object({
+  subject: SubjectIdSchema.optional(),
+  grade: z.string().optional(),
+  provider: z.string().optional(),
+  from: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }).optional(),
+  to: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }).optional(),
+  q: z.string().optional(),
+});
 
 export const searchMaterials: AsyncHandler<{}, SearchMaterialsResponse, SearchMaterialsRequest, ParsedQs> = async (
   req,
@@ -9,12 +23,14 @@ export const searchMaterials: AsyncHandler<{}, SearchMaterialsResponse, SearchMa
 ) => {
   const items = await MaterialRepository.listMaterials();
 
-  const subject = (req.body.subject ?? '').trim();
-  const grade = (req.body.grade ?? '').trim();
-  const provider = (req.body.provider ?? '').trim();
-  const from = (req.body.from ?? '').trim();
-  const to = (req.body.to ?? '').trim();
-  const q = (req.body.q ?? '').trim();
+  const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchMaterialsBodySchema>;
+
+  const subject = (body.subject ?? '').trim();
+  const grade = (body.grade ?? '').trim();
+  const provider = (body.provider ?? '').trim();
+  const from = (body.from ?? '').trim();
+  const to = (body.to ?? '').trim();
+  const q = (body.q ?? '').trim();
 
   const subjectLower = subject.toLowerCase();
   const qLower = q.toLowerCase();

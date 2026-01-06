@@ -4,11 +4,12 @@ import type { ParsedQs } from 'qs';
 import type { CreateMaterialRequest, CreateMaterialResponse } from '@smart-exam/api-types';
 import { z } from 'zod';
 import type { ValidatedBody } from '@/types/express';
+import { DateUtils } from '@/lib/dateUtils';
 
 export const CreateMaterialBodySchema = z.object({
   name: z.string().min(1),
   subject: z.enum(['1', '2', '3', '4']),
-  materialDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  materialDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
   grade: z.string().min(1),
   provider: z.string().min(1),
 });

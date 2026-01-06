@@ -2,6 +2,16 @@ import { QuestionRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type { CreateQuestionParams, CreateQuestionRequest, CreateQuestionResponse } from '@smart-exam/api-types';
+import { z } from 'zod';
+import type { ValidatedBody } from '@/types/express';
+
+const SubjectIdSchema = z.enum(['1', '2', '3', '4']);
+
+export const CreateQuestionBodySchema = z.object({
+  canonicalKey: z.string().min(1),
+  subject: SubjectIdSchema,
+  tags: z.array(z.string().min(1)).optional(),
+});
 
 export const createQuestion: AsyncHandler<
   CreateQuestionParams,
@@ -10,8 +20,9 @@ export const createQuestion: AsyncHandler<
   ParsedQs
 > = async (req, res) => {
   const { materialId } = req.params;
+  const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateQuestionBodySchema>;
   const item = await QuestionRepository.createQuestion({
-    ...req.body,
+    ...body,
     materialId: materialId,
   });
   res.status(201).json(item);

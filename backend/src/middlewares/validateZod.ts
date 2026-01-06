@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import type { ZodTypeAny, ZodError, ZodIssue } from 'zod';
+import { z } from 'zod';
 
 const normalizePath = (path: readonly (string | number | symbol)[]): Array<string | number> => {
   return path.map((p) => {
@@ -8,12 +8,19 @@ const normalizePath = (path: readonly (string | number | symbol)[]): Array<strin
   });
 };
 
-const toIssues = (error: ZodError): Array<{ path: (string | number)[]; message: string; code: string }> => {
-  return error.issues.map((i: ZodIssue) => ({
-    path: normalizePath(i.path as readonly (string | number | symbol)[]),
-    message: i.message,
-    code: String(i.code),
-  }));
+const toIssues = (error: z.ZodError): Array<{ path: (string | number)[]; message: string; code: string }> => {
+  return error.issues.map((i) => {
+    const issue = i as unknown as {
+      path: readonly (string | number | symbol)[];
+      message: string;
+      code: unknown;
+    };
+    return {
+      path: normalizePath(issue.path),
+      message: issue.message,
+      code: String(issue.code),
+    };
+  });
 };
 
 type ValidateOptions = {
@@ -21,7 +28,7 @@ type ValidateOptions = {
 };
 
 const validate = (params: {
-  schema: ZodTypeAny;
+  schema: z.ZodType;
   target: 'body' | 'query' | 'params';
   options?: ValidateOptions;
 }): RequestHandler => {
@@ -57,14 +64,14 @@ const validate = (params: {
   };
 };
 
-export const validateBody = <T extends ZodTypeAny>(schema: T, options?: ValidateOptions): RequestHandler => {
+export const validateBody = (schema: z.ZodType, options?: ValidateOptions): RequestHandler => {
   return validate({ schema, target: 'body', options });
 };
 
-export const validateQuery = <T extends ZodTypeAny>(schema: T): RequestHandler => {
+export const validateQuery = (schema: z.ZodType): RequestHandler => {
   return validate({ schema, target: 'query' });
 };
 
-export const validateParams = <T extends ZodTypeAny>(schema: T): RequestHandler => {
+export const validateParams = (schema: z.ZodType): RequestHandler => {
   return validate({ schema, target: 'params' });
 };
