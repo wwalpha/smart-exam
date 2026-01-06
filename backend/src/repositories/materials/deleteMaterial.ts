@@ -2,10 +2,8 @@ import { MaterialsService } from '@/services/MaterialsService';
 import { QuestionsService } from '@/services/QuestionsService';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 import { ReviewTestsService } from '@/services/ReviewTestsService';
-import { s3Client } from '@/lib/aws';
+import { AwsUtils } from '@/lib/awsUtils';
 import { ENV } from '@/lib/env';
-import { DeleteObjectsCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
-import type { ListObjectsV2CommandOutput } from '@aws-sdk/client-s3';
 
 export const deleteMaterial = async (id: string): Promise<boolean> => {
   const existing = await MaterialsService.get(id);
@@ -15,7 +13,7 @@ export const deleteMaterial = async (id: string): Promise<boolean> => {
 
   // 教材削除時は、復習候補と問題もまとめて削除する（孤児候補や復習テストへの混入を防ぐため）
   for (const q of materialQuestions) {
-    await ReviewTestCandidatesService.deleteAny({ subject: q.subjectId, questionId: q.questionId });
+    await ReviewTestCandidatesService.deleteOpenCandidatesByTargetId({ subject: q.subjectId, targetId: q.questionId });
     await QuestionsService.delete(q.questionId);
   }
 
@@ -50,36 +48,7 @@ export const deleteMaterial = async (id: string): Promise<boolean> => {
   // S3 上の教材ファイルを削除する（materials/{materialId}/...）
   const bucket = ENV.FILES_BUCKET_NAME;
   if (bucket) {
-    const prefix = `materials/${id}/`;
-    let continuationToken: string | undefined = undefined;
-
-    // List+Delete を繰り返す（最大 1000 keys / request）
-    while (true) {
-      const response: ListObjectsV2CommandOutput = await s3Client.send(
-        new ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: prefix,
-          ContinuationToken: continuationToken,
-        })
-      );
-
-      const keys = (response.Contents ?? []).map((obj) => obj.Key).filter((k): k is string => !!k);
-
-      if (keys.length > 0) {
-        await s3Client.send(
-          new DeleteObjectsCommand({
-            Bucket: bucket,
-            Delete: {
-              Objects: keys.map((key) => ({ Key: key })),
-              Quiet: true,
-            },
-          })
-        );
-      }
-
-      if (!response.IsTruncated || !response.NextContinuationToken) break;
-      continuationToken = response.NextContinuationToken;
-    }
+    await AwsUtils.deleteS3Prefix({ bucket, prefix: `materials/${id}/` });
   }
 
   await MaterialsService.delete(id);

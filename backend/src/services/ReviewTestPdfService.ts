@@ -117,7 +117,7 @@ export const ReviewTestPdfService = {
 
     const getMaterialLine = (item: ReviewTestDetail['items'][number]): string => {
       const name = item.materialName ?? '';
-      const date = item.materialExecutionDate ?? '';
+      const date = item.materialDate ?? '';
       const key = item.canonicalKey ?? '';
       const parts = [name, date ? `(${date})` : '', key].filter((v) => v.length > 0);
       if (parts.length === 0) return '';

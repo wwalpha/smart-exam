@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useWordTestStore } from '@/stores';
-import type { ReviewAttempt } from '@smart-exam/api-types';
+import type { ReviewAttempt, ReviewTargetType } from '@smart-exam/api-types';
 
 export const useReviewAttemptHistory = (params: {
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   targetId: string | null;
   subject?: string | null;
   enabled: boolean;

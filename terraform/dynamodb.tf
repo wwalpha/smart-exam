@@ -92,7 +92,7 @@ resource "aws_dynamodb_table" "review_test_candidates" {
   name         = "${var.project_name}_review_test_candidates"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "subject"
-  range_key    = "questionId"
+  range_key    = "candidateKey"
 
   attribute {
     name = "subject"
@@ -100,19 +100,26 @@ resource "aws_dynamodb_table" "review_test_candidates" {
   }
 
   attribute {
-    name = "questionId"
+    name = "candidateKey"
     type = "S"
   }
 
   attribute {
-    name = "nextTime"
+    name = "questionKey"
     type = "S"
   }
 
   global_secondary_index {
     name            = "gsi_subject_next_time"
     hash_key        = "subject"
-    range_key       = "nextTime"
+    range_key       = "candidateKey"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = "gsi_subject_question_key"
+    hash_key        = "subject"
+    range_key       = "questionKey"
     projection_type = "ALL"
   }
 }

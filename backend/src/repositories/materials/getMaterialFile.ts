@@ -1,16 +1,6 @@
-import { GetObjectCommand } from '@aws-sdk/client-s3';
-import type { Readable } from 'stream';
-import { s3Client } from '@/lib/aws';
+import { AwsUtils } from '@/lib/awsUtils';
 import { ENV } from '@/lib/env';
 import { listMaterialFiles } from './listMaterialFiles';
-
-const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
-  const chunks: Buffer[] = [];
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  return Buffer.concat(chunks);
-};
 
 export const getMaterialFile = async (
   materialId: string,
@@ -26,19 +16,10 @@ export const getMaterialFile = async (
   const s3Key = target.s3Key;
   const filename = target.filename || s3Key.split('/').pop() || 'file.pdf';
 
-  const response = await s3Client.send(
-    new GetObjectCommand({
-      Bucket: bucket,
-      Key: s3Key,
-    })
-  );
-
-  const bodyStream = response.Body;
-  if (!bodyStream || typeof (bodyStream as any)?.on !== 'function') return null;
-
-  const body = await streamToBuffer(bodyStream as Readable);
+  const { buffer, contentType: responseContentType } = await AwsUtils.getS3ObjectBuffer({ bucket, key: s3Key });
+  const body = buffer;
   const contentType =
-    response.ContentType || (filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+    responseContentType || (filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
 
   return { body, contentType, filename };
 };

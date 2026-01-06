@@ -1,6 +1,4 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { s3Client } from '@/lib/aws';
+import { AwsUtils } from '@/lib/awsUtils';
 import { ENV } from '@/lib/env';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParamsDictionary } from 'express-serve-static-core';
@@ -9,18 +7,6 @@ import type { GetUploadUrlRequest, GetUploadUrlResponse } from '@smart-exam/api-
 import { createUuid } from '@/lib/uuid';
 
 const BUCKET_NAME = ENV.FILES_BUCKET_NAME;
-
-export const generatePresignedUrl = async (fileName: string, contentType: string) => {
-  const key = `uploads/${createUuid()}-${fileName}`;
-  const command = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-    ContentType: contentType,
-  });
-
-  const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-  return { uploadUrl: url, fileKey: key };
-};
 
 export const getUploadUrl: AsyncHandler<ParamsDictionary, GetUploadUrlResponse, GetUploadUrlRequest, ParsedQs> = async (
   req,
@@ -32,13 +18,7 @@ export const getUploadUrl: AsyncHandler<ParamsDictionary, GetUploadUrlResponse, 
   const base = normalizedPrefix ? normalizedPrefix : 'uploads';
 
   const key = `${base}/${createUuid()}-${fileName}`;
-  const command = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-    ContentType: contentType,
-  });
-
-  const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+  const url = await AwsUtils.getPresignedPutUrl({ bucket: BUCKET_NAME, key, contentType, expiresInSeconds: 3600 });
   const result = { uploadUrl: url, fileKey: key };
   res.json(result);
 };

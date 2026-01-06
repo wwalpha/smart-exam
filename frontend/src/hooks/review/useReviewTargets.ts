@@ -1,13 +1,14 @@
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { format, subYears } from 'date-fns';
+import type { ReviewMode } from '@smart-exam/api-types';
 
 type FormValues = {
   from: string;
   to: string;
 };
 
-export const useReviewTargets = (params: { mode: 'QUESTION' | 'KANJI' }) => {
+export const useReviewTargets = (params: { mode: ReviewMode }) => {
   const { items, status } = useWordTestStore((s) => s.reviewTargets);
   const fetchReviewTestTargets = useWordTestStore((s) => s.fetchReviewTestTargets);
 

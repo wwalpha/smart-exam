@@ -3,10 +3,12 @@ import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesServ
 
 export const putCandidate = async (params: {
   subject: SubjectId;
-  questionId: string;
-  mode: 'QUESTION' | 'KANJI';
-  nextTime: string;
-  testId?: string;
+  candidateKey: string;
+  testId: string;
 }): Promise<void> => {
-  await ReviewTestCandidatesService.putCandidate(params);
+  await ReviewTestCandidatesService.lockCandidateIfUnlocked({
+    subject: params.subject,
+    candidateKey: params.candidateKey,
+    testId: params.testId,
+  });
 };

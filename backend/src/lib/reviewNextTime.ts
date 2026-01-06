@@ -1,8 +1,9 @@
 import { DateUtils } from '@/lib/dateUtils';
+import type { ReviewMode } from '@smart-exam/api-types';
 
 const EXCLUDED_NEXT_TIME = '2099-12-31';
 
-export type ReviewMode = 'QUESTION' | 'KANJI';
+export type { ReviewMode };
 
 export const ReviewNextTime = {
   EXCLUDED_NEXT_TIME,
@@ -14,11 +15,12 @@ export const ReviewNextTime = {
     currentCorrectCount: number;
   }): { nextTime: string; nextCorrectCount: number } => {
     const current = Number.isFinite(params.currentCorrectCount) ? params.currentCorrectCount : 0;
-    const currentClamped = Math.max(0, Math.min(3, Math.trunc(current)));
+    const maxStreak = params.mode === 'QUESTION' ? 2 : 3;
+    const currentClamped = Math.max(0, Math.min(maxStreak, Math.trunc(current)));
 
     if (params.isCorrect) {
-      const nextCorrectCount = Math.min(3, currentClamped + 1);
-      if (nextCorrectCount >= 3) {
+      const nextCorrectCount = Math.min(maxStreak, currentClamped + 1);
+      if (nextCorrectCount >= maxStreak) {
         return { nextTime: EXCLUDED_NEXT_TIME, nextCorrectCount };
       }
 
@@ -34,7 +36,7 @@ export const ReviewNextTime = {
     // incorrect
     const nextCorrectCount = 0;
     if (params.mode === 'KANJI') {
-      return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 1), nextCorrectCount };
+      return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 7), nextCorrectCount };
     }
 
     // QUESTION

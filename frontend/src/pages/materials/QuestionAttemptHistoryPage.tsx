@@ -8,6 +8,7 @@ import { useQuestionAttemptHistory } from '@/hooks/materials';
 import { useReviewCandidateForTarget } from '@/hooks/review';
 import { useWordTestStore } from '@/stores';
 import { compareQuestionNumber } from '@/utils/questionNumber';
+import { REVIEW_MODE } from '@smart-exam/api-types';
 
 export const QuestionAttemptHistoryPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,7 +42,7 @@ export const QuestionAttemptHistoryPage = () => {
   }, [initialQuestionId, history]);
 
   const candidateState = useReviewCandidateForTarget({
-    mode: 'QUESTION',
+    mode: REVIEW_MODE.QUESTION,
     targetId: history.selectedQuestion?.id ?? null,
     subject: material?.subject ?? null,
     enabled: history.isOpen,

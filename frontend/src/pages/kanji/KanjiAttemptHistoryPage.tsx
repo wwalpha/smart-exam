@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewAttemptHistory, useReviewCandidateForTarget } from '@/hooks/review';
 import { useWordTestStore } from '@/stores';
+import { REVIEW_MODE } from '@smart-exam/api-types';
 
 export const KanjiAttemptHistoryPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,14 +17,14 @@ export const KanjiAttemptHistoryPage = () => {
   }, [id, fetchKanji]);
 
   const history = useReviewAttemptHistory({
-    targetType: 'KANJI',
+    targetType: REVIEW_MODE.KANJI,
     targetId: id ?? null,
     subject: detail?.subject ?? null,
     enabled: Boolean(id && detail),
   });
 
   const candidateState = useReviewCandidateForTarget({
-    mode: 'KANJI',
+    mode: REVIEW_MODE.KANJI,
     targetId: id ?? null,
     subject: detail?.subject ?? null,
     enabled: Boolean(id && detail),

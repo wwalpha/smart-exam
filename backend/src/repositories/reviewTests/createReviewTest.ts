@@ -53,6 +53,7 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
         registeredDate: createdDate,
         dueDate: c.nextTime,
         lastAttemptDate: '',
+        candidateKey: c.candidateKey,
       });
     }
   }
@@ -71,13 +72,9 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
     if (!c.dueDate) continue;
 
     try {
-      await putCandidate({
-        subject: c.subject as any,
-        questionId: c.targetId,
-        mode: req.mode,
-        nextTime: c.dueDate,
-        testId,
-      });
+      if (c.targetType === 'QUESTION') {
+        await putCandidate({ subject: c.subject, candidateKey: c.candidateKey, testId });
+      }
       selected.push(c);
     } catch (e: unknown) {
       const name = (e as { name?: string } | null)?.name;
@@ -144,7 +141,7 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
         canonicalKey: q?.canonicalKey,
         materialId: q?.materialId,
         materialName: m?.title,
-        materialExecutionDate: m?.executionDate,
+        materialDate: m?.materialDate,
         questionText: q?.canonicalKey,
       });
     });

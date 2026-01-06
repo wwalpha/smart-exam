@@ -1,11 +1,12 @@
 import { useEffect, useMemo } from 'react';
 import { useWordTestStore } from '@/stores';
-import type { ReviewTestCandidate } from '@smart-exam/api-types';
+import type { ReviewMode, ReviewTestCandidate } from '@smart-exam/api-types';
+import type { SubjectId } from '@smart-exam/api-types';
 
 export const useReviewCandidateForTarget = (params: {
-  mode: 'QUESTION' | 'KANJI';
+  mode: ReviewMode;
   targetId: string | null;
-  subject?: string | null;
+  subject?: SubjectId | null;
   enabled: boolean;
 }) => {
   const { items, status } = useWordTestStore((s) => s.reviewCandidates);
@@ -24,7 +25,7 @@ export const useReviewCandidateForTarget = (params: {
     return (
       items.find((x) => {
         if (x.mode !== params.mode) return false;
-        if (params.subject && x.subject !== (params.subject as any)) return false;
+        if (params.subject && x.subject !== params.subject) return false;
         return x.targetId === params.targetId;
       }) ?? null
     );

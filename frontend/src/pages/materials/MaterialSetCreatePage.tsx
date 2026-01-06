@@ -81,15 +81,15 @@ export const MaterialSetCreatePage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>実施年月日 *</Label>
+                <Label>教材年月日 *</Label>
                 <Input
                   type="date"
-                  {...register('executionDate', { required: '必須です' })}
-                  aria-invalid={!!errors.executionDate}
-                  className={errors.executionDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                  {...register('materialDate', { required: '必須です' })}
+                  aria-invalid={!!errors.materialDate}
+                  className={errors.materialDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
                 />
-                {errors.executionDate?.message ? (
-                  <p className="text-sm text-destructive">{String(errors.executionDate.message)}</p>
+                {errors.materialDate?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.materialDate.message)}</p>
                 ) : null}
               </div>
 

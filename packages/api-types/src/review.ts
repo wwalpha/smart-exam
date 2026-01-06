@@ -1,5 +1,14 @@
 import type { SubjectId } from './subject';
 
+export const REVIEW_MODE = {
+  QUESTION: 'QUESTION',
+  KANJI: 'KANJI',
+} as const;
+
+export type ReviewMode = (typeof REVIEW_MODE)[keyof typeof REVIEW_MODE];
+
+export type ReviewTargetType = ReviewMode;
+
 /** `GET /review-tests/:testId` */
 export type GetReviewTestParams = {
   testId: string;
@@ -27,7 +36,7 @@ export type CreateReviewTestRequest = {
   /** 出題数 */
   count: number;
   /** モード (QUESTION: 問題, KANJI: 漢字) */
-  mode: 'QUESTION' | 'KANJI';
+  mode: ReviewMode;
   /** 対象期間（直近N日） */
   days?: number;
   /** 対象期間 (開始日 ISO) */
@@ -57,7 +66,7 @@ export type ReviewTestListResponse = {
 /** `POST /review-tests/search` */
 export type SearchReviewTestsRequest = {
   subject: 'ALL' | SubjectId;
-  mode: 'QUESTION' | 'KANJI';
+  mode: ReviewMode;
   status?: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
   limit?: number;
   cursor?: string;
@@ -75,7 +84,7 @@ export type ReviewTestItem = {
   /** テストID */
   testId: string;
   /** 対象種別 */
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   /** 対象ID */
   targetId: string;
   /** 表示ラベル */
@@ -88,8 +97,8 @@ export type ReviewTestItem = {
   materialId?: string;
   /** 出典教材名 */
   materialName?: string;
-  /** 出典教材の実施日 (YYYY-MM-DD) */
-  materialExecutionDate?: string;
+  /** 出典教材の教材年月日 (YYYY-MM-DD) */
+  materialDate?: string;
   /** 問題文 */
   questionText?: string;
   /** 解答 */
@@ -125,7 +134,7 @@ export type ReviewTest = {
   /** 科目 */
   subject: SubjectId;
   /** モード */
-  mode: 'QUESTION' | 'KANJI';
+  mode: ReviewMode;
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
   /** 提出日 (YYYY-MM-DD) */
@@ -170,7 +179,7 @@ export type SubmitReviewTestResultsRequest = {
  */
 export type ReviewAttempt = {
   /** 対象種別 */
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   /** 対象ID */
   targetId: string;
   /** 科目 */
@@ -194,7 +203,7 @@ export type ListReviewAttemptsResponse = {
 
 /** `PUT /review-attempts` */
 export type UpsertReviewAttemptRequest = {
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   targetId: string;
   subject: SubjectId;
   /** 実施日 (YYYY-MM-DD) */
@@ -210,7 +219,7 @@ export type UpsertReviewAttemptResponse = ReviewAttempt;
 
 /** `DELETE /review-attempts?targetType=...&targetId=...&dateYmd=...` */
 export type DeleteReviewAttemptRequest = {
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   targetId: string;
   /** 実施日 (YYYY-MM-DD) */
   dateYmd: string;
@@ -225,7 +234,7 @@ export type DeleteReviewAttemptResponse = {
  */
 export type ReviewTestTarget = {
   /** 対象種別 */
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   /** 対象ID */
   targetId: string;
   /** 科目 */
@@ -240,8 +249,8 @@ export type ReviewTestTarget = {
   reading?: string;
   /** 出典教材名 */
   materialName?: string;
-  /** 出典教材の実施日 (YYYY-MM-DD) */
-  materialExecutionDate?: string;
+  /** 出典教材の教材年月日 (YYYY-MM-DD) */
+  materialDate?: string;
   /** 問題文 */
   questionText?: string;
   /** 指定期間内で最後に出題された日 */
@@ -266,7 +275,7 @@ export type ReviewTestCandidate = {
   /** 対象ID（QUESTION: questionId / KANJI: wordId） */
   targetId: string;
   /** モード */
-  mode: 'QUESTION' | 'KANJI';
+  mode: ReviewMode;
   /** 連続正解回数（streak相当） */
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */

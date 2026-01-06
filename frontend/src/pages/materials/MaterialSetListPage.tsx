@@ -167,7 +167,7 @@ export const MaterialSetListPage = () => {
                 <TableCell>
                   <Badge variant="outline">{SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                 </TableCell>
-                <TableCell>{material.executionDate}</TableCell>
+                <TableCell>{material.materialDate}</TableCell>
                 <TableCell className="font-medium">{material.name}</TableCell>
               </TableRow>
             ))}

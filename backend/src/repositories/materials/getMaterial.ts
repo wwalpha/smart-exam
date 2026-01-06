@@ -7,12 +7,11 @@ export const getMaterial = async (id: string): Promise<Material | null> => {
 
   if (!dbItem) return null;
 
-  const executionDate = (() => {
-    const raw = dbItem.executionDate ?? (dbItem as unknown as { yearMonth?: string; date?: string }).date ?? (dbItem as any).yearMonth;
+  const materialDate = (() => {
+    const raw = dbItem.materialDate;
     if (!raw) return DateUtils.todayYmd();
     const trimmed = String(raw).trim();
     if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-    if (/^\d{4}-\d{2}$/.test(trimmed)) return `${trimmed}-01`;
     return DateUtils.todayYmd();
   })();
 
@@ -22,6 +21,6 @@ export const getMaterial = async (id: string): Promise<Material | null> => {
     subject: dbItem.subjectId,
     grade: dbItem.grade,
     provider: dbItem.provider,
-    executionDate,
+    materialDate,
   };
 };

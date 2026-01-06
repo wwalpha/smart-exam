@@ -1,68 +1,15 @@
-import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { Readable } from 'stream';
-import { ENV } from '../lib/env';
-
-const bedrockClient = new BedrockRuntimeClient({ region: ENV.BEDROCK_REGION || 'us-east-1' });
-const s3Client = new S3Client({ region: ENV.AWS_REGION });
-
-const nodeStreamToBuffer = async (stream: Readable): Promise<Buffer> => {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on('error', (err) => reject(err));
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-  });
-};
-
-const webStreamToBuffer = async (stream: ReadableStream<Uint8Array>): Promise<Buffer> => {
-  const reader = stream.getReader();
-  const chunks: Uint8Array[] = [];
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (value) chunks.push(value);
-  }
-  const totalLength = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-  const merged = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const c of chunks) {
-    merged.set(c, offset);
-    offset += c.byteLength;
-  }
-  return Buffer.from(merged);
-};
-
-const bodyToBuffer = async (body: unknown): Promise<Buffer> => {
-  if (body instanceof Readable) {
-    return nodeStreamToBuffer(body);
-  }
-
-  if (body && typeof (body as any).transformToByteArray === 'function') {
-    const bytes = (await (body as any).transformToByteArray()) as Uint8Array;
-    return Buffer.from(bytes);
-  }
-
-  if (body && typeof (body as any).getReader === 'function') {
-    return webStreamToBuffer(body as ReadableStream<Uint8Array>);
-  }
-
-  throw new Error('Unsupported S3 body stream type');
-};
+import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+import { AwsUtils } from '@/lib/awsUtils';
+import { bedrockClient } from '@/lib/aws';
+import { ENV } from '@/lib/env';
 
 export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'): Promise<string[]> => {
   // 1. Get file from S3
-  const getObjectParams = {
-    Bucket: ENV.FILES_BUCKET_NAME,
-    Key: s3Key,
-  };
-  const s3Response = await s3Client.send(new GetObjectCommand(getObjectParams));
-
-  if (!s3Response.Body) {
-    throw new Error('Empty file body from S3');
+  const bucket = ENV.FILES_BUCKET_NAME;
+  if (!bucket) {
+    throw new Error('FILES_BUCKET_NAME is not set');
   }
-
-  const fileBuffer = await bodyToBuffer(s3Response.Body);
+  const { buffer: fileBuffer } = await AwsUtils.getS3ObjectBuffer({ bucket, key: s3Key });
 
   // 2. Call Bedrock
   // Using Claude 4.5 Sonnet

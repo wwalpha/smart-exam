@@ -4,6 +4,21 @@ import type { ParsedQs } from 'qs';
 import { ApiError } from '@/lib/apiError';
 import { logger } from '@/lib/logger';
 
+const getErrorNameMessage = (error: unknown): { name?: string; message?: string } => {
+  if (error instanceof Error) {
+    return { name: error.name, message: error.message };
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    const obj = error as Record<string, unknown>;
+    const name = typeof obj.name === 'string' ? obj.name : undefined;
+    const message = typeof obj.message === 'string' ? obj.message : undefined;
+    return { name, message };
+  }
+
+  return {};
+};
+
 export type AsyncHandler<
   Params extends ParamsDictionary = ParamsDictionary,
   ResBody = unknown,
@@ -30,8 +45,7 @@ export function apiHandler<
       // 例外を捕捉する
     } catch (error) {
       // 例外の種別とメッセージをログへ出す（500の原因追跡のため）
-      const errName = (error as any)?.name as string | undefined;
-      const errMessage = (error as any)?.message as string | undefined;
+      const { name: errName, message: errMessage } = getErrorNameMessage(error);
       // リクエスト識別子を取得する
       const fallbackRequestId = (res.locals?.requestId as string | undefined) ?? undefined;
       // API エラーへ正規化する
@@ -39,7 +53,7 @@ export function apiHandler<
         error instanceof ApiError
           ? error
           : new ApiError(
-              (error as Error).message ?? 'internal server error',
+              (error instanceof Error ? error.message : errMessage) ?? 'internal server error',
               500,
               ['internal_server_error'],
               [],

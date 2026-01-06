@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listMaterials, createMaterial, getMaterial } from '@/handlers/material';
+import { listMaterials, createMaterial, getMaterial } from '@/handlers/materials';
 import { MaterialRepository } from '@/repositories';
 import { Request, Response } from 'express';
 import type { CreateMaterialRequest, GetMaterialParams } from '@smart-exam/api-types';

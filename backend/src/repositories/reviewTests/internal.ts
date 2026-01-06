@@ -10,14 +10,24 @@ import type { ReviewTestItemEmbedded, ReviewTestTable } from '@/types/db';
 
 export type ReviewTargetType = 'QUESTION' | 'KANJI';
 
-export type ReviewCandidate = {
-  targetType: ReviewTargetType;
-  targetId: string;
-  subject: string;
-  registeredDate: string;
-  dueDate: string | null;
-  lastAttemptDate: string;
-};
+export type ReviewCandidate =
+  | {
+      targetType: 'QUESTION';
+      targetId: string;
+      subject: SubjectId;
+      registeredDate: string;
+      dueDate: string | null;
+      lastAttemptDate: string;
+      candidateKey: string;
+    }
+  | {
+      targetType: 'KANJI';
+      targetId: string;
+      subject: SubjectId;
+      registeredDate: string;
+      dueDate: string | null;
+      lastAttemptDate: string;
+    };
 
 export const targetKeyOf = (targetType: ReviewTargetType, targetId: string): string => `${targetType}#${targetId}`;
 
@@ -87,7 +97,7 @@ export const toApiReviewTestItem = (testId: string, row: ReviewTestItemEmbedded)
   kanji: row.kanji,
   materialId: row.materialId,
   materialName: row.materialName,
-  materialExecutionDate: row.materialExecutionDate,
+  materialDate: row.materialDate,
   questionText: row.questionText,
   answerText: row.answerText,
   ...(row.isCorrect !== undefined ? { isCorrect: row.isCorrect } : {}),

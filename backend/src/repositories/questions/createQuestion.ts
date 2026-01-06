@@ -5,7 +5,8 @@ import { createUuid } from '@/lib/uuid';
 import { toSortNumber } from './toSortNumber';
 import { MaterialsService } from '@/services/MaterialsService';
 import { DateUtils } from '@/lib/dateUtils';
-import { putCandidate } from '@/repositories/reviewTests/putCandidate';
+import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
+import { REVIEW_MODE } from '@smart-exam/api-types';
 
 export const createQuestion = async (data: CreateQuestionRequest & { materialId: string }): Promise<Question> => {
   const id = createUuid();
@@ -27,22 +28,15 @@ export const createQuestion = async (data: CreateQuestionRequest & { materialId:
 
   await MaterialsService.incrementQuestionCount(data.materialId, 1);
 
-  const material = await MaterialsService.get(data.materialId);
-  const performedDate = (() => {
-    const raw = material?.executionDate ?? (material as any)?.date ?? (material as any)?.yearMonth;
-    if (!raw) return DateUtils.todayYmd();
+  const todayYmd = DateUtils.todayYmd();
 
-    const trimmed = raw.trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-    if (/^\d{4}-\d{2}$/.test(trimmed)) return `${trimmed}-01`;
-    return DateUtils.todayYmd();
-  })();
-
-  await putCandidate({
+  await ReviewTestCandidatesService.createCandidate({
     subject: data.subject,
     questionId: id,
-    mode: 'QUESTION',
-    nextTime: performedDate,
+    mode: REVIEW_MODE.QUESTION,
+    nextTime: todayYmd,
+    correctCount: 0,
+    status: 'OPEN',
   });
 
   return item;

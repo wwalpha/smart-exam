@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useWordTestCreateDialog } from '@/hooks/wordtest';
 import { SUBJECT_LABEL } from '@/lib/Consts';
+import type { WordTestSubject } from '@typings/wordtest';
 
 type WordTestCreateDialogProps = {
   open: boolean;
@@ -40,7 +41,7 @@ export const WordTestCreateDialog = ({ open, onClose }: WordTestCreateDialogProp
           <div className="space-y-2">
             <Label>科目</Label>
             <input type="hidden" {...register('subject', { required: '必須です' })} />
-            <Select onValueChange={(v) => setValue('subject', v, { shouldValidate: true })}>
+            <Select onValueChange={(v) => setValue('subject', v as WordTestSubject, { shouldValidate: true })}>
               <SelectTrigger
                 aria-invalid={!!errors.subject}
                 className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}

@@ -1,4 +1,5 @@
 import type { ReviewAttempt } from '@smart-exam/api-types';
+import type { ReviewTargetType, SubjectId } from '@smart-exam/api-types';
 import type { ReviewTestItemEmbedded, ReviewTestTable } from '@/types/db';
 import { ReviewTestsService } from '@/services';
 
@@ -27,15 +28,15 @@ const getAttemptFromTest = (params: {
 };
 
 export const listReviewAttempts = async (params: {
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   targetId: string;
-  subject?: string;
+  subject?: SubjectId;
 }): Promise<ReviewAttempt[]> => {
   const items: ReviewTestTable[] = await ReviewTestsService.scanAll();
 
   const filtered = items
     .filter((t) => {
-      if (params.subject && t.subject !== (params.subject as any)) return false;
+      if (params.subject && t.subject !== params.subject) return false;
       if (!t.items || t.items.length === 0) return false;
       return true;
     })

@@ -1,9 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
+import type { WordTestSubject } from '@typings/wordtest';
 
 type FormValues = {
   name: string;
-  subject: string;
+  subject: WordTestSubject;
   sourceId: string;
   count: number;
 };
@@ -24,7 +25,7 @@ export const useWordTestCreateDialog = (params: { onClose: () => void }) => {
   const onCreateClick = handleSubmit(async (data) => {
     await createWordTest({
       name: data.name,
-      subject: data.subject as any,
+      subject: data.subject,
       sourceId: data.sourceId,
       count: Number(data.count),
     });

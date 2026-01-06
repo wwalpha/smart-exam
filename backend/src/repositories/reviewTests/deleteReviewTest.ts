@@ -8,10 +8,19 @@ export const deleteReviewTest = async (testId: string): Promise<boolean> => {
   const items = Array.isArray(existing.items) ? existing.items : [];
   await Promise.all(
     items.map(async (i) => {
+      if (i.targetType !== 'QUESTION') return;
+
       try {
+        const open = await ReviewTestCandidatesService.getLatestOpenCandidateByTargetId({
+          subject: existing.subject,
+          targetId: i.targetId,
+        });
+        if (!open) return;
+        if (open.testId !== testId) return;
+
         await ReviewTestCandidatesService.releaseLockIfMatch({
           subject: existing.subject,
-          questionId: i.targetId,
+          candidateKey: open.candidateKey,
           testId,
         });
       } catch (e: unknown) {

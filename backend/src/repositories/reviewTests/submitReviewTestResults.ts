@@ -29,26 +29,19 @@ export const submitReviewTestResults = async (testId: string, req: SubmitReviewT
   const items = Array.isArray(test.items) ? test.items : [];
   const resultByTargetId = new Map(req.results.map((r) => [r.id, r.isCorrect] as const));
 
-  const candidateByTargetId = new Map<string, { correctCount: number }>();
-  if (items.length > 0) {
-    const uniqueTargets = Array.from(new Set(items.map((i) => i.targetId)));
-    const candidates = await Promise.all(
-      uniqueTargets.map((qid) => ReviewTestCandidatesService.getCandidate({ subject: test.subject, questionId: qid }))
-    );
-    uniqueTargets.forEach((qid, idx) => {
-      const c = candidates[idx];
-      candidateByTargetId.set(qid, { correctCount: typeof c?.correctCount === 'number' ? c.correctCount : 0 });
-    });
-  }
-
   await Promise.all(
     items.map(async (i) => {
       const isCorrect = resultByTargetId.get(i.targetId);
 
+      const open = await ReviewTestCandidatesService.getLatestOpenCandidateByTargetId({
+        subject: test.subject,
+        targetId: i.targetId,
+      });
+
       try {
         if (typeof isCorrect === 'boolean') {
           const baseDateYmd = dateYmd;
-          const currentCorrectCount = candidateByTargetId.get(i.targetId)?.correctCount ?? 0;
+          const currentCorrectCount = open ? open.correctCount : 0;
           const computed = ReviewNextTime.compute({
             mode: test.mode,
             baseDateYmd,
@@ -56,18 +49,32 @@ export const submitReviewTestResults = async (testId: string, req: SubmitReviewT
             currentCorrectCount,
           });
 
-          await ReviewTestCandidatesService.updateNextTimeAndReleaseLockIfMatch({
+          if (open) {
+            await ReviewTestCandidatesService.closeCandidateIfMatch({
+              subject: test.subject,
+              candidateKey: open.candidateKey,
+              expectedTestId: testId,
+            });
+          }
+
+          await ReviewTestCandidatesService.createCandidate({
             subject: test.subject,
             questionId: i.targetId,
-            testId,
-            nextTime: computed.nextTime,
             mode: test.mode,
+            nextTime: computed.nextTime,
             correctCount: computed.nextCorrectCount,
+            status: computed.nextTime === ReviewNextTime.EXCLUDED_NEXT_TIME ? 'EXCLUDED' : 'OPEN',
           });
           return;
         }
 
-        await ReviewTestCandidatesService.releaseLockIfMatch({ subject: test.subject, questionId: i.targetId, testId });
+        if (open && open.testId === testId) {
+          await ReviewTestCandidatesService.releaseLockIfMatch({
+            subject: test.subject,
+            candidateKey: open.candidateKey,
+            testId,
+          });
+        }
       } catch (e: unknown) {
         const name = (e as { name?: string } | null)?.name;
         if (name === 'ConditionalCheckFailedException') return;

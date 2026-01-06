@@ -156,7 +156,7 @@ export const ReviewTestDetailPage = () => {
                         {review.mode === 'QUESTION' ? (
                           <div className="mt-1 text-xs text-muted-foreground">
                             {item.materialName ? item.materialName : '-'}
-                            {item.materialExecutionDate ? ` (${formatYmdSlash(item.materialExecutionDate)})` : ''}
+                            {item.materialDate ? ` (${formatYmdSlash(item.materialDate)})` : ''}
                           </div>
                         ) : null}
 

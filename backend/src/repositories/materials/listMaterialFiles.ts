@@ -1,20 +1,14 @@
-import { ListObjectsV2Command } from '@aws-sdk/client-s3';
 import type { MaterialFile } from '@smart-exam/api-types';
-import { s3Client } from '@/lib/aws';
 import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
+import { AwsUtils } from '@/lib/awsUtils';
 
 export const listMaterialFiles = async (materialId: string): Promise<MaterialFile[]> => {
   const bucket = ENV.FILES_BUCKET_NAME;
   if (!bucket) return [];
 
   const prefix = `materials/${materialId}/`;
-  const response = await s3Client.send(
-    new ListObjectsV2Command({
-      Bucket: bucket,
-      Prefix: prefix,
-    })
-  );
+  const response = await AwsUtils.listS3ObjectsByPrefix({ bucket, prefix });
 
   const now = DateUtils.now();
   const objects = response.Contents ?? [];

@@ -1,11 +1,11 @@
 import { DateUtils } from '@/lib/dateUtils';
-import type { SubjectId } from '@smart-exam/api-types';
+import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { ReviewTestCandidateTable } from '@/types/db';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 
 export const listDueCandidates = async (params: {
   subject: SubjectId;
-  mode?: 'QUESTION' | 'KANJI';
+  mode?: ReviewMode;
   todayYmd?: string;
 }): Promise<ReviewTestCandidateTable[]> => {
   const today = params.todayYmd ?? DateUtils.todayYmd();

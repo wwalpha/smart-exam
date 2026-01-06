@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { useReviewTargets } from '@/hooks/review';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
+import { REVIEW_MODE } from '@smart-exam/api-types';
 
 export const KanjiAttemptHistoryListPage = () => {
-  const { items, isLoading, error, form, submit } = useReviewTargets({ mode: 'KANJI' });
+  const { items, isLoading, error, form, submit } = useReviewTargets({ mode: REVIEW_MODE.KANJI });
   const {
     register,
     formState: { errors },

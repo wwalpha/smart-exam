@@ -1,4 +1,4 @@
-import type { SubjectId } from '@smart-exam/api-types';
+import type { ReviewMode, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
 
 /**
  * 教材テーブル
@@ -18,11 +18,8 @@ export interface MaterialTable {
   provider?: string;
   /** 解答用紙S3パス */
   answerSheetPath?: string;
-  /** 実施年月日 (YYYY-MM-DD) */
-  executionDate?: string;
-
-  /** 試験カテゴリ（試験用紙の場合のみ） */
-  category?: string;
+  /** 教材年月日 (YYYY-MM-DD) */
+  materialDate: string;
   /** 問題PDFパス（試験用紙の場合のみ） */
   questionPdfPath?: string;
   /** 解答PDFパス（試験用紙の場合のみ） */
@@ -88,7 +85,7 @@ export interface ReviewTestTable {
   /** 科目 */
   subject: SubjectId;
   /** モード */
-  mode: 'QUESTION' | 'KANJI';
+  mode: ReviewMode;
   /** ステータス */
   status: 'IN_PROGRESS' | 'COMPLETED';
   /** 出題数 */
@@ -116,7 +113,7 @@ export interface ReviewTestItemEmbedded {
   /** 表示順 */
   order: number;
   /** 対象種別 */
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: ReviewTargetType;
   /** 対象ID */
   targetId: string;
   /** ロックキー */
@@ -133,8 +130,8 @@ export interface ReviewTestItemEmbedded {
   materialId?: string;
   /** 出典教材名 */
   materialName?: string;
-  /** 出典教材の実施日 (YYYY-MM-DD) */
-  materialExecutionDate?: string;
+  /** 出典教材の教材年月日 (YYYY-MM-DD) */
+  materialDate?: string;
   /** 問題文 */
   questionText?: string;
   /** 解答 */
@@ -147,18 +144,28 @@ export interface ReviewTestItemEmbedded {
  * 復習テスト候補テーブル
  */
 export interface ReviewTestCandidateTable {
-  /** 候補ID */
-  id: string;
   /** 科目 (PK) */
   subject: SubjectId;
-  /** 問題ID (SK) */
+  /** 候補キー (SK): nextTime#candidateId */
+  candidateKey: string;
+  /** 候補ID */
+  id: string;
+  /** 対象ID（QUESTION: questionId / KANJI: wordId） */
   questionId: string;
+  /** 対象キー: questionId#createdAt */
+  questionKey: string;
   /** モード */
-  mode: 'QUESTION' | 'KANJI';
-  /** 連続正解回数（streak相当） */
-  correctCount?: number;
+  mode: ReviewMode;
+  /** 状態 */
+  status: 'OPEN' | 'CLOSED' | 'EXCLUDED';
+  /** 連続正解回数（必須、default 0） */
+  correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
   /** ロック: 紐付けられた復習テストID */
   testId?: string;
+  /** 作成日時 */
+  createdAt: string;
+  /** クローズ日時 */
+  closedAt?: string;
 }

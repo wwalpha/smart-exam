@@ -3,11 +3,11 @@ import cors from 'cors';
 import serverlessExpress from '@vendia/serverless-express';
 import * as s3Handler from '@/handlers/s3';
 import * as bedrockHandler from '@/handlers/bedrock';
-import * as materialHandler from '@/handlers/material';
+import * as materialHandler from '@/handlers/materials';
 import * as kanjiHandler from '@/handlers/kanji';
-import * as questionHandler from '@/handlers/question';
-import * as reviewTestHandler from '@/handlers/reviewTest';
-import * as reviewAttemptHandler from '@/handlers/reviewAttempt';
+import * as questionHandler from '@/handlers/questions';
+import * as reviewTestHandler from '@/handlers/reviewTests';
+import * as reviewAttemptHandler from '@/handlers/reviewAttempts';
 import * as dashboardHandler from '@/handlers/dashboard';
 import { handleRequest } from '@/lib/handler';
 

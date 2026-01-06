@@ -55,8 +55,8 @@ export type DeleteQuestionReviewCandidateParams = {
 export type CreateMaterialRequest = {
   name: string;
   subject: SubjectId;
-  /** 実施年月日 (YYYY-MM-DD) */
-  executionDate: string;
+  /** 教材年月日 (YYYY-MM-DD) */
+  materialDate: string;
   grade?: string;
   provider?: string;
 };
@@ -187,6 +187,6 @@ export type Material = {
   grade?: string;
   /** 提供元（SAPIX, YOTSUYA, etc.） */
   provider?: string;
-  /** 実施年月日 (YYYY-MM-DD) */
-  executionDate: string;
+  /** 教材年月日 (YYYY-MM-DD) */
+  materialDate: string;
 };
