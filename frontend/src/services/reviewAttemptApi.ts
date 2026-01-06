@@ -3,6 +3,8 @@ import type {
   ListReviewAttemptsResponse,
   UpsertReviewAttemptRequest,
   UpsertReviewAttemptResponse,
+  DeleteReviewAttemptRequest,
+  DeleteReviewAttemptResponse,
 } from '@smart-exam/api-types';
 
 export const listReviewAttempts = async (params: {
@@ -23,5 +25,20 @@ export const upsertReviewAttempt = async (
     method: 'PUT',
     path: '/api/review-attempts',
     body: request,
+  });
+};
+
+export const deleteReviewAttempt = async (
+  request: DeleteReviewAttemptRequest
+): Promise<DeleteReviewAttemptResponse> => {
+  const qs = new URLSearchParams({
+    targetType: request.targetType,
+    targetId: request.targetId,
+    dateYmd: request.dateYmd,
+  });
+
+  return apiRequest<DeleteReviewAttemptResponse>({
+    method: 'DELETE',
+    path: `/api/review-attempts?${qs.toString()}`,
   });
 };

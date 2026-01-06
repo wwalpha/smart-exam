@@ -24,6 +24,7 @@ export const useReviewAttemptHistory = (params: {
   const { items, status } = useWordTestStore((s) => s.reviewAttempt);
   const fetchReviewAttempts = useWordTestStore((s) => s.fetchReviewAttempts);
   const upsertReviewAttempt = useWordTestStore((s) => s.upsertReviewAttempt);
+  const deleteReviewAttempt = useWordTestStore((s) => s.deleteReviewAttempt);
 
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState<EditingAttempt | null>(null);
@@ -92,6 +93,19 @@ export const useReviewAttemptHistory = (params: {
     await refresh();
   });
 
+  const remove = useCallback(
+    async (dateYmd: string) => {
+      if (!params.targetId) return;
+      await deleteReviewAttempt({
+        targetType: params.targetType,
+        targetId: params.targetId,
+        dateYmd,
+      });
+      await refresh();
+    },
+    [params.targetId, params.targetType, deleteReviewAttempt, refresh]
+  );
+
   return {
     attempts,
     isLoading: status.isLoading,
@@ -102,5 +116,6 @@ export const useReviewAttemptHistory = (params: {
     startAdd,
     startEdit,
     submit,
+    remove,
   };
 };

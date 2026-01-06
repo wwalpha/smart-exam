@@ -55,6 +55,14 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       },
     },
 
+    reviewTargets: {
+      items: [],
+      status: {
+        isLoading: false,
+        error: null,
+      },
+    },
+
     fetchReviewTests: async (params) => {
       await withStatus(
         setStatus,
@@ -128,6 +136,36 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       );
     },
 
+    fetchReviewTestTargets: async (params) => {
+      const setTargetsStatus = (next: Partial<ReviewSlice['reviewTargets']['status']>) => {
+        const current = get().reviewTargets;
+        set({
+          reviewTargets: {
+            ...current,
+            status: {
+              ...current.status,
+              ...next,
+            },
+          },
+        });
+      };
+
+      await withStatus(
+        setTargetsStatus,
+        async () => {
+          const response = await REVIEW_API.listReviewTestTargets(params);
+          set({
+            reviewTargets: {
+              items: response.items,
+              status: get().reviewTargets.status,
+            },
+          });
+        },
+        '対象一覧の取得に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
     fetchReviewAttempts: async (params) => {
       const setAttemptStatus = (next: Partial<ReviewSlice['reviewAttempt']['status']>) => {
         const current = get().reviewAttempt;
@@ -178,6 +216,30 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
           await REVIEW_ATTEMPT_API.upsertReviewAttempt(request);
         },
         '履歴の保存に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    deleteReviewAttempt: async (request) => {
+      const setAttemptStatus = (next: Partial<ReviewSlice['reviewAttempt']['status']>) => {
+        const current = get().reviewAttempt;
+        set({
+          reviewAttempt: {
+            ...current,
+            status: {
+              ...current.status,
+              ...next,
+            },
+          },
+        });
+      };
+
+      await withStatus(
+        setAttemptStatus,
+        async () => {
+          await REVIEW_ATTEMPT_API.deleteReviewAttempt(request);
+        },
+        '履歴の削除に失敗しました。',
         { rethrow: true }
       );
     },

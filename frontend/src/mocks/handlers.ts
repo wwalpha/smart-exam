@@ -36,6 +36,8 @@ import type {
   ReviewTest,
   ReviewTestDetail,
   ReviewTestListResponse,
+  ReviewTestTarget,
+  ListReviewTestTargetsResponse,
   SubmitAttemptRequest,
   SubmitAttemptResponse,
   SubmitReviewTestResultsRequest,
@@ -714,6 +716,71 @@ export const handlers = [
       itemCount: detail.itemCount,
     };
     return HttpResponse.json(response, { status: 201 });
+  }),
+
+  http.get('/api/review-tests/targets', ({ request }) => {
+    const url = new URL(request.url);
+    const mode = url.searchParams.get('mode');
+    const from = url.searchParams.get('from');
+    const to = url.searchParams.get('to');
+
+    if (!mode || !from || !to) {
+      const response: ListReviewTestTargetsResponse = { items: [] };
+      return HttpResponse.json(response, { status: 400 });
+    }
+
+    if (mode !== 'QUESTION' && mode !== 'KANJI') {
+      const response: ListReviewTestTargetsResponse = { items: [] };
+      return HttpResponse.json(response, { status: 400 });
+    }
+
+    const filtered = reviewTests.filter((t) => {
+      if (t.mode !== mode) return false;
+      if (t.createdDate < from) return false;
+      if (t.createdDate > to) return false;
+      return true;
+    });
+
+    const byKey = new Map<string, ReviewTestTarget>();
+
+    for (const t of filtered) {
+      for (const i of t.items) {
+        if (i.targetType !== mode) continue;
+
+        const key = `${t.subject}#${i.targetId}`;
+        const current = byKey.get(key);
+
+        const reading = (i as any).reading ?? (i as any).answerText;
+
+        if (!current) {
+          byKey.set(key, {
+            targetType: i.targetType,
+            targetId: i.targetId,
+            subject: t.subject as any,
+            displayLabel: i.displayLabel,
+            canonicalKey: i.canonicalKey,
+            kanji: i.kanji,
+            reading,
+            materialSetName: i.materialSetName,
+            materialSetDate: i.materialSetDate,
+            questionText: (i as any).questionText,
+            lastTestCreatedDate: t.createdDate,
+            includedCount: 1,
+          });
+          continue;
+        }
+
+        const nextLast = current.lastTestCreatedDate < t.createdDate ? t.createdDate : current.lastTestCreatedDate;
+        byKey.set(key, {
+          ...current,
+          lastTestCreatedDate: nextLast,
+          includedCount: current.includedCount + 1,
+        });
+      }
+    }
+
+    const response: ListReviewTestTargetsResponse = { items: Array.from(byKey.values()) };
+    return HttpResponse.json(response);
   }),
 
   http.get('/api/review-tests/:testId', ({ params }) => {

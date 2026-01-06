@@ -6,6 +6,7 @@ import type {
   ReviewTestDetail,
   UpdateReviewTestStatusRequest,
   SubmitReviewTestResultsRequest,
+  ListReviewTestTargetsResponse,
 } from '@smart-exam/api-types';
 
 export const listReviewTests = async (params?: {
@@ -67,3 +68,22 @@ export const submitReviewTestResults = async (
 };
 
 // PDFは /api/review-tests/:testId/pdf (binary) を利用する
+
+export const listReviewTestTargets = async (params: {
+  mode: 'QUESTION' | 'KANJI';
+  from: string;
+  to: string;
+  subject?: string;
+}): Promise<ListReviewTestTargetsResponse> => {
+  const qs = new URLSearchParams({
+    mode: params.mode,
+    from: params.from,
+    to: params.to,
+    ...(params.subject ? { subject: params.subject } : {}),
+  });
+
+  return apiRequest<ListReviewTestTargetsResponse>({
+    method: 'GET',
+    path: `/api/review-tests/targets?${qs.toString()}`,
+  });
+};

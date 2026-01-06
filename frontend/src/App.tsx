@@ -10,6 +10,8 @@ import { MaterialSetListPage } from '@/pages/materials/MaterialSetListPage';
 import { MaterialSetCreatePage } from '@/pages/materials/MaterialSetCreatePage';
 import { MaterialSetDetailPage } from '@/pages/materials/MaterialSetDetailPage';
 import { QuestionManagementPage } from '@/pages/materials/QuestionManagementPage';
+import { QuestionAttemptHistoryListPage } from '@/pages/materials/QuestionAttemptHistoryListPage';
+import { QuestionAttemptHistoryPage } from '@/pages/materials/QuestionAttemptHistoryPage';
 
 // Review Tests (Questions & Kanji)
 import { ReviewTestListPage } from '@/pages/review/ReviewTestListPage';
@@ -22,6 +24,8 @@ import { ReviewTestPdfPage } from '@/pages/review/ReviewTestPdfPage';
 import { KanjiListPage } from '@/pages/kanji/KanjiListPage';
 import { KanjiCreatePage } from '@/pages/kanji/KanjiCreatePage';
 import { KanjiImportPage } from '@/pages/kanji/KanjiImportPage';
+import { KanjiAttemptHistoryListPage } from '@/pages/kanji/KanjiAttemptHistoryListPage';
+import { KanjiAttemptHistoryPage } from '@/pages/kanji/KanjiAttemptHistoryPage';
 
 // Search
 import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
@@ -35,9 +39,11 @@ export const App = () => {
   const sidebarItems = [
     { label: 'ダッシュボード', to: '/' },
     { label: '教材管理', to: '/materials' },
+    { label: '問題テスト履歴', to: '/materials/attempts' },
     { label: '問題復習テスト', to: '/reviewtests/questions' },
     { label: '漢字復習テスト', to: '/reviewtests/kanji' },
     { label: '漢字管理', to: '/kanji' },
+    { label: '漢字テスト履歴', to: '/kanji/attempts' },
     { label: '問題検索', to: '/search/questions' },
     { label: '設定', to: '/settings/pdf' },
   ];
@@ -48,7 +54,9 @@ export const App = () => {
 
       { pattern: '/materials', title: '教材セット一覧' },
       { pattern: '/materials/new', title: '教材セット登録' },
+      { pattern: '/materials/attempts', title: '問題テスト履歴' },
       { pattern: '/materials/:id/questions', title: '問題管理' },
+      { pattern: '/materials/:id/attempts', title: '問題テスト履歴' },
       { pattern: '/materials/:id', title: '教材セット詳細' },
 
       { pattern: '/reviewtests/questions', title: '問題復習テスト一覧' },
@@ -66,15 +74,15 @@ export const App = () => {
       { pattern: '/kanji', title: '漢字一覧' },
       { pattern: '/kanji/new', title: '漢字登録' },
       { pattern: '/kanji/import', title: '漢字一括登録' },
+      { pattern: '/kanji/attempts', title: '漢字テスト履歴' },
       { pattern: '/kanji/:id', title: '漢字編集' },
+      { pattern: '/kanji/:id/attempts', title: '漢字テスト履歴' },
 
       { pattern: '/search/questions', title: '問題検索' },
       { pattern: '/settings/pdf', title: 'PDF設定' },
     ];
 
-    const matched = rules.find((rule) =>
-      matchPath({ path: rule.pattern, end: true }, location.pathname)
-    );
+    const matched = rules.find((rule) => matchPath({ path: rule.pattern, end: true }, location.pathname));
     return matched?.title;
   })();
 
@@ -88,8 +96,10 @@ export const App = () => {
         {/* Materials */}
         <Route path="/materials" element={<MaterialSetListPage />} />
         <Route path="/materials/new" element={<MaterialSetCreatePage />} />
+        <Route path="/materials/attempts" element={<QuestionAttemptHistoryListPage />} />
         <Route path="/materials/:id" element={<MaterialSetDetailPage />} />
         <Route path="/materials/:id/questions" element={<QuestionManagementPage />} />
+        <Route path="/materials/:id/attempts" element={<QuestionAttemptHistoryPage />} />
 
         {/* Review Tests (Questions) */}
         <Route path="/reviewtests/questions" element={<ReviewTestListPage />} />
@@ -109,7 +119,9 @@ export const App = () => {
         <Route path="/kanji" element={<KanjiListPage />} />
         <Route path="/kanji/new" element={<KanjiCreatePage />} />
         <Route path="/kanji/import" element={<KanjiImportPage />} />
+        <Route path="/kanji/attempts" element={<KanjiAttemptHistoryListPage />} />
         <Route path="/kanji/:id" element={<KanjiCreatePage />} />
+        <Route path="/kanji/:id/attempts" element={<KanjiAttemptHistoryPage />} />
 
         {/* Search */}
         <Route path="/search/questions" element={<QuestionSearchPage />} />
@@ -119,5 +131,4 @@ export const App = () => {
       </Routes>
     </AppLayout>
   );
-}
-
+};

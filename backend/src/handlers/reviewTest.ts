@@ -8,6 +8,7 @@ import type {
   DeleteReviewTestParams,
   GetReviewTestParams,
   GetReviewTestResponse,
+  ListReviewTestTargetsResponse,
   ReviewTestListResponse,
   SearchReviewTestsRequest,
   SearchReviewTestsResponse,
@@ -21,18 +22,17 @@ type SubmitReviewTestResultsParams = {
   testId: string;
 };
 
-export const listReviewTests: AsyncHandler<{}, ReviewTestListResponse, {}, ParsedQs> = async (
-  req,
-  res
-) => {
+export const listReviewTests: AsyncHandler<{}, ReviewTestListResponse, {}, ParsedQs> = async (req, res) => {
   const items = await ReviewTestRepository.listReviewTests();
   res.json({ items, total: items.length });
 };
 
-export const searchReviewTests: AsyncHandler<{}, SearchReviewTestsResponse, SearchReviewTestsRequest, ParsedQs> = async (
-  req,
-  res
-) => {
+export const searchReviewTests: AsyncHandler<
+  {},
+  SearchReviewTestsResponse,
+  SearchReviewTestsRequest,
+  ParsedQs
+> = async (req, res) => {
   const items = await ReviewTestRepository.listReviewTests();
   const filtered = items.filter((x) => {
     if (req.body?.mode && x.mode !== req.body.mode) return false;
@@ -44,12 +44,49 @@ export const searchReviewTests: AsyncHandler<{}, SearchReviewTestsResponse, Sear
   res.json({ items: filtered, total: filtered.length });
 };
 
-export const createReviewTest: AsyncHandler<
-  {},
-  CreateReviewTestResponse,
-  CreateReviewTestRequest,
-  ParsedQs
-> = async (req, res) => {
+type ListReviewTestTargetsQuery = {
+  mode?: 'QUESTION' | 'KANJI';
+  from?: string;
+  to?: string;
+  subject?: string;
+};
+
+export const listReviewTestTargets: AsyncHandler<{}, ListReviewTestTargetsResponse, {}, ParsedQs> = async (
+  req,
+  res
+) => {
+  const q = req.query as unknown as ListReviewTestTargetsQuery;
+  if (!q.mode || !q.from || !q.to) {
+    res.status(400).json({ items: [] });
+    return;
+  }
+
+  if (q.mode !== 'QUESTION' && q.mode !== 'KANJI') {
+    res.status(400).json({ items: [] });
+    return;
+  }
+
+  // createdDate(YYYY-MM-DD) の単純比較なので、YYYY-MM-DD 形式を前提とする
+  const ymdRe = /^\d{4}-\d{2}-\d{2}$/;
+  if (!ymdRe.test(q.from) || !ymdRe.test(q.to)) {
+    res.status(400).json({ items: [] });
+    return;
+  }
+
+  const items = await ReviewTestRepository.listReviewTestTargets({
+    mode: q.mode,
+    fromYmd: q.from,
+    toYmd: q.to,
+    subject: q.subject,
+  });
+
+  res.json({ items });
+};
+
+export const createReviewTest: AsyncHandler<{}, CreateReviewTestResponse, CreateReviewTestRequest, ParsedQs> = async (
+  req,
+  res
+) => {
   const item = await ReviewTestRepository.createReviewTest(req.body);
   res.status(201).json(item);
 };
@@ -110,12 +147,10 @@ type GetReviewTestPdfParams = {
   testId: string;
 };
 
-export const getReviewTestPdf: AsyncHandler<
-  GetReviewTestPdfParams,
-  Buffer | { error: string },
-  {},
-  ParsedQs
-> = async (req, res) => {
+export const getReviewTestPdf: AsyncHandler<GetReviewTestPdfParams, Buffer | { error: string }, {}, ParsedQs> = async (
+  req,
+  res
+) => {
   const { testId } = req.params;
   const review = await ReviewTestRepository.getReviewTest(testId);
   if (!review) {

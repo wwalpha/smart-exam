@@ -2,7 +2,12 @@ import { dbHelper } from '@/lib/aws';
 import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import type { ReviewAttemptTable } from '@/types/db';
-import type { SubjectId, ReviewAttempt, UpsertReviewAttemptRequest } from '@smart-exam/api-types';
+import type {
+  SubjectId,
+  ReviewAttempt,
+  UpsertReviewAttemptRequest,
+  DeleteReviewAttemptRequest,
+} from '@smart-exam/api-types';
 
 const TABLE_REVIEW_ATTEMPTS = ENV.TABLE_REVIEW_ATTEMPTS;
 
@@ -65,5 +70,14 @@ export const ReviewAttemptsRepository = {
     await dbHelper.put({ TableName: TABLE_REVIEW_ATTEMPTS, Item: row });
 
     return toApiAttempt(row);
+  },
+
+  delete: async (req: DeleteReviewAttemptRequest): Promise<void> => {
+    const targetKey = targetKeyOf(req.targetType, req.targetId);
+    const attemptedAt = toIsoAtStartOfDay(req.dateYmd);
+    await dbHelper.delete({
+      TableName: TABLE_REVIEW_ATTEMPTS,
+      Key: { targetKey, attemptedAt },
+    });
   },
 };

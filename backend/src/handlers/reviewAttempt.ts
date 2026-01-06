@@ -5,6 +5,8 @@ import type {
   ListReviewAttemptsResponse,
   UpsertReviewAttemptRequest,
   UpsertReviewAttemptResponse,
+  DeleteReviewAttemptRequest,
+  DeleteReviewAttemptResponse,
 } from '@smart-exam/api-types';
 import { ReviewAttemptsRepository } from '@/repositories/reviewAttemptRepository';
 
@@ -35,4 +37,30 @@ export const upsertReviewAttempt: AsyncHandler<
 > = async (req, res) => {
   const item = await ReviewAttemptsRepository.upsert(req.body);
   res.json(item);
+};
+
+type DeleteReviewAttemptsQuery = {
+  targetType?: 'QUESTION' | 'KANJI';
+  targetId?: string;
+  dateYmd?: string;
+};
+
+export const deleteReviewAttempt: AsyncHandler<ParamsDictionary, DeleteReviewAttemptResponse, {}, ParsedQs> = async (
+  req,
+  res
+) => {
+  const q = req.query as unknown as DeleteReviewAttemptsQuery;
+  if (!q.targetType || !q.targetId || !q.dateYmd) {
+    res.status(400).json({ ok: true });
+    return;
+  }
+
+  const request: DeleteReviewAttemptRequest = {
+    targetType: q.targetType,
+    targetId: q.targetId,
+    dateYmd: q.dateYmd,
+  };
+
+  await ReviewAttemptsRepository.delete(request);
+  res.json({ ok: true });
 };

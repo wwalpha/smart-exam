@@ -201,3 +201,50 @@ export type UpsertReviewAttemptRequest = {
 
 /** `PUT /review-attempts` */
 export type UpsertReviewAttemptResponse = ReviewAttempt;
+
+/** `DELETE /review-attempts?targetType=...&targetId=...&dateYmd=...` */
+export type DeleteReviewAttemptRequest = {
+  targetType: 'QUESTION' | 'KANJI';
+  targetId: string;
+  /** 実施日 (YYYY-MM-DD) */
+  dateYmd: string;
+};
+
+export type DeleteReviewAttemptResponse = {
+  ok: true;
+};
+
+/**
+ * 復習テスト対象（指定期間内に出題された対象のユニーク一覧）
+ */
+export type ReviewTestTarget = {
+  /** 対象種別 */
+  targetType: 'QUESTION' | 'KANJI';
+  /** 対象ID */
+  targetId: string;
+  /** 科目 */
+  subject: SubjectId;
+  /** 表示ラベル */
+  displayLabel?: string;
+  /** 識別キー */
+  canonicalKey?: string;
+  /** 漢字（漢字テストの場合） */
+  kanji?: string;
+  /** よみ（漢字テストの場合） */
+  reading?: string;
+  /** 出典教材名 */
+  materialSetName?: string;
+  /** 出典教材日付 */
+  materialSetDate?: string;
+  /** 問題文 */
+  questionText?: string;
+  /** 指定期間内で最後に出題された日 */
+  lastTestCreatedDate: string;
+  /** 指定期間内で出題された回数 */
+  includedCount: number;
+};
+
+/** `GET /review-tests/targets?mode=...&from=YYYY-MM-DD&to=YYYY-MM-DD` */
+export type ListReviewTestTargetsResponse = {
+  items: ReviewTestTarget[];
+};

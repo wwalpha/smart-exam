@@ -86,6 +86,7 @@ app.get('/api/tests/:testId/attempts/latest', handleRequest(attemptHandler.getLa
 app.get('/api/review-tests', handleRequest(reviewTestHandler.listReviewTests));
 app.post('/api/review-tests/search', handleRequest(reviewTestHandler.searchReviewTests));
 app.post('/api/review-tests', handleRequest(reviewTestHandler.createReviewTest));
+app.get('/api/review-tests/targets', handleRequest(reviewTestHandler.listReviewTestTargets));
 app.get('/api/review-tests/:testId', handleRequest(reviewTestHandler.getReviewTest));
 app.get('/api/review-tests/:testId/pdf', handleRequest(reviewTestHandler.getReviewTestPdf));
 app.patch('/api/review-tests/:testId', handleRequest(reviewTestHandler.updateReviewTestStatus));
@@ -95,6 +96,7 @@ app.post('/api/review-tests/:testId/results', handleRequest(reviewTestHandler.su
 // Review Attempts (per target history)
 app.get('/api/review-attempts', handleRequest(reviewAttemptHandler.listReviewAttempts));
 app.put('/api/review-attempts', handleRequest(reviewAttemptHandler.upsertReviewAttempt));
+app.delete('/api/review-attempts', handleRequest(reviewAttemptHandler.deleteReviewAttempt));
 
 export const handler = serverlessExpress({
   app,

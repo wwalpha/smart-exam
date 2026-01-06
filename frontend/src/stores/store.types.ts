@@ -25,6 +25,8 @@ import type {
   SubmitReviewTestResultsRequest,
   ReviewAttempt,
   UpsertReviewAttemptRequest,
+  DeleteReviewAttemptRequest,
+  ReviewTestTarget,
   Kanji,
   CreateKanjiRequest,
   UpdateKanjiRequest,
@@ -99,6 +101,11 @@ export type ReviewState = {
 
 export type ReviewAttemptState = {
   items: ReviewAttempt[];
+  status: ApiStatus;
+};
+
+export type ReviewTargetState = {
+  items: ReviewTestTarget[];
   status: ApiStatus;
 };
 
@@ -196,14 +203,22 @@ export type MaterialSlice = {
 export type ReviewSlice = {
   review: ReviewState;
   reviewAttempt: ReviewAttemptState;
+  reviewTargets: ReviewTargetState;
   fetchReviewTests: (params?: Record<string, unknown>) => Promise<void>;
   createReviewTest: (request: CreateReviewTestRequest) => Promise<ReviewTest>;
   fetchReviewTest: (id: string) => Promise<void>;
   updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest) => Promise<void>;
   deleteReviewTest: (id: string) => Promise<void>;
   submitReviewTestResults: (id: string, request: SubmitReviewTestResultsRequest) => Promise<void>;
+  fetchReviewTestTargets: (params: {
+    mode: 'QUESTION' | 'KANJI';
+    from: string;
+    to: string;
+    subject?: string;
+  }) => Promise<void>;
   fetchReviewAttempts: (params: { targetType: 'QUESTION' | 'KANJI'; targetId: string }) => Promise<void>;
   upsertReviewAttempt: (request: UpsertReviewAttemptRequest) => Promise<void>;
+  deleteReviewAttempt: (request: DeleteReviewAttemptRequest) => Promise<void>;
 };
 
 /**

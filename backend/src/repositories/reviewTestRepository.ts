@@ -10,6 +10,7 @@ import type {
   ReviewTest,
   ReviewTestDetail,
   ReviewTestItem,
+  ReviewTestTarget,
   SubmitReviewTestResultsRequest,
   UpdateReviewTestStatusRequest,
 } from '@smart-exam/api-types';
@@ -73,7 +74,9 @@ const listAttemptsForTarget = async (targetKey: string): Promise<ReviewAttemptTa
   return result.Items ?? [];
 };
 
-const calcStreakAndLastDates = (attempts: ReviewAttemptTable[]): {
+const calcStreakAndLastDates = (
+  attempts: ReviewAttemptTable[]
+): {
   latestState: 'CORRECT' | 'INCORRECT' | null;
   streak: number;
   lastCorrectDate: string | null;
@@ -177,7 +180,11 @@ const computeDueDate = (params: {
   };
 };
 
-const tryLock = async (params: { targetType: ReviewTargetType; targetId: string; testId: string }): Promise<boolean> => {
+const tryLock = async (params: {
+  targetType: ReviewTargetType;
+  targetId: string;
+  testId: string;
+}): Promise<boolean> => {
   const targetKey = targetKeyOf(params.targetType, params.targetId);
 
   const item: ReviewLockTable = {
@@ -230,7 +237,11 @@ const putReviewTestItems = async (items: ReviewTestItemTable[]): Promise<void> =
   }
 };
 
-const updateReviewItemGrading = async (params: { testId: string; itemKey: string; isCorrect: boolean }): Promise<void> => {
+const updateReviewItemGrading = async (params: {
+  testId: string;
+  itemKey: string;
+  isCorrect: boolean;
+}): Promise<void> => {
   await dbHelper.update({
     TableName: TABLE_REVIEW_TEST_ITEMS,
     Key: { testId: params.testId, itemKey: params.itemKey },
@@ -283,6 +294,89 @@ export const ReviewTestRepository = {
     });
 
     return items.map(toApiReviewTest);
+  },
+
+  listReviewTestTargets: async (params: {
+    mode: 'QUESTION' | 'KANJI';
+    fromYmd: string;
+    toYmd: string;
+    subject?: string;
+  }): Promise<ReviewTestTarget[]> => {
+    const tests = await ReviewTestRepository.listReviewTests();
+
+    const from = params.fromYmd;
+    const to = params.toYmd;
+
+    const filteredTests = tests.filter((t) => {
+      if (t.mode !== params.mode) return false;
+      if (params.subject && t.subject !== (params.subject as any)) return false;
+      if (t.createdDate < from) return false;
+      if (t.createdDate > to) return false;
+      return true;
+    });
+
+    const byKey = new Map<string, ReviewTestTarget>();
+
+    for (const t of filteredTests) {
+      const rows = await listReviewTestItemRows(t.testId);
+      for (const r of rows) {
+        // safety: keep only items that match requested mode
+        if (r.targetType !== params.mode) continue;
+
+        const key = `${t.subject}#${r.targetId}`;
+        const current = byKey.get(key);
+
+        const reading = (r as any).reading ?? r.answerText;
+
+        if (!current) {
+          byKey.set(key, {
+            targetType: r.targetType,
+            targetId: r.targetId,
+            subject: t.subject as any,
+            displayLabel: r.displayLabel,
+            canonicalKey: r.canonicalKey,
+            kanji: r.kanji,
+            reading,
+            materialSetName: r.materialSetName,
+            materialSetDate: r.materialSetDate,
+            questionText: r.questionText,
+            lastTestCreatedDate: t.createdDate,
+            includedCount: 1,
+          });
+          continue;
+        }
+
+        const nextLast = current.lastTestCreatedDate < t.createdDate ? t.createdDate : current.lastTestCreatedDate;
+
+        byKey.set(key, {
+          ...current,
+          displayLabel: current.displayLabel ?? r.displayLabel,
+          canonicalKey: current.canonicalKey ?? r.canonicalKey,
+          kanji: current.kanji ?? r.kanji,
+          reading: current.reading ?? reading,
+          materialSetName: current.materialSetName ?? r.materialSetName,
+          materialSetDate: current.materialSetDate ?? r.materialSetDate,
+          questionText: current.questionText ?? r.questionText,
+          lastTestCreatedDate: nextLast,
+          includedCount: (current.includedCount ?? 0) + 1,
+        });
+      }
+    }
+
+    const items = Array.from(byKey.values());
+    items.sort((a, b) => {
+      if (a.lastTestCreatedDate !== b.lastTestCreatedDate) {
+        return a.lastTestCreatedDate < b.lastTestCreatedDate ? 1 : -1;
+      }
+      if (a.subject !== b.subject) return String(a.subject) < String(b.subject) ? -1 : 1;
+
+      const aKey = a.canonicalKey ?? a.kanji ?? a.targetId;
+      const bKey = b.canonicalKey ?? b.kanji ?? b.targetId;
+      if (aKey !== bKey) return aKey < bKey ? -1 : 1;
+      return a.targetId < b.targetId ? -1 : a.targetId > b.targetId ? 1 : 0;
+    });
+
+    return items;
   },
 
   createReviewTest: async (req: CreateReviewTestRequest): Promise<ReviewTest> => {
@@ -470,7 +564,9 @@ export const ReviewTestRepository = {
       ExpressionAttributeValues: { ':testId': testId },
     });
     const locks = lockScan.Items ?? [];
-    await Promise.all(locks.map((l) => dbHelper.delete({ TableName: TABLE_REVIEW_LOCKS, Key: { targetKey: l.targetKey } })));
+    await Promise.all(
+      locks.map((l) => dbHelper.delete({ TableName: TABLE_REVIEW_LOCKS, Key: { targetKey: l.targetKey } }))
+    );
 
     for (const i of items) {
       await dbHelper.delete({ TableName: TABLE_REVIEW_TEST_ITEMS, Key: { testId, itemKey: i.itemKey } });

@@ -13,6 +13,7 @@ export const useQuestionAttemptHistory = (params: { subject: SubjectId | null; q
   const { items, status } = useWordTestStore((s) => s.reviewAttempt);
   const fetchReviewAttempts = useWordTestStore((s) => s.fetchReviewAttempts);
   const upsertReviewAttempt = useWordTestStore((s) => s.upsertReviewAttempt);
+  const deleteReviewAttempt = useWordTestStore((s) => s.deleteReviewAttempt);
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
@@ -94,6 +95,19 @@ export const useQuestionAttemptHistory = (params: { subject: SubjectId | null; q
     form.reset({ dateYmd: '', isCorrect: true, memo: '' });
   }, [form]);
 
+  const remove = useCallback(
+    async (dateYmd: string) => {
+      if (!selectedQuestionId) return;
+      await deleteReviewAttempt({
+        targetType: 'QUESTION',
+        targetId: selectedQuestionId,
+        dateYmd,
+      });
+      await refresh();
+    },
+    [selectedQuestionId, deleteReviewAttempt, refresh]
+  );
+
   return {
     isOpen,
     selectedQuestion,
@@ -104,6 +118,7 @@ export const useQuestionAttemptHistory = (params: { subject: SubjectId | null; q
     openForQuestion,
     startEdit,
     submit,
+    remove,
     close,
   };
 };
