@@ -16,7 +16,7 @@ const outdir = path.join(backendRoot, 'dist');
 await build({
   entryPoints: {
     index: path.join(backendRoot, 'src', 'index.ts'),
-    'handlers/bedrock': path.join(backendRoot, 'src', 'handlers', 'bedrock.ts'),
+    'handlers/bedrock': path.join(backendRoot, 'src', 'handlers', 'bedrock', 'index.ts'),
   },
   outdir,
   bundle: true,
