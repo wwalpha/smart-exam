@@ -1,9 +1,10 @@
-import { randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
 
 export const normalizeUuid = (value: string): string => {
   return String(value).trim().toLowerCase().replace(/-/g, '');
 };
 
 export const createUuid = (): string => {
-  return normalizeUuid(randomUUID());
+  // 16桁 (16文字) のIDに統一する
+  return randomBytes(8).toString('hex');
 };

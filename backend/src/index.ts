@@ -3,8 +3,6 @@ import cors from 'cors';
 import serverlessExpress from '@vendia/serverless-express';
 import * as s3Handler from '@/handlers/s3';
 import * as bedrockHandler from '@/handlers/bedrock';
-import * as examPaperHandler from '@/handlers/examPaper';
-import * as examResultHandler from '@/handlers/examResult';
 import * as materialHandler from '@/handlers/material';
 import * as kanjiHandler from '@/handlers/kanji';
 import * as questionHandler from '@/handlers/question';
@@ -25,14 +23,6 @@ app.post('/api/upload-url', handleRequest(s3Handler.getUploadUrl));
 
 // Analyze Exam Paper (Bedrock)
 app.post('/api/analyze-paper', handleRequest(bedrockHandler.analyzePaper));
-
-// Exam Papers
-app.get('/api/exampapers', handleRequest(examPaperHandler.listExamPapers));
-app.post('/api/exampapers', handleRequest(examPaperHandler.createExamPaper));
-
-// Exam Results
-app.get('/api/examresults', handleRequest(examResultHandler.listExamResults));
-app.post('/api/examresults', handleRequest(examResultHandler.createExamResult));
 
 // Dashboard
 app.get('/api/dashboard', handleRequest(dashboardHandler.getDashboard));

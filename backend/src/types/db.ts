@@ -153,6 +153,8 @@ export interface ReviewTestItemEmbedded {
  * 復習テスト候補テーブル
  */
 export interface ReviewTestCandidateTable {
+  /** 候補ID */
+  id: string;
   /** 科目 (PK) */
   subject: SubjectId;
   /** 問題ID (SK) */
@@ -161,32 +163,6 @@ export interface ReviewTestCandidateTable {
   mode: 'QUESTION' | 'KANJI';
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
-}
-
-/**
- * 試験結果テーブル
- */
-export interface ExamResultTable {
-  /** 結果ID (PK) */
-  resultId: string;
-  /** 用紙ID */
-  paperId: string;
-  /** 学年 */
-  grade: string;
-  /** 科目 */
-  subject: SubjectId;
-  /** カテゴリ */
-  category: string;
-  /** 名称 */
-  name: string;
-  /** タイトル */
-  title: string;
-  /** 試験日 */
-  testDate: string;
-  /** 合計点 */
-  totalScore: number;
-  /** 詳細 */
-  details: { number: number; isCorrect: boolean }[];
-  /** 採点済み画像パス */
-  gradedImagePath?: string;
+  /** ロック: 紐付けられた復習テストID */
+  testId?: string;
 }
