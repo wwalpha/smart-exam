@@ -1,5 +1,5 @@
 import { WordsService } from '../services/WordsService';
-import { WordTable } from '../types/db';
+import { WordMasterTable } from '../types/db';
 import { Kanji, CreateKanjiRequest } from './repo.types';
 import { createUuid } from '@/lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
@@ -53,12 +53,11 @@ export const KanjiRepository = {
     
     const item: Kanji = { id, ...data };
 
-    const dbItem: WordTable = {
+    const dbItem: WordMasterTable = {
       wordId: id,
       question: data.kanji,
       answer: data.reading || '',
       subject: data.subject,
-      registeredDate: DateUtils.todayYmd(),
     };
 
     await WordsService.create(dbItem);

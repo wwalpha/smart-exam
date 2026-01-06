@@ -80,8 +80,8 @@ export const getMaterialSet: AsyncHandler<
   {},
   ParsedQs
 > = async (req, res) => {
-  const { materialSetId } = req.params;
-  const item = await MaterialRepository.getMaterialSet(materialSetId);
+  const { materialId } = req.params;
+  const item = await MaterialRepository.getMaterialSet(materialId);
   if (!item) {
     res.status(404).json({ error: 'Not Found' });
     return;
@@ -95,8 +95,8 @@ export const deleteMaterialSet: AsyncHandler<
   {},
   ParsedQs
 > = async (req, res) => {
-  const { materialSetId } = req.params;
-  const deleted = await MaterialRepository.deleteMaterialSet(materialSetId);
+  const { materialId } = req.params;
+  const deleted = await MaterialRepository.deleteMaterialSet(materialId);
   if (!deleted) {
     res.status(404).json({ error: 'Not Found' });
     return;
@@ -108,7 +108,7 @@ export const listMaterialFiles: AsyncHandler<ListMaterialFilesParams, ListMateri
   req,
   res
 ) => {
-  const { materialSetId } = req.params;
-  const items = await MaterialRepository.listMaterialFiles(materialSetId);
+  const { materialId } = req.params;
+  const items = await MaterialRepository.listMaterialFiles(materialId);
   res.json({ datas: items });
 };

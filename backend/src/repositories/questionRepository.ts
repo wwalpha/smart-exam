@@ -1,5 +1,5 @@
 import { QuestionsService } from '../services/QuestionsService';
-import { TestsService } from '../services/TestsService';
+import { MaterialsService } from '../services/MaterialsService';
 import { QuestionTable } from '../types/db';
 import { Question, CreateQuestionRequest, UpdateQuestionRequest } from './repo.types';
 import { createUuid } from '@/lib/uuid';
@@ -23,12 +23,10 @@ export const QuestionRepository = {
 
     const dbItem: QuestionTable = {
       questionId: id,
-      testId: data.materialSetId,
+      materialId: data.materialSetId,
       subjectId: data.subject,
       number: toSortNumber(data.canonicalKey),
       canonicalKey: data.canonicalKey,
-      tags: data.tags,
-      registeredDate: DateUtils.todayYmd(),
     };
 
     await QuestionsService.create(dbItem);
@@ -37,14 +35,13 @@ export const QuestionRepository = {
   },
 
   listQuestions: async (materialSetId: string): Promise<Question[]> => {
-    const items = await QuestionsService.listByTestId(materialSetId);
+    const items = await QuestionsService.listByMaterialId(materialSetId);
 
     return items.map(dbItem => ({
       id: dbItem.questionId,
-      materialSetId: dbItem.testId,
+      materialSetId: dbItem.materialId,
       canonicalKey: dbItem.canonicalKey,
       subject: dbItem.subjectId,
-      tags: dbItem.tags,
     }));
   },
 
@@ -59,10 +56,9 @@ export const QuestionRepository = {
     const dbItem = result;
     return { 
       id: dbItem.questionId, 
-      materialSetId: dbItem.testId,
+      materialSetId: dbItem.materialId,
       canonicalKey: dbItem.canonicalKey,
       subject: dbItem.subjectId,
-      tags: dbItem.tags,
     };
   },
 
@@ -74,8 +70,8 @@ export const QuestionRepository = {
     const keyword = (params.keyword ?? '').trim().toLowerCase();
     const subject = (params.subject ?? '').trim().toLowerCase();
 
-    const [questions, materialSets] = await Promise.all([QuestionsService.scanAll(), TestsService.list()]);
-    const materialById = new Map(materialSets.map((x) => [x.testId, x] as const));
+    const [questions, materialSets] = await Promise.all([QuestionsService.scanAll(), MaterialsService.list()]);
+    const materialById = new Map(materialSets.map((x) => [x.materialId, x] as const));
 
     const filtered = questions.filter((q) => {
       if (subject && String(q.subjectId ?? '').toLowerCase() !== subject) return false;
@@ -86,19 +82,17 @@ export const QuestionRepository = {
         .join(' ')
         .toLowerCase();
 
-      const tagText = Array.isArray(q.tags) ? q.tags.join(' ').toLowerCase() : '';
-
-      return haystack.includes(keyword) || tagText.includes(keyword);
+      return haystack.includes(keyword);
     });
 
     return filtered.map((q): QuestionSearchResult => {
-      const material = materialById.get(q.testId);
+      const material = materialById.get(q.materialId);
       return {
         id: q.questionId,
         subject: q.subjectId,
         unit: '',
         questionText: q.canonicalKey,
-        sourceMaterialId: q.testId,
+        sourceMaterialId: q.materialId,
         sourceMaterialName: material?.title ?? '',
       };
     });

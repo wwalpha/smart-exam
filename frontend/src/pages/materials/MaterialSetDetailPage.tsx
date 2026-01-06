@@ -106,7 +106,7 @@ export const MaterialSetDetailPage = () => {
                       variant="outline"
                       size="sm"
                       className="w-[100px]"
-                      onClick={() => file && previewFile(file.s3Key)}
+                      onClick={() => file && previewFile(file.id)}
                       disabled={!file}>
                       プレビュー
                     </Button>

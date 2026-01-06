@@ -1,5 +1,5 @@
-import { TestsService } from '../services/TestsService';
-import { TestTable } from '../types/db';
+import { MaterialsService } from '@/services/MaterialsService';
+import type { MaterialTable } from '@/types/db';
 import { MaterialSet, CreateMaterialSetRequest } from './repo.types';
 import { DateUtils } from '@/lib/dateUtils';
 import type { MaterialFile } from '@smart-exam/api-types';
@@ -27,8 +27,8 @@ export const MaterialRepository = {
       ...data,
     };
 
-    const dbItem: TestTable = {
-      testId: id,
+    const dbItem: MaterialTable = {
+      materialId: id,
       subjectId: data.subject,
       title: data.name,
       description: data.description,
@@ -40,18 +40,18 @@ export const MaterialRepository = {
       yearMonth: data.yearMonth,
     };
 
-    await TestsService.create(dbItem);
+    await MaterialsService.create(dbItem);
 
     return item;
   },
 
   getMaterialSet: async (id: string): Promise<MaterialSet | null> => {
-    const dbItem = await TestsService.get(id);
+    const dbItem = await MaterialsService.get(id);
 
     if (!dbItem) return null;
 
     return {
-      id: dbItem.testId,
+      id: dbItem.materialId,
       name: dbItem.title,
       subject: dbItem.subjectId,
       grade: dbItem.grade,
@@ -65,10 +65,10 @@ export const MaterialRepository = {
   },
 
   listMaterialSets: async (): Promise<MaterialSet[]> => {
-    const items = await TestsService.list();
+    const items = await MaterialsService.list();
 
-    return items.map((dbItem) => ({
-      id: dbItem.testId,
+    return items.map((dbItem: MaterialTable) => ({
+      id: dbItem.materialId,
       name: dbItem.title,
       subject: dbItem.subjectId,
       grade: dbItem.grade,
@@ -82,9 +82,9 @@ export const MaterialRepository = {
   },
 
   deleteMaterialSet: async (id: string): Promise<boolean> => {
-    const existing = await TestsService.get(id);
+    const existing = await MaterialsService.get(id);
     if (!existing) return false;
-    await TestsService.delete(id);
+    await MaterialsService.delete(id);
     return true;
   },
 
@@ -139,11 +139,19 @@ export const MaterialRepository = {
       .filter((x): x is MaterialFile => x !== null);
   },
 
-  getMaterialFileByKey: async (s3Key: string): Promise<{ body: Buffer; contentType: string; filename: string } | null> => {
+  getMaterialFile: async (
+    materialSetId: string,
+    fileId: string
+  ): Promise<{ body: Buffer; contentType: string; filename: string } | null> => {
     const bucket = ENV.FILES_BUCKET_NAME;
     if (!bucket) return null;
 
-    const filename = s3Key.split('/').pop() || 'file.pdf';
+    const files = await MaterialRepository.listMaterialFiles(materialSetId);
+    const target = files.find((f) => f.id === fileId);
+    if (!target) return null;
+
+    const s3Key = target.s3Key;
+    const filename = target.filename || s3Key.split('/').pop() || 'file.pdf';
 
     const response = await s3Client.send(
       new GetObjectCommand({

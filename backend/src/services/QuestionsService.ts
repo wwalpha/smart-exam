@@ -26,13 +26,13 @@ export const QuestionsService = {
     return result.Items || [];
   },
 
-  listByTestId: async (testId: string): Promise<QuestionTable[]> => {
+  listByMaterialId: async (materialId: string): Promise<QuestionTable[]> => {
     const result = await dbHelper.query<QuestionTable>({
       TableName: TABLE_NAME,
-      IndexName: 'gsi_test_id_number',
-      KeyConditionExpression: '#testId = :testId',
-      ExpressionAttributeNames: { '#testId': 'testId' },
-      ExpressionAttributeValues: { ':testId': testId },
+      IndexName: 'gsi_material_id_number',
+      KeyConditionExpression: '#materialId = :materialId',
+      ExpressionAttributeNames: { '#materialId': 'materialId' },
+      ExpressionAttributeValues: { ':materialId': materialId },
     });
     return result.Items || [];
   },

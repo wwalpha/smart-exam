@@ -4,9 +4,9 @@
  * Express の `req.params` 用の型を api-types 側で集中管理する。
  */
 
-/** `GET /material-sets/:materialSetId` */
+/** `GET /materials/:materialId` */
 export type GetMaterialSetParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
 /** `PATCH /questions/:questionId` */
@@ -29,14 +29,14 @@ export type GetLatestAttemptParams = {
   testId: string;
 };
 
-/** `GET /material-sets/:materialSetId/questions` */
+/** `GET /materials/:materialId/questions` */
 export type ListQuestionsParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
-/** `POST /material-sets/:materialSetId/questions` */
+/** `POST /materials/:materialId/questions` */
 export type CreateQuestionParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
 /** `GET /review-tests/:testId` */

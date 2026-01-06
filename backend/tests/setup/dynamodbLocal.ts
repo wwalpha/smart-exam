@@ -57,15 +57,15 @@ const createTables = async (client: DynamoDBClient) => {
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [
         { AttributeName: 'questionId', AttributeType: 'S' },
-        { AttributeName: 'testId', AttributeType: 'S' },
+        { AttributeName: 'materialId', AttributeType: 'S' },
         { AttributeName: 'number', AttributeType: 'N' },
       ],
       KeySchema: [{ AttributeName: 'questionId', KeyType: 'HASH' }],
       GlobalSecondaryIndexes: [
         {
-          IndexName: 'gsi_test_id_number',
+          IndexName: 'gsi_material_id_number',
           KeySchema: [
-            { AttributeName: 'testId', KeyType: 'HASH' },
+            { AttributeName: 'materialId', KeyType: 'HASH' },
             { AttributeName: 'number', KeyType: 'RANGE' },
           ],
           Projection: { ProjectionType: 'ALL' },
@@ -94,10 +94,23 @@ const createTables = async (client: DynamoDBClient) => {
 
   await create(
     new CreateTableCommand({
-      TableName: 'tests',
+      TableName: 'materials',
       BillingMode: 'PAY_PER_REQUEST',
-      AttributeDefinitions: [{ AttributeName: 'testId', AttributeType: 'S' }],
-      KeySchema: [{ AttributeName: 'testId', KeyType: 'HASH' }],
+      AttributeDefinitions: [
+        { AttributeName: 'materialId', AttributeType: 'S' },
+        { AttributeName: 'subjectId', AttributeType: 'S' },
+      ],
+      KeySchema: [{ AttributeName: 'materialId', KeyType: 'HASH' }],
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: 'gsi_subject_id',
+          KeySchema: [
+            { AttributeName: 'subjectId', KeyType: 'HASH' },
+            { AttributeName: 'materialId', KeyType: 'RANGE' },
+          ],
+          Projection: { ProjectionType: 'ALL' },
+        },
+      ],
     })
   );
 

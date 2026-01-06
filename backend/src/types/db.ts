@@ -1,21 +1,11 @@
 import type { SubjectId } from '@smart-exam/api-types';
 
 /**
- * 科目テーブル
+ * 教材テーブル
  */
-export interface SubjectTable {
-  /** 科目ID (PK) */
-  subjectId: SubjectId;
-  /** 科目名 */
-  name: string;
-}
-
-/**
- * テストテーブル
- */
-export interface TestTable {
-  /** テストID (PK) */
-  testId: string;
+export interface MaterialTable {
+  /** 教材ID (PK) */
+  materialId: string;
   /** 科目ID (GSI1 PK) */
   subjectId: SubjectId;
   /** タイトル */
@@ -38,6 +28,13 @@ export interface TestTable {
   yearMonth?: string;
   /** 実施日 - 旧データ互換用 */
   date?: string;
+
+  /** 試験カテゴリ（試験用紙の場合のみ） */
+  category?: string;
+  /** 問題PDFパス（試験用紙の場合のみ） */
+  questionPdfPath?: string;
+  /** 解答PDFパス（試験用紙の場合のみ） */
+  answerPdfPath?: string;
 }
 
 /**
@@ -46,20 +43,14 @@ export interface TestTable {
 export interface QuestionTable {
   /** 問題ID (PK) */
   questionId: string;
-  /** テストID (GSI1 PK) */
-  testId: string;
+  /** 教材ID (GSI1 PK) */
+  materialId: string;
   /** 科目ID */
   subjectId: SubjectId;
   /** 問題番号 (GSI1 SK) */
   number: number;
-  /** プロンプトS3キー */
-  promptS3Key?: string;
   /** 識別キー */
   canonicalKey: string;
-  /** タグ */
-  tags?: string[];
-  /** 登録日 (YYYY-MM-DD) */
-  registeredDate?: string;
 }
 
 /**
@@ -119,7 +110,7 @@ export interface GradedSheetTable {
 /**
  * 単語テーブル
  */
-export interface WordTable {
+export interface WordMasterTable {
   /** 単語ID (PK) */
   wordId: string;
   /** 問題文 */
@@ -128,9 +119,6 @@ export interface WordTable {
   answer: string;
   /** 科目 */
   subject: SubjectId;
-
-  /** 登録日 (YYYY-MM-DD) */
-  registeredDate?: string;
 }
 
 /**
@@ -233,14 +221,12 @@ export interface ReviewAttemptTable {
 export interface WordTestTable {
   /** 単語テストID (PK) */
   wordTestId: string;
-  /** 単語種別 */
-  wordType: 'KANJI';
   /** 問題数 */
   count: number;
   /** 単語IDリスト */
   wordIds: string[];
   /** PDF S3キー */
-  pdfS3Key?: string;
+  pdfS3Key: string;
   /** テストID (表示用) */
   testId: string;
   /** 科目 */
@@ -265,26 +251,6 @@ export interface WordTestAttemptTable {
   submittedAt?: string;
   /** 結果リスト */
   results: { wordId: string; isCorrect: boolean }[];
-}
-
-/**
- * 試験用紙テーブル
- */
-export interface ExamPaperTable {
-  /** 用紙ID (PK) */
-  paperId: string;
-  /** 学年 */
-  grade: string;
-  /** 科目 */
-  subject: SubjectId;
-  /** カテゴリ */
-  category: string;
-  /** 名称 */
-  name: string;
-  /** 問題PDFパス */
-  questionPdfPath: string;
-  /** 解答PDFパス */
-  answerPdfPath: string;
 }
 
 /**

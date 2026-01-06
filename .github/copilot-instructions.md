@@ -6,6 +6,8 @@
 - CI（Ubuntu/Linux）はファイル名の大小文字を区別するため、TypeScript の import パスは git 管理されている実ファイル名と **大小文字まで完全一致** させてください（大小文字だけのリネームは `git mv` で確実に反映）。
 - Frontend の `yarn dev` は MSW を使用しません。API を叩く場合は `VITE_APIGW_URL` または `VITE_API_ENDPOINT` を設定して実バックエンドに向けてください。
 
+- AWS Lambda（Node.js 24 以降）は callback ベースのハンドラーをサポートしないため、ハンドラーは `async` 関数で Promise を返す形式にしてください（`(event, context, callback)` は使用しない）。
+
 ### Yarn (workspace)
 
 - このリポジトリは Yarn Berry (v4) の workspace 構成です。`yarn -C` は使わず、`yarn workspace <workspaceName> <script>` を使用してください。

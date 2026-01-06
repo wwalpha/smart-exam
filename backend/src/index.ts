@@ -40,14 +40,14 @@ app.post('/api/examresults', handleRequest(examResultHandler.createExamResult));
 // Dashboard
 app.get('/api/dashboard', handleRequest(dashboardHandler.getDashboard));
 
-// Material Sets
-app.get('/api/material-sets', handleRequest(materialHandler.listMaterialSets));
-app.post('/api/material-sets/search', handleRequest(materialHandler.searchMaterialSets));
-app.post('/api/material-sets', handleRequest(materialHandler.createMaterialSet));
-app.get('/api/material-sets/:materialSetId', handleRequest(materialHandler.getMaterialSet));
-app.delete('/api/material-sets/:materialSetId', handleRequest(materialHandler.deleteMaterialSet));
-app.get('/api/material-sets/:materialSetId/files', handleRequest(materialHandler.listMaterialFiles));
-app.get('/api/material-files', handleRequest(materialFileHandler.getMaterialFile));
+// Materials
+app.get('/api/materials', handleRequest(materialHandler.listMaterialSets));
+app.post('/api/materials/search', handleRequest(materialHandler.searchMaterialSets));
+app.post('/api/materials', handleRequest(materialHandler.createMaterialSet));
+app.get('/api/materials/:materialId', handleRequest(materialHandler.getMaterialSet));
+app.delete('/api/materials/:materialId', handleRequest(materialHandler.deleteMaterialSet));
+app.get('/api/materials/:materialId/files', handleRequest(materialHandler.listMaterialFiles));
+app.get('/api/materials/:materialId/files/:fileId', handleRequest(materialFileHandler.getMaterialFile));
 
 // Kanji
 app.get('/api/kanji', handleRequest(kanjiHandler.listKanji));
@@ -60,8 +60,8 @@ app.post('/api/kanji/import', handleRequest(kanjiHandler.importKanji));
 
 // Questions
 app.post('/api/questions/search', handleRequest(questionHandler.searchQuestions));
-app.get('/api/material-sets/:materialSetId/questions', handleRequest(questionHandler.listQuestions));
-app.post('/api/material-sets/:materialSetId/questions', handleRequest(questionHandler.createQuestion));
+app.get('/api/materials/:materialId/questions', handleRequest(questionHandler.listQuestions));
+app.post('/api/materials/:materialId/questions', handleRequest(questionHandler.createQuestion));
 app.patch('/api/questions/:questionId', handleRequest(questionHandler.updateQuestion));
 app.delete('/api/questions/:questionId', handleRequest(questionHandler.deleteQuestion));
 

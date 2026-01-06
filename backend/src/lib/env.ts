@@ -4,8 +4,7 @@ export const ENV = {
   FILES_BUCKET_NAME: process.env.FILES_BUCKET_NAME || '',
   
   // DynamoDB Tables
-  TABLE_SUBJECTS: process.env.TABLE_SUBJECTS || 'subjects',
-  TABLE_TESTS: process.env.TABLE_TESTS || 'tests',
+  TABLE_MATERIALS: process.env.TABLE_MATERIALS || 'materials',
   TABLE_WORD_TESTS: process.env.TABLE_WORD_TESTS || 'word_tests',
   TABLE_QUESTIONS: process.env.TABLE_QUESTIONS || 'questions',
   TABLE_ATTEMPTS: process.env.TABLE_ATTEMPTS || 'attempts',
@@ -17,6 +16,5 @@ export const ENV = {
   TABLE_REVIEW_TEST_ITEMS: process.env.TABLE_REVIEW_TEST_ITEMS || 'review_test_items',
   TABLE_REVIEW_LOCKS: process.env.TABLE_REVIEW_LOCKS || 'review_locks',
   TABLE_REVIEW_ATTEMPTS: process.env.TABLE_REVIEW_ATTEMPTS || 'review_attempts',
-  TABLE_EXAM_PAPERS: process.env.TABLE_EXAM_PAPERS || 'exam_papers',
   TABLE_EXAM_RESULTS: process.env.TABLE_EXAM_RESULTS || 'exam_results',
 };

@@ -32,8 +32,8 @@ export const listQuestions: AsyncHandler<ListQuestionsParams, QuestionListRespon
   req,
   res
 ) => {
-  const { materialSetId } = req.params;
-  const items = await QuestionRepository.listQuestions(materialSetId);
+  const { materialId } = req.params;
+  const items = await QuestionRepository.listQuestions(materialId);
   res.json({ datas: items });
 };
 
@@ -43,10 +43,10 @@ export const createQuestion: AsyncHandler<
   CreateQuestionRequest,
   ParsedQs
 > = async (req, res) => {
-  const { materialSetId } = req.params;
+  const { materialId } = req.params;
   const item = await QuestionRepository.createQuestion({
     ...req.body,
-    materialSetId,
+    materialSetId: materialId,
   });
   res.status(201).json(item);
 };

@@ -16,7 +16,7 @@ import type {
 export const listMaterialSets = async (params?: SearchMaterialSetsRequest): Promise<MaterialSetListResponse> => {
   return apiRequest<MaterialSetListResponse, SearchMaterialSetsRequest>({
     method: 'POST',
-    path: '/api/material-sets/search',
+    path: '/api/materials/search',
     body: params ?? {},
   });
 };
@@ -24,7 +24,7 @@ export const listMaterialSets = async (params?: SearchMaterialSetsRequest): Prom
 export const createMaterialSet = async (request: CreateMaterialSetRequest): Promise<MaterialSet> => {
   return apiRequest<MaterialSet, CreateMaterialSetRequest>({
     method: 'POST',
-    path: '/api/material-sets',
+    path: '/api/materials',
     body: request,
   });
 };
@@ -32,7 +32,7 @@ export const createMaterialSet = async (request: CreateMaterialSetRequest): Prom
 export const getMaterialSet = async (materialSetId: string): Promise<MaterialSet> => {
   return apiRequest<MaterialSet>({
     method: 'GET',
-    path: `/api/material-sets/${materialSetId}`,
+    path: `/api/materials/${materialSetId}`,
   });
 };
 
@@ -42,7 +42,7 @@ export const updateMaterialSet = async (
 ): Promise<MaterialSet> => {
   return apiRequest<MaterialSet, UpdateMaterialSetRequest>({
     method: 'PATCH',
-    path: `/api/material-sets/${materialSetId}`,
+    path: `/api/materials/${materialSetId}`,
     body: request,
   });
 };
@@ -50,14 +50,14 @@ export const updateMaterialSet = async (
 export const deleteMaterialSet = async (materialSetId: string): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
-    path: `/api/material-sets/${materialSetId}`,
+    path: `/api/materials/${materialSetId}`,
   });
 };
 
 export const listMaterialFiles = async (materialSetId: string): Promise<MaterialFile[]> => {
   const response = await apiRequest<ListMaterialFilesResponse>({
     method: 'GET',
-    path: `/api/material-sets/${materialSetId}/files`,
+    path: `/api/materials/${materialSetId}/files`,
   });
 
   return response.datas;
@@ -66,7 +66,7 @@ export const listMaterialFiles = async (materialSetId: string): Promise<Material
 export const listQuestions = async (materialSetId: string): Promise<Question[]> => {
   const response = await apiRequest<QuestionListResponse>({
     method: 'GET',
-    path: `/api/material-sets/${materialSetId}/questions`,
+    path: `/api/materials/${materialSetId}/questions`,
   });
 
   return response.datas;
@@ -78,7 +78,7 @@ export const createQuestion = async (
 ): Promise<Question> => {
   return apiRequest<Question, CreateQuestionRequest>({
     method: 'POST',
-    path: `/api/material-sets/${materialSetId}/questions`,
+    path: `/api/materials/${materialSetId}/questions`,
     body: request,
   });
 };

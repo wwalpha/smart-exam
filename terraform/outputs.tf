@@ -20,8 +20,7 @@ output "http_api_endpoint" {
 output "dynamodb_table_names" {
   description = "All DynamoDB table names created for the app."
   value = {
-    subjects           = aws_dynamodb_table.subjects.name
-    tests              = aws_dynamodb_table.tests.name
+    materials          = aws_dynamodb_table.materials.name
     questions          = aws_dynamodb_table.questions.name
     attempts           = aws_dynamodb_table.attempts.name
     graded_sheets      = aws_dynamodb_table.graded_sheets.name

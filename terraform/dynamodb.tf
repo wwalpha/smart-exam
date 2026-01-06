@@ -1,27 +1,17 @@
+ # ----------------------------------------------------------------------------------------------
+ # DynamoDB tables.
+ # ----------------------------------------------------------------------------------------------
+
 # ----------------------------------------------------------------------------------------------
-# DynamoDB tables.
+# DynamoDB table for materials.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "subjects" {
-  name         = "${var.project_name}_subjects"
+resource "aws_dynamodb_table" "materials" {
+  name         = "${var.project_name}_materials"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "subjectId"
+  hash_key     = "materialId"
 
   attribute {
-    name = "subjectId"
-    type = "S"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for tests.
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "tests" {
-  name         = "${var.project_name}_tests"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "testId"
-
-  attribute {
-    name = "testId"
+    name = "materialId"
     type = "S"
   }
 
@@ -33,7 +23,7 @@ resource "aws_dynamodb_table" "tests" {
   global_secondary_index {
     name            = "gsi_subject_id"
     hash_key        = "subjectId"
-    range_key       = "testId"
+    range_key       = "materialId"
     projection_type = "ALL"
   }
 }
@@ -52,7 +42,7 @@ resource "aws_dynamodb_table" "questions" {
   }
 
   attribute {
-    name = "testId"
+    name = "materialId"
     type = "S"
   }
 
@@ -62,8 +52,8 @@ resource "aws_dynamodb_table" "questions" {
   }
 
   global_secondary_index {
-    name            = "gsi_test_id_number"
-    hash_key        = "testId"
+    name            = "gsi_material_id_number"
+    hash_key        = "materialId"
     range_key       = "number"
     projection_type = "ALL"
   }
@@ -195,37 +185,6 @@ resource "aws_dynamodb_table" "word_test_attempts" {
     name            = "gsi_word_test_id_started_at"
     hash_key        = "wordTestId"
     range_key       = "startedAt"
-    projection_type = "ALL"
-  }
-}
-
-# ----------------------------------------------------------------------------------------------
-# DynamoDB table for Exam Papers (PDFs).
-# ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "exam_papers" {
-  name         = "${var.project_name}_exam_papers"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "paperId"
-
-  attribute {
-    name = "paperId"
-    type = "S"
-  }
-
-  attribute {
-    name = "grade"
-    type = "S"
-  }
-
-  attribute {
-    name = "subject"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "gsi_grade_subject"
-    hash_key        = "grade"
-    range_key       = "subject"
     projection_type = "ALL"
   }
 }

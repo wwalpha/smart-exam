@@ -76,11 +76,12 @@ export const useMaterialDetail = () => {
     });
   }, [latestFilesByType]);
 
-  const previewFile = useCallback(async (key: string) => {
+  const previewFile = useCallback(async (fileId: string) => {
     try {
+      if (!id) return;
       const blob = await apiRequestBlob({
         method: 'GET',
-        path: `/api/material-files?key=${encodeURIComponent(key)}`,
+        path: `/api/materials/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}`,
       });
 
       if (!(await isPdfBlob(blob))) {
@@ -95,7 +96,7 @@ export const useMaterialDetail = () => {
     } catch {
       toast.error('PDFの取得に失敗しました');
     }
-  }, []);
+  }, [id]);
 
   const replacePdf = useCallback(
     async (fileType: MaterialPdfFileType, file: File) => {

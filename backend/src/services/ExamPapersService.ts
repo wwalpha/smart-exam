@@ -1,21 +1,12 @@
-import { dbHelper } from '../lib/aws';
-import { ENV } from '../lib/env';
-import { ExamPaperTable } from '../types/db';
-
-const TABLE_NAME = ENV.TABLE_EXAM_PAPERS;
+import { MaterialsService } from './MaterialsService';
+import type { MaterialTable } from '../types/db';
 
 export const ExamPapersService = {
-  create: async (item: ExamPaperTable): Promise<void> => {
-    await dbHelper.put({
-      TableName: TABLE_NAME,
-      Item: item,
-    });
+  create: async (item: MaterialTable): Promise<void> => {
+    await MaterialsService.create(item);
   },
 
-  list: async (): Promise<ExamPaperTable[]> => {
-    const result = await dbHelper.scan<ExamPaperTable>({
-      TableName: TABLE_NAME,
-    });
-    return result.Items || [];
-  }
+  list: async (): Promise<MaterialTable[]> => {
+    return MaterialsService.list();
+  },
 };

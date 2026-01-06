@@ -1,27 +1,27 @@
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
-import { WordTable } from '../types/db';
+import { WordMasterTable } from '../types/db';
 import type { SubjectId } from '@smart-exam/api-types';
 
 const TABLE_NAME = ENV.TABLE_WORDS;
 
 export const WordsService = {
-  create: async (item: WordTable): Promise<void> => {
+  create: async (item: WordMasterTable): Promise<void> => {
     await dbHelper.put({
       TableName: TABLE_NAME,
       Item: item,
     });
   },
 
-  get: async (wordId: string): Promise<WordTable | null> => {
-    const result = await dbHelper.get<WordTable>({
+  get: async (wordId: string): Promise<WordMasterTable | null> => {
+    const result = await dbHelper.get<WordMasterTable>({
       TableName: TABLE_NAME,
       Key: { wordId },
     });
     return result?.Item || null;
   },
 
-  update: async (wordId: string, updates: Partial<WordTable>): Promise<WordTable | null> => {
+  update: async (wordId: string, updates: Partial<WordMasterTable>): Promise<WordMasterTable | null> => {
     const expAttrNames: Record<string, string> = {};
     const expAttrValues: Record<string, unknown> = {};
     let updateExp = 'SET';
@@ -45,7 +45,7 @@ export const WordsService = {
       ReturnValues: 'ALL_NEW',
     });
 
-    return (result.Attributes as WordTable) || null;
+    return (result.Attributes as WordMasterTable) || null;
   },
 
   delete: async (wordId: string): Promise<void> => {
@@ -55,9 +55,9 @@ export const WordsService = {
     });
   },
 
-  listKanji: async (subject?: SubjectId): Promise<WordTable[]> => {
+  listKanji: async (subject?: SubjectId): Promise<WordMasterTable[]> => {
     if (subject) {
-      const result = await dbHelper.query<WordTable>({
+      const result = await dbHelper.query<WordMasterTable>({
         TableName: TABLE_NAME,
         IndexName: 'gsi_subject_word_id',
         KeyConditionExpression: '#subject = :subject',
@@ -67,7 +67,7 @@ export const WordsService = {
       return result.Items || [];
     }
 
-    const result = await dbHelper.scan<WordTable>({
+    const result = await dbHelper.scan<WordMasterTable>({
       TableName: TABLE_NAME,
     });
     return result.Items || [];

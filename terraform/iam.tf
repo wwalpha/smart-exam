@@ -47,9 +47,7 @@ data "aws_iam_policy_document" "lambda" {
       "dynamodb:Scan",
     ]
     resources = [
-      aws_dynamodb_table.subjects.arn,
-      aws_dynamodb_table.tests.arn,
-      aws_dynamodb_table.tests.arn,
+      aws_dynamodb_table.materials.arn,
       aws_dynamodb_table.questions.arn,
       aws_dynamodb_table.attempts.arn,
       aws_dynamodb_table.graded_sheets.arn,
@@ -61,9 +59,8 @@ data "aws_iam_policy_document" "lambda" {
       aws_dynamodb_table.review_test_items.arn,
       aws_dynamodb_table.review_locks.arn,
       aws_dynamodb_table.review_attempts.arn,
-      aws_dynamodb_table.exam_papers.arn,
       aws_dynamodb_table.exam_results.arn,
-      "${aws_dynamodb_table.tests.arn}/index/*",
+      "${aws_dynamodb_table.materials.arn}/index/*",
       "${aws_dynamodb_table.questions.arn}/index/*",
       "${aws_dynamodb_table.attempts.arn}/index/*",
       "${aws_dynamodb_table.words.arn}/index/*",
@@ -72,7 +69,6 @@ data "aws_iam_policy_document" "lambda" {
       "${aws_dynamodb_table.review_test_items.arn}/index/*",
       "${aws_dynamodb_table.review_locks.arn}/index/*",
       "${aws_dynamodb_table.review_attempts.arn}/index/*",
-      "${aws_dynamodb_table.exam_papers.arn}/index/*",
       "${aws_dynamodb_table.exam_results.arn}/index/*",
     ]
   }

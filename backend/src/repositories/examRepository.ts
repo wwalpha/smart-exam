@@ -1,6 +1,6 @@
-import { ExamPapersService } from '../services/ExamPapersService';
 import { ExamResultsService } from '../services/ExamResultsService';
-import { ExamPaperTable, ExamResultTable } from '../types/db';
+import { MaterialsService } from '../services/MaterialsService';
+import { ExamResultTable, MaterialTable } from '../types/db';
 import { ExamPaper, ExamResult } from './repo.types';
 import { createUuid } from '@/lib/uuid';
 
@@ -13,33 +13,39 @@ export const ExamPapersRepository = {
       paperId: id,
     };
 
-    const dbItem: ExamPaperTable = {
-      paperId: id,
+    const dbItem: MaterialTable = {
+      materialId: id,
+      subjectId: paper.subject,
+      title: paper.name,
+      questionCount: 0,
       grade: paper.grade,
-      subject: paper.subject,
       category: paper.category,
-      name: paper.name,
       questionPdfPath: paper.questionPdfKey,
       answerPdfPath: paper.answerPdfKey,
     };
 
-    await ExamPapersService.create(dbItem);
+    await MaterialsService.create(dbItem);
 
     return newPaper;
   },
 
   listExamPapers: async (): Promise<ExamPaper[]> => {
-    const items = await ExamPapersService.list();
+    const items = await MaterialsService.list();
 
-    return items.map((dbItem) => ({
-      paperId: dbItem.paperId,
-      grade: dbItem.grade,
-      subject: dbItem.subject,
-      category: dbItem.category,
-      name: dbItem.name,
-      questionPdfKey: dbItem.questionPdfPath,
-      answerPdfKey: dbItem.answerPdfPath,
-    }));
+    return items
+      .filter(
+        (m): m is MaterialTable & Required<Pick<MaterialTable, 'grade' | 'category' | 'questionPdfPath' | 'answerPdfPath'>> =>
+          Boolean(m.grade && m.category && m.questionPdfPath && m.answerPdfPath)
+      )
+      .map((m) => ({
+        paperId: m.materialId,
+        grade: m.grade,
+        subject: m.subjectId,
+        category: m.category,
+        name: m.title,
+        questionPdfKey: m.questionPdfPath,
+        answerPdfKey: m.answerPdfPath,
+      }));
   }
 };
 

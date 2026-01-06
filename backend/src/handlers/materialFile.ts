@@ -1,21 +1,20 @@
 import { MaterialRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
-import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { ApiError } from '@/lib/apiError';
 
-export const getMaterialFile: AsyncHandler<ParamsDictionary, unknown, {}, ParsedQs> = async (req, res) => {
-  const key = typeof req.query.key === 'string' ? req.query.key : '';
-  if (!key) {
-    throw new ApiError('key is required', 400, ['invalid_request']);
+type GetMaterialFileParams = {
+  materialId: string;
+  fileId: string;
+};
+
+export const getMaterialFile: AsyncHandler<GetMaterialFileParams, unknown, {}, ParsedQs> = async (req, res) => {
+  const { materialId, fileId } = req.params;
+  if (!materialId || !fileId) {
+    throw new ApiError('materialId and fileId are required', 400, ['invalid_request']);
   }
 
-  // 任意のS3オブジェクトを読めないように制限する
-  if (!key.startsWith('materials/')) {
-    throw new ApiError('invalid key', 400, ['invalid_request']);
-  }
-
-  const file = await MaterialRepository.getMaterialFileByKey(key);
+  const file = await MaterialRepository.getMaterialFile(materialId, fileId);
   if (!file) {
     throw new ApiError('not found', 404, ['not_found']);
   }

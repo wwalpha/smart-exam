@@ -3,7 +3,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import { createUuid } from '@/lib/uuid';
 import { QuestionsService } from '@/services/QuestionsService';
-import { TestsService } from '@/services/TestsService';
+import { MaterialsService } from '@/services/MaterialsService';
 import { WordsService } from '@/services/WordsService';
 import type {
   CreateReviewTestRequest,
@@ -20,7 +20,7 @@ import type {
   ReviewLockTable,
   ReviewTestItemTable,
   ReviewTestTable,
-  WordTable,
+  WordMasterTable,
 } from '@/types/db';
 
 const TABLE_REVIEW_TESTS = ENV.TABLE_REVIEW_TESTS;
@@ -389,8 +389,8 @@ export const ReviewTestRepository = {
 
     if (req.mode === 'KANJI') {
       const words = await WordsService.listKanji(req.subject);
-      for (const w of words as WordTable[]) {
-        const registeredDate = w.registeredDate ?? DateUtils.todayYmd();
+        for (const w of words as WordMasterTable[]) {
+          const registeredDate = createdDate;
         const targetKey = targetKeyOf('KANJI', w.wordId);
         const attempts = await listAttemptsForTarget(targetKey);
         const { dueDate, lastAttemptDate } = computeDueDate({
@@ -416,7 +416,7 @@ export const ReviewTestRepository = {
       for (const q of questions as QuestionTable[]) {
         if (String(q.subjectId) !== String(req.subject)) continue;
 
-        const registeredDate = q.registeredDate ?? DateUtils.todayYmd();
+        const registeredDate = createdDate;
         const targetKey = targetKeyOf('QUESTION', q.questionId);
         const attempts = await listAttemptsForTarget(targetKey);
         const { dueDate, lastAttemptDate } = computeDueDate({
@@ -474,7 +474,7 @@ export const ReviewTestRepository = {
     const itemRows: ReviewTestItemTable[] = [];
     if (req.mode === 'KANJI') {
       const words = await WordsService.listKanji(req.subject);
-      const byId = new Map((words as WordTable[]).map((w) => [w.wordId, w] as const));
+      const byId = new Map((words as WordMasterTable[]).map((w) => [w.wordId, w] as const));
 
       selected.forEach((c, index) => {
         const w = byId.get(c.targetId);
@@ -492,13 +492,13 @@ export const ReviewTestRepository = {
         });
       });
     } else {
-      const [questions, materialSets] = await Promise.all([QuestionsService.scanAll(), TestsService.list()]);
+      const [questions, materials] = await Promise.all([QuestionsService.scanAll(), MaterialsService.list()]);
       const qById = new Map((questions as QuestionTable[]).map((q) => [q.questionId, q] as const));
-      const mById = new Map(materialSets.map((m) => [m.testId, m] as const));
+      const mById = new Map(materials.map((m) => [m.materialId, m] as const));
 
       selected.forEach((c, index) => {
         const q = qById.get(c.targetId);
-        const m = q ? mById.get(q.testId) : undefined;
+        const m = q ? mById.get(q.materialId) : undefined;
         itemRows.push({
           testId,
           itemKey: `${c.targetType}#${c.targetId}`,

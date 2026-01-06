@@ -1,28 +1,34 @@
 import type { SubjectId } from './subject';
 
-/** `GET /material-sets/:materialSetId` */
+/** `GET /materials/:materialId` */
 export type GetMaterialSetParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
-/** `DELETE /material-sets/:materialSetId` */
+/** `DELETE /materials/:materialId` */
 export type DeleteMaterialSetParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
-/** `GET /material-sets/:materialSetId/questions` */
+/** `GET /materials/:materialId/questions` */
 export type ListQuestionsParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
-/** `GET /material-sets/:materialSetId/files` */
+/** `GET /materials/:materialId/files` */
 export type ListMaterialFilesParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
-/** `POST /material-sets/:materialSetId/questions` */
+/** `GET /materials/:materialId/files/:fileId` */
+export type GetMaterialFileParams = {
+  materialId: string;
+  fileId: string;
+};
+
+/** `POST /materials/:materialId/questions` */
 export type CreateQuestionParams = {
-  materialSetId: string;
+  materialId: string;
 };
 
 /** `PATCH /questions/:questionId` */
@@ -57,7 +63,7 @@ export type UpdateMaterialSetRequest = Partial<CreateMaterialSetRequest>;
 /** 教材セット取得レスポンス */
 export type GetMaterialSetResponse = MaterialSet;
 
-/** `DELETE /material-sets/:materialSetId` */
+/** `DELETE /materials/:materialId` */
 export type DeleteMaterialSetResponse = Record<string, never>;
 
 /** 教材セット一覧取得レスポンス */
@@ -70,7 +76,7 @@ export type MaterialSetListResponse = {
   cursor?: string;
 };
 
-/** `POST /material-sets/search` */
+/** `POST /materials/search` */
 export type SearchMaterialSetsRequest = {
   subject?: SubjectId;
   grade?: string;
@@ -82,7 +88,7 @@ export type SearchMaterialSetsRequest = {
   cursor?: string;
 };
 
-/** `POST /material-sets/search` */
+/** `POST /materials/search` */
 export type SearchMaterialSetsResponse = MaterialSetListResponse;
 
 /**
@@ -105,7 +111,7 @@ export type MaterialFile = {
   createdAt: string;
 };
 
-/** `GET /material-sets/:materialSetId/files` */
+/** `GET /materials/:materialId/files` */
 export type ListMaterialFilesResponse = {
   datas: MaterialFile[];
 };
