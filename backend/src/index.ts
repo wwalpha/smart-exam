@@ -7,6 +7,7 @@ import * as materialHandler from '@/handlers/material';
 import * as kanjiHandler from '@/handlers/kanji';
 import * as questionHandler from '@/handlers/question';
 import * as reviewTestHandler from '@/handlers/reviewTest';
+import * as reviewAttemptHandler from '@/handlers/reviewAttempt';
 import * as dashboardHandler from '@/handlers/dashboard';
 import { handleRequest } from '@/lib/handler';
 
@@ -57,6 +58,11 @@ app.get('/api/review-tests', handleRequest(reviewTestHandler.listReviewTests));
 app.post('/api/review-tests/search', handleRequest(reviewTestHandler.searchReviewTests));
 app.post('/api/review-tests', handleRequest(reviewTestHandler.createReviewTest));
 app.get('/api/review-tests/targets', handleRequest(reviewTestHandler.listReviewTestTargets));
+app.get('/api/review-test-candidates', handleRequest(reviewTestHandler.listReviewTestCandidates));
+
+// Derived review attempts (read-only)
+app.get('/api/review-attempts', handleRequest(reviewAttemptHandler.listReviewAttempts));
+
 app.get('/api/review-tests/:testId', handleRequest(reviewTestHandler.getReviewTest));
 app.get('/api/review-tests/:testId/pdf', handleRequest(reviewTestHandler.getReviewTestPdf));
 app.patch('/api/review-tests/:testId', handleRequest(reviewTestHandler.updateReviewTestStatus));

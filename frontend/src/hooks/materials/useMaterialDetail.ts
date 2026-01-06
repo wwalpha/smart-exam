@@ -36,16 +36,16 @@ const fileTypeLabel = (fileType: string): string => {
 export const useMaterialDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { detail, files, status } = useWordTestStore((s) => s.material);
-  const fetchMaterialSet = useWordTestStore((s) => s.fetchMaterialSet);
+  const fetchMaterial = useWordTestStore((s) => s.fetchMaterial);
   const fetchMaterialFiles = useWordTestStore((s) => s.fetchMaterialFiles);
   const uploadMaterialPdf = useWordTestStore((s) => s.uploadMaterialPdf);
 
   useEffect(() => {
     if (id) {
-      fetchMaterialSet(id);
+      fetchMaterial(id);
       fetchMaterialFiles(id);
     }
-  }, [id, fetchMaterialSet, fetchMaterialFiles]);
+  }, [id, fetchMaterial, fetchMaterialFiles]);
 
   const latestFilesByType = useMemo(() => {
     const byType: Partial<Record<MaterialPdfFileType, MaterialFile>> = {};
@@ -107,7 +107,7 @@ export const useMaterialDetail = () => {
       }
 
       try {
-        await uploadMaterialPdf({ materialSetId: id, fileType, file });
+        await uploadMaterialPdf({ materialId: id, fileType, file });
         toast.success('アップロードしました');
       } catch {
         // store側でエラートーストを出す可能性があるため、ここでは追加表示しない

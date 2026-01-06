@@ -42,7 +42,7 @@ export const useReviewGrading = () => {
     if (currentTest) {
       reset({
         items: currentTest.items.map((item) => ({
-          itemId: item.itemId,
+          itemId: item.id,
           isCorrect: item.isCorrect ?? false,
         })),
       });
@@ -51,10 +51,11 @@ export const useReviewGrading = () => {
 
   const submit = async (data: GradingFormValues) => {
     if (!id) return;
-    await submitReviewTest(id, { results: data.items.map(item => ({
-        targetId: item.itemId,
+    await submitReviewTest(id, {
+      results: data.items.map((item) => ({
+        id: item.itemId,
         isCorrect: item.isCorrect,
-      })) 
+      })),
     });
     navigate(`${basePath}/${id}`);
   };

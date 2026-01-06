@@ -8,6 +8,7 @@ import type {
   DeleteReviewTestParams,
   GetReviewTestParams,
   GetReviewTestResponse,
+  ListReviewTestCandidatesResponse,
   ListReviewTestTargetsResponse,
   ReviewTestListResponse,
   SearchReviewTestsRequest,
@@ -54,6 +55,39 @@ type ListReviewTestTargetsQuery = {
   from?: string;
   to?: string;
   subject?: string;
+};
+
+type ListReviewTestCandidatesQuery = {
+  subject?: string;
+  mode?: 'QUESTION' | 'KANJI';
+};
+
+export const listReviewTestCandidates: AsyncHandler<{}, ListReviewTestCandidatesResponse, {}, ParsedQs> = async (
+  req,
+  res
+) => {
+  const q = req.query as unknown as ListReviewTestCandidatesQuery;
+
+  if (q.mode && q.mode !== 'QUESTION' && q.mode !== 'KANJI') {
+    res.status(400).json({ items: [] });
+    return;
+  }
+
+  const items = await ReviewTestRepository.listReviewTestCandidates({
+    subject: q.subject as any,
+    mode: q.mode,
+  });
+
+  res.json({
+    items: items.map((x) => ({
+      id: x.id,
+      subject: x.subject,
+      targetId: x.questionId,
+      mode: x.mode,
+      nextTime: x.nextTime,
+      testId: x.testId,
+    })),
+  });
 };
 
 export const listReviewTestTargets: AsyncHandler<{}, ListReviewTestTargetsResponse, {}, ParsedQs> = async (

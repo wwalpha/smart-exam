@@ -4,7 +4,3 @@ export { KanjiRepository } from './kanji';
 export { MaterialRepository } from './materials';
 export { QuestionRepository } from './questions';
 export { ReviewTestRepository } from './reviewTests';
-
-
-
-

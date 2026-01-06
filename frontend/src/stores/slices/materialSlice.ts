@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { MaterialSlice } from '@/stores/store.types';
 import * as MATERIAL_API from '@/services/materialApi';
-import * as EXAM_API from '@/services/examApi';
+import * as S3_API from '@/services/s3Api';
 import * as BEDROCK_API from '@/services/bedrockApi';
 import { compareQuestionNumber, normalizeQuestionNumber } from '@/utils/questionNumber';
 import { toBedrockPromptSubject } from '@/utils/bedrockSubject';
@@ -52,11 +52,11 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       },
     },
 
-    fetchMaterialSets: async (params) => {
+    fetchMaterials: async (params) => {
       await withStatus(
         setStatus,
         async () => {
-          const response = await MATERIAL_API.listMaterialSets(params);
+          const response = await MATERIAL_API.listMaterials(params);
 
           const hasSearchParams =
             !!params && Object.values(params).some((v) => v !== undefined && v !== null && String(v).trim().length > 0);
@@ -72,11 +72,11 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    createMaterialSet: async (request) => {
+    createMaterial: async (request) => {
       return await withStatus(
         setStatus,
         async () => {
-          const response = await MATERIAL_API.createMaterialSet(request);
+          const response = await MATERIAL_API.createMaterial(request);
           // Optionally refresh list or add to list
           return response;
         },
@@ -85,11 +85,11 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    createMaterialSetWithUpload: async (params) => {
+    createMaterialWithUpload: async (params) => {
       return await withStatus(
         setStatus,
         async () => {
-          const materialSet = await MATERIAL_API.createMaterialSet(params.request);
+          const material = await MATERIAL_API.createMaterial(params.request);
 
           const uploads: Array<{ fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER'; file: File }> = [];
           if (params.questionFile) uploads.push({ fileType: 'QUESTION', file: params.questionFile });
@@ -97,16 +97,16 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           if (params.gradedFile) uploads.push({ fileType: 'GRADED_ANSWER', file: params.gradedFile });
 
           for (const upload of uploads) {
-            const prefix = `materials/${materialSet.id}/${upload.fileType}`;
-            const presigned = await EXAM_API.getUploadUrl(upload.file.name, upload.file.type, prefix);
-            await EXAM_API.uploadFileToS3(presigned.uploadUrl, upload.file);
+            const prefix = `materials/${material.id}/${upload.fileType}`;
+            const presigned = await S3_API.getUploadUrl(upload.file.name, upload.file.type, prefix);
+            await S3_API.uploadFileToS3(presigned.uploadUrl, upload.file);
           }
 
           // ファイル一覧を即時反映
-          const files = await MATERIAL_API.listMaterialFiles(materialSet.id);
+          const files = await MATERIAL_API.listMaterialFiles(material.id);
           updateMaterial({ files });
 
-          return materialSet;
+          return material;
         },
         '教材セットの作成に失敗しました。',
         { rethrow: true }
@@ -114,18 +114,18 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
     },
 
     uploadMaterialPdf: async (params: {
-      materialSetId: string;
+      materialId: string;
       fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
       file: File;
     }) => {
       await withStatus(
         setStatus,
         async () => {
-          const prefix = `materials/${params.materialSetId}/${params.fileType}`;
-          const presigned = await EXAM_API.getUploadUrl(params.file.name, params.file.type, prefix);
-          await EXAM_API.uploadFileToS3(presigned.uploadUrl, params.file);
+          const prefix = `materials/${params.materialId}/${params.fileType}`;
+          const presigned = await S3_API.getUploadUrl(params.file.name, params.file.type, prefix);
+          await S3_API.uploadFileToS3(presigned.uploadUrl, params.file);
 
-          const files = await MATERIAL_API.listMaterialFiles(params.materialSetId);
+          const files = await MATERIAL_API.listMaterialFiles(params.materialId);
           updateMaterial({ files });
         },
         'PDFのアップロードに失敗しました。',
@@ -133,11 +133,11 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    fetchMaterialSet: async (id) => {
+    fetchMaterial: async (id) => {
       await withStatus(
         setStatus,
         async () => {
-          const response = await MATERIAL_API.getMaterialSet(id);
+          const response = await MATERIAL_API.getMaterial(id);
           updateMaterial({ detail: response });
         },
         '教材セット詳細の取得に失敗しました。',
@@ -145,11 +145,11 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    updateMaterialSet: async (id, request) => {
+    updateMaterial: async (id, request) => {
       await withStatus(
         setStatus,
         async () => {
-          const response = await MATERIAL_API.updateMaterialSet(id, request);
+          const response = await MATERIAL_API.updateMaterial(id, request);
           updateMaterial({ detail: response });
         },
         '教材セットの更新に失敗しました。',
@@ -157,11 +157,11 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    deleteMaterialSet: async (id) => {
+    deleteMaterial: async (id) => {
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.deleteMaterialSet(id);
+          await MATERIAL_API.deleteMaterial(id);
 
           const current = getMaterial();
           const nextList = current.list.filter((x) => x.id !== id);
@@ -202,12 +202,12 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    extractQuestionsFromGradedAnswer: async (materialSetId) => {
+    extractQuestionsFromGradedAnswer: async (materialId) => {
       await withStatus(
         setStatus,
         async () => {
           const current = getMaterial();
-          if (current.detail?.id !== materialSetId) return;
+          if (current.detail?.id !== materialId) return;
           if (current.questions.length > 0) return;
 
           const graded = current.files.find(
@@ -228,13 +228,13 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           if (unique.length === 0) return;
 
           for (const key of unique) {
-            await MATERIAL_API.createQuestion(materialSetId, {
+            await MATERIAL_API.createQuestion(materialId, {
               canonicalKey: key,
               subject: current.detail.subject,
             });
           }
 
-          const nextQuestions = await MATERIAL_API.listQuestions(materialSetId);
+          const nextQuestions = await MATERIAL_API.listQuestions(materialId);
           updateMaterial({ questions: nextQuestions });
         },
         '問題番号の抽出に失敗しました。',
@@ -242,13 +242,13 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    createQuestion: async (materialSetId, request) => {
+    createQuestion: async (materialId, request) => {
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.createQuestion(materialSetId, request);
+          await MATERIAL_API.createQuestion(materialId, request);
           // Refresh questions
-          const response = await MATERIAL_API.listQuestions(materialSetId);
+          const response = await MATERIAL_API.listQuestions(materialId);
           updateMaterial({ questions: response });
         },
         '問題の作成に失敗しました。',

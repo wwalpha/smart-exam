@@ -47,7 +47,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       },
     },
 
-    reviewAttempt: {
+    reviewTargets: {
       items: [],
       status: {
         isLoading: false,
@@ -55,7 +55,15 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       },
     },
 
-    reviewTargets: {
+    reviewAttempts: {
+      items: [],
+      status: {
+        isLoading: false,
+        error: null,
+      },
+    },
+
+    reviewCandidates: {
       items: [],
       status: {
         isLoading: false,
@@ -167,10 +175,10 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
     },
 
     fetchReviewAttempts: async (params) => {
-      const setAttemptStatus = (next: Partial<ReviewSlice['reviewAttempt']['status']>) => {
-        const current = get().reviewAttempt;
+      const setAttemptsStatus = (next: Partial<ReviewSlice['reviewAttempts']['status']>) => {
+        const current = get().reviewAttempts;
         set({
-          reviewAttempt: {
+          reviewAttempts: {
             ...current,
             status: {
               ...current.status,
@@ -181,13 +189,13 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       };
 
       await withStatus(
-        setAttemptStatus,
+        setAttemptsStatus,
         async () => {
           const response = await REVIEW_ATTEMPT_API.listReviewAttempts(params);
           set({
-            reviewAttempt: {
+            reviewAttempts: {
               items: response.items,
-              status: get().reviewAttempt.status,
+              status: get().reviewAttempts.status,
             },
           });
         },
@@ -196,11 +204,11 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       );
     },
 
-    upsertReviewAttempt: async (request) => {
-      const setAttemptStatus = (next: Partial<ReviewSlice['reviewAttempt']['status']>) => {
-        const current = get().reviewAttempt;
+    fetchReviewTestCandidates: async (params) => {
+      const setCandidatesStatus = (next: Partial<ReviewSlice['reviewCandidates']['status']>) => {
+        const current = get().reviewCandidates;
         set({
-          reviewAttempt: {
+          reviewCandidates: {
             ...current,
             status: {
               ...current.status,
@@ -211,35 +219,17 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
       };
 
       await withStatus(
-        setAttemptStatus,
+        setCandidatesStatus,
         async () => {
-          await REVIEW_ATTEMPT_API.upsertReviewAttempt(request);
-        },
-        '履歴の保存に失敗しました。',
-        { rethrow: true }
-      );
-    },
-
-    deleteReviewAttempt: async (request) => {
-      const setAttemptStatus = (next: Partial<ReviewSlice['reviewAttempt']['status']>) => {
-        const current = get().reviewAttempt;
-        set({
-          reviewAttempt: {
-            ...current,
-            status: {
-              ...current.status,
-              ...next,
+          const response = await REVIEW_API.listReviewTestCandidates(params);
+          set({
+            reviewCandidates: {
+              items: response.items,
+              status: get().reviewCandidates.status,
             },
-          },
-        });
-      };
-
-      await withStatus(
-        setAttemptStatus,
-        async () => {
-          await REVIEW_ATTEMPT_API.deleteReviewAttempt(request);
+          });
         },
-        '履歴の削除に失敗しました。',
+        '候補一覧の取得に失敗しました。',
         { rethrow: true }
       );
     },

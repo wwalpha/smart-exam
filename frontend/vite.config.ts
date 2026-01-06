@@ -13,4 +13,8 @@ export default defineConfig({
       '@typings': fileURLToPath(new URL('./typings', import.meta.url)),
     },
   },
+  build: {
+    // The default (500kB) is too chatty for this app; raise the warning threshold.
+    chunkSizeWarningLimit: 900,
+  },
 });

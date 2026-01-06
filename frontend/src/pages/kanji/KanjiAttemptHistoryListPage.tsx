@@ -47,7 +47,9 @@ export const KanjiAttemptHistoryListPage = () => {
                   aria-invalid={!!errors.to}
                   className={errors.to ? 'border-destructive focus-visible:ring-destructive' : undefined}
                 />
-                {errors.to?.message ? <p className="text-sm text-destructive">{String(errors.to.message)}</p> : null}
+                {errors.to?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.to.message)}</p>
+                ) : null}
               </div>
             </div>
 
@@ -61,7 +63,6 @@ export const KanjiAttemptHistoryListPage = () => {
       </Card>
 
       <div className="text-sm text-muted-foreground">全{targets.length}件</div>
-
       {error ? <div className="text-sm text-destructive">{error}</div> : null}
 
       <div className="w-full rounded-md border">

@@ -5,18 +5,14 @@ import type {
   CreateReviewTestRequest,
   ReviewTestDetail,
   UpdateReviewTestStatusRequest,
+  SearchReviewTestsRequest,
   SubmitReviewTestResultsRequest,
   ListReviewTestTargetsResponse,
+  ListReviewTestCandidatesResponse,
 } from '@smart-exam/api-types';
 
-export const listReviewTests = async (params?: {
-  subject?: string;
-  status?: string;
-  mode?: 'QUESTION' | 'KANJI';
-  limit?: number;
-  cursor?: string;
-}): Promise<ReviewTestListResponse> => {
-  return apiRequest<ReviewTestListResponse, typeof params>({
+export const listReviewTests = async (params: SearchReviewTestsRequest): Promise<ReviewTestListResponse> => {
+  return apiRequest<ReviewTestListResponse, SearchReviewTestsRequest>({
     method: 'POST',
     path: '/api/review-tests/search',
     body: params,
@@ -85,5 +81,22 @@ export const listReviewTestTargets = async (params: {
   return apiRequest<ListReviewTestTargetsResponse>({
     method: 'GET',
     path: `/api/review-tests/targets?${qs.toString()}`,
+  });
+};
+
+export const listReviewTestCandidates = async (params?: {
+  subject?: string;
+  mode?: 'QUESTION' | 'KANJI';
+}): Promise<ListReviewTestCandidatesResponse> => {
+  const qs = new URLSearchParams({
+    ...(params?.subject ? { subject: params.subject } : {}),
+    ...(params?.mode ? { mode: params.mode } : {}),
+  });
+
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+
+  return apiRequest<ListReviewTestCandidatesResponse>({
+    method: 'GET',
+    path: `/api/review-test-candidates${suffix}`,
   });
 };

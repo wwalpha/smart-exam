@@ -2,6 +2,8 @@ import { createReviewTest } from './createReviewTest';
 import { deleteReviewTest } from './deleteReviewTest';
 import { getReviewTest } from './getReviewTest';
 import { listDueCandidates } from './listDueCandidates';
+import { listReviewAttempts } from './listReviewAttempts';
+import { listReviewTestCandidates } from './listReviewTestCandidates';
 import { listReviewTests } from './listReviewTests';
 import { listReviewTestTargets } from './listReviewTestTargets';
 import { putCandidate } from './putCandidate';
@@ -13,6 +15,8 @@ export {
   deleteReviewTest,
   getReviewTest,
   listDueCandidates,
+  listReviewAttempts,
+  listReviewTestCandidates,
   listReviewTests,
   listReviewTestTargets,
   putCandidate,
@@ -23,6 +27,8 @@ export {
 export const ReviewTestRepository = {
   putCandidate,
   listDueCandidates,
+  listReviewAttempts,
+  listReviewTestCandidates,
   listReviewTests,
   listReviewTestTargets,
   createReviewTest,

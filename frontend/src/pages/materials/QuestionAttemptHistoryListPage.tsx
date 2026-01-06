@@ -1,14 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { useReviewAttemptHistory, useReviewTargets } from '@/hooks/review';
+import { useReviewAttemptHistoryDialog, useReviewTargets, useReviewCandidateForTarget } from '@/hooks/review';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
-import type { SubjectId } from '@smart-exam/api-types';
 
 export const QuestionAttemptHistoryListPage = () => {
   const { items, isLoading, error, form, submit } = useReviewTargets({ mode: 'QUESTION' });
@@ -21,23 +20,14 @@ export const QuestionAttemptHistoryListPage = () => {
     return items.filter((x) => x.targetType === 'QUESTION');
   }, [items]);
 
-  const [selected, setSelected] = useState<{
-    targetId: string;
-    subject: SubjectId;
-    title: string;
-  } | null>(null);
+  const dialog = useReviewAttemptHistoryDialog();
 
-  const history = useReviewAttemptHistory({
-    targetType: 'QUESTION',
-    targetId: selected?.targetId ?? null,
-    subject: selected?.subject ?? null,
-    enabled: true,
+  const candidateState = useReviewCandidateForTarget({
+    mode: 'QUESTION',
+    targetId: dialog.selected?.targetId ?? null,
+    subject: dialog.selected?.subject ?? null,
+    enabled: dialog.isOpen,
   });
-
-  const {
-    register: registerHistory,
-    formState: { errors: historyErrors },
-  } = history.form;
 
   return (
     <div className="space-y-6 px-8 py-4">
@@ -80,7 +70,6 @@ export const QuestionAttemptHistoryListPage = () => {
       </Card>
 
       <div className="text-sm text-muted-foreground">全{targets.length}件</div>
-
       {error ? <div className="text-sm text-destructive">{error}</div> : null}
 
       <div className="rounded-md border">
@@ -107,8 +96,7 @@ export const QuestionAttemptHistoryListPage = () => {
                     className="h-8"
                     onClick={() => {
                       const title = t.canonicalKey ?? t.questionText ?? t.displayLabel ?? t.targetId;
-                      setSelected({ targetId: t.targetId, subject: t.subject as SubjectId, title });
-                      history.startAdd();
+                      void dialog.open({ targetId: t.targetId, subject: t.subject as any, title });
                     }}>
                     履歴
                   </Button>
@@ -139,59 +127,49 @@ export const QuestionAttemptHistoryListPage = () => {
       </div>
 
       <Dialog
-        open={history.isOpen}
+        open={dialog.isOpen}
         onOpenChange={(open) => {
           if (!open) {
-            history.setIsOpen(false);
-            setSelected(null);
+            dialog.close();
           }
         }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>履歴: {selected?.title ?? ''}</DialogTitle>
+            <DialogTitle>履歴: {dialog.selected?.title ?? ''}</DialogTitle>
           </DialogHeader>
 
-          {history.error ? <div className="text-sm text-destructive">{history.error}</div> : null}
+          {dialog.error ? <div className="text-sm text-destructive">{dialog.error}</div> : null}
+          {candidateState.error ? <div className="text-sm text-destructive">{candidateState.error}</div> : null}
 
           <div className="space-y-3">
+            <div className="grid grid-cols-1 gap-2 text-sm">
+              <div>
+                次回日付: <span className="font-medium">{candidateState.candidate?.nextTime ?? '-'}</span>
+              </div>
+              <div>
+                ロック: <span className="font-medium">{candidateState.candidate?.testId ?? '-'}</span>
+              </div>
+            </div>
+
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[140px]">実施日</TableHead>
                   <TableHead className="w-[100px]">正誤</TableHead>
-                  <TableHead>メモ</TableHead>
-                  <TableHead className="w-[180px]" />
+                  <TableHead>復習テストID</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {history.attempts.map((a) => (
-                  <TableRow key={a.attemptedAt}>
+                {dialog.attempts.map((a) => (
+                  <TableRow key={`${a.reviewTestId ?? ''}#${a.dateYmd}`}>
                     <TableCell>{a.dateYmd}</TableCell>
                     <TableCell>{a.isCorrect ? '正解' : '不正解'}</TableCell>
-                    <TableCell className="truncate" title={a.memo ?? ''}>
-                      {a.memo ?? ''}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" size="sm" onClick={() => history.startEdit(a)}>
-                          変更
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          onClick={() => history.remove(a.dateYmd)}
-                          disabled={history.isLoading}>
-                          削除
-                        </Button>
-                      </div>
-                    </TableCell>
+                    <TableCell className="text-muted-foreground">{a.reviewTestId ?? '-'}</TableCell>
                   </TableRow>
                 ))}
-                {history.attempts.length === 0 ? (
+                {dialog.attempts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
+                    <TableCell colSpan={3} className="py-6 text-center text-muted-foreground">
                       履歴がありません
                     </TableCell>
                   </TableRow>
@@ -199,45 +177,11 @@ export const QuestionAttemptHistoryListPage = () => {
               </TableBody>
             </Table>
 
-            <form onSubmit={history.submit} className="space-y-3">
-              <div className="space-y-2">
-                <Label>実施日 *</Label>
-                <Input
-                  type="date"
-                  {...registerHistory('dateYmd', { required: '必須です' })}
-                  aria-invalid={!!historyErrors.dateYmd}
-                  className={historyErrors.dateYmd ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                />
-                {historyErrors.dateYmd?.message ? (
-                  <p className="text-sm text-destructive">{String(historyErrors.dateYmd.message)}</p>
-                ) : null}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <input type="checkbox" {...registerHistory('isCorrect')} className="h-4 w-4" />
-                <span className="text-sm">正解</span>
-              </div>
-
-              <div className="space-y-2">
-                <Label>メモ</Label>
-                <Input {...registerHistory('memo')} placeholder="任意" />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    history.setIsOpen(false);
-                    setSelected(null);
-                  }}>
-                  閉じる
-                </Button>
-                <Button type="submit" disabled={history.isLoading || !selected}>
-                  保存
-                </Button>
-              </div>
-            </form>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={dialog.close}>
+                閉じる
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

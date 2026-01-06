@@ -13,7 +13,7 @@ export const useQuestionManagement = () => {
   const { id } = useParams<{ id: string }>();
   const { questions, detail, files, status } = useWordTestStore((s) => s.material);
   const fetchQuestions = useWordTestStore((s) => s.fetchQuestions);
-  const fetchMaterialSet = useWordTestStore((s) => s.fetchMaterialSet);
+  const fetchMaterial = useWordTestStore((s) => s.fetchMaterial);
   const fetchMaterialFiles = useWordTestStore((s) => s.fetchMaterialFiles);
   const createQuestion = useWordTestStore((s) => s.createQuestion);
   const deleteQuestion = useWordTestStore((s) => s.deleteQuestion);
@@ -33,11 +33,11 @@ export const useQuestionManagement = () => {
   useEffect(() => {
     if (id) {
       extractedRef.current = false;
-      fetchMaterialSet(id);
+      fetchMaterial(id);
       fetchMaterialFiles(id);
       fetchQuestions(id);
     }
-  }, [id, fetchMaterialSet, fetchMaterialFiles, fetchQuestions]);
+  }, [id, fetchMaterial, fetchMaterialFiles, fetchQuestions]);
 
   useEffect(() => {
     if (!id || !detail || detail.id !== id) return;

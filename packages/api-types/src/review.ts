@@ -252,3 +252,26 @@ export type ReviewTestTarget = {
 export type ListReviewTestTargetsResponse = {
   items: ReviewTestTarget[];
 };
+
+/**
+ * 復習テスト候補（ReviewTestCandidateTable）
+ */
+export type ReviewTestCandidate = {
+  /** 候補ID */
+  id: string;
+  /** 科目 */
+  subject: SubjectId;
+  /** 対象ID（QUESTION: questionId / KANJI: wordId） */
+  targetId: string;
+  /** モード */
+  mode: 'QUESTION' | 'KANJI';
+  /** 次回日付 (YYYY-MM-DD) */
+  nextTime: string;
+  /** ロック: 紐付けられた復習テストID */
+  testId?: string;
+};
+
+/** `GET /review-test-candidates?subject=...&mode=...` */
+export type ListReviewTestCandidatesResponse = {
+  items: ReviewTestCandidate[];
+};

@@ -1,10 +1,10 @@
 import { apiRequest } from './apiClient';
 import type {
-  MaterialSet,
-  MaterialSetListResponse,
-  SearchMaterialSetsRequest,
-  CreateMaterialSetRequest,
-  UpdateMaterialSetRequest,
+  Material,
+  MaterialListResponse,
+  SearchMaterialsRequest,
+  CreateMaterialRequest,
+  UpdateMaterialRequest,
   MaterialFile,
   ListMaterialFilesResponse,
   Question,
@@ -13,72 +13,69 @@ import type {
   UpdateQuestionRequest,
 } from '@smart-exam/api-types';
 
-export const listMaterialSets = async (params?: SearchMaterialSetsRequest): Promise<MaterialSetListResponse> => {
-  return apiRequest<MaterialSetListResponse, SearchMaterialSetsRequest>({
+export const listMaterials = async (params?: SearchMaterialsRequest): Promise<MaterialListResponse> => {
+  return apiRequest<MaterialListResponse, SearchMaterialsRequest>({
     method: 'POST',
     path: '/api/materials/search',
     body: params ?? {},
   });
 };
 
-export const createMaterialSet = async (request: CreateMaterialSetRequest): Promise<MaterialSet> => {
-  return apiRequest<MaterialSet, CreateMaterialSetRequest>({
+export const createMaterial = async (request: CreateMaterialRequest): Promise<Material> => {
+  return apiRequest<Material, CreateMaterialRequest>({
     method: 'POST',
     path: '/api/materials',
     body: request,
   });
 };
 
-export const getMaterialSet = async (materialSetId: string): Promise<MaterialSet> => {
-  return apiRequest<MaterialSet>({
+export const getMaterial = async (materialId: string): Promise<Material> => {
+  return apiRequest<Material>({
     method: 'GET',
-    path: `/api/materials/${materialSetId}`,
+    path: `/api/materials/${materialId}`,
   });
 };
 
-export const updateMaterialSet = async (
-  materialSetId: string,
-  request: UpdateMaterialSetRequest
-): Promise<MaterialSet> => {
-  return apiRequest<MaterialSet, UpdateMaterialSetRequest>({
+export const updateMaterial = async (materialId: string, request: UpdateMaterialRequest): Promise<Material> => {
+  return apiRequest<Material, UpdateMaterialRequest>({
     method: 'PATCH',
-    path: `/api/materials/${materialSetId}`,
+    path: `/api/materials/${materialId}`,
     body: request,
   });
 };
 
-export const deleteMaterialSet = async (materialSetId: string): Promise<void> => {
+export const deleteMaterial = async (materialId: string): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
-    path: `/api/materials/${materialSetId}`,
+    path: `/api/materials/${materialId}`,
   });
 };
 
-export const listMaterialFiles = async (materialSetId: string): Promise<MaterialFile[]> => {
+export const listMaterialFiles = async (materialId: string): Promise<MaterialFile[]> => {
   const response = await apiRequest<ListMaterialFilesResponse>({
     method: 'GET',
-    path: `/api/materials/${materialSetId}/files`,
+    path: `/api/materials/${materialId}/files`,
   });
 
   return response.datas;
 };
 
-export const listQuestions = async (materialSetId: string): Promise<Question[]> => {
+export const listQuestions = async (materialId: string): Promise<Question[]> => {
   const response = await apiRequest<QuestionListResponse>({
     method: 'GET',
-    path: `/api/materials/${materialSetId}/questions`,
+    path: `/api/materials/${materialId}/questions`,
   });
 
   return response.datas;
 };
 
 export const createQuestion = async (
-  materialSetId: string,
+  materialId: string,
   request: CreateQuestionRequest
 ): Promise<Question> => {
   return apiRequest<Question, CreateQuestionRequest>({
     method: 'POST',
-    path: `/api/materials/${materialSetId}/questions`,
+    path: `/api/materials/${materialId}/questions`,
     body: request,
   });
 };

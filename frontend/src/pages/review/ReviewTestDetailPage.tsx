@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useReviewDetail } from '@/hooks/review';
-import { formatYmdHmSlash } from '@/utils/date';
+import { formatYmdSlash } from '@/utils/date';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 
 export const ReviewTestDetailPage = () => {
@@ -76,11 +76,11 @@ export const ReviewTestDetailPage = () => {
               </div>
               <div className="flex items-start gap-4">
                 <span className="w-24 shrink-0 font-medium">問題数</span>
-                <span className="flex-1 text-left">{review.itemCount}問</span>
+                <span className="flex-1 text-left">{review.count}問</span>
               </div>
               <div className="flex items-start gap-4">
                 <span className="w-24 shrink-0 font-medium">作成日時</span>
-                <span className="flex-1 text-left">{formatYmdHmSlash(review.createdAt)}</span>
+                <span className="flex-1 text-left">{formatYmdSlash(review.createdDate)}</span>
               </div>
               <div className="flex items-start gap-4">
                 <span className="w-24 shrink-0 font-medium">ステータス</span>

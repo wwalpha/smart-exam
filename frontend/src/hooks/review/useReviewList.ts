@@ -7,7 +7,7 @@ import type { WordTestSubject } from '@typings/wordtest';
 
 type SearchFormValues = {
   subject: 'ALL' | WordTestSubject;
-  status: string;
+  status: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
 };
 
 export const useReviewList = () => {
@@ -31,19 +31,19 @@ export const useReviewList = () => {
   const search = (data: SearchFormValues) => {
     fetchReviewTests({
       mode,
-      subject: data.subject === 'ALL' ? undefined : data.subject,
-      status: data.status === 'ALL' ? undefined : data.status,
+      subject: data.subject,
+      ...(data.status === 'ALL' ? {} : { status: data.status }),
     });
   };
 
   useEffect(() => {
-    fetchReviewTests({ mode });
+    fetchReviewTests({ mode, subject: 'ALL' });
   }, [fetchReviewTests, mode]);
 
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
       await deleteReviewTest(id);
-      fetchReviewTests({ mode });
+      fetchReviewTests({ mode, subject: 'ALL' });
     }
   };
 

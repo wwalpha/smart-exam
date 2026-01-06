@@ -55,8 +55,8 @@ export const App = () => {
       { pattern: '/materials', title: '教材セット一覧' },
       { pattern: '/materials/new', title: '教材セット登録' },
       { pattern: '/materials/attempts', title: '問題テスト履歴' },
-      { pattern: '/materials/:id/questions', title: '問題管理' },
       { pattern: '/materials/:id/attempts', title: '問題テスト履歴' },
+      { pattern: '/materials/:id/questions', title: '問題管理' },
       { pattern: '/materials/:id', title: '教材セット詳細' },
 
       { pattern: '/reviewtests/questions', title: '問題復習テスト一覧' },
@@ -75,8 +75,8 @@ export const App = () => {
       { pattern: '/kanji/new', title: '漢字登録' },
       { pattern: '/kanji/import', title: '漢字一括登録' },
       { pattern: '/kanji/attempts', title: '漢字テスト履歴' },
-      { pattern: '/kanji/:id', title: '漢字編集' },
       { pattern: '/kanji/:id/attempts', title: '漢字テスト履歴' },
+      { pattern: '/kanji/:id', title: '漢字編集' },
 
       { pattern: '/search/questions', title: '問題検索' },
       { pattern: '/settings/pdf', title: 'PDF設定' },
@@ -96,9 +96,9 @@ export const App = () => {
         {/* Materials */}
         <Route path="/materials" element={<MaterialSetListPage />} />
         <Route path="/materials/new" element={<MaterialSetCreatePage />} />
-        <Route path="/materials/attempts" element={<QuestionAttemptHistoryListPage />} />
         <Route path="/materials/:id" element={<MaterialSetDetailPage />} />
         <Route path="/materials/:id/questions" element={<QuestionManagementPage />} />
+        <Route path="/materials/attempts" element={<QuestionAttemptHistoryListPage />} />
         <Route path="/materials/:id/attempts" element={<QuestionAttemptHistoryPage />} />
 
         {/* Review Tests (Questions) */}
@@ -120,8 +120,8 @@ export const App = () => {
         <Route path="/kanji/new" element={<KanjiCreatePage />} />
         <Route path="/kanji/import" element={<KanjiImportPage />} />
         <Route path="/kanji/attempts" element={<KanjiAttemptHistoryListPage />} />
-        <Route path="/kanji/:id" element={<KanjiCreatePage />} />
         <Route path="/kanji/:id/attempts" element={<KanjiAttemptHistoryPage />} />
+        <Route path="/kanji/:id" element={<KanjiCreatePage />} />
 
         {/* Search */}
         <Route path="/search/questions" element={<QuestionSearchPage />} />

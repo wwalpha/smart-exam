@@ -14,8 +14,8 @@ type SearchFormValues = {
 
 export const useMaterialList = () => {
   const { list, total, status } = useWordTestStore((s) => s.material);
-  const fetchMaterialSets = useWordTestStore((s) => s.fetchMaterialSets);
-  const deleteMaterialSet = useWordTestStore((s) => s.deleteMaterialSet);
+  const fetchMaterials = useWordTestStore((s) => s.fetchMaterials);
+  const deleteMaterial = useWordTestStore((s) => s.deleteMaterial);
   
   const form = useForm<SearchFormValues>({
     defaultValues: {
@@ -28,7 +28,7 @@ export const useMaterialList = () => {
   });
 
   const search = (data: SearchFormValues) => {
-    fetchMaterialSets({
+    fetchMaterials({
       subject: data.subject === 'ALL' ? undefined : data.subject,
       grade: data.grade === 'ALL' ? undefined : data.grade,
       provider: data.provider.trim() ? data.provider.trim() : undefined,
@@ -38,14 +38,14 @@ export const useMaterialList = () => {
   };
 
   useEffect(() => {
-    fetchMaterialSets();
-  }, [fetchMaterialSets]);
+    fetchMaterials();
+  }, [fetchMaterials]);
 
   const { confirm, ConfirmDialog } = useConfirm();
 
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
-      await deleteMaterialSet(id);
+      await deleteMaterial(id);
     }
   };
 
