@@ -5,28 +5,13 @@
  */
 
 /** `GET /materials/:materialId` */
-export type GetMaterialSetParams = {
+export type GetMaterialParams = {
   materialId: string;
 };
 
 /** `PATCH /questions/:questionId` */
 export type UpdateQuestionParams = {
   questionId: string;
-};
-
-/** `POST /tests/:testId/attempts` */
-export type CreateAttemptParams = {
-  testId: string;
-};
-
-/** `PATCH /attempts/:attemptId/submit` */
-export type SubmitAttemptParams = {
-  attemptId: string;
-};
-
-/** `GET /tests/:testId/attempts/latest` */
-export type GetLatestAttemptParams = {
-  testId: string;
 };
 
 /** `GET /materials/:materialId/questions` */

@@ -56,9 +56,9 @@ export type ReviewTestListResponse = {
 
 /** `POST /review-tests/search` */
 export type SearchReviewTestsRequest = {
-  subject?: string;
-  status?: string;
-  mode?: 'QUESTION' | 'KANJI';
+  subject: 'ALL' | SubjectId;
+  mode: 'QUESTION' | 'KANJI';
+  status?: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
   limit?: number;
   cursor?: string;
 };
@@ -126,10 +126,10 @@ export type ReviewTest = {
   mode: 'QUESTION' | 'KANJI';
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
+  /** 提出日 (YYYY-MM-DD) */
+  submittedDate?: string;
   /** ステータス */
   status: 'IN_PROGRESS' | 'COMPLETED';
-  /** 作成日時 (ISO8601) */
-  createdAt: string;
   /** PDF情報 */
   pdf: {
     /** PDF表示用URL */
@@ -138,7 +138,11 @@ export type ReviewTest = {
     downloadUrl: string;
   };
   /** 出題数 */
-  itemCount: number;
+  count: number;
+  /** 出題IDリスト（mode に応じて questionId / wordId を格納） */
+  questions: string[];
+  /** 採点結果 */
+  results: { id: string; isCorrect: boolean }[];
 };
 
 /**
@@ -146,7 +150,7 @@ export type ReviewTest = {
  */
 export type ReviewTestResult = {
   /** 対象ID */
-  targetId: string;
+  id: string;
   /** 正誤 */
   isCorrect: boolean;
 };

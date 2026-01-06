@@ -1,7 +1,5 @@
-export * from './attempt';
 export * from './dashboard';
 export * from './bedrock';
-export * from './exam';
 export * from './kanji';
 export * from './material';
 export * from './question-types';

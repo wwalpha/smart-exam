@@ -1,12 +1,12 @@
 import type { SubjectId } from './subject';
 
 /** `GET /materials/:materialId` */
-export type GetMaterialSetParams = {
+export type GetMaterialParams = {
   materialId: string;
 };
 
 /** `DELETE /materials/:materialId` */
-export type DeleteMaterialSetParams = {
+export type DeleteMaterialParams = {
   materialId: string;
 };
 
@@ -42,7 +42,7 @@ export type DeleteQuestionParams = {
 };
 
 /** 教材セット作成リクエスト */
-export type CreateMaterialSetRequest = {
+export type CreateMaterialRequest = {
   name: string;
   subject: SubjectId;
   /** 教材年月 (YYYY-MM) */
@@ -55,21 +55,21 @@ export type CreateMaterialSetRequest = {
 };
 
 /** 教材セット作成レスポンス */
-export type CreateMaterialSetResponse = MaterialSet;
+export type CreateMaterialResponse = Material;
 
 /** 教材セット更新リクエスト */
-export type UpdateMaterialSetRequest = Partial<CreateMaterialSetRequest>;
+export type UpdateMaterialRequest = Partial<CreateMaterialRequest>;
 
 /** 教材セット取得レスポンス */
-export type GetMaterialSetResponse = MaterialSet;
+export type GetMaterialResponse = Material;
 
 /** `DELETE /materials/:materialId` */
-export type DeleteMaterialSetResponse = Record<string, never>;
+export type DeleteMaterialResponse = Record<string, never>;
 
 /** 教材セット一覧取得レスポンス */
-export type MaterialSetListResponse = {
+export type MaterialListResponse = {
   /** 教材セットリスト */
-  items: MaterialSet[];
+  items: Material[];
   /** 総件数 */
   total: number;
   /** 次ページ用カーソル */
@@ -77,7 +77,7 @@ export type MaterialSetListResponse = {
 };
 
 /** `POST /materials/search` */
-export type SearchMaterialSetsRequest = {
+export type SearchMaterialsRequest = {
   subject?: SubjectId;
   grade?: string;
   provider?: string;
@@ -89,7 +89,7 @@ export type SearchMaterialSetsRequest = {
 };
 
 /** `POST /materials/search` */
-export type SearchMaterialSetsResponse = MaterialSetListResponse;
+export type SearchMaterialsResponse = MaterialListResponse;
 
 /**
  * 教材に関連するファイル
@@ -154,7 +154,7 @@ export type DeleteQuestionResponse = Record<string, never>;
 /**
  * 教材セット（テスト一回分など）
  */
-export type MaterialSet = {
+export type Material = {
   /** ID */
   id: string;
   /** 名称 */
