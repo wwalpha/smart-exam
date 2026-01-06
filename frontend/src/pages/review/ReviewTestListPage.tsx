@@ -26,10 +26,10 @@ export const ReviewTestListPage = () => {
   };
 
   return (
-    <div className="space-y-6 px-8">
+    <div className="space-y-6 px-8 py-4 ">
       <ConfirmDialog />
       <Card>
-        <CardContent className="p-3">
+        <CardContent className="p-6 pt-4">
           <form onSubmit={search} className="space-y-4">
             <div className="flex flex-wrap gap-4 items-end">
               <div className="w-40">

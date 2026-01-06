@@ -186,6 +186,11 @@ export type MaterialSlice = {
     answerFile?: File;
     gradedFile?: File;
   }) => Promise<MaterialSet>;
+  uploadMaterialPdf: (params: {
+    materialSetId: string;
+    fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
+    file: File;
+  }) => Promise<void>;
   fetchMaterialSet: (id: string) => Promise<void>;
   updateMaterialSet: (id: string, request: UpdateMaterialSetRequest) => Promise<void>;
   deleteMaterialSet: (id: string) => Promise<void>;

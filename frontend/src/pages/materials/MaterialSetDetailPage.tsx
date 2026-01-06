@@ -1,12 +1,18 @@
 import { Link } from 'react-router-dom';
+import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useMaterialDetail } from '@/hooks/materials';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 
+type PdfFileType = 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
+
+const PDF_FILE_TYPES: PdfFileType[] = ['QUESTION', 'ANSWER', 'GRADED_ANSWER'];
+
 export const MaterialSetDetailPage = () => {
-  const { material, files, isLoading, error, id, fileTypeLabel, previewFile } = useMaterialDetail();
+  const { material, filesByType, isLoading, error, id, fileTypeLabel, previewFile, replacePdf } = useMaterialDetail();
+  const fileInputRefs = useRef<Partial<Record<PdfFileType, HTMLInputElement | null>>>({});
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -70,22 +76,53 @@ export const MaterialSetDetailPage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {files.map((file) => (
-              <div key={file.id} className="flex items-center justify-between border p-3 rounded-md">
-                <div>
-                  <div className="font-medium">{fileTypeLabel(file.fileType)}</div>
-                  <div className="text-sm text-muted-foreground">{file.filename}</div>
+            {PDF_FILE_TYPES.map((fileType) => {
+              const file = filesByType[fileType];
+
+              return (
+                <div key={fileType} className="flex flex-col gap-2 border p-3 rounded-md sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="font-medium">{fileTypeLabel(fileType)}</div>
+                    <div className="text-sm text-muted-foreground truncate">{file?.filename ?? '未登録'}</div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 justify-end">
+                    <input
+                      ref={(el) => {
+                        fileInputRefs.current[fileType] = el;
+                      }}
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) void replacePdf(fileType, f);
+                        e.target.value = '';
+                      }}
+                    />
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-[100px]"
+                      onClick={() => file && previewFile(file.s3Key)}
+                      disabled={!file}>
+                      プレビュー
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-[100px]"
+                      onClick={() => fileInputRefs.current[fileType]?.click()}>
+                      アップロード
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-[100px]"
-                  onClick={() => previewFile(file.s3Key)}>
-                  プレビュー
-                </Button>
-              </div>
-            ))}
-            {files.length === 0 && <div className="text-muted-foreground">ファイルが登録されていません</div>}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

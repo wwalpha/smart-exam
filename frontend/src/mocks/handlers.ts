@@ -26,6 +26,7 @@ import type {
   ImportKanjiResponse,
   Kanji,
   KanjiListResponse,
+  MaterialFile,
   MaterialSet,
   MaterialSetListResponse,
   SearchKanjiRequest,
@@ -274,7 +275,11 @@ export const handlers = [
 
   http.put('http://localhost/mock-s3/:key*', ({ params }) => {
     const key = String(params.key);
-    uploadedObjects.add(key);
+    try {
+      uploadedObjects.add(decodeURIComponent(key));
+    } catch {
+      uploadedObjects.add(key);
+    }
     return new HttpResponse(null, { status: 200 });
   }),
 
@@ -379,8 +384,43 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.get('/api/material-sets/:materialSetId/files', () => {
-    return HttpResponse.json({ datas: [] });
+  http.get('/api/material-sets/:materialSetId/files', ({ params }) => {
+    const materialSetId = String(params.materialSetId);
+    const prefix = `materials/${materialSetId}/`;
+    const now = new Date().toISOString();
+
+    const allowedTypes = new Set<MaterialFile['fileType']>(['QUESTION', 'ANSWER', 'GRADED_ANSWER']);
+
+    const datas: MaterialFile[] = Array.from(uploadedObjects)
+      .filter((key) => key.startsWith(prefix))
+      .map((key) => {
+        const parts = key.split('/');
+        // materials/{materialSetId}/{fileType}/{id}-{filename}
+        if (parts.length < 4) return null;
+
+        const fileType = parts[2] as MaterialFile['fileType'];
+        if (!allowedTypes.has(fileType)) return null;
+
+        const baseName = parts.slice(3).join('/');
+        const dashIndex = baseName.indexOf('-');
+        const id = dashIndex > 0 ? baseName.slice(0, dashIndex) : baseName;
+        const filename = dashIndex > 0 ? baseName.slice(dashIndex + 1) : baseName;
+        const contentType = filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';
+
+        const item: MaterialFile = {
+          id,
+          materialSetId,
+          filename,
+          s3Key: key,
+          contentType,
+          fileType,
+          createdAt: now,
+        };
+        return item;
+      })
+      .filter((x): x is MaterialFile => x !== null);
+
+    return HttpResponse.json({ datas });
   }),
 
   http.get('/api/material-files', () => {

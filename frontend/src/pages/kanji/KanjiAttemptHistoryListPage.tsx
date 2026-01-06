@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useReviewTargets } from '@/hooks/review';
 import { SUBJECT_LABEL } from '@/lib/Consts';
@@ -21,33 +21,36 @@ export const KanjiAttemptHistoryListPage = () => {
   }, [items]);
 
   return (
-    <div className="space-y-6 px-6">
+    <div className="space-y-6 px-8 py-4">
       <Card>
-        <CardHeader>
-          <CardTitle>対象期間</CardTitle>
-        </CardHeader>
         <CardContent>
-          <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-end">
-            <div className="space-y-2">
-              <Label>開始日 *</Label>
-              <Input
-                type="date"
-                {...register('from', { required: '必須です' })}
-                aria-invalid={!!errors.from}
-                className={errors.from ? 'border-destructive focus-visible:ring-destructive' : undefined}
-              />
-              {errors.from?.message ? <p className="text-sm text-destructive">{String(errors.from.message)}</p> : null}
+          <form onSubmit={submit} className="space-y-4 pt-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>開始日 *</Label>
+                <Input
+                  type="date"
+                  {...register('from', { required: '必須です' })}
+                  aria-invalid={!!errors.from}
+                  className={errors.from ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                />
+                {errors.from?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.from.message)}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
+                <Label>終了日 *</Label>
+                <Input
+                  type="date"
+                  {...register('to', { required: '必須です' })}
+                  aria-invalid={!!errors.to}
+                  className={errors.to ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                />
+                {errors.to?.message ? <p className="text-sm text-destructive">{String(errors.to.message)}</p> : null}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>終了日 *</Label>
-              <Input
-                type="date"
-                {...register('to', { required: '必須です' })}
-                aria-invalid={!!errors.to}
-                className={errors.to ? 'border-destructive focus-visible:ring-destructive' : undefined}
-              />
-              {errors.to?.message ? <p className="text-sm text-destructive">{String(errors.to.message)}</p> : null}
-            </div>
+
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading}>
                 表示

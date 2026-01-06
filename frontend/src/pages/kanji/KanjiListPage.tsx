@@ -31,7 +31,7 @@ export const KanjiListPage = () => {
   });
 
   return (
-    <div className="space-y-6 px-6">
+    <div className="space-y-6 px-8 py-4">
       <ConfirmDialog />
       <Card>
         <CardHeader>

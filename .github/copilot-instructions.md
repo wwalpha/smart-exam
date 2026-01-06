@@ -4,11 +4,16 @@
 
 - AWS CLI を利用する際は常に `--no-cli-pager` オプションを付与してください。
 - CI（Ubuntu/Linux）はファイル名の大小文字を区別するため、TypeScript の import パスは git 管理されている実ファイル名と **大小文字まで完全一致** させてください（大小文字だけのリネームは `git mv` で確実に反映）。
+- Frontend の `yarn dev` は MSW を使用しません。API を叩く場合は `VITE_APIGW_URL` または `VITE_API_ENDPOINT` を設定して実バックエンドに向けてください。
 
 ### Yarn (workspace)
 
 - このリポジトリは Yarn Berry (v4) の workspace 構成です。`yarn -C` は使わず、`yarn workspace <workspaceName> <script>` を使用してください。
 - workspace 名の例: `frontend`, `smart-exam-backend`, `@smart-exam/api-types`。
+
+### api-types（開発フロー）
+
+- `packages/api-types/src/**` を変更した場合は、依存側（`frontend` / `smart-exam-backend`）が参照する `dist` を更新するために `yarn workspace @smart-exam/api-types build` を実行してください。
 
 ## フロントエンド実装ルール（仕様以外）
 
@@ -165,7 +170,6 @@
 - `frontend/src/hooks`: UI から切り出したロジック（Custom Hook）
 - `frontend/src/stores`: Zustand store（slice）
 - `frontend/src/services`: API クライアント/サービス層（HTTP 呼び出し）
-- `frontend/src/mocks`: API mock（MSW など）
 - `frontend/src/components`: 共通 UI
 - `frontend/typings`: 型定義（Request/Response、Slice 型など）
 

@@ -1,19 +1,22 @@
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { ChevronRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useMaterialList } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
+const PROVIDER_OPTIONS = ['SAPIX', '四谷'] as const;
+
 export const MaterialSetListPage = () => {
   const { materials, form, search, remove, ConfirmDialog } = useMaterialList();
-  const { register, setValue } = form;
+  const { register, setValue, watch } = form;
+  const provider = watch('provider');
 
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -34,56 +37,72 @@ export const MaterialSetListPage = () => {
     <div className="space-y-6 px-8 py-4">
       <ConfirmDialog />
       <Card>
-        <CardHeader>
-          <CardTitle>検索条件</CardTitle>
-        </CardHeader>
         <CardContent>
-          <form onSubmit={onSearch} className="flex flex-wrap gap-4 items-end">
-            <div className="w-40">
-              <label className="text-sm font-medium">科目</label>
-              <Select onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)} defaultValue="ALL">
-                <SelectTrigger>
-                  <SelectValue placeholder="科目" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">全て</SelectItem>
-                  <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
-                  <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
-                  <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
-                </SelectContent>
-              </Select>
+          <form onSubmit={onSearch} className="space-y-4 pt-4">
+            <div className="flex flex-wrap gap-4 items-end">
+              <div className="w-40">
+                <label className="text-sm font-medium">科目</label>
+                <Select onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)} defaultValue="ALL">
+                  <SelectTrigger>
+                    <SelectValue placeholder="科目" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">全て</SelectItem>
+                    <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
+                    <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
+                    <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-40">
+                <label className="text-sm font-medium">学年</label>
+                <Select onValueChange={(v) => setValue('grade', v)} defaultValue="ALL">
+                  <SelectTrigger>
+                    <SelectValue placeholder="学年" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">全て</SelectItem>
+                    <SelectItem value="4">4年</SelectItem>
+                    <SelectItem value="5">5年</SelectItem>
+                    <SelectItem value="6">6年</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-48">
+                <label className="text-sm font-medium">教材種別</label>
+                <input type="hidden" {...register('provider')} />
+                <Select
+                  value={(provider?.trim() ? provider : 'ALL') as string}
+                  onValueChange={(v) => setValue('provider', v === 'ALL' ? '' : v, { shouldDirty: true })}
+                  defaultValue="ALL">
+                  <SelectTrigger>
+                    <SelectValue placeholder="教材種別" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">全て</SelectItem>
+                    {PROVIDER_OPTIONS.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-44">
+                <label className="text-sm font-medium">実施年月日</label>
+                <Input type="date" {...register('date')} />
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <label className="text-sm font-medium">キーワード</label>
+                <Input {...register('q')} placeholder="教材名など" />
+              </div>
             </div>
-            <div className="w-40">
-              <label className="text-sm font-medium">学年</label>
-              <Select onValueChange={(v) => setValue('grade', v)} defaultValue="ALL">
-                <SelectTrigger>
-                  <SelectValue placeholder="学年" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">全て</SelectItem>
-                  <SelectItem value="4">4年</SelectItem>
-                  <SelectItem value="5">5年</SelectItem>
-                  <SelectItem value="6">6年</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-48">
-              <label className="text-sm font-medium">教材種別</label>
-              <Input {...register('provider')} placeholder="例: SAPIX" />
-            </div>
-            <div className="w-44">
-              <label className="text-sm font-medium">実施年月日</label>
-              <Input type="date" {...register('date')} />
-            </div>
-            <div className="flex-1 min-w-[200px]">
-              <label className="text-sm font-medium">キーワード</label>
-              <Input {...register('q')} placeholder="教材名など" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Button type="submit">検索</Button>
+
+            <div className="flex justify-end gap-2">
               <Button type="button" asChild>
                 <Link to="/materials/new">新規登録</Link>
               </Button>
+              <Button type="submit">検索</Button>
             </div>
           </form>
         </CardContent>
@@ -115,7 +134,7 @@ export const MaterialSetListPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead />
+              <TableHead className="w-[200px]">操作</TableHead>
               <TableHead>学年</TableHead>
               <TableHead>教材種別</TableHead>
               <TableHead>科目</TableHead>
@@ -127,14 +146,21 @@ export const MaterialSetListPage = () => {
             {pagedMaterials.map((material) => (
               <TableRow key={material.id}>
                 <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="削除"
-                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => remove(material.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button asChild variant="outline" size="icon" className="h-8 w-8" aria-label="詳細">
+                      <Link to={`/materials/${material.id}`}>
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="削除"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => remove(material.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
                 <TableCell>{material.grade}年</TableCell>
                 <TableCell>{material.provider ?? ''}</TableCell>
@@ -142,11 +168,7 @@ export const MaterialSetListPage = () => {
                   <Badge variant="outline">{SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                 </TableCell>
                 <TableCell>{material.yearMonth}</TableCell>
-                <TableCell>
-                  <Link to={`/materials/${material.id}`} className="font-medium underline underline-offset-4">
-                    {material.name}
-                  </Link>
-                </TableCell>
+                <TableCell className="font-medium">{material.name}</TableCell>
               </TableRow>
             ))}
             {materials.length === 0 && (

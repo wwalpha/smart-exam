@@ -113,6 +113,26 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
+    uploadMaterialPdf: async (params: {
+      materialSetId: string;
+      fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
+      file: File;
+    }) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          const prefix = `materials/${params.materialSetId}/${params.fileType}`;
+          const presigned = await EXAM_API.getUploadUrl(params.file.name, params.file.type, prefix);
+          await EXAM_API.uploadFileToS3(presigned.uploadUrl, params.file);
+
+          const files = await MATERIAL_API.listMaterialFiles(params.materialSetId);
+          updateMaterial({ files });
+        },
+        'PDFのアップロードに失敗しました。',
+        { rethrow: true }
+      );
+    },
+
     fetchMaterialSet: async (id) => {
       await withStatus(
         setStatus,

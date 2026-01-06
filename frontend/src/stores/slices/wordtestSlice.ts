@@ -47,7 +47,7 @@ export const createWordTestSlice: StateCreator<WordTestSlice, [], [], WordTestSl
       await withStatus(
         setStatus,
         async () => {
-          // 一覧はサーバー（MSW）側を正として置き換える
+          // 一覧はサーバー側を正として置き換える
           const response = await WORDTEST_API.listWordTests();
           const nextLists = orderBy(response.datas, ['createdAt'], ['desc']);
           updateWordTest({ lists: nextLists });
