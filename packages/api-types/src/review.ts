@@ -95,6 +95,10 @@ export type ReviewTestItem = {
   kanji?: string;
   /** 出典教材ID */
   materialId?: string;
+  /** 出典教材の学年 */
+  grade?: string;
+  /** 出典教材の提供元 */
+  provider?: string;
   /** 出典教材名 */
   materialName?: string;
   /** 出典教材の教材年月日 (YYYY-MM-DD) */

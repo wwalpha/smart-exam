@@ -95,10 +95,12 @@ export const useQuestionManagement = () => {
 
   const markCorrect = async (questionId: string) => {
     await markQuestionCorrect(questionId);
+    if (id) fetchQuestions(id);
   };
 
   const markIncorrect = async (questionId: string) => {
     await markQuestionIncorrect(questionId);
+    if (id) fetchQuestions(id);
   };
 
   return {

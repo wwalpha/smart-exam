@@ -28,7 +28,13 @@ describe('material handler', () => {
     vi.spyOn(MaterialRepository, 'createMaterial').mockResolvedValue(mockItem as any);
 
     const req = {
-      body: { name: 'Test Material' },
+      body: {
+        name: 'Test Material',
+        subject: '4',
+        grade: '4年',
+        provider: 'SAPIX',
+        materialDate: '2025-01-01',
+      },
     } as Request<Record<string, never>, unknown, CreateMaterialRequest>;
     const res = {
       json: vi.fn(),

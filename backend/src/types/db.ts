@@ -13,9 +13,9 @@ export interface MaterialTable {
   /** 問題数 */
   questionCount: number;
   /** 学年 */
-  grade?: string;
+  grade: string;
   /** 提供元 */
-  provider?: string;
+  provider: string;
   /** 解答用紙S3パス */
   answerSheetPath?: string;
   /** 教材年月日 (YYYY-MM-DD) */
@@ -128,6 +128,10 @@ export interface ReviewTestItemEmbedded {
   reading?: string;
   /** 出典教材ID */
   materialId?: string;
+  /** 出典教材の学年 */
+  grade?: string;
+  /** 出典教材の提供元 */
+  provider?: string;
   /** 出典教材名 */
   materialName?: string;
   /** 出典教材の教材年月日 (YYYY-MM-DD) */
@@ -152,8 +156,6 @@ export interface ReviewTestCandidateTable {
   id: string;
   /** 対象ID（QUESTION: questionId / KANJI: wordId） */
   questionId: string;
-  /** 対象キー: questionId#createdAt */
-  questionKey: string;
   /** モード */
   mode: ReviewMode;
   /** 状態 */

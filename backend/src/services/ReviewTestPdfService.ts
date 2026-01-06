@@ -35,8 +35,8 @@ export const ReviewTestPdfService = {
     const pdfDoc = await PDFDocument.create();
     pdfDoc.registerFontkit(fontkit);
 
-    // CJKフォントはサイズが大きいので、使用グリフのみ埋め込み（zipもPDFも小さくする）
-    const jpFont = await pdfDoc.embedFont(fontBytes, { subset: true });
+    // タイトルが欠けるケースがあるため、サブセット化しない（全グリフを埋め込む）
+    const jpFont = await pdfDoc.embedFont(fontBytes, { subset: false });
 
     const createPage = () => {
       const page = pdfDoc.addPage([a4Width, a4Height]);

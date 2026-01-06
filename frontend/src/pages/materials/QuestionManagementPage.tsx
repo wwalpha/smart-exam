@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { useQuestionManagement } from '@/hooks/materials';
 
 export const QuestionManagementPage = () => {
@@ -134,6 +135,7 @@ export const QuestionManagementPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>問題番号</TableHead>
+                <TableHead>状態</TableHead>
                 <TableHead className="w-[176px]" />
               </TableRow>
             </TableHeader>
@@ -141,6 +143,24 @@ export const QuestionManagementPage = () => {
               {questions.map((q) => (
                 <TableRow key={q.id} className="h-10">
                   <TableCell className="py-2">{q.canonicalKey}</TableCell>
+                  <TableCell className="py-2">
+                    {q.reviewCandidate ? (
+                      <div className="flex items-center gap-2">
+                        {q.reviewCandidate.status === 'EXCLUDED' ? (
+                          <Badge variant="secondary">除外</Badge>
+                        ) : q.reviewCandidate.status === 'OPEN' ? (
+                          <Badge variant="outline">候補</Badge>
+                        ) : (
+                          <Badge variant="secondary">CLOSED</Badge>
+                        )}
+                        <span className="text-sm text-muted-foreground">
+                          次回: {q.reviewCandidate.nextTime} / 連続正解: {q.reviewCandidate.correctCount}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">未設定</span>
+                    )}
+                  </TableCell>
                   <TableCell className="py-2">
                     <div className="flex justify-end">
                       <div className="flex gap-2">

@@ -1,26 +1,33 @@
 import { MaterialsService } from '@/services/MaterialsService';
 import type { Material } from '@/repositories/repo.types';
-import { DateUtils } from '@/lib/dateUtils';
+
+const requireYmd = (value: unknown, fieldName: string): string => {
+  const trimmed = String(value ?? '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    throw new Error(`${fieldName} is required (YYYY-MM-DD)`);
+  }
+  return trimmed;
+};
+
+const requireNonEmpty = (value: unknown, fieldName: string): string => {
+  const trimmed = String(value ?? '').trim();
+  if (trimmed.length === 0) {
+    throw new Error(`${fieldName} is required`);
+  }
+  return trimmed;
+};
 
 export const getMaterial = async (id: string): Promise<Material | null> => {
   const dbItem = await MaterialsService.get(id);
 
   if (!dbItem) return null;
 
-  const materialDate = (() => {
-    const raw = dbItem.materialDate;
-    if (!raw) return DateUtils.todayYmd();
-    const trimmed = String(raw).trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-    return DateUtils.todayYmd();
-  })();
-
   return {
     id: dbItem.materialId,
     name: dbItem.title,
     subject: dbItem.subjectId,
-    grade: dbItem.grade,
-    provider: dbItem.provider,
-    materialDate,
+    grade: requireNonEmpty(dbItem.grade, 'Material.grade'),
+    provider: requireNonEmpty(dbItem.provider, 'Material.provider'),
+    materialDate: requireYmd(dbItem.materialDate, 'Material.materialDate'),
   };
 };

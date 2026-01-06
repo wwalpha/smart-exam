@@ -32,36 +32,33 @@ export const ReviewTestDetailPage = () => {
     navigate(basePath);
   }, [review, updateReviewTestStatus, navigate, basePath]);
 
-  const previewMaterialPdf = useCallback(
-    async (materialId: string, fileType: MaterialFile['fileType']) => {
-      try {
-        const files = await MATERIAL_API.listMaterialFiles(materialId);
-        const target = pickLatestPdf(files, fileType);
-        if (!target) {
-          toast.error('PDFが見つかりません');
-          return;
-        }
-
-        const blob = await apiRequestBlob({
-          method: 'GET',
-          path: `/api/materials/${encodeURIComponent(materialId)}/files/${encodeURIComponent(target.id)}`,
-        });
-
-        if (!(await isPdfBlob(blob))) {
-          const text = await blob.text().catch(() => '');
-          toast.error('PDFの取得に失敗しました', { description: text.slice(0, 200) });
-          return;
-        }
-
-        const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
-        const url = URL.createObjectURL(pdfBlob);
-        window.open(url, '_blank', 'noopener,noreferrer');
-      } catch {
-        toast.error('PDFの取得に失敗しました');
+  const previewMaterialPdf = useCallback(async (materialId: string, fileType: MaterialFile['fileType']) => {
+    try {
+      const files = await MATERIAL_API.listMaterialFiles(materialId);
+      const target = pickLatestPdf(files, fileType);
+      if (!target) {
+        toast.error('PDFが見つかりません');
+        return;
       }
-    },
-    []
-  );
+
+      const blob = await apiRequestBlob({
+        method: 'GET',
+        path: `/api/materials/${encodeURIComponent(materialId)}/files/${encodeURIComponent(target.id)}`,
+      });
+
+      if (!(await isPdfBlob(blob))) {
+        const text = await blob.text().catch(() => '');
+        toast.error('PDFの取得に失敗しました', { description: text.slice(0, 200) });
+        return;
+      }
+
+      const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {
+      toast.error('PDFの取得に失敗しました');
+    }
+  }, []);
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
@@ -144,60 +141,137 @@ export const ReviewTestDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="max-h-[400px] overflow-y-auto">
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                {review.items.map((item, index) => (
-                  <div key={item.id} className="rounded border px-3 py-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium">
-                          {index + 1}. {item.questionText}
+              {(() => {
+                const entries = review.items.map((item, index) => ({ item, no: index + 1 }));
+
+                if (review.mode !== 'QUESTION') {
+                  return (
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                      {entries.map(({ item, no }) => (
+                        <div key={item.id} className="rounded border px-3 py-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium">
+                                {no}. {item.questionText}
+                              </div>
+                            </div>
+                            <div className="shrink-0">
+                              {item.isCorrect === true && (
+                                <Badge
+                                  variant="default"
+                                  className="border-transparent bg-emerald-600 text-white hover:bg-emerald-600/90">
+                                  正解
+                                </Badge>
+                              )}
+                              {item.isCorrect === false && <Badge variant="destructive">不正解</Badge>}
+                              {item.isCorrect === undefined && <span className="text-muted-foreground">-</span>}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+
+                const blocks: Array<{
+                  key: string;
+                  grade: string;
+                  provider: string;
+                  materialDate: string;
+                  materialName: string;
+                  materialId: string | null;
+                  items: typeof entries;
+                }> = [];
+                const byKey = new Map<string, (typeof blocks)[number]>();
+
+                for (const e of entries) {
+                  const grade = e.item.grade ?? '';
+                  const provider = e.item.provider ?? '';
+                  const materialDate = e.item.materialDate ?? '';
+                  const materialName = e.item.materialName ?? '';
+                  const key = [grade, provider, materialDate, materialName].join('||');
+
+                  const existing = byKey.get(key);
+                  if (existing) {
+                    existing.items.push(e);
+                    continue;
+                  }
+
+                  const created = {
+                    key,
+                    grade,
+                    provider,
+                    materialDate,
+                    materialName,
+                    materialId: e.item.materialId ?? null,
+                    items: [e],
+                  };
+                  byKey.set(key, created);
+                  blocks.push(created);
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {blocks.map((b) => (
+                      <div key={b.key} className="rounded border">
+                        <div className="flex items-start justify-between gap-3 border-b px-3 py-2">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium">
+                              {[
+                                b.grade,
+                                b.provider,
+                                b.materialDate ? formatYmdSlash(b.materialDate) : '',
+                                b.materialName,
+                              ]
+                                .filter((v) => String(v).trim().length > 0)
+                                .join(' ')}
+                            </div>
+                          </div>
+                          {b.materialId ? (
+                            <div className="flex shrink-0 gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => previewMaterialPdf(b.materialId as string, 'QUESTION')}>
+                                問題PDF
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => previewMaterialPdf(b.materialId as string, 'ANSWER')}>
+                                解答PDF
+                              </Button>
+                            </div>
+                          ) : null}
                         </div>
 
-                        {review.mode === 'QUESTION' ? (
-                          <div className="mt-1 text-xs text-muted-foreground">
-                            {item.materialName ? item.materialName : '-'}
-                            {item.materialDate ? ` (${formatYmdSlash(item.materialDate)})` : ''}
+                        <div className="p-3">
+                          <div className="space-y-2">
+                            {b.items.map(({ item, no }) => (
+                              <div
+                                key={item.id}
+                                className="flex items-start justify-between gap-3 rounded border px-3 py-2">
+                                <div className="min-w-0">
+                                  <div className="text-sm font-medium">
+                                    {no}. {item.canonicalKey ?? item.questionText ?? item.displayLabel ?? '-'}
+                                  </div>
+                                </div>
+                                <div className="shrink-0">
+                                  {item.isCorrect === true && <Badge variant="default">正解</Badge>}
+                                  {item.isCorrect === false && <Badge variant="destructive">不正解</Badge>}
+                                  {item.isCorrect === undefined && <span className="text-muted-foreground">-</span>}
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ) : null}
-
-                        {review.mode === 'QUESTION' && item.materialId ? (
-                          <div className="mt-2 flex gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => previewMaterialPdf(item.materialId as string, 'QUESTION')}>
-                              問題PDF
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => previewMaterialPdf(item.materialId as string, 'ANSWER')}>
-                              解答PDF
-                            </Button>
-                          </div>
-                        ) : null}
+                        </div>
                       </div>
-                      <div className="shrink-0">
-                        {item.isCorrect === true && (
-                          <Badge
-                            variant="default"
-                            className={
-                              review.mode === 'KANJI'
-                                ? 'border-transparent bg-emerald-600 text-white hover:bg-emerald-600/90'
-                                : undefined
-                            }>
-                            正解
-                          </Badge>
-                        )}
-                        {item.isCorrect === false && <Badge variant="destructive">不正解</Badge>}
-                        {item.isCorrect === undefined && <span className="text-muted-foreground">-</span>}
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           </CardContent>
         </Card>

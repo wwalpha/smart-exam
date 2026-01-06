@@ -96,6 +96,8 @@ export const toApiReviewTestItem = (testId: string, row: ReviewTestItemEmbedded)
   canonicalKey: row.canonicalKey,
   kanji: row.kanji,
   materialId: row.materialId,
+  grade: row.grade,
+  provider: row.provider,
   materialName: row.materialName,
   materialDate: row.materialDate,
   questionText: row.questionText,

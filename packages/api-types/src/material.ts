@@ -57,8 +57,8 @@ export type CreateMaterialRequest = {
   subject: SubjectId;
   /** 教材年月日 (YYYY-MM-DD) */
   materialDate: string;
-  grade?: string;
-  provider?: string;
+  grade: string;
+  provider: string;
 };
 
 /** 教材セット作成レスポンス */
@@ -138,6 +138,16 @@ export type ListMaterialFilesResponse = {
   datas: MaterialFile[];
 };
 
+/** 問題の復習候補情報（最新） */
+export type QuestionReviewCandidateSummary = {
+  /** 状態 */
+  status: 'OPEN' | 'CLOSED' | 'EXCLUDED';
+  /** 次回日付 (YYYY-MM-DD) */
+  nextTime: string;
+  /** 連続正解回数 */
+  correctCount: number;
+};
+
 /**
  * 問題定義
  */
@@ -152,6 +162,8 @@ export type Question = {
   subject: SubjectId;
   /** タグ */
   tags?: string[];
+  /** 復習候補（最新） */
+  reviewCandidate?: QuestionReviewCandidateSummary;
 };
 
 /** 問題作成リクエスト */
@@ -184,9 +196,9 @@ export type Material = {
   /** 科目 */
   subject: SubjectId;
   /** 学年 */
-  grade?: string;
+  grade: string;
   /** 提供元（SAPIX, YOTSUYA, etc.） */
-  provider?: string;
+  provider: string;
   /** 教材年月日 (YYYY-MM-DD) */
   materialDate: string;
 };

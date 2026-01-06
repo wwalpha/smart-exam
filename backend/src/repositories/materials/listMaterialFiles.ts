@@ -32,7 +32,7 @@ export const listMaterialFiles = async (materialId: string): Promise<MaterialFil
       const filename = dashIndex > 0 ? baseName.slice(dashIndex + 1) : baseName;
 
       const contentType = filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';
-      const createdAt = obj.LastModified ? obj.LastModified.toISOString() : now;
+      const createdAt = obj.LastModified ? DateUtils.format(obj.LastModified) : now;
 
       const item: MaterialFile = {
         id,

@@ -105,7 +105,12 @@ resource "aws_dynamodb_table" "review_test_candidates" {
   }
 
   attribute {
-    name = "questionKey"
+    name = "questionId"
+    type = "S"
+  }
+
+  attribute {
+    name = "createdAt"
     type = "S"
   }
 
@@ -117,9 +122,9 @@ resource "aws_dynamodb_table" "review_test_candidates" {
   }
 
   global_secondary_index {
-    name            = "gsi_subject_question_key"
-    hash_key        = "subject"
-    range_key       = "questionKey"
+    name            = "gsi_question_id_created_at"
+    hash_key        = "questionId"
+    range_key       = "createdAt"
     projection_type = "ALL"
   }
 }

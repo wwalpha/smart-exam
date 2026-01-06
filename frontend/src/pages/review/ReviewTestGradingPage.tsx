@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { formatYmdSlash } from '@/utils/date';
 import { useReviewGrading } from '@/hooks/review';
 
 export const ReviewTestGradingPage = () => {
@@ -47,39 +48,101 @@ export const ReviewTestGradingPage = () => {
                 全問正解
               </Button>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">No.</TableHead>
-                  <TableHead>問題</TableHead>
-                  <TableHead>正解</TableHead>
-                  <TableHead className="w-24 text-center">不正解</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fields.map((field, index) => {
-                  const question = review.items.find((i) => i.itemId === field.itemId);
-                  const isCorrect = watch(`items.${index}.isCorrect`);
-                  return (
-                    <TableRow key={field.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{question?.questionText}</TableCell>
-                      <TableCell>{question?.answerText}</TableCell>
-                      <TableCell className="text-center">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          checked={!isCorrect}
-                          onChange={(e) => {
-                            setValue(`items.${index}.isCorrect`, !e.target.checked, { shouldDirty: true });
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+
+            {(() => {
+              const entries = fields
+                .map((field, index) => ({
+                  field,
+                  index,
+                  item: review.items[index],
+                  isCorrect: watch(`items.${index}.isCorrect`),
+                }))
+                .filter((x) => !!x.item);
+
+              const blocks: Array<{
+                key: string;
+                grade: string;
+                provider: string;
+                materialDate: string;
+                materialName: string;
+                items: typeof entries;
+              }> = [];
+              const byKey = new Map<string, (typeof blocks)[number]>();
+
+              for (const e of entries) {
+                const grade = e.item?.grade ?? '';
+                const provider = e.item?.provider ?? '';
+                const materialDate = e.item?.materialDate ?? '';
+                const materialName = e.item?.materialName ?? '';
+                const key = [grade, provider, materialDate, materialName].join('||');
+
+                const existing = byKey.get(key);
+                if (existing) {
+                  existing.items.push(e);
+                  continue;
+                }
+
+                const created = {
+                  key,
+                  grade,
+                  provider,
+                  materialDate,
+                  materialName,
+                  items: [e],
+                };
+                byKey.set(key, created);
+                blocks.push(created);
+              }
+
+              return (
+                <div className="space-y-3">
+                  {blocks.map((b) => (
+                    <div key={b.key} className="rounded border">
+                      <div className="border-b px-3 py-2">
+                        <div className="text-sm font-medium">
+                          {[b.grade, b.provider, b.materialDate ? formatYmdSlash(b.materialDate) : '', b.materialName]
+                            .filter((v) => String(v).trim().length > 0)
+                            .join(' ')}
+                        </div>
+                      </div>
+
+                      <div className="p-3">
+                        <div className="space-y-2">
+                          {b.items.map((e) => (
+                            <div key={e.field.id} className="flex items-start justify-between gap-3 rounded border px-3 py-2">
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium">
+                                  {e.index + 1}. {e.item?.canonicalKey ?? e.item?.questionText ?? e.item?.displayLabel ?? '-'}
+                                </div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  {e.item?.answerText ?? ''}
+                                </div>
+                              </div>
+
+                              <div className="flex shrink-0 items-center gap-3">
+                                {e.isCorrect ? <Badge variant="default">正解</Badge> : <Badge variant="destructive">不正解</Badge>}
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                    checked={!e.isCorrect}
+                                    onChange={(ev) => {
+                                      setValue(`items.${e.index}.isCorrect`, !ev.target.checked, { shouldDirty: true });
+                                    }}
+                                  />
+                                  不正解
+                                </label>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
             <div className="mt-6 flex justify-end">
               <Button type="submit">採点を保存</Button>
             </div>

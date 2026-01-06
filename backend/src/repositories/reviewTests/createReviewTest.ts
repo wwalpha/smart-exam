@@ -140,6 +140,8 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
         displayLabel: q?.canonicalKey,
         canonicalKey: q?.canonicalKey,
         materialId: q?.materialId,
+        grade: m?.grade,
+        provider: m?.provider,
         materialName: m?.title,
         materialDate: m?.materialDate,
         questionText: q?.canonicalKey,

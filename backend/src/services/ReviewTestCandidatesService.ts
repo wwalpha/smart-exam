@@ -1,12 +1,13 @@
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
 import { createUuid } from '../lib/uuid';
+import { DateUtils } from '@/lib/dateUtils';
 import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { ReviewTestCandidateTable } from '../types/db';
 
 const TABLE_NAME = ENV.TABLE_REVIEW_TEST_CANDIDATES;
 const INDEX_GSI_SUBJECT_NEXT_TIME = 'gsi_subject_next_time';
-const INDEX_GSI_SUBJECT_QUESTION_KEY = 'gsi_subject_question_key';
+const INDEX_GSI_QUESTION_ID_CREATED_AT = 'gsi_question_id_created_at';
 
 type ReviewTestCandidateTableRaw = Omit<ReviewTestCandidateTable, 'correctCount'> & {
   correctCount?: number;
@@ -19,7 +20,7 @@ const normalizeCandidate = (raw: ReviewTestCandidateTableRaw): ReviewTestCandida
   };
 };
 
-const nowIso = (): string => new Date().toISOString();
+const nowIso = (): string => DateUtils.now();
 
 const toCandidateKeyUpperBound = (ymd: string): string => `${ymd}#~`;
 
@@ -35,14 +36,12 @@ export const ReviewTestCandidatesService = {
     const id = createUuid();
     const createdAt = nowIso();
     const candidateKey = `${params.nextTime}#${id}`;
-    const questionKey = `${params.questionId}#${createdAt}`;
 
     const item: ReviewTestCandidateTable = {
       subject: params.subject,
       candidateKey,
       id,
       questionId: params.questionId,
-      questionKey,
       mode: params.mode,
       status: params.status,
       correctCount: Math.max(0, Math.trunc(params.correctCount)),
@@ -60,24 +59,40 @@ export const ReviewTestCandidatesService = {
     return item;
   },
 
-  getLatestOpenCandidateByTargetId: async (params: {
+  getLatestCandidateByTargetId: async (params: {
     subject: SubjectId;
     targetId: string;
   }): Promise<ReviewTestCandidateTable | null> => {
-    const prefix = `${params.targetId}#`;
-
     const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
       TableName: TABLE_NAME,
-      IndexName: INDEX_GSI_SUBJECT_QUESTION_KEY,
-      KeyConditionExpression: '#subject = :subject AND begins_with(#questionKey, :prefix)',
-      ExpressionAttributeNames: { '#subject': 'subject', '#questionKey': 'questionKey' },
-      ExpressionAttributeValues: { ':subject': params.subject, ':prefix': prefix },
+      IndexName: INDEX_GSI_QUESTION_ID_CREATED_AT,
+      KeyConditionExpression: '#questionId = :questionId',
+      ExpressionAttributeNames: { '#questionId': 'questionId' },
+      ExpressionAttributeValues: { ':questionId': params.targetId },
       ScanIndexForward: false,
       Limit: 10,
     });
 
     const items = (result.Items ?? []).map(normalizeCandidate);
-    return items.find((x) => x.status === 'OPEN') ?? null;
+    return items.find((x) => x.subject === params.subject) ?? null;
+  },
+
+  getLatestOpenCandidateByTargetId: async (params: {
+    subject: SubjectId;
+    targetId: string;
+  }): Promise<ReviewTestCandidateTable | null> => {
+    const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
+      TableName: TABLE_NAME,
+      IndexName: INDEX_GSI_QUESTION_ID_CREATED_AT,
+      KeyConditionExpression: '#questionId = :questionId',
+      ExpressionAttributeNames: { '#questionId': 'questionId' },
+      ExpressionAttributeValues: { ':questionId': params.targetId },
+      ScanIndexForward: false,
+      Limit: 20,
+    });
+
+    const items = (result.Items ?? []).map(normalizeCandidate);
+    return items.find((x) => x.subject === params.subject && x.status === 'OPEN') ?? null;
   },
 
   lockCandidateIfUnlocked: async (params: {

@@ -10,13 +10,16 @@ dayjs.extend(customParseFormat);
 // Set default timezone to Asia/Tokyo
 dayjs.tz.setDefault('Asia/Tokyo');
 
+const JST_TZ = 'Asia/Tokyo';
+const ISO_WITH_OFFSET = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+
 export const DateUtils = {
   /**
    * 現在日時(ISO8601形式)を取得する
    * @returns {string} ISO8601 formatted date string
    */
   now: (): string => {
-    return dayjs().toISOString();
+    return dayjs().tz(JST_TZ).format(ISO_WITH_OFFSET);
   },
 
   /**
@@ -25,7 +28,7 @@ export const DateUtils = {
    * @returns {string} ISO8601 formatted date string
    */
   format: (date: string | Date | number): string => {
-    return dayjs(date).toISOString();
+    return dayjs(date).tz(JST_TZ).format(ISO_WITH_OFFSET);
   },
 
   /**
@@ -33,26 +36,26 @@ export const DateUtils = {
    * @returns {number} Unix timestamp in seconds
    */
   unix: (): number => {
-    return dayjs().unix();
+    return dayjs().tz(JST_TZ).unix();
   },
 
   /**
    * `YYYY/MM/DD` を厳密に解釈して ISO8601(UTC) に変換する
    */
   parseYmdSlashToIso: (ymd: string): string | null => {
-    const parsed = dayjs.utc(ymd.trim(), 'YYYY/MM/DD', true);
+    const parsed = dayjs.tz(ymd.trim(), 'YYYY/MM/DD', JST_TZ);
     if (!parsed.isValid()) return null;
-    return parsed.toISOString();
+    return parsed.startOf('day').format(ISO_WITH_OFFSET);
   },
 
   /** 今日の日付 (YYYY-MM-DD) を返す */
   todayYmd: (): string => {
-    return dayjs().format('YYYY-MM-DD');
+    return dayjs().tz(JST_TZ).format('YYYY-MM-DD');
   },
 
   /** ISO8601 などの日時から日付 (YYYY-MM-DD) を返す */
   toYmd: (date: string | Date | number): string => {
-    return dayjs(date).format('YYYY-MM-DD');
+    return dayjs(date).tz(JST_TZ).format('YYYY-MM-DD');
   },
 
   /** YYYY-MM-DD に日数を加算して YYYY-MM-DD を返す */

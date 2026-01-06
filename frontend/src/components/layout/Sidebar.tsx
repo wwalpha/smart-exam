@@ -7,9 +7,10 @@ export type SidebarItem = {
 
 type SidebarProps = {
   items: SidebarItem[];
+  isOpen?: boolean;
 };
 
-export const Sidebar = ({ items }: SidebarProps) => {
+export const Sidebar = ({ items, isOpen = true }: SidebarProps) => {
   const location = useLocation();
 
   const isMaterialsAttemptPath = (pathname: string): boolean => {
@@ -22,8 +23,10 @@ export const Sidebar = ({ items }: SidebarProps) => {
     return /^\/kanji\/[^/]+\/attempts(?:\/.*)?$/.test(pathname);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <aside className="w-64 shrink-0 border-r border-border bg-primary text-primary-foreground">
+    <aside className="w-44 shrink-0 border-r border-border bg-primary text-primary-foreground">
       <nav className="p-3">
         <ul className="space-y-1">
           {items.map((item) => (
