@@ -31,6 +31,8 @@ export const ReviewTestQuestionDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewQuestionDetail();
   const navigate = useNavigate();
 
+  const infoBadgeClass = 'px-4 py-2 text-sm';
+
   const blocks = useMemo(() => {
     if (!review) return [];
 
@@ -184,17 +186,25 @@ export const ReviewTestQuestionDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">科目: {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
-              <Badge variant="secondary">ステータス: {review.status}</Badge>
-              <Badge variant="secondary">作成日時: {formatYmdSlash(review.createdDate)}</Badge>
-              <Badge variant="secondary">問題数: {review.count}問</Badge>
+                <Badge variant="secondary" className={infoBadgeClass}>
+                  科目: {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                </Badge>
+                <Badge variant="secondary" className={infoBadgeClass}>
+                  ステータス: {review.status}
+                </Badge>
+                <Badge variant="secondary" className={infoBadgeClass}>
+                  作成日時: {formatYmdSlash(review.createdDate)}
+                </Badge>
+                <Badge variant="secondary" className={infoBadgeClass}>
+                  問題数: {review.count}問
+                </Badge>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>出題リスト</CardTitle>
+            <CardTitle>問題リスト</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="max-h-[400px] overflow-y-auto">
@@ -210,10 +220,26 @@ export const ReviewTestQuestionDetailPage = () => {
                       <div className="flex items-start justify-between gap-3 border-b px-3 py-2">
                         <div className="min-w-0">
                           <div className="flex flex-wrap gap-2">
-                            {b.provider ? <Badge variant="secondary">{b.provider}</Badge> : null}
-                            {b.materialDate ? <Badge variant="secondary">{formatYmdSlash(b.materialDate)}</Badge> : null}
-                            {b.materialName ? <Badge variant="secondary">{b.materialName}</Badge> : null}
-                            {b.grade ? <Badge variant="secondary">{b.grade}</Badge> : null}
+                            {b.provider ? (
+                              <Badge variant="secondary" className={infoBadgeClass}>
+                                {b.provider}
+                              </Badge>
+                            ) : null}
+                            {b.materialDate ? (
+                              <Badge variant="secondary" className={infoBadgeClass}>
+                                {formatYmdSlash(b.materialDate)}
+                              </Badge>
+                            ) : null}
+                            {b.materialName ? (
+                              <Badge variant="secondary" className={infoBadgeClass}>
+                                {b.materialName}
+                              </Badge>
+                            ) : null}
+                            {b.grade ? (
+                              <Badge variant="secondary" className={infoBadgeClass}>
+                                {b.grade}
+                              </Badge>
+                            ) : null}
                           </div>
                         </div>
 

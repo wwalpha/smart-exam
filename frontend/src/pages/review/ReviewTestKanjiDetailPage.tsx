@@ -11,6 +11,8 @@ export const ReviewTestKanjiDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewKanjiDetail();
   const navigate = useNavigate();
 
+  const infoBadgeClass = 'px-4 py-2 text-sm';
+
   const complete = useCallback(async () => {
     if (!review) return;
     await updateReviewTestStatus(review.id, { status: 'COMPLETED' });
@@ -57,19 +59,25 @@ export const ReviewTestKanjiDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">
+              <Badge variant="secondary" className={infoBadgeClass}>
                 科目: {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
               </Badge>
-              <Badge variant="secondary">ステータス: {review.status}</Badge>
-              <Badge variant="secondary">作成日時: {formatYmdSlash(review.createdDate)}</Badge>
-              <Badge variant="secondary">問題数: {review.count}問</Badge>
+              <Badge variant="secondary" className={infoBadgeClass}>
+                ステータス: {review.status}
+              </Badge>
+              <Badge variant="secondary" className={infoBadgeClass}>
+                作成日時: {formatYmdSlash(review.createdDate)}
+              </Badge>
+              <Badge variant="secondary" className={infoBadgeClass}>
+                問題数: {review.count}問
+              </Badge>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>出題リスト</CardTitle>
+            <CardTitle>問題リスト</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="max-h-[400px] overflow-y-auto">

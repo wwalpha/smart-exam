@@ -201,6 +201,7 @@ export type KanjiSlice = {
   fetchKanji: (id: string) => Promise<void>;
   updateKanji: (id: string, request: UpdateKanjiRequest) => Promise<void>;
   deleteKanji: (id: string) => Promise<void>;
+  deleteManyKanji: (ids: string[]) => Promise<void>;
   importKanji: (request: ImportKanjiRequest) => Promise<ImportKanjiResponse>;
 };
 

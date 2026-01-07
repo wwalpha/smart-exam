@@ -8,8 +8,9 @@ export const normalizeQuestionNumber = (raw: string): string | null => {
     .replace(/^-/, '')
     .replace(/-$/, '');
 
-  // 例: 1-8, 1-8-1, 1-8-A (末尾のみ英字1文字を許可)
-  if (!/^\d+(?:-\d+)*(?:-[A-Za-z])?$/.test(replaced)) return null;
+  // 例: 1-8, 1-8-1, 1-8-A, 1-8-あ, 1-8-あい, 1-9-カナ
+  // 先頭〜途中は数値のみ、末尾は「数値」または「任意の文字列」を許可
+  if (!/^\d+(?:-\d+)*(?:-[^-\s]+)?$/.test(replaced)) return null;
 
   const parts = replaced.split('-').filter((p) => p.length > 0);
   const last = parts.at(-1) ?? '';
@@ -23,10 +24,15 @@ export const compareQuestionNumber = (a: string, b: string): number => {
   const parse = (s: string): { nums: number[]; suffix: string | null } => {
     const parts = s.split('-').filter((p) => p.length > 0);
     const last = parts.at(-1) ?? '';
-    if (/^[A-Za-z]$/.test(last)) {
+    const isLastNumeric = /^\d+$/.test(last);
+    if (!isLastNumeric) {
+      const normalizedSuffix = /^[A-Za-z]+$/.test(last) ? last.toUpperCase() : last;
       return {
-        nums: parts.slice(0, -1).map((x) => Number.parseInt(x, 10)).map((n) => (Number.isFinite(n) ? n : 0)),
-        suffix: last.toUpperCase(),
+        nums: parts
+          .slice(0, -1)
+          .map((x) => Number.parseInt(x, 10))
+          .map((n) => (Number.isFinite(n) ? n : 0)),
+        suffix: normalizedSuffix,
       };
     }
     return {
@@ -48,5 +54,5 @@ export const compareQuestionNumber = (a: string, b: string): number => {
   if (pa.suffix === pb.suffix) return 0;
   if (pa.suffix === null) return -1;
   if (pb.suffix === null) return 1;
-  return pa.suffix.localeCompare(pb.suffix);
+  return pa.suffix.localeCompare(pb.suffix, 'ja');
 };

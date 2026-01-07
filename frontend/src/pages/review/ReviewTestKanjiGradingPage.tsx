@@ -52,28 +52,38 @@ export const ReviewTestKanjiGradingPage = () => {
                 const isCorrect = watch(`items.${index}.isCorrect`);
 
                 return (
-                  <div key={field.id} className="flex items-start justify-between gap-3 rounded border px-3 py-2">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium">
-                        {index + 1}. {item.questionText}
+                  <div
+                    key={field.id}
+                    className="grid grid-cols-[56px,1fr,1fr,96px,120px] items-center gap-3 rounded border px-3 py-2">
+                    <div className="text-sm font-medium text-muted-foreground">{index + 1}</div>
+
+                    <div className="min-w-0 text-sm font-medium">
+                      <div className="truncate" title={item.questionText}>
+                        {item.questionText}
                       </div>
-                      <div className="mt-1 text-xs text-muted-foreground">{item.answerText ?? ''}</div>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-3">
-                      {isCorrect ? <Badge variant="default">正解</Badge> : <Badge variant="destructive">不正解</Badge>}
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          checked={!isCorrect}
-                          onChange={(ev) => {
-                            setValue(`items.${index}.isCorrect`, !ev.target.checked, { shouldDirty: true });
-                          }}
-                        />
-                        不正解
-                      </label>
+                    <div className="min-w-0 text-sm">
+                      <div className="truncate text-muted-foreground" title={item.answerText ?? ''}>
+                        {item.answerText ?? ''}
+                      </div>
                     </div>
+
+                    <div className="flex justify-center">
+                      {isCorrect ? <Badge variant="default">正解</Badge> : <Badge variant="destructive">不正解</Badge>}
+                    </div>
+
+                    <label className="flex items-center justify-end gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        checked={!isCorrect}
+                        onChange={(ev) => {
+                          setValue(`items.${index}.isCorrect`, !ev.target.checked, { shouldDirty: true });
+                        }}
+                      />
+                      不正解
+                    </label>
                   </div>
                 );
               })}

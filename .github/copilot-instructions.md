@@ -23,6 +23,15 @@
   - 開発環境は Vite の proxy 設定が無い前提のため、SPA ルーティングに吸われて「空白画面」になります。
   - バイナリ（PDF など）は `frontend/src/services/apiClient.ts` の `apiRequestBlob` 等を使って取得し、Blob URL でプレビュー/ダウンロード/印刷してください。
 
+### 共通UIの一元管理（仕様以外）
+
+- Badge の見た目（背景色など）は `frontend/src/components/ui/badge.tsx` に集約し、各ページで Badge の背景色を個別に指定しないでください。
+
+### 一括操作API（仕様以外）
+
+- 一括削除などの「複数件に対する操作」は、Frontend から 1件ずつ API をループ呼び出ししないでください。
+  - Backend に一括操作用のエンドポイントを追加し、Frontend はそのAPIを1回だけ呼び出す実装にしてください。
+
   ### 表示/変換ロジックの配置（仕様以外）
   - 「表示用/外部サービス用の変換（例: Bedrock 向け subject の正規化）」は Frontend 側（`frontend/src/utils` など）で行い、Backend には業務データの生値を渡す前提にしてください。
 

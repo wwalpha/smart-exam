@@ -114,6 +114,28 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
       );
     },
 
+    deleteManyKanji: async (ids) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          const uniqueIds = Array.from(new Set((ids ?? []).map((x) => String(x).trim()).filter((x) => x.length > 0)));
+          if (uniqueIds.length === 0) return;
+
+          await KANJI_API.deleteManyKanji({ kanjiIds: uniqueIds });
+
+          const current = getKanji();
+          const nextList = current.list.filter((x) => !uniqueIds.includes(x.id));
+          updateKanji({
+            list: nextList,
+            total: Math.max(0, current.total - (current.list.length - nextList.length)),
+            detail: current.detail && uniqueIds.includes(current.detail.id) ? null : current.detail,
+          });
+        },
+        '漢字の一括削除に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
     importKanji: async (request) => {
       return await withStatus(
         setStatus,

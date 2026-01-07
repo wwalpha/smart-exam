@@ -62,6 +62,11 @@ app.post('/api/kanji', validateBody(kanjiHandler.CreateKanjiBodySchema), handleR
 app.get('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(kanjiHandler.getKanji));
 app.patch('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(kanjiHandler.updateKanji));
 app.delete('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(kanjiHandler.deleteKanji));
+app.post(
+  '/api/kanji/deletions',
+  validateBody(kanjiHandler.DeleteManyKanjiBodySchema),
+  handleRequest(kanjiHandler.deleteManyKanji)
+);
 app.post('/api/kanji/import', validateBody(kanjiHandler.ImportKanjiBodySchema), handleRequest(kanjiHandler.importKanji));
 
 // Questions

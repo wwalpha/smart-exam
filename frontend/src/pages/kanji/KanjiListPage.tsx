@@ -169,7 +169,6 @@ export const KanjiListPage = () => {
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-24">操作</TableHead>
               <TableHead className="w-12">
                 <div className="flex items-center justify-center">
                   <Checkbox
@@ -179,6 +178,7 @@ export const KanjiListPage = () => {
                   />
                 </div>
               </TableHead>
+              <TableHead className="w-24">操作</TableHead>
               <TableHead className="w-24">科目</TableHead>
               <TableHead className="w-[45%]">問題</TableHead>
               <TableHead className="w-[35%]">解答</TableHead>
@@ -187,6 +187,22 @@ export const KanjiListPage = () => {
           <TableBody>
             {pagedList.map((kanji) => (
               <TableRow key={kanji.id}>
+                <TableCell className="px-2 py-1">
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={selectedIds.has(kanji.id)}
+                      onCheckedChange={(checked) => {
+                        setSelectedIds((prev) => {
+                          const next = new Set(prev);
+                          if (checked) next.add(kanji.id);
+                          else next.delete(kanji.id);
+                          return next;
+                        });
+                      }}
+                      aria-label="選択"
+                    />
+                  </div>
+                </TableCell>
                 <TableCell className="px-2 py-1">
                   <div className="flex gap-2">
                     <Button asChild variant="ghost" size="icon" className="h-8 w-8" aria-label="編集">
@@ -202,22 +218,6 @@ export const KanjiListPage = () => {
                       onClick={() => remove(kanji.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
-                  </div>
-                </TableCell>
-                <TableCell className="px-2 py-1">
-                  <div className="flex items-center justify-center">
-                    <Checkbox
-                      checked={selectedIds.has(kanji.id)}
-                      onCheckedChange={(checked) => {
-                        setSelectedIds((prev) => {
-                          const next = new Set(prev);
-                          if (checked) next.add(kanji.id);
-                          else next.delete(kanji.id);
-                          return next;
-                        });
-                      }}
-                      aria-label="選択"
-                    />
                   </div>
                 </TableCell>
                 <TableCell className="px-2 py-1 text-sm">

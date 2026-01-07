@@ -27,6 +27,9 @@ export const useQuestionManagement = () => {
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [bulkInput, setBulkInput] = useState('');
   const [busyQuestionId, setBusyQuestionId] = useState<string | null>(null);
+  const [optimisticResultByQuestionId, setOptimisticResultByQuestionId] = useState<
+    Record<string, 'correct' | 'incorrect' | undefined>
+  >({});
   const form = useForm<QuestionFormValues>();
   const { reset } = form;
   const { confirm, ConfirmDialog } = useConfirm();
@@ -103,6 +106,7 @@ export const useQuestionManagement = () => {
   const markCorrect = async (questionId: string) => {
     if (busyQuestionId) return;
     setBusyQuestionId(questionId);
+    setOptimisticResultByQuestionId((prev) => ({ ...prev, [questionId]: 'correct' }));
     try {
       await markQuestionCorrect(questionId);
       if (id) fetchQuestions(id);
@@ -114,6 +118,7 @@ export const useQuestionManagement = () => {
   const markIncorrect = async (questionId: string) => {
     if (busyQuestionId) return;
     setBusyQuestionId(questionId);
+    setOptimisticResultByQuestionId((prev) => ({ ...prev, [questionId]: 'incorrect' }));
     try {
       await markQuestionIncorrect(questionId);
       if (id) fetchQuestions(id);
@@ -136,6 +141,7 @@ export const useQuestionManagement = () => {
     setIsBulkDialogOpen,
     bulkInput,
     setBulkInput,
+    optimisticResultByQuestionId,
     form,
     submit: form.handleSubmit(submit),
     submitBulk,

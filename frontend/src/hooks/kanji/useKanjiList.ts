@@ -13,6 +13,7 @@ export const useKanjiList = () => {
   const { list, total, status } = useWordTestStore((s) => s.kanji);
   const fetchKanjiList = useWordTestStore((s) => s.fetchKanjiList);
   const deleteKanji = useWordTestStore((s) => s.deleteKanji);
+  const deleteManyKanji = useWordTestStore((s) => s.deleteManyKanji);
   
   const form = useForm<SearchFormValues>({
     defaultValues: {
@@ -42,9 +43,7 @@ export const useKanjiList = () => {
   const removeMany = async (ids: string[]) => {
     if (ids.length === 0) return;
     if (await confirm(`選択した${ids.length}件を削除しますか？`, { variant: 'destructive' })) {
-      for (const id of ids) {
-        await deleteKanji(id);
-      }
+      await deleteManyKanji(ids);
       fetchKanjiList();
     }
   };

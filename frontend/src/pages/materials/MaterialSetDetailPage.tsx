@@ -75,16 +75,6 @@ export const MaterialSetDetailPage = () => {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <div className="text-sm font-medium text-muted-foreground">教材年月日</div>
-              {material.materialDate ? (
-                <Badge variant="secondary" className="mt-1 px-4 py-2 text-sm">
-                  {material.materialDate}
-                </Badge>
-              ) : (
-                <div>-</div>
-              )}
-            </div>
-            <div>
               <div className="text-sm font-medium text-muted-foreground">初回実施日</div>
               <div className="flex items-center gap-2">
                 <Input

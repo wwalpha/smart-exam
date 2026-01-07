@@ -5,6 +5,7 @@ import type {
   SearchKanjiRequest,
   CreateKanjiRequest,
   UpdateKanjiRequest,
+  DeleteManyKanjiRequest,
   ImportKanjiRequest,
   ImportKanjiResponse,
 } from '@smart-exam/api-types';
@@ -44,6 +45,14 @@ export const deleteKanji = async (kanjiId: string): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
     path: `/api/kanji/${kanjiId}`,
+  });
+};
+
+export const deleteManyKanji = async (request: DeleteManyKanjiRequest): Promise<void> => {
+  return apiRequest<void, DeleteManyKanjiRequest>({
+    method: 'POST',
+    path: '/api/kanji/deletions',
+    body: request,
   });
 };
 

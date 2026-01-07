@@ -25,6 +25,7 @@ export const QuestionManagementPage = () => {
     setIsBulkDialogOpen,
     bulkInput,
     setBulkInput,
+    optimisticResultByQuestionId,
     form,
     submit,
     submitBulk,
@@ -107,8 +108,8 @@ export const QuestionManagementPage = () => {
                     {...register('canonicalKey', {
                       required: '必須です',
                       pattern: {
-                        value: /^\d+(?:-\d+)*(?:-[A-Za-z])?$/,
-                        message: 'ハイフン区切りで入力してください (例: 1-1 / 1-8-A)',
+                        value: /^\d+(?:-\d+)*(?:-[^-\s]+)?$/,
+                        message: 'ハイフン区切りで入力してください (例: 1-1 / 1-8-A / 1-8-あ)',
                       },
                     })}
                     aria-invalid={!!errors.canonicalKey}
@@ -118,7 +119,7 @@ export const QuestionManagementPage = () => {
                   {errors.canonicalKey?.message ? (
                     <p className="text-sm text-destructive">{String(errors.canonicalKey.message)}</p>
                   ) : null}
-                  <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1 / 1-8-A)</p>
+                  <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1 / 1-8-A / 1-9-カナ)</p>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isBusy}>
@@ -149,13 +150,30 @@ export const QuestionManagementPage = () => {
                 <TableRow key={q.id} className="h-10">
                   <TableCell className="py-2">{q.canonicalKey}</TableCell>
                   <TableCell className="py-2">
-                    {q.reviewCandidate ? (
+                    {(() => {
+                      const optimistic = optimisticResultByQuestionId[q.id];
+                      if (optimistic === 'correct') {
+                        return (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">正解</Badge>
+                          </div>
+                        );
+                      }
+                      if (optimistic === 'incorrect') {
+                        return (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">不正解</Badge>
+                            {q.reviewCandidate?.status === 'OPEN' ? (
+                              <span className="text-sm text-muted-foreground">次回: {q.reviewCandidate.nextTime}</span>
+                            ) : null}
+                          </div>
+                        );
+                      }
+
+                      return q.reviewCandidate ? (
                       <div className="flex items-center gap-2">
                         {q.reviewCandidate.status === 'OPEN' ? (
                           <Badge variant="outline">不正解</Badge>
-                        ) : q.reviewCandidate.status === 'EXCLUDED' ||
-                          (q.reviewCandidate.status === 'CLOSED' && q.reviewCandidate.correctCount > 0) ? (
-                          <Badge variant="secondary">正解</Badge>
                         ) : (
                           <Badge variant="secondary">履歴</Badge>
                         )}
@@ -165,19 +183,19 @@ export const QuestionManagementPage = () => {
                       </div>
                     ) : (
                       <span className="text-sm text-muted-foreground">未設定</span>
-                    )}
+                    );
+                    })()}
                   </TableCell>
                   <TableCell className="py-2">
                     <div className="flex justify-end">
                       {(() => {
                         const isRowBusy = busyQuestionId === q.id;
+                        const optimistic = optimisticResultByQuestionId[q.id];
 
                         const value = (() => {
+                          if (optimistic) return optimistic;
                           if (!q.reviewCandidate) return '';
                           if (q.reviewCandidate.status === 'OPEN') return 'incorrect';
-                          if (q.reviewCandidate.status === 'EXCLUDED') return 'correct';
-                          if (q.reviewCandidate.status === 'CLOSED' && q.reviewCandidate.correctCount > 0)
-                            return 'correct';
                           return '';
                         })();
 
@@ -192,25 +210,13 @@ export const QuestionManagementPage = () => {
                                 if (v === 'incorrect') return markIncorrect(q.id);
                               }}
                               className="flex min-w-[220px] items-center gap-4">
-                              <div
-                                className="flex items-center gap-2 whitespace-nowrap"
-                                onClick={() => {
-                                  if (isRowBusy) return;
-                                  if (value === 'incorrect') return;
-                                  markIncorrect(q.id);
-                                }}>
+                              <div className="flex items-center gap-2 whitespace-nowrap">
                                 <RadioGroupItem value="incorrect" id={`incorrect-${q.id}`} />
                                 <Label className="whitespace-nowrap" htmlFor={`incorrect-${q.id}`}>
                                   不正解
                                 </Label>
                               </div>
-                              <div
-                                className="flex items-center gap-2 whitespace-nowrap"
-                                onClick={() => {
-                                  if (isRowBusy) return;
-                                  if (value === 'correct') return;
-                                  markCorrect(q.id);
-                                }}>
+                              <div className="flex items-center gap-2 whitespace-nowrap">
                                 <RadioGroupItem value="correct" id={`correct-${q.id}`} />
                                 <Label className="whitespace-nowrap" htmlFor={`correct-${q.id}`}>
                                   正解

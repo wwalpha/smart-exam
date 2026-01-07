@@ -76,6 +76,14 @@ export type DeleteKanjiParams = {
 /** `DELETE /kanji/:kanjiId` */
 export type DeleteKanjiResponse = Record<string, never>;
 
+/** `POST /kanji/deletions` */
+export type DeleteManyKanjiRequest = {
+  kanjiIds: string[];
+};
+
+/** `POST /kanji/deletions` */
+export type DeleteManyKanjiResponse = Record<string, never>;
+
 /** 漢字インポートリクエスト */
 export type ImportKanjiRequest = {
   /** CSV/TSV等のファイル内容 */
