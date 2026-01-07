@@ -43,7 +43,7 @@ export const useReviewQuestionGrading = () => {
     reset({
       items: currentTest.items.map((item) => ({
         itemId: item.itemId ?? item.id,
-        isCorrect: item.isCorrect ?? false,
+        isCorrect: item.isCorrect ?? true,
       })),
     });
   }, [currentTest, reset]);

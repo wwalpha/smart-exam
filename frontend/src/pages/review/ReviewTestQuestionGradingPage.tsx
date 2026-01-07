@@ -16,6 +16,7 @@ export const ReviewTestQuestionGradingPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
       <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">採点入力: {review.testId}</h1>
         <Button asChild variant="outline">
           <Link to={`${basePath}/${id}`}>戻る</Link>
         </Button>
@@ -39,7 +40,7 @@ export const ReviewTestQuestionGradingPage = () => {
                   field,
                   index,
                   item: review.items[index],
-                  isCorrect: watch(`items.${index}.isCorrect`),
+                  isCorrect: watch(`items.${index}.isCorrect`) ?? true,
                 }))
                 .filter((x) => !!x.item);
 

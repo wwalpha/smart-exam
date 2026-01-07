@@ -15,6 +15,7 @@ export const ReviewTestKanjiGradingPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
       <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">採点入力: {review.testId}</h1>
         <Button asChild variant="outline">
           <Link to={`${basePath}/${id}`}>戻る</Link>
         </Button>
@@ -37,23 +38,18 @@ export const ReviewTestKanjiGradingPage = () => {
                 const item = review.items[index];
                 if (!item) return null;
 
-                const isCorrect = watch(`items.${index}.isCorrect`);
+                const isCorrect = watch(`items.${index}.isCorrect`) ?? true;
+                const qaText = [item.questionText, item.answerText].filter((v) => (v ?? '').trim().length > 0).join(' / ');
 
                 return (
                   <div
                     key={field.id}
-                    className="grid grid-cols-[56px,1fr,1fr,96px,120px] items-center gap-3 rounded border px-3 py-2">
+                    className="grid grid-cols-[56px,1fr,96px,120px] items-center gap-3 rounded border px-3 py-2">
                     <div className="text-sm font-medium text-muted-foreground">{index + 1}</div>
 
                     <div className="min-w-0 text-sm font-medium">
-                      <div className="truncate" title={item.questionText}>
-                        {item.questionText}
-                      </div>
-                    </div>
-
-                    <div className="min-w-0 text-sm">
-                      <div className="truncate text-muted-foreground" title={item.answerText ?? ''}>
-                        {item.answerText ?? ''}
+                      <div className="truncate" title={qaText}>
+                        {qaText}
                       </div>
                     </div>
 
