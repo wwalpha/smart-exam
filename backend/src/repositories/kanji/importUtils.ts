@@ -13,9 +13,9 @@ const parseOkNg = (raw: string): boolean | null => {
   return null;
 };
 
-const parseYmdToIso = (ymd: string): string | null => {
-  return DateUtils.parseYmdSlashToIso(ymd);
-};
+// const parseYmdToIso = (ymd: string): string | null => {
+//   return DateUtils.parseYmdSlashToIso(ymd);
+// };
 
 export const parsePipeLine = (line: string): { kanji: string; reading: string; histories: ImportedHistoryEntry[] } => {
   const parts = line.split('|').map((x) => x.trim());

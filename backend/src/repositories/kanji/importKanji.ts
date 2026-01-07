@@ -2,7 +2,6 @@ import { WordMasterService } from '@/services/WordMasterService';
 import type { ImportKanjiRequest, ImportKanjiResponse } from '@smart-exam/api-types';
 import { createKanji } from './createKanji';
 import { parsePipeLine } from './importUtils';
-import { updateKanji } from './updateKanji';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';

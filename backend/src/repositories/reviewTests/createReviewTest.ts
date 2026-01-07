@@ -1,24 +1,16 @@
 import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
 import { ReviewTestsService } from '@/services';
-import { WordMasterService } from '@/services/WordMasterService';
 import type { CreateReviewTestRequest, ReviewTest } from '@smart-exam/api-types';
-import type { ReviewTestTable, WordMasterTable } from '@/types/db';
+import type { ReviewTestTable } from '@/types/db';
 import { listDueCandidates } from './listDueCandidates';
 import { putCandidate } from './putCandidate';
-import {
-  computeDueDate,
-  isWithinRange,
-  parseFilterRange,
-  ReviewCandidate,
-  targetKeyOf,
-  toApiReviewTest,
-} from './internal';
+import { parseFilterRange, ReviewCandidate, toApiReviewTest } from './internal';
 
 export const createReviewTest = async (req: CreateReviewTestRequest): Promise<ReviewTest> => {
   const testId = createUuid();
   const createdDate = DateUtils.todayYmd();
-  const range = parseFilterRange(req);
+  parseFilterRange(req); // validate fields but unused range
 
   const candidates: ReviewCandidate[] = [];
 

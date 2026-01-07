@@ -23,7 +23,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get(['/health', '/v1/health'], (req, res) => {
+app.get(['/health', '/v1/health'], (_req, res) => {
   res.json({ status: 'ok' });
 });
 
@@ -31,24 +31,48 @@ app.get(['/health', '/v1/health'], (req, res) => {
 app.post('/api/upload-url', validateBody(s3Handler.GetUploadUrlBodySchema), handleRequest(s3Handler.getUploadUrl));
 
 // Analyze Exam Paper (Bedrock)
-app.post('/api/analyze-paper', validateBody(bedrockHandler.AnalyzePaperBodySchema), handleRequest(bedrockHandler.analyzePaper));
+app.post(
+  '/api/analyze-paper',
+  validateBody(bedrockHandler.AnalyzePaperBodySchema),
+  handleRequest(bedrockHandler.analyzePaper)
+);
 
 // Dashboard
 app.get('/api/dashboard', handleRequest(dashboardHandler.getDashboard));
 
 // Materials
 app.get('/api/materials', handleRequest(materialHandler.listMaterials));
-app.post('/api/materials/search', validateBody(materialHandler.SearchMaterialsBodySchema), handleRequest(materialHandler.searchMaterials));
-app.post('/api/materials', validateBody(materialHandler.CreateMaterialBodySchema), handleRequest(materialHandler.createMaterial));
-app.get('/api/materials/:materialId', validateParams(MaterialIdParamsSchema), handleRequest(materialHandler.getMaterial));
+app.post(
+  '/api/materials/search',
+  validateBody(materialHandler.SearchMaterialsBodySchema),
+  handleRequest(materialHandler.searchMaterials)
+);
+app.post(
+  '/api/materials',
+  validateBody(materialHandler.CreateMaterialBodySchema),
+  handleRequest(materialHandler.createMaterial)
+);
+app.get(
+  '/api/materials/:materialId',
+  validateParams(MaterialIdParamsSchema),
+  handleRequest(materialHandler.getMaterial)
+);
 app.patch(
   '/api/materials/:materialId',
   validateParams(MaterialIdParamsSchema),
   validateBody(materialHandler.UpdateMaterialBodySchema),
   handleRequest(materialHandler.updateMaterial)
 );
-app.delete('/api/materials/:materialId', validateParams(MaterialIdParamsSchema), handleRequest(materialHandler.deleteMaterial));
-app.get('/api/materials/:materialId/files', validateParams(MaterialIdParamsSchema), handleRequest(materialHandler.listMaterialFiles));
+app.delete(
+  '/api/materials/:materialId',
+  validateParams(MaterialIdParamsSchema),
+  handleRequest(materialHandler.deleteMaterial)
+);
+app.get(
+  '/api/materials/:materialId/files',
+  validateParams(MaterialIdParamsSchema),
+  handleRequest(materialHandler.listMaterialFiles)
+);
 app.get(
   '/api/materials/:materialId/files/:fileId',
   validateParams(MaterialFileParamsSchema),
@@ -57,7 +81,11 @@ app.get(
 
 // Kanji
 app.get('/api/kanji', handleRequest(kanjiHandler.listKanji));
-app.post('/api/kanji/search', validateBody(kanjiHandler.SearchKanjiBodySchema), handleRequest(kanjiHandler.searchKanji));
+app.post(
+  '/api/kanji/search',
+  validateBody(kanjiHandler.SearchKanjiBodySchema),
+  handleRequest(kanjiHandler.searchKanji)
+);
 app.post('/api/kanji', validateBody(kanjiHandler.CreateKanjiBodySchema), handleRequest(kanjiHandler.createKanji));
 app.get('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(kanjiHandler.getKanji));
 app.patch('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(kanjiHandler.updateKanji));
@@ -67,10 +95,18 @@ app.post(
   validateBody(kanjiHandler.DeleteManyKanjiBodySchema),
   handleRequest(kanjiHandler.deleteManyKanji)
 );
-app.post('/api/kanji/import', validateBody(kanjiHandler.ImportKanjiBodySchema), handleRequest(kanjiHandler.importKanji));
+app.post(
+  '/api/kanji/import',
+  validateBody(kanjiHandler.ImportKanjiBodySchema),
+  handleRequest(kanjiHandler.importKanji)
+);
 
 // Questions
-app.post('/api/questions/search', validateBody(questionHandler.SearchQuestionsBodySchema), handleRequest(questionHandler.searchQuestions));
+app.post(
+  '/api/questions/search',
+  validateBody(questionHandler.SearchQuestionsBodySchema),
+  handleRequest(questionHandler.searchQuestions)
+);
 app.get(
   '/api/materials/:materialId/questions',
   validateParams(MaterialIdParamsSchema),
@@ -98,27 +134,63 @@ app.delete(
   validateParams(QuestionIdParamsSchema),
   handleRequest(questionHandler.deleteQuestionReviewCandidate)
 );
-app.delete('/api/questions/:questionId', validateParams(QuestionIdParamsSchema), handleRequest(questionHandler.deleteQuestion));
+app.delete(
+  '/api/questions/:questionId',
+  validateParams(QuestionIdParamsSchema),
+  handleRequest(questionHandler.deleteQuestion)
+);
 
 // Review Tests
 app.get('/api/review-tests', handleRequest(reviewTestHandler.listReviewTests));
-app.post('/api/review-tests/search', validateBody(reviewTestHandler.SearchReviewTestsBodySchema), handleRequest(reviewTestHandler.searchReviewTests));
-app.post('/api/review-tests', validateBody(reviewTestHandler.CreateReviewTestBodySchema), handleRequest(reviewTestHandler.createReviewTest));
-app.get('/api/review-tests/targets', validateQuery(reviewTestHandler.ListReviewTestTargetsQuerySchema), handleRequest(reviewTestHandler.listReviewTestTargets));
-app.get('/api/review-test-candidates', validateQuery(reviewTestHandler.ListReviewTestCandidatesQuerySchema), handleRequest(reviewTestHandler.listReviewTestCandidates));
+app.post(
+  '/api/review-tests/search',
+  validateBody(reviewTestHandler.SearchReviewTestsBodySchema),
+  handleRequest(reviewTestHandler.searchReviewTests)
+);
+app.post(
+  '/api/review-tests',
+  validateBody(reviewTestHandler.CreateReviewTestBodySchema),
+  handleRequest(reviewTestHandler.createReviewTest)
+);
+app.get(
+  '/api/review-tests/targets',
+  validateQuery(reviewTestHandler.ListReviewTestTargetsQuerySchema),
+  handleRequest(reviewTestHandler.listReviewTestTargets)
+);
+app.get(
+  '/api/review-test-candidates',
+  validateQuery(reviewTestHandler.ListReviewTestCandidatesQuerySchema),
+  handleRequest(reviewTestHandler.listReviewTestCandidates)
+);
 
 // Derived review attempts (read-only)
-app.get('/api/review-attempts', validateQuery(reviewAttemptHandler.ListReviewAttemptsQuerySchema), handleRequest(reviewAttemptHandler.listReviewAttempts));
+app.get(
+  '/api/review-attempts',
+  validateQuery(reviewAttemptHandler.ListReviewAttemptsQuerySchema),
+  handleRequest(reviewAttemptHandler.listReviewAttempts)
+);
 
-app.get('/api/review-tests/:testId', validateParams(TestIdParamsSchema), handleRequest(reviewTestHandler.getReviewTest));
-app.get('/api/review-tests/:testId/pdf', validateParams(TestIdParamsSchema), handleRequest(reviewTestHandler.getReviewTestPdf));
+app.get(
+  '/api/review-tests/:testId',
+  validateParams(TestIdParamsSchema),
+  handleRequest(reviewTestHandler.getReviewTest)
+);
+app.get(
+  '/api/review-tests/:testId/pdf',
+  validateParams(TestIdParamsSchema),
+  handleRequest(reviewTestHandler.getReviewTestPdf)
+);
 app.patch(
   '/api/review-tests/:testId',
   validateParams(TestIdParamsSchema),
   validateBody(reviewTestHandler.UpdateReviewTestStatusBodySchema),
   handleRequest(reviewTestHandler.updateReviewTestStatus)
 );
-app.delete('/api/review-tests/:testId', validateParams(TestIdParamsSchema), handleRequest(reviewTestHandler.deleteReviewTest));
+app.delete(
+  '/api/review-tests/:testId',
+  validateParams(TestIdParamsSchema),
+  handleRequest(reviewTestHandler.deleteReviewTest)
+);
 app.post(
   '/api/review-tests/:testId/results',
   validateParams(TestIdParamsSchema),

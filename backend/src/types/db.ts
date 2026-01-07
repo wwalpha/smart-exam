@@ -1,4 +1,4 @@
-import type { ReviewMode, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
+import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 
 /**
  * 教材テーブル
