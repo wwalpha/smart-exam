@@ -19,6 +19,7 @@ export const createMaterial = async (data: CreateMaterialRequest): Promise<Mater
     grade: data.grade,
     provider: data.provider,
     materialDate: data.materialDate,
+    registeredDate: data.registeredDate,
   };
 
   await MaterialsService.create(dbItem);

@@ -1,5 +1,6 @@
 import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
+import { MaterialsService } from '@/services/MaterialsService';
 import { QuestionsService } from '@/services/QuestionsService';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 
@@ -42,7 +43,9 @@ export const markQuestionIncorrect = async (questionId: string): Promise<boolean
   const q = await QuestionsService.get(questionId);
   if (!q) return false;
 
-  const baseDateYmd = DateUtils.todayYmd();
+  const material = await MaterialsService.get(q.materialId);
+  const preferred = material?.registeredDate ?? material?.materialDate ?? '';
+  const baseDateYmd = DateUtils.isValidYmd(preferred) ? preferred : DateUtils.todayYmd();
 
   const open = await ReviewTestCandidatesService.getLatestOpenCandidateByTargetId({
     subject: q.subjectId,

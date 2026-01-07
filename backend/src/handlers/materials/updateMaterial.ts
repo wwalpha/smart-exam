@@ -13,6 +13,10 @@ export const UpdateMaterialBodySchema = z.object({
   materialDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }).optional(),
   grade: z.string().min(1).optional(),
   provider: z.string().min(1).optional(),
+  registeredDate: z
+    .string()
+    .refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' })
+    .optional(),
   questionPdfPath: z.string().min(1).optional(),
   answerPdfPath: z.string().min(1).optional(),
   answerSheetPath: z.string().min(1).optional(),
@@ -32,6 +36,7 @@ export const updateMaterial: AsyncHandler<
     ...(typeof updates.subject === 'string' ? { subjectId: updates.subject } : {}),
     ...(typeof updates.grade === 'string' ? { grade: updates.grade } : {}),
     ...(typeof updates.provider === 'string' ? { provider: updates.provider } : {}),
+    ...(typeof updates.registeredDate === 'string' ? { registeredDate: updates.registeredDate } : {}),
     ...(typeof updates.questionPdfPath === 'string' ? { questionPdfPath: updates.questionPdfPath } : {}),
     ...(typeof updates.answerPdfPath === 'string' ? { answerPdfPath: updates.answerPdfPath } : {}),
     ...(typeof updates.answerSheetPath === 'string' ? { answerSheetPath: updates.answerSheetPath } : {}),

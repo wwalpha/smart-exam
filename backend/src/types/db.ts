@@ -20,6 +20,8 @@ export interface MaterialTable {
   answerSheetPath?: string;
   /** 教材年月日 (YYYY-MM-DD) */
   materialDate: string;
+  /** 初回実施日 (YYYY-MM-DD) */
+  registeredDate?: string;
   /** 問題PDFパス（試験用紙の場合のみ） */
   questionPdfPath?: string;
   /** 解答PDFパス（試験用紙の場合のみ） */

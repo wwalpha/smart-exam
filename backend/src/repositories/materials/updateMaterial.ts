@@ -30,5 +30,6 @@ export const updateMaterial = async (materialId: string, updates: Partial<Materi
     grade: requireNonEmpty(next.grade, 'Material.grade'),
     provider: requireNonEmpty(next.provider, 'Material.provider'),
     materialDate: requireYmd(next.materialDate, 'Material.materialDate'),
+    registeredDate: requireYmd(next.registeredDate ?? next.materialDate, 'Material.registeredDate'),
   };
 };

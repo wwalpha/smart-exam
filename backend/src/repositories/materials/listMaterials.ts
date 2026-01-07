@@ -29,5 +29,6 @@ export const listMaterials = async (): Promise<Material[]> => {
     grade: requireNonEmpty(dbItem.grade, 'Material.grade'),
     provider: requireNonEmpty(dbItem.provider, 'Material.provider'),
     materialDate: requireYmd(dbItem.materialDate, 'Material.materialDate'),
+    registeredDate: requireYmd(dbItem.registeredDate ?? dbItem.materialDate, 'Material.registeredDate'),
   }));
 };

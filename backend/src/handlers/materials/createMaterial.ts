@@ -11,6 +11,7 @@ export const CreateMaterialBodySchema = z.object({
   name: z.string().min(1),
   subject: SubjectIdSchema,
   materialDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
+  registeredDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
   grade: z.string().min(1),
   provider: z.string().min(1),
 });

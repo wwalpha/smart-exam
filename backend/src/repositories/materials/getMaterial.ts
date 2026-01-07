@@ -30,5 +30,6 @@ export const getMaterial = async (id: string): Promise<Material | null> => {
     grade: requireNonEmpty(dbItem.grade, 'Material.grade'),
     provider: requireNonEmpty(dbItem.provider, 'Material.provider'),
     materialDate: requireYmd(dbItem.materialDate, 'Material.materialDate'),
+    registeredDate: requireYmd(dbItem.registeredDate ?? dbItem.materialDate, 'Material.registeredDate'),
   };
 };
