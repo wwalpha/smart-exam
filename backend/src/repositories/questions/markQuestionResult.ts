@@ -8,33 +8,23 @@ export const markQuestionCorrect = async (questionId: string): Promise<boolean> 
   const q = await QuestionsService.get(questionId);
   if (!q) return false;
 
-  const baseDateYmd = DateUtils.todayYmd();
-
   const open = await ReviewTestCandidatesService.getLatestOpenCandidateByTargetId({
     subject: q.subjectId,
     targetId: questionId,
   });
 
-  const currentCorrectCount = open ? open.correctCount : 1;
-
   if (open) {
     await ReviewTestCandidatesService.closeCandidateIfMatch({ subject: q.subjectId, candidateKey: open.candidateKey });
   }
 
-  const computed = ReviewNextTime.compute({
-    mode: 'QUESTION',
-    baseDateYmd,
-    isCorrect: true,
-    currentCorrectCount,
-  });
-
+  // 正解の場合は候補にしない（ただしUIで状態を保持できるようにEXCLUDEDを残す）
   await ReviewTestCandidatesService.createCandidate({
     subject: q.subjectId,
     questionId,
     mode: 'QUESTION',
-    nextTime: computed.nextTime,
-    correctCount: computed.nextCorrectCount,
-    status: computed.nextTime === ReviewNextTime.EXCLUDED_NEXT_TIME ? 'EXCLUDED' : 'OPEN',
+    nextTime: ReviewNextTime.EXCLUDED_NEXT_TIME,
+    correctCount: 1,
+    status: 'EXCLUDED',
   });
   return true;
 };

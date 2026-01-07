@@ -7,6 +7,11 @@ export const MATERIAL_PROVIDER_OPTIONS = [MATERIAL_PROVIDER.sapix, MATERIAL_PROV
 
 export type MaterialProvider = (typeof MATERIAL_PROVIDER_OPTIONS)[number];
 
+export const MATERIAL_NAME_OPTIONS_BY_PROVIDER: Record<MaterialProvider, readonly string[]> = {
+  [MATERIAL_PROVIDER.sapix]: ['マンスリーテスト', '組分テスト', '復習テスト', '実力診断テスト'] as const,
+  [MATERIAL_PROVIDER.yotsuyaOtsuka]: ['組分テスト', '週テスト'] as const,
+};
+
 export type MaterialPdfFileType = 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
 
 export const MATERIAL_PDF_FILE_TYPES: MaterialPdfFileType[] = ['QUESTION', 'ANSWER', 'GRADED_ANSWER'];

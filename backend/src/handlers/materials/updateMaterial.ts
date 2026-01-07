@@ -1,4 +1,5 @@
 import { MaterialRepository } from '@/repositories';
+import { QuestionRepository } from '@/repositories';
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 import type { UpdateMaterialParams, UpdateMaterialRequest, UpdateMaterialResponse } from '@smart-exam/api-types';
@@ -44,6 +45,13 @@ export const updateMaterial: AsyncHandler<
   if (!updated) {
     res.status(404).json({ error: 'Not Found' });
     return;
+  }
+
+  if (typeof updates.registeredDate === 'string') {
+    await QuestionRepository.recalculateCandidatesForMaterial({
+      materialId,
+      registeredDate: updates.registeredDate,
+    });
   }
   res.json(updated);
 };

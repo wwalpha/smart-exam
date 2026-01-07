@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useMaterialCreate } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
-import { MATERIAL_PDF_FILE_TYPE_LABEL, MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
+import { MATERIAL_NAME_OPTIONS_BY_PROVIDER, MATERIAL_PDF_FILE_TYPE_LABEL, MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const MaterialSetCreatePage = () => {
@@ -13,8 +13,12 @@ export const MaterialSetCreatePage = () => {
   const {
     register,
     setValue,
+    watch,
     formState: { errors },
   } = form;
+
+  const provider = watch('provider');
+  const nameOptions = provider ? MATERIAL_NAME_OPTIONS_BY_PROVIDER[provider as keyof typeof MATERIAL_NAME_OPTIONS_BY_PROVIDER] : null;
 
   return (
     <div className="space-y-6 p-0 max-w-3xl mx-auto">
@@ -45,7 +49,12 @@ export const MaterialSetCreatePage = () => {
               <div className="space-y-2">
                 <Label>教材種別 *</Label>
                 <input type="hidden" {...register('provider', { required: '必須です' })} />
-                <Select onValueChange={(v) => setValue('provider', v, { shouldValidate: true })}>
+                <Select
+                  onValueChange={(v) => {
+                    setValue('provider', v, { shouldValidate: true });
+                    // 教材種別に依存するため、教材名は選択し直させる
+                    setValue('name', '', { shouldValidate: true });
+                  }}>
                   <SelectTrigger
                     aria-invalid={!!errors.provider}
                     className={errors.provider ? 'border-destructive focus:ring-destructive' : undefined}>
@@ -112,12 +121,24 @@ export const MaterialSetCreatePage = () => {
 
               <div className="space-y-2">
                 <Label>教材名 *</Label>
-                <Input
-                  {...register('name', { required: '必須です' })}
-                  aria-invalid={!!errors.name}
-                  className={errors.name ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                  placeholder="例: 第1回 復習テスト"
-                />
+                <input type="hidden" {...register('name', { required: '必須です' })} />
+                <Select
+                  disabled={!provider}
+                  onValueChange={(v) => setValue('name', v, { shouldValidate: true })}
+                >
+                  <SelectTrigger
+                    aria-invalid={!!errors.name}
+                    className={errors.name ? 'border-destructive focus:ring-destructive' : undefined}>
+                    <SelectValue placeholder={provider ? '選択してください' : '先に教材種別を選択してください'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(nameOptions ?? []).map((n) => (
+                      <SelectItem key={n} value={n}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {errors.name?.message ? (
                   <p className="text-sm text-destructive">{String(errors.name.message)}</p>
                 ) : null}

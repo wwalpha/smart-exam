@@ -21,9 +21,9 @@ export const Header = ({ title, pageTitle, onToggleSidebar }: HeaderProps) => {
               メニュー
             </Button>
           ) : null}
-          <div className="text-base font-semibold text-background/80">{title}</div>
+          <div className="text-2xl font-semibold text-background/80">{title}</div>
         </div>
-        <div className="text-center text-lg font-semibold text-background">{pageTitle ?? ''}</div>
+        <div className="text-center text-2xl font-semibold text-background">{pageTitle ?? ''}</div>
         <div />
       </div>
     </header>

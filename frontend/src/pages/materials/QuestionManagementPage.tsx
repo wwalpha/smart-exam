@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useQuestionManagement } from '@/hooks/materials';
 
 export const QuestionManagementPage = () => {
@@ -150,16 +151,16 @@ export const QuestionManagementPage = () => {
                   <TableCell className="py-2">
                     {q.reviewCandidate ? (
                       <div className="flex items-center gap-2">
-                        {q.reviewCandidate.status === 'EXCLUDED' ? (
-                          <Badge variant="secondary">除外</Badge>
-                        ) : q.reviewCandidate.status === 'OPEN' ? (
-                          <Badge variant="outline">候補</Badge>
+                        {q.reviewCandidate.status === 'OPEN' ? (
+                          <Badge variant="outline">不正解</Badge>
+                        ) : q.reviewCandidate.status === 'EXCLUDED' ? (
+                          <Badge variant="secondary">正解</Badge>
                         ) : (
-                          <Badge variant="secondary">CLOSED</Badge>
+                          <Badge variant="secondary">履歴</Badge>
                         )}
-                        <span className="text-sm text-muted-foreground">
-                          次回: {q.reviewCandidate.nextTime} / 連続正解: {q.reviewCandidate.correctCount}
-                        </span>
+                        {q.reviewCandidate.status === 'OPEN' ? (
+                          <span className="text-sm text-muted-foreground">次回: {q.reviewCandidate.nextTime}</span>
+                        ) : null}
                       </div>
                     ) : (
                       <span className="text-sm text-muted-foreground">未設定</span>
@@ -167,47 +168,58 @@ export const QuestionManagementPage = () => {
                   </TableCell>
                   <TableCell className="py-2">
                     <div className="flex justify-end">
-                      <div className="flex gap-2">
-                        {(() => {
-                          const lastIsIncorrect = q.reviewCandidate ? q.reviewCandidate.correctCount === 0 : null;
-                          const isRowBusy = busyQuestionId === q.id;
-                          return (
-                            <>
-                              <Button
-                                variant={lastIsIncorrect === true ? 'default' : 'outline'}
-                                size="sm"
-                                className="h-8 px-3"
-                                disabled={isRowBusy}
-                                onClick={() => markIncorrect(q.id)}>
-                                不正解
-                              </Button>
-                              <Button
-                                variant={lastIsIncorrect === false ? 'default' : 'outline'}
-                                size="sm"
-                                className="h-8 px-3"
-                                disabled={isRowBusy}
-                                onClick={() => markCorrect(q.id)}>
-                                正解
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                disabled={isRowBusy}
-                                onClick={() => remove(q.id)}>
-                                削除
-                              </Button>
-                            </>
-                          );
-                        })()}
-                      </div>
+                      {(() => {
+                        const isRowBusy = busyQuestionId === q.id;
+
+                        const value = (() => {
+                          if (!q.reviewCandidate) return '';
+                          if (q.reviewCandidate.status === 'EXCLUDED') return 'correct';
+                          if (q.reviewCandidate.status === 'OPEN') return 'incorrect';
+                          return '';
+                        })();
+
+                        return (
+                          <div className="flex items-center gap-3">
+                            <RadioGroup
+                              value={value}
+                              disabled={isRowBusy}
+                              onValueChange={(v) => {
+                                if (v === 'correct') {
+                                  markCorrect(q.id);
+                                  return;
+                                }
+                                if (v === 'incorrect') {
+                                  markIncorrect(q.id);
+                                }
+                              }}
+                              className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <RadioGroupItem value="incorrect" id={`incorrect-${q.id}`} />
+                                <Label htmlFor={`incorrect-${q.id}`}>不正解</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <RadioGroupItem value="correct" id={`correct-${q.id}`} />
+                                <Label htmlFor={`correct-${q.id}`}>正解</Label>
+                              </div>
+                            </RadioGroup>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              disabled={isRowBusy}
+                              onClick={() => remove(q.id)}>
+                              削除
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
               {questions.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                     問題が登録されていません
                   </TableCell>
                 </TableRow>
