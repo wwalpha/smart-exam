@@ -16,7 +16,7 @@ export const ReviewTestKanjiDetailPage = () => {
   const isAllAnswered =
     review &&
     review.items.length > 0 &&
-    review.items.every((item) => review.results.some((r) => r.targetId === item.targetId));
+    review.items.every((item) => review.results.some((r) => r.id === item.targetId));
 
   const complete = useCallback(async () => {
     if (!review) return;

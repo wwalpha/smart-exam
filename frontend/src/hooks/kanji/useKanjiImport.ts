@@ -91,7 +91,6 @@ export const useKanjiImport = () => {
 
     const response = await importKanji({
       fileContent,
-      mode: data.mode,
       subject,
     });
 
