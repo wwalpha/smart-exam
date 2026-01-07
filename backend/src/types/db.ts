@@ -82,48 +82,6 @@ export interface ReviewTestTable {
   pdfS3Key: string;
   /** 採点結果 */
   results?: { id: string; isCorrect: boolean }[];
-  /** 出題スナップショット（ReviewTestItemTable をマージ） */
-  items?: ReviewTestItemEmbedded[];
-}
-
-/**
- * 復習テスト項目（ReviewTestTable に埋め込み）
- */
-export interface ReviewTestItemEmbedded {
-  /** アイテムキー（テスト内で一意） */
-  itemKey: string;
-  /** 表示順 */
-  order: number;
-  /** 対象種別 */
-  targetType: ReviewTargetType;
-  /** 対象ID */
-  targetId: string;
-  /** ロックキー */
-  targetKey: string;
-  /** 表示ラベル */
-  displayLabel?: string;
-  /** 識別キー */
-  canonicalKey?: string;
-  /** 漢字 */
-  kanji?: string;
-  /** よみ */
-  reading?: string;
-  /** 出典教材ID */
-  materialId?: string;
-  /** 出典教材の学年 */
-  grade?: string;
-  /** 出典教材の提供元 */
-  provider?: string;
-  /** 出典教材名 */
-  materialName?: string;
-  /** 出典教材の教材年月日 (YYYY-MM-DD) */
-  materialDate?: string;
-  /** 問題文 */
-  questionText?: string;
-  /** 解答 */
-  answerText?: string;
-  /** 正誤 (採点後) */
-  isCorrect?: boolean;
 }
 
 /**

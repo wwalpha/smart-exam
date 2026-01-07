@@ -26,20 +26,16 @@ export const deleteMaterial = async (id: string): Promise<boolean> => {
 
       const hasAny =
         test.questions?.some((qid) => deletedQuestionIds.has(qid)) ||
-        test.items?.some((it) => it.targetType === 'QUESTION' && deletedQuestionIds.has(it.targetId));
+        test.results?.some((r) => deletedQuestionIds.has(r.id));
       if (!hasAny) continue;
 
       const nextQuestions = (test.questions ?? []).filter((qid) => !deletedQuestionIds.has(qid));
-      const nextItems = test.items
-        ? test.items.filter((it) => !(it.targetType === 'QUESTION' && deletedQuestionIds.has(it.targetId)))
-        : undefined;
       const nextResults = test.results ? test.results.filter((r) => !deletedQuestionIds.has(r.id)) : undefined;
 
       await ReviewTestsService.put({
         ...test,
         questions: nextQuestions,
         count: nextQuestions.length,
-        items: nextItems,
         results: nextResults,
       });
     }

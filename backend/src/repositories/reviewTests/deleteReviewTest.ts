@@ -5,31 +5,30 @@ export const deleteReviewTest = async (testId: string): Promise<boolean> => {
   const existing = await ReviewTestsService.get(testId);
   if (!existing) return false;
 
-  const items = Array.isArray(existing.items) ? existing.items : [];
-  await Promise.all(
-    items.map(async (i) => {
-      if (i.targetType !== 'QUESTION') return;
+  if (existing.mode === 'QUESTION') {
+    await Promise.all(
+      (existing.questions ?? []).map(async (targetId) => {
+        try {
+          const open = await ReviewTestCandidatesService.getLatestOpenCandidateByTargetId({
+            subject: existing.subject,
+            targetId,
+          });
+          if (!open) return;
+          if (open.testId !== testId) return;
 
-      try {
-        const open = await ReviewTestCandidatesService.getLatestOpenCandidateByTargetId({
-          subject: existing.subject,
-          targetId: i.targetId,
-        });
-        if (!open) return;
-        if (open.testId !== testId) return;
-
-        await ReviewTestCandidatesService.releaseLockIfMatch({
-          subject: existing.subject,
-          candidateKey: open.candidateKey,
-          testId,
-        });
-      } catch (e: unknown) {
-        const name = (e as { name?: string } | null)?.name;
-        if (name === 'ConditionalCheckFailedException') return;
-        throw e;
-      }
-    })
-  );
+          await ReviewTestCandidatesService.releaseLockIfMatch({
+            subject: existing.subject,
+            candidateKey: open.candidateKey,
+            testId,
+          });
+        } catch (e: unknown) {
+          const name = (e as { name?: string } | null)?.name;
+          if (name === 'ConditionalCheckFailedException') return;
+          throw e;
+        }
+      })
+    );
+  }
 
   await ReviewTestsService.delete(testId);
 

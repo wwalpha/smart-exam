@@ -1,28 +1,26 @@
 import type { ReviewAttempt } from '@smart-exam/api-types';
 import type { ReviewTargetType, SubjectId } from '@smart-exam/api-types';
-import type { ReviewTestItemEmbedded, ReviewTestTable } from '@/types/db';
+import type { ReviewTestTable } from '@/types/db';
 import { ReviewTestsService } from '@/services';
 
 const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
 
-const getAttemptFromTest = (params: {
-  test: ReviewTestTable;
-  match: (item: ReviewTestItemEmbedded) => boolean;
-}): ReviewAttempt | null => {
-  const { test, match } = params;
-  const dateYmd = test.submittedDate ?? test.createdDate;
+const getAttemptFromTest = (params: { test: ReviewTestTable; targetType: ReviewTargetType; targetId: string }): ReviewAttempt | null => {
+  const { test, targetType, targetId } = params;
+  if (test.mode !== targetType) return null;
+  if (!Array.isArray(test.questions) || !test.questions.includes(targetId)) return null;
 
-  const matched = (test.items ?? []).find((x) => match(x));
-  if (!matched) return null;
-  if (typeof matched.isCorrect !== 'boolean') return null;
+  const dateYmd = test.submittedDate ?? test.createdDate;
+  const isCorrect = (test.results ?? []).find((r) => r.id === targetId)?.isCorrect;
+  if (typeof isCorrect !== 'boolean') return null;
 
   return {
-    targetType: matched.targetType,
-    targetId: matched.targetId,
+    targetType,
+    targetId,
     subject: test.subject,
     dateYmd,
     attemptedAt: toAttemptedAt(dateYmd),
-    isCorrect: matched.isCorrect,
+    isCorrect,
     reviewTestId: test.testId,
   };
 };
@@ -37,14 +35,10 @@ export const listReviewAttempts = async (params: {
   const filtered = items
     .filter((t) => {
       if (params.subject && t.subject !== params.subject) return false;
-      if (!t.items || t.items.length === 0) return false;
       return true;
     })
     .map((test) =>
-      getAttemptFromTest({
-        test,
-        match: (item) => item.targetType === params.targetType && item.targetId === params.targetId,
-      })
+      getAttemptFromTest({ test, targetType: params.targetType, targetId: params.targetId })
     )
     .filter((x): x is ReviewAttempt => Boolean(x));
 

@@ -7,6 +7,7 @@ import { useMaterialDetail } from '@/hooks/materials';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 import { MATERIAL_PDF_FILE_TYPES } from '@/lib/materialConsts';
 import { Input } from '@/components/ui/input';
+import { formatYmdSlash } from '@/utils/date';
 
 type PdfFileType = 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
 
@@ -67,6 +68,9 @@ export const MaterialSetDetailPage = () => {
             </Badge>
             <Badge variant="outline" className="px-4 py-2 text-sm">
               {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+            </Badge>
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              {formatYmdSlash(material.materialDate)}
             </Badge>
             <Badge variant="outline" className="px-4 py-2 text-sm">
               {material.name}

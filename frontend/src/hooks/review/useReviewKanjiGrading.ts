@@ -42,7 +42,7 @@ export const useReviewKanjiGrading = () => {
     if (!currentTest) return;
     reset({
       items: currentTest.items.map((item) => ({
-        itemId: item.id,
+        itemId: item.itemId ?? item.id,
         isCorrect: item.isCorrect ?? false,
       })),
     });

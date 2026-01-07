@@ -1,11 +1,9 @@
 import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
-import { MaterialsService } from '@/services/MaterialsService';
-import { QuestionsService } from '@/services/QuestionsService';
 import { ReviewTestsService } from '@/services';
 import { WordsService } from '@/services/WordsService';
 import type { CreateReviewTestRequest, ReviewTest } from '@smart-exam/api-types';
-import type { ReviewTestItemEmbedded, ReviewTestTable, WordMasterTable } from '@/types/db';
+import type { ReviewTestTable, WordMasterTable } from '@/types/db';
 import { listDueCandidates } from './listDueCandidates';
 import { putCandidate } from './putCandidate';
 import {
@@ -94,68 +92,10 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
     questions: targetIds,
     createdDate,
     pdfS3Key: `review-tests/${testId}.pdf`,
-  };
-
-  const embeddedItems: ReviewTestItemEmbedded[] = [];
-
-  if (req.mode === 'KANJI') {
-    const words = await WordsService.listKanji(req.subject);
-    const byId = new Map((words as WordMasterTable[]).map((w) => [w.wordId, w] as const));
-
-    selected.forEach((c, index) => {
-      const w = byId.get(c.targetId);
-      embeddedItems.push({
-        itemKey: `${c.targetType}#${c.targetId}`,
-        order: index + 1,
-        targetType: 'KANJI',
-        targetId: c.targetId,
-        targetKey: targetKeyOf('KANJI', c.targetId),
-        kanji: w?.question,
-        reading: w?.answer,
-        questionText: w?.question,
-        answerText: w?.answer,
-      });
-    });
-  } else {
-    const questionRows = await Promise.all(targetIds.map((qid) => QuestionsService.get(qid)));
-    const qById = new Map(
-      questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const)
-    );
-
-    const materialIds = Array.from(new Set(Array.from(qById.values()).map((q) => q.materialId)));
-    const materialRows = await Promise.all(materialIds.map((mid) => MaterialsService.get(mid)));
-    const mById = new Map(
-      materialRows.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m.materialId, m] as const)
-    );
-
-    selected.forEach((c, index) => {
-      const q = qById.get(c.targetId);
-      const m = q ? mById.get(q.materialId) : undefined;
-      embeddedItems.push({
-        itemKey: `${c.targetType}#${c.targetId}`,
-        order: index + 1,
-        targetType: 'QUESTION',
-        targetId: c.targetId,
-        targetKey: targetKeyOf('QUESTION', c.targetId),
-        displayLabel: q?.canonicalKey,
-        canonicalKey: q?.canonicalKey,
-        materialId: q?.materialId,
-        grade: m?.grade,
-        provider: m?.provider,
-        materialName: m?.title,
-        materialDate: m?.materialDate,
-        questionText: q?.canonicalKey,
-      });
-    });
-  }
-
-  const storedRow: ReviewTestTable = {
-    ...testRow,
-    items: embeddedItems,
     results: [],
   };
 
-  await ReviewTestsService.put(storedRow);
+  await ReviewTestsService.put(testRow);
 
-  return toApiReviewTest(storedRow);
+  return toApiReviewTest(testRow);
 };

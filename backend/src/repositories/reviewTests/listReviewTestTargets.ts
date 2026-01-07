@@ -3,6 +3,9 @@ import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { ReviewTestTable, WordMasterTable } from '@/types/db';
 import { sortTargets, toReviewTargetKey } from './internal';
 import { ReviewTestsService } from '@/services';
+import { QuestionsService } from '@/services/QuestionsService';
+import { MaterialsService } from '@/services/MaterialsService';
+import { WordsService } from '@/services/WordsService';
 
 export const listReviewTestTargets = async (params: {
   mode: ReviewMode;
@@ -25,28 +28,58 @@ export const listReviewTestTargets = async (params: {
 
   const byKey = new Map<string, ReviewTestTarget>();
 
+  const allTargetIds = new Set<string>();
   for (const t of filteredRows) {
-    const items = Array.isArray(t.items) ? t.items : [];
-    for (const r of items) {
-      if (r.targetType !== params.mode) continue;
+    for (const id of t.questions ?? []) allTargetIds.add(id);
+  }
 
-      const key = toReviewTargetKey(t.subject, r.targetId);
+  const questionById = new Map<string, { canonicalKey?: string; materialId?: string }>();
+  const materialById = new Map<string, { title?: string; materialDate?: string }>();
+  const wordById = new Map<string, WordMasterTable>();
+
+  if (params.mode === 'QUESTION') {
+    const qRows = await Promise.all(Array.from(allTargetIds).map((qid) => QuestionsService.get(qid)));
+    for (const q of qRows) {
+      if (!q) continue;
+      questionById.set(q.questionId, { canonicalKey: q.canonicalKey, materialId: q.materialId });
+    }
+
+    const materialIds = Array.from(new Set(Array.from(questionById.values()).map((q) => q.materialId).filter((x): x is string => !!x)));
+    const mRows = await Promise.all(materialIds.map((mid) => MaterialsService.get(mid)));
+    for (const m of mRows) {
+      if (!m) continue;
+      materialById.set(m.materialId, { title: m.title, materialDate: m.materialDate });
+    }
+  } else {
+    const wRows = await Promise.all(Array.from(allTargetIds).map((wid) => WordsService.get(wid)));
+    for (const w of wRows) {
+      if (!w) continue;
+      wordById.set(w.wordId, w as WordMasterTable);
+    }
+  }
+
+  for (const t of filteredRows) {
+    for (const targetId of t.questions ?? []) {
+      const key = toReviewTargetKey(t.subject, targetId);
       const current = byKey.get(key);
 
-      const reading = (r as unknown as WordMasterTable & { reading?: string }).reading ?? r.answerText;
+      const q = questionById.get(targetId);
+      const m = q?.materialId ? materialById.get(q.materialId) : undefined;
+      const w = wordById.get(targetId);
+      const reading = (w as unknown as WordMasterTable & { reading?: string } | undefined)?.answer;
 
       if (!current) {
         byKey.set(key, {
-          targetType: r.targetType,
-          targetId: r.targetId,
+          targetType: params.mode,
+          targetId,
           subject: t.subject,
-          displayLabel: r.displayLabel,
-          canonicalKey: r.canonicalKey,
-          kanji: r.kanji,
+          displayLabel: q?.canonicalKey,
+          canonicalKey: q?.canonicalKey,
+          kanji: w?.question,
           reading,
-          materialName: r.materialName,
-          materialDate: r.materialDate,
-          questionText: r.questionText,
+          materialName: m?.title,
+          materialDate: m?.materialDate,
+          questionText: params.mode === 'QUESTION' ? q?.canonicalKey : w?.question,
           lastTestCreatedDate: t.createdDate,
           includedCount: 1,
         });
@@ -57,13 +90,13 @@ export const listReviewTestTargets = async (params: {
 
       byKey.set(key, {
         ...current,
-        displayLabel: current.displayLabel ?? r.displayLabel,
-        canonicalKey: current.canonicalKey ?? r.canonicalKey,
-        kanji: current.kanji ?? r.kanji,
+        displayLabel: current.displayLabel ?? q?.canonicalKey,
+        canonicalKey: current.canonicalKey ?? q?.canonicalKey,
+        kanji: current.kanji ?? w?.question,
         reading: current.reading ?? reading,
-        materialName: current.materialName ?? r.materialName,
-        materialDate: current.materialDate ?? r.materialDate,
-        questionText: current.questionText ?? r.questionText,
+        materialName: current.materialName ?? m?.title,
+        materialDate: current.materialDate ?? m?.materialDate,
+        questionText: current.questionText ?? (params.mode === 'QUESTION' ? q?.canonicalKey : w?.question),
         lastTestCreatedDate: nextLast,
         includedCount: (current.includedCount ?? 0) + 1,
       });

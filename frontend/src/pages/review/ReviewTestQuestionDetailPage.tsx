@@ -155,7 +155,8 @@ export const ReviewTestQuestionDetailPage = () => {
     <div className="space-y-6 px-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+        <h1 className="text-2xl font-bold">問題復習テスト詳細</h1>
+        <div className="flex justify-end gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>
           </Button>

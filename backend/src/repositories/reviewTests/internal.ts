@@ -2,11 +2,10 @@ import { DateUtils } from '@/lib/dateUtils';
 import type {
   CreateReviewTestRequest,
   ReviewTest,
-  ReviewTestItem,
   ReviewTestTarget,
   SubjectId,
 } from '@smart-exam/api-types';
-import type { ReviewTestItemEmbedded, ReviewTestTable } from '@/types/db';
+import type { ReviewTestTable } from '@/types/db';
 
 export type ReviewTargetType = 'QUESTION' | 'KANJI';
 
@@ -84,25 +83,6 @@ export const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
   questions: row.questions,
   submittedDate: row.submittedDate,
   results: row.results ?? [],
-});
-
-export const toApiReviewTestItem = (testId: string, row: ReviewTestItemEmbedded): ReviewTestItem => ({
-  id: row.itemKey,
-  itemId: row.targetId,
-  testId,
-  targetType: row.targetType,
-  targetId: row.targetId,
-  displayLabel: row.displayLabel,
-  canonicalKey: row.canonicalKey,
-  kanji: row.kanji,
-  materialId: row.materialId,
-  grade: row.grade,
-  provider: row.provider,
-  materialName: row.materialName,
-  materialDate: row.materialDate,
-  questionText: row.questionText,
-  answerText: row.answerText,
-  ...(row.isCorrect !== undefined ? { isCorrect: row.isCorrect } : {}),
 });
 
 export const toReviewTargetKey = (subject: SubjectId, targetId: string): string => `${subject}#${targetId}`;

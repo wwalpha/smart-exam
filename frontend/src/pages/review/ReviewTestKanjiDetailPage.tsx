@@ -27,7 +27,8 @@ export const ReviewTestKanjiDetailPage = () => {
     <div className="space-y-6 px-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+        <h1 className="text-2xl font-bold">漢字復習テスト詳細</h1>
+        <div className="flex justify-end gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>
           </Button>
@@ -77,9 +78,9 @@ export const ReviewTestKanjiDetailPage = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="max-h-[600px] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 pl-6">
                 {review.items.map((item) => (
-                  <div key={item.id} className="rounded border px-3 py-2 text-center text-sm font-medium">
+                  <div key={item.id} className="rounded border px-3 py-2 text-left text-sm font-medium">
                     {item.questionText}
                   </div>
                 ))}
