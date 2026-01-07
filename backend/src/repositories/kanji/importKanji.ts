@@ -130,19 +130,6 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
             createdAtIso: lastAttemptIso,
           });
         }
-      } else {
-        // 履歴がない場合（新規単語など）は、OPENな候補を作成してテスト対象にする
-        const now = DateUtils.now();
-        const today = DateUtils.todayYmd();
-        await ReviewTestCandidatesService.createCandidate({
-          subject,
-          questionId: targetWordId,
-          mode: 'KANJI',
-          nextTime: today,
-          correctCount: 0,
-          status: 'OPEN',
-          createdAtIso: now,
-        });
       }
     } catch (e) {
       errorCount += 1;
