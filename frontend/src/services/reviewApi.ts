@@ -63,8 +63,6 @@ export const submitReviewTestResults = async (
   });
 };
 
-// PDFは /api/review-tests/:testId/pdf (binary) を利用する
-
 export const listReviewTestTargets = async (params: {
   mode: 'QUESTION' | 'KANJI';
   from: string;

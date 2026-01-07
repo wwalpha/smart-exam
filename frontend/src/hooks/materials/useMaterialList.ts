@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
@@ -36,10 +35,6 @@ export const useMaterialList = () => {
       q: data.q,
     });
   };
-
-  useEffect(() => {
-    fetchMaterials();
-  }, [fetchMaterials]);
 
   const { confirm, ConfirmDialog } = useConfirm();
 

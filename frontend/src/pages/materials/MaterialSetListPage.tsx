@@ -16,6 +16,7 @@ export const MaterialSetListPage = () => {
   const { materials, form, search, remove, ConfirmDialog } = useMaterialList();
   const { register, setValue, watch } = form;
   const provider = watch('provider');
+  const infoBadgeClass = 'px-4 py-2 text-sm';
 
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -164,7 +165,9 @@ export const MaterialSetListPage = () => {
                 <TableCell className="py-1">{material.grade}年</TableCell>
                 <TableCell className="py-1">{material.provider ?? ''}</TableCell>
                 <TableCell className="py-1">
-                  <Badge variant="outline">{SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
+                  <Badge variant="outline" className={infoBadgeClass}>
+                    {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                  </Badge>
                 </TableCell>
                 <TableCell className="py-1">{material.materialDate}</TableCell>
                 <TableCell className="py-1 font-medium">{material.name}</TableCell>

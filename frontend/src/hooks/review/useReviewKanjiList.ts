@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
@@ -32,14 +31,15 @@ export const useReviewKanjiList = () => {
     });
   };
 
-  useEffect(() => {
-    fetchReviewTests({ mode: 'KANJI', subject: 'ALL' });
-  }, [fetchReviewTests]);
-
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
       await deleteReviewTest(id);
-      fetchReviewTests({ mode: 'KANJI', subject: 'ALL' });
+      const current = form.getValues();
+      fetchReviewTests({
+        mode: 'KANJI',
+        subject: current.subject,
+        ...(current.status === 'ALL' ? {} : { status: current.status }),
+      });
     }
   };
 

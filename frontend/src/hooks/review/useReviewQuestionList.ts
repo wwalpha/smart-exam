@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
@@ -32,14 +31,15 @@ export const useReviewQuestionList = () => {
     });
   };
 
-  useEffect(() => {
-    fetchReviewTests({ mode: 'QUESTION', subject: 'ALL' });
-  }, [fetchReviewTests]);
-
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
       await deleteReviewTest(id);
-      fetchReviewTests({ mode: 'QUESTION', subject: 'ALL' });
+      const current = form.getValues();
+      fetchReviewTests({
+        mode: 'QUESTION',
+        subject: current.subject,
+        ...(current.status === 'ALL' ? {} : { status: current.status }),
+      });
     }
   };
 
