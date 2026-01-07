@@ -107,8 +107,8 @@ export const QuestionManagementPage = () => {
                     {...register('canonicalKey', {
                       required: '必須です',
                       pattern: {
-                        value: /^\d+(?:-\d+)*$/,
-                        message: 'ハイフン区切りの数字で入力してください (例: 1-1)',
+                        value: /^\d+(?:-\d+)*(?:-[A-Za-z])?$/,
+                        message: 'ハイフン区切りで入力してください (例: 1-1 / 1-8-A)',
                       },
                     })}
                     aria-invalid={!!errors.canonicalKey}
@@ -118,7 +118,7 @@ export const QuestionManagementPage = () => {
                   {errors.canonicalKey?.message ? (
                     <p className="text-sm text-destructive">{String(errors.canonicalKey.message)}</p>
                   ) : null}
-                  <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1)</p>
+                  <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1 / 1-8-A)</p>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isBusy}>
@@ -184,22 +184,30 @@ export const QuestionManagementPage = () => {
                               value={value}
                               disabled={isRowBusy}
                               onValueChange={(v) => {
-                                if (v === 'correct') {
-                                  markCorrect(q.id);
-                                  return;
-                                }
-                                if (v === 'incorrect') {
-                                  markIncorrect(q.id);
-                                }
+                                if (v === value) return;
+                                if (v === 'correct') return markCorrect(q.id);
+                                if (v === 'incorrect') return markIncorrect(q.id);
                               }}
                               className="flex min-w-[220px] items-center gap-4">
-                              <div className="flex items-center gap-2 whitespace-nowrap">
+                              <div
+                                className="flex items-center gap-2 whitespace-nowrap"
+                                onClick={() => {
+                                  if (isRowBusy) return;
+                                  if (value === 'incorrect') return;
+                                  markIncorrect(q.id);
+                                }}>
                                 <RadioGroupItem value="incorrect" id={`incorrect-${q.id}`} />
                                 <Label className="whitespace-nowrap" htmlFor={`incorrect-${q.id}`}>
                                   不正解
                                 </Label>
                               </div>
-                              <div className="flex items-center gap-2 whitespace-nowrap">
+                              <div
+                                className="flex items-center gap-2 whitespace-nowrap"
+                                onClick={() => {
+                                  if (isRowBusy) return;
+                                  if (value === 'correct') return;
+                                  markCorrect(q.id);
+                                }}>
                                 <RadioGroupItem value="correct" id={`correct-${q.id}`} />
                                 <Label className="whitespace-nowrap" htmlFor={`correct-${q.id}`}>
                                   正解

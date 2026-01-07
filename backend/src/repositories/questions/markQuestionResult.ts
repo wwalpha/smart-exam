@@ -17,15 +17,7 @@ export const markQuestionCorrect = async (questionId: string): Promise<boolean> 
     await ReviewTestCandidatesService.deleteCandidate({ subject: q.subjectId, candidateKey: open.candidateKey });
   }
 
-  // 正解の場合は候補にしない（ただしUIで状態を保持できるようにEXCLUDEDを残す）
-  await ReviewTestCandidatesService.createCandidate({
-    subject: q.subjectId,
-    questionId,
-    mode: 'QUESTION',
-    nextTime: ReviewNextTime.EXCLUDED_NEXT_TIME,
-    correctCount: 1,
-    status: 'EXCLUDED',
-  });
+  // 正解の場合は候補にしない（EXCLUDED も登録しない）
   return true;
 };
 

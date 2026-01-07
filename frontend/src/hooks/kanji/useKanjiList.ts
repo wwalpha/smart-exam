@@ -39,6 +39,16 @@ export const useKanjiList = () => {
     }
   };
 
+  const removeMany = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    if (await confirm(`選択した${ids.length}件を削除しますか？`, { variant: 'destructive' })) {
+      for (const id of ids) {
+        await deleteKanji(id);
+      }
+      fetchKanjiList();
+    }
+  };
+
   return {
     kanjiList: list,
     total,
@@ -47,6 +57,7 @@ export const useKanjiList = () => {
     form,
     runSearch,
     remove,
+    removeMany,
     ConfirmDialog,
   };
 };

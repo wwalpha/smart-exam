@@ -1,5 +1,76 @@
-import { ReviewTestGradingPage } from '@/pages/review/ReviewTestGradingPage';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useReviewKanjiGrading } from '@/hooks/review';
 
 export const ReviewTestKanjiGradingPage = () => {
-  return <ReviewTestGradingPage basePath="/reviewtests/kanji" />;
+  const { review, isLoading, error, basePath, fields, watch, setValue, setAllCorrect, submit, id } =
+    useReviewKanjiGrading();
+
+  if (isLoading) return <div className="p-8">Loading...</div>;
+  if (error) return <div className="p-8 text-red-500">{error}</div>;
+  if (!review) return <div className="p-8">データの取得に失敗しました。</div>;
+
+  return (
+    <div className="max-w-4xl mx-auto p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">採点入力: {review.testId}</h1>
+        <Button asChild variant="outline">
+          <Link to={`${basePath}/${id}`}>戻る</Link>
+        </Button>
+      </div>
+
+      <Card>
+        <CardContent>
+          <form onSubmit={submit}>
+            <div className="mb-4 flex items-center justify-end gap-2">
+              <Button type="button" variant="outline" onClick={setAllCorrect}>
+                全問正解
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {fields.map((field, index) => {
+                const item = review.items[index];
+                if (!item) return null;
+
+                const isCorrect = watch(`items.${index}.isCorrect`);
+
+                return (
+                  <div key={field.id} className="flex items-start justify-between gap-3 rounded border px-3 py-2">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium">
+                        {index + 1}. {item.questionText}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">{item.answerText ?? ''}</div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-3">
+                      {isCorrect ? <Badge variant="default">正解</Badge> : <Badge variant="destructive">不正解</Badge>}
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          checked={!isCorrect}
+                          onChange={(ev) => {
+                            setValue(`items.${index}.isCorrect`, !ev.target.checked, { shouldDirty: true });
+                          }}
+                        />
+                        不正解
+                      </label>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button type="submit">採点を保存</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
 };

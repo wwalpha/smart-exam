@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,24 +12,56 @@ import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const KanjiListPage = () => {
-  const { kanjiList, total, form, runSearch, remove, ConfirmDialog } = useKanjiList();
+  const { kanjiList, total, form, runSearch, remove, removeMany, ConfirmDialog } = useKanjiList();
   const { register, setValue, watch, handleSubmit } = form;
   const subject = watch('subject');
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const totalPages = Math.max(1, Math.ceil(kanjiList.length / pageSize));
   const currentPage = Math.min(page, totalPages);
 
   const pagedList = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return kanjiList.slice(start, start + pageSize);
-  }, [kanjiList, currentPage]);
+  }, [kanjiList, currentPage, pageSize]);
 
   const onSearch = handleSubmit((data) => {
     setPage(1);
+    setSelectedIds(new Set());
     runSearch(data);
   });
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      if (kanjiList.length === 0) return new Set();
+      if (prev.size === kanjiList.length) return new Set();
+      return new Set(kanjiList.map((k) => k.id));
+    });
+  };
+
+  const toggleSelectPage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      const pageIds = pagedList.map((k) => k.id);
+      const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => next.has(id));
+      if (allOnPageSelected) {
+        for (const id of pageIds) next.delete(id);
+        return next;
+      }
+      for (const id of pageIds) next.add(id);
+      return next;
+    });
+  };
+
+  const bulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    await removeMany(ids);
+    setSelectedIds(new Set());
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6 px-8 py-4">
@@ -79,6 +112,19 @@ export const KanjiListPage = () => {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-muted-foreground">全{total}件</div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={toggleSelectAll} disabled={kanjiList.length === 0}>
+            一括選択
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={bulkDelete}
+            disabled={selectedIds.size === 0}>
+            一括削除
+          </Button>
+
           <div className="w-28">
             <Select
               value={String(pageSize)}
@@ -86,6 +132,7 @@ export const KanjiListPage = () => {
                 const n = Number(v);
                 setPage(1);
                 setPageSize(Number.isFinite(n) && n > 0 ? n : 10);
+                setSelectedIds(new Set());
               }}>
               <SelectTrigger>
                 <SelectValue placeholder="件数" />
@@ -123,6 +170,15 @@ export const KanjiListPage = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-24">操作</TableHead>
+              <TableHead className="w-12">
+                <div className="flex items-center justify-center">
+                  <Checkbox
+                    checked={pagedList.length > 0 && pagedList.every((k) => selectedIds.has(k.id))}
+                    onCheckedChange={() => toggleSelectPage()}
+                    aria-label="ページ内を一括選択"
+                  />
+                </div>
+              </TableHead>
               <TableHead className="w-24">科目</TableHead>
               <TableHead className="w-[45%]">問題</TableHead>
               <TableHead className="w-[35%]">解答</TableHead>
@@ -148,6 +204,22 @@ export const KanjiListPage = () => {
                     </Button>
                   </div>
                 </TableCell>
+                <TableCell className="px-2 py-1">
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={selectedIds.has(kanji.id)}
+                      onCheckedChange={(checked) => {
+                        setSelectedIds((prev) => {
+                          const next = new Set(prev);
+                          if (checked) next.add(kanji.id);
+                          else next.delete(kanji.id);
+                          return next;
+                        });
+                      }}
+                      aria-label="選択"
+                    />
+                  </div>
+                </TableCell>
                 <TableCell className="px-2 py-1 text-sm">
                   <div className="truncate" title={SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}>
                     {SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}
@@ -167,7 +239,7 @@ export const KanjiListPage = () => {
             ))}
             {kanjiList.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

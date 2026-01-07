@@ -4,17 +4,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useReviewList } from '@/hooks/review';
+import { useReviewQuestionList } from '@/hooks/review';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import { formatYmdSlash } from '@/utils/date';
 import type { WordTestSubject } from '@typings/wordtest';
 import { FileText, Trash2 } from 'lucide-react';
 
 export const ReviewTestQuestionListPage = () => {
-  const { basePath, reviews, form, search, remove, ConfirmDialog } = useReviewList({
-    mode: 'QUESTION',
-    basePath: '/reviewtests/questions',
-  });
+  const { basePath, reviews, form, search, remove, ConfirmDialog } = useReviewQuestionList();
   const { setValue } = form;
 
   const getStatusBadge = (status: string) => {

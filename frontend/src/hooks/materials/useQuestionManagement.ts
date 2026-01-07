@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
 import { compareQuestionNumber } from '@/utils/questionNumber';
+import { normalizeQuestionNumber } from '@/utils/questionNumber';
 
 type QuestionFormValues = {
   canonicalKey: string;
@@ -70,10 +71,8 @@ export const useQuestionManagement = () => {
 
     const normalized = bulkInput
       .split(/[\s,]+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-      .map((s) => s.replace(/[^0-9\-]/g, ''))
-      .filter((s) => /^\d+(?:-\d+)*$/.test(s));
+      .map((s) => normalizeQuestionNumber(s))
+      .filter((s): s is string => typeof s === 'string');
 
     const unique = Array.from(new Set(normalized)).sort(compareQuestionNumber);
     if (unique.length === 0) return;
