@@ -42,7 +42,7 @@ export const MaterialSetDetailPage = () => {
   return (
     <div className="space-y-6 px-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{material.name}</h1>
+        <h1 className="text-2xl font-bold">教材詳細</h1>
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link to="/materials">一覧へ戻る</Link>
@@ -58,35 +58,39 @@ export const MaterialSetDetailPage = () => {
           <CardTitle>基本情報</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              {material.grade}年
+            </Badge>
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              {material.provider}
+            </Badge>
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+            </Badge>
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              {material.name}
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <div className="text-sm font-medium text-muted-foreground">学年</div>
-              <div>{material.grade}年</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground">教材種別</div>
-              <div>{material.provider}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground">科目</div>
-              <Badge variant="outline">{SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground">実施年月日</div>
+              <div className="text-sm font-medium text-muted-foreground">教材年月日</div>
               <div>{material.materialDate || '-'}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">初回実施日</div>
               <div className="flex items-center gap-2">
-                <Input type="date" value={registeredDate} onChange={(e) => setRegisteredDate(e.target.value)} className="w-[180px]" />
+                <Input
+                  type="date"
+                  value={registeredDate}
+                  onChange={(e) => setRegisteredDate(e.target.value)}
+                  className="w-[180px]"
+                />
                 <Button type="button" variant="outline" size="sm" onClick={() => void saveRegisteredDate()} disabled={isBusy}>
                   更新
                 </Button>
               </div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground">教材名</div>
-              <div className="text-lg font-medium">{material.name}</div>
             </div>
           </div>
         </CardContent>

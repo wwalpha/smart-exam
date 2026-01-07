@@ -192,14 +192,18 @@ export const QuestionManagementPage = () => {
                                   markIncorrect(q.id);
                                 }
                               }}
-                              className="flex items-center gap-4">
-                              <div className="flex items-center gap-2">
+                              className="flex min-w-[220px] items-center gap-4">
+                              <div className="flex items-center gap-2 whitespace-nowrap">
                                 <RadioGroupItem value="incorrect" id={`incorrect-${q.id}`} />
-                                <Label htmlFor={`incorrect-${q.id}`}>不正解</Label>
+                                <Label className="whitespace-nowrap" htmlFor={`incorrect-${q.id}`}>
+                                  不正解
+                                </Label>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 whitespace-nowrap">
                                 <RadioGroupItem value="correct" id={`correct-${q.id}`} />
-                                <Label htmlFor={`correct-${q.id}`}>正解</Label>
+                                <Label className="whitespace-nowrap" htmlFor={`correct-${q.id}`}>
+                                  正解
+                                </Label>
                               </div>
                             </RadioGroup>
                             <Button

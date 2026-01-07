@@ -121,6 +121,22 @@ export const ReviewTestCandidatesService = {
     return items.find((x) => x.subject === params.subject && x.status === 'OPEN') ?? null;
   },
 
+  deleteCandidate: async (params: { subject: SubjectId; candidateKey: string }): Promise<void> => {
+    await dbHelper.delete({
+      TableName: TABLE_NAME,
+      Key: { subject: params.subject, candidateKey: params.candidateKey },
+    });
+  },
+
+  deleteLatestOpenCandidateByTargetId: async (params: { subject: SubjectId; targetId: string }): Promise<void> => {
+    const open = await ReviewTestCandidatesService.getLatestOpenCandidateByTargetId({
+      subject: params.subject,
+      targetId: params.targetId,
+    });
+    if (!open) return;
+    await ReviewTestCandidatesService.deleteCandidate({ subject: params.subject, candidateKey: open.candidateKey });
+  },
+
   lockCandidateIfUnlocked: async (params: {
     subject: SubjectId;
     candidateKey: string;

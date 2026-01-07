@@ -14,7 +14,7 @@ export const markQuestionCorrect = async (questionId: string): Promise<boolean> 
   });
 
   if (open) {
-    await ReviewTestCandidatesService.closeCandidateIfMatch({ subject: q.subjectId, candidateKey: open.candidateKey });
+    await ReviewTestCandidatesService.deleteCandidate({ subject: q.subjectId, candidateKey: open.candidateKey });
   }
 
   // 正解の場合は候補にしない（ただしUIで状態を保持できるようにEXCLUDEDを残す）

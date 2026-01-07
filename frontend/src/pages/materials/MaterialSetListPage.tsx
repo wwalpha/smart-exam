@@ -88,7 +88,7 @@ export const MaterialSetListPage = () => {
                 </Select>
               </div>
               <div className="w-44">
-                <label className="text-sm font-medium">実施年月日</label>
+                <label className="text-sm font-medium">教材年月日</label>
                 <Input type="date" {...register('date')} />
               </div>
               <div className="flex-1 min-w-[200px]">
@@ -137,7 +137,7 @@ export const MaterialSetListPage = () => {
               <TableHead>学年</TableHead>
               <TableHead>教材種別</TableHead>
               <TableHead>科目</TableHead>
-              <TableHead>実施年月日</TableHead>
+              <TableHead>教材年月日</TableHead>
               <TableHead>教材名</TableHead>
             </TableRow>
           </TableHeader>
