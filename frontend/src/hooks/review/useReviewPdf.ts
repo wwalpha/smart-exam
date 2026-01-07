@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 
-export const useReviewPdf = () => {
+export const useReviewPdf = (params: { basePath: string; isKanji: boolean }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isKanji = location.pathname.includes('/kanji');
-  const basePath = isKanji ? '/reviewtests/kanji' : '/reviewtests/questions';
+  const isKanji = params.isKanji;
+  const basePath = params.basePath;
 
   const { detail: currentTest, status } = useWordTestStore((s) => s.review);
   const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);

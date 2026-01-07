@@ -18,8 +18,11 @@ const isPdfBlob = async (blob: Blob): Promise<boolean> => {
   );
 };
 
-export const ReviewTestPdfPage = () => {
-  const { review, isLoading, error, basePath, navigate, id, pdfUrl } = useReviewPdf();
+export const ReviewTestPdfPage = (props: { basePath: string; isKanji: boolean }) => {
+  const { review, isLoading, error, basePath, navigate, id, pdfUrl } = useReviewPdf({
+    basePath: props.basePath,
+    isKanji: props.isKanji,
+  });
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [blobUrl, setBlobUrl] = useState<string>('');
   const [isFetching, setIsFetching] = useState(false);

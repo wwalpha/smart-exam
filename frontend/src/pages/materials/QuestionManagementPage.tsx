@@ -134,7 +134,7 @@ export const QuestionManagementPage = () => {
         </div>
       </div>
 
-      <Card className="max-w-xl">
+      <Card className="w-full max-w-5xl">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

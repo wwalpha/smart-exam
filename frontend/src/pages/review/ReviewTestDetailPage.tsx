@@ -22,8 +22,10 @@ const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']
   return [...candidates].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] ?? null;
 };
 
-export const ReviewTestDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewDetail();
+export const ReviewTestDetailPage = (props: { basePath: string }) => {
+  const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewDetail({
+    basePath: props.basePath,
+  });
   const navigate = useNavigate();
 
   const complete = useCallback(async () => {

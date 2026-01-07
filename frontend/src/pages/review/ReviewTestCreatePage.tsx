@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { useReviewCreate } from '@/hooks/review';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
+import type { ReviewMode } from '@smart-exam/api-types';
 
-export const ReviewTestCreatePage = () => {
-  const { isKanji, form, submit } = useReviewCreate();
+export const ReviewTestCreatePage = (props: { basePath: string; mode: ReviewMode }) => {
+  const { form, submit } = useReviewCreate({ basePath: props.basePath, mode: props.mode });
   const {
     register,
     setValue,
@@ -19,10 +20,10 @@ export const ReviewTestCreatePage = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-8 space-y-6">
-      <h1 className="text-2xl font-bold">{isKanji ? '漢字復習テスト作成' : '問題復習テスト作成'}</h1>
+      <h1 className="text-2xl font-bold">{props.mode === 'KANJI' ? '漢字復習テスト作成' : '問題復習テスト作成'}</h1>
 
       <Card>
-        {isKanji ? null : (
+        {props.mode === 'KANJI' ? null : (
           <CardHeader>
             <CardTitle>条件設定</CardTitle>
           </CardHeader>
@@ -43,7 +44,7 @@ export const ReviewTestCreatePage = () => {
                   <SelectValue placeholder="科目を選択" />
                 </SelectTrigger>
                 <SelectContent>
-                  {isKanji ? (
+                  {props.mode === 'KANJI' ? (
                     <>
                       <SelectItem value={SUBJECT.japanese}>{SUBJECT_LABEL[SUBJECT.japanese]}</SelectItem>
                       <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>

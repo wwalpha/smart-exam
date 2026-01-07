@@ -1,13 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 import { KanjiRepository } from '@/repositories';
 import { WordsService } from '@/services/WordsService';
+import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 
 vi.mock('@/services/WordsService');
+vi.mock('@/services/ReviewTestCandidatesService');
 
 describe('KanjiRepository.importKanji (pipe format)', () => {
-  it('creates master and ignores imported histories', async () => {
+  it('creates master and persists imported histories', async () => {
     vi.mocked(WordsService.listKanji).mockResolvedValue([] as any);
     vi.mocked(WordsService.create).mockResolvedValue();
+    vi.mocked(ReviewTestCandidatesService.deleteCandidatesByTargetId).mockResolvedValue();
+    vi.mocked(ReviewTestCandidatesService.createCandidate).mockResolvedValue({} as any);
 
     const res = await KanjiRepository.importKanji({
       subject: '1',
@@ -19,6 +23,10 @@ describe('KanjiRepository.importKanji (pipe format)', () => {
     expect(res.errorCount).toBe(0);
 
     expect(WordsService.create).toHaveBeenCalledTimes(1);
+
+    // 履歴3件 + 現在状態1件
+    expect(ReviewTestCandidatesService.createCandidate).toHaveBeenCalledTimes(4);
+    expect(ReviewTestCandidatesService.deleteCandidatesByTargetId).toHaveBeenCalledTimes(1);
   });
 
   it('fails when subject is missing', async () => {

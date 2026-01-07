@@ -1,19 +1,18 @@
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import type { WordTestSubject } from '@typings/wordtest';
+import type { ReviewMode } from '@smart-exam/api-types';
 
 type CreateFormValues = {
   subject: WordTestSubject | '';
   count: number;
 };
 
-export const useReviewCreate = () => {
+export const useReviewCreate = (params: { mode: ReviewMode; basePath: string }) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const isKanji = location.pathname.includes('/kanji');
-  const mode = isKanji ? 'KANJI' : 'QUESTION';
-  const basePath = isKanji ? '/reviewtests/kanji' : '/reviewtests/questions';
+  const mode = params.mode;
+  const basePath = params.basePath;
 
   const createReviewTest = useWordTestStore((s) => s.createReviewTest);
   const status = useWordTestStore((s) => s.review.status);
@@ -21,7 +20,7 @@ export const useReviewCreate = () => {
   const form = useForm<CreateFormValues>({
     defaultValues: {
       subject: '',
-      count: isKanji ? 60 : 20,
+      count: mode === 'KANJI' ? 60 : 20,
     },
   });
 
@@ -42,7 +41,6 @@ export const useReviewCreate = () => {
   };
 
   return {
-    isKanji,
     form,
     submit: form.handleSubmit(submit),
     isLoading: status.isLoading,

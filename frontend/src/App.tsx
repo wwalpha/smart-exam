@@ -14,11 +14,16 @@ import { QuestionAttemptHistoryListPage } from '@/pages/materials/QuestionAttemp
 import { QuestionAttemptHistoryPage } from '@/pages/materials/QuestionAttemptHistoryPage';
 
 // Review Tests (Questions & Kanji)
-import { ReviewTestListPage } from '@/pages/review/ReviewTestListPage';
-import { ReviewTestCreatePage } from '@/pages/review/ReviewTestCreatePage';
-import { ReviewTestDetailPage } from '@/pages/review/ReviewTestDetailPage';
-import { ReviewTestGradingPage } from '@/pages/review/ReviewTestGradingPage';
-import { ReviewTestPdfPage } from '@/pages/review/ReviewTestPdfPage';
+import { ReviewTestQuestionListPage } from '@/pages/review/ReviewTestQuestionListPage';
+import { ReviewTestKanjiListPage } from '@/pages/review/ReviewTestKanjiListPage';
+import { ReviewTestQuestionCreatePage } from '@/pages/review/ReviewTestQuestionCreatePage';
+import { ReviewTestKanjiCreatePage } from '@/pages/review/ReviewTestKanjiCreatePage';
+import { ReviewTestQuestionDetailPage } from '@/pages/review/ReviewTestQuestionDetailPage';
+import { ReviewTestKanjiDetailPage } from '@/pages/review/ReviewTestKanjiDetailPage';
+import { ReviewTestQuestionGradingPage } from '@/pages/review/ReviewTestQuestionGradingPage';
+import { ReviewTestKanjiGradingPage } from '@/pages/review/ReviewTestKanjiGradingPage';
+import { ReviewTestQuestionPdfPage } from '@/pages/review/ReviewTestQuestionPdfPage';
+import { ReviewTestKanjiPdfPage } from '@/pages/review/ReviewTestKanjiPdfPage';
 
 // Kanji Management
 import { KanjiListPage } from '@/pages/kanji/KanjiListPage';
@@ -100,18 +105,18 @@ export const App = () => {
         <Route path="/materials/:id/attempts" element={<QuestionAttemptHistoryPage />} />
 
         {/* Review Tests (Questions) */}
-        <Route path="/reviewtests/questions" element={<ReviewTestListPage />} />
-        <Route path="/reviewtests/questions/new" element={<ReviewTestCreatePage />} />
-        <Route path="/reviewtests/questions/:id" element={<ReviewTestDetailPage />} />
-        <Route path="/reviewtests/questions/:id/grading" element={<ReviewTestGradingPage />} />
-        <Route path="/reviewtests/questions/:id/pdf" element={<ReviewTestPdfPage />} />
+        <Route path="/reviewtests/questions" element={<ReviewTestQuestionListPage />} />
+        <Route path="/reviewtests/questions/new" element={<ReviewTestQuestionCreatePage />} />
+        <Route path="/reviewtests/questions/:id" element={<ReviewTestQuestionDetailPage />} />
+        <Route path="/reviewtests/questions/:id/grading" element={<ReviewTestQuestionGradingPage />} />
+        <Route path="/reviewtests/questions/:id/pdf" element={<ReviewTestQuestionPdfPage />} />
 
         {/* Review Tests (Kanji) */}
-        <Route path="/reviewtests/kanji" element={<ReviewTestListPage />} />
-        <Route path="/reviewtests/kanji/new" element={<ReviewTestCreatePage />} />
-        <Route path="/reviewtests/kanji/:id" element={<ReviewTestDetailPage />} />
-        <Route path="/reviewtests/kanji/:id/grading" element={<ReviewTestGradingPage />} />
-        <Route path="/reviewtests/kanji/:id/pdf" element={<ReviewTestPdfPage />} />
+        <Route path="/reviewtests/kanji" element={<ReviewTestKanjiListPage />} />
+        <Route path="/reviewtests/kanji/new" element={<ReviewTestKanjiCreatePage />} />
+        <Route path="/reviewtests/kanji/:id" element={<ReviewTestKanjiDetailPage />} />
+        <Route path="/reviewtests/kanji/:id/grading" element={<ReviewTestKanjiGradingPage />} />
+        <Route path="/reviewtests/kanji/:id/pdf" element={<ReviewTestKanjiPdfPage />} />
 
         {/* Kanji Management */}
         <Route path="/kanji" element={<KanjiListPage />} />

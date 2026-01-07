@@ -31,10 +31,11 @@ export const ReviewTestCandidatesService = {
     mode: ReviewMode;
     nextTime: string;
     correctCount: number;
-    status: 'OPEN' | 'EXCLUDED';
+    status: 'OPEN' | 'EXCLUDED' | 'CLOSED';
+    createdAtIso?: string;
   }): Promise<ReviewTestCandidateTable> => {
     const id = createUuid();
-    const createdAt = nowIso();
+    const createdAt = params.createdAtIso ?? nowIso();
     const candidateKey = `${params.nextTime}#${id}`;
 
     const item: ReviewTestCandidateTable = {
@@ -57,6 +58,31 @@ export const ReviewTestCandidatesService = {
     });
 
     return item;
+  },
+
+  listCandidatesByTargetId: async (params: { targetId: string }): Promise<ReviewTestCandidateTable[]> => {
+    const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
+      TableName: TABLE_NAME,
+      IndexName: INDEX_GSI_QUESTION_ID_CREATED_AT,
+      KeyConditionExpression: '#questionId = :questionId',
+      ExpressionAttributeNames: { '#questionId': 'questionId' },
+      ExpressionAttributeValues: { ':questionId': params.targetId },
+      ScanIndexForward: false,
+      Limit: 200,
+    });
+
+    return (result.Items ?? []).map(normalizeCandidate);
+  },
+
+  deleteCandidatesByTargetId: async (params: { subject: SubjectId; targetId: string }): Promise<void> => {
+    const items = await ReviewTestCandidatesService.listCandidatesByTargetId({ targetId: params.targetId });
+    const filtered = items.filter((x) => x.subject === params.subject);
+    for (const item of filtered) {
+      await dbHelper.delete({
+        TableName: TABLE_NAME,
+        Key: { subject: item.subject, candidateKey: item.candidateKey },
+      });
+    }
   },
 
   getLatestCandidateByTargetId: async (params: {

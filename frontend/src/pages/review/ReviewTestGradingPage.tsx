@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatYmdSlash } from '@/utils/date';
 import { useReviewGrading } from '@/hooks/review';
 
-export const ReviewTestGradingPage = () => {
+export const ReviewTestGradingPage = (props: { basePath: string }) => {
   const {
     review,
     isLoading,
@@ -17,7 +17,7 @@ export const ReviewTestGradingPage = () => {
     setAllCorrect,
     submit,
     id,
-  } = useReviewGrading();
+  } = useReviewGrading({ basePath: props.basePath });
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;

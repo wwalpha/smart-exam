@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 
@@ -10,12 +10,10 @@ type GradingFormValues = {
   }[];
 };
 
-export const useReviewGrading = () => {
+export const useReviewGrading = (params: { basePath: string }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isKanji = location.pathname.includes('/kanji');
-  const basePath = isKanji ? '/reviewtests/kanji' : '/reviewtests/questions';
+  const basePath = params.basePath;
 
   const { detail: currentTest, status } = useWordTestStore((s) => s.review);
   const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);

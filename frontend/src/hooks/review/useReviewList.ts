@@ -1,20 +1,18 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
 import type { WordTestSubject } from '@typings/wordtest';
+import type { ReviewMode } from '@smart-exam/api-types';
 
 type SearchFormValues = {
   subject: 'ALL' | WordTestSubject;
   status: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
 };
 
-export const useReviewList = () => {
-  const location = useLocation();
-  const isKanji = location.pathname.includes('/kanji');
-  const mode = isKanji ? 'KANJI' : 'QUESTION';
-  const basePath = isKanji ? '/reviewtests/kanji' : '/reviewtests/questions';
+export const useReviewList = (params: { mode: ReviewMode; basePath: string }) => {
+  const mode = params.mode;
+  const basePath = params.basePath;
 
   const { list, total, status } = useWordTestStore((s) => s.review);
   const fetchReviewTests = useWordTestStore((s) => s.fetchReviewTests);
@@ -48,7 +46,6 @@ export const useReviewList = () => {
   };
 
   return {
-    isKanji,
     basePath,
     reviews: list,
     total,
