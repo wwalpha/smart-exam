@@ -9,7 +9,7 @@ import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 export const ImportKanjiBodySchema = z.object({
   fileContent: z.string().min(1),
-  mode: z.enum(['SKIP', 'UPDATE']),
+  // 以前は mode があったが削除
   subject: SubjectIdSchema.optional(),
 });
 

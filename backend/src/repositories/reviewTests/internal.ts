@@ -26,6 +26,8 @@ export type ReviewCandidate =
       registeredDate: string;
       dueDate: string | null;
       lastAttemptDate: string;
+      // ロック判定用
+      candidateKey: string;
     };
 
 export const targetKeyOf = (targetType: ReviewTargetType, targetId: string): string => `${targetType}#${targetId}`;

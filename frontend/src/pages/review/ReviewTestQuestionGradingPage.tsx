@@ -15,8 +15,7 @@ export const ReviewTestQuestionGradingPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">採点入力: {review.testId}</h1>
+      <div className="flex items-center justify-end">
         <Button asChild variant="outline">
           <Link to={`${basePath}/${id}`}>戻る</Link>
         </Button>
@@ -96,14 +95,7 @@ export const ReviewTestQuestionGradingPage = () => {
                           {b.items.map((e) => (
                             <div
                               key={e.field.id}
-                              className="flex items-start justify-between gap-3 rounded border px-3 py-2">
-                              <div className="min-w-0">
-                                <div className="text-sm font-medium">
-                                  {e.index + 1}.{' '}
-                                  {e.item?.canonicalKey ?? e.item?.questionText ?? e.item?.displayLabel ?? '-'}
-                                </div>
-                                <div className="mt-1 text-xs text-muted-foreground">{e.item?.answerText ?? ''}</div>
-                              </div>
+                              className="flex items-center justify-between gap-3 rounded border px-3 py-2">
 
                               <div className="flex shrink-0 items-center gap-3">
                                 {e.isCorrect ? (

@@ -26,8 +26,7 @@ export const ReviewTestKanjiDetailPage = () => {
   return (
     <div className="space-y-6 px-8">
       <ConfirmDialog />
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">漢字復習テスト詳細</h1>
+      <div className="flex items-center justify-end">
         <div className="flex justify-end gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>

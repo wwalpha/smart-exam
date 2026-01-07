@@ -41,7 +41,7 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
       const cols = isPipeFormat ? [] : line.split(/\t|,/).map((x) => x.trim());
 
       const kanji = parsedPipe?.kanji ?? cols[0];
-      const reading = parsedPipe?.reading ?? (cols[1] ?? '');
+      const reading = parsedPipe?.reading ?? cols[1] ?? '';
       const histories = parsedPipe?.histories ?? [];
       if (!kanji) {
         errorCount += 1;
@@ -51,20 +51,10 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
 
       const existingId = existingByQuestion.get(kanji);
 
-      const wordId = existingId ?? null;
-
       if (existingId) {
-        if (data.mode === 'SKIP') {
-          duplicateCount += 1;
-          continue;
-        }
-
-        await updateKanji(existingId, {
-          kanji,
-          reading,
-          subject,
-        });
-        successCount += 1;
+        // 重複時はスキップ（要件変更: UPDATE -> SKIP）
+        duplicateCount += 1;
+        continue;
       } else {
         const created = await createKanji({
           kanji,

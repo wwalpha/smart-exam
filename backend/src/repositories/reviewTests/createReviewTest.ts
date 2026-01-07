@@ -23,24 +23,25 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
   const candidates: ReviewCandidate[] = [];
 
   if (req.mode === 'KANJI') {
-    const words = await WordsService.listKanji(req.subject);
-    for (const w of words as WordMasterTable[]) {
-      const registeredDate = createdDate;
-      const { dueDate, lastAttemptDate } = computeDueDate({ targetType: 'KANJI', registeredDate });
-
-      if (dueDate === null) continue;
-      if (!isWithinRange(lastAttemptDate, range)) continue;
-
+    // 候補テーブルから取得する (要件: Master全スキャンではなく候補テーブルを使用)
+    // Full scan 禁止対応
+    const due = await listDueCandidates({ subject: req.subject, mode: 'KANJI' });
+    for (const c of due) {
+      // 次回実施日が入っていないものはスキップ
+      if (!c.nextTime) continue;
+      // ロック判定(putCandidate)のため candidateKey をセットする
       candidates.push({
         targetType: 'KANJI',
-        targetId: w.wordId,
-        subject: w.subject,
-        registeredDate,
-        dueDate,
-        lastAttemptDate,
+        targetId: c.questionId,
+        subject: c.subject,
+        registeredDate: createdDate,
+        dueDate: c.nextTime,
+        lastAttemptDate: c.createdAt, // createdAt を最終実施日候補として使用
+        candidateKey: c.candidateKey,
       });
     }
   } else {
+    // QUESTIONの場合も候補テーブルから取得
     const due = await listDueCandidates({ subject: req.subject, mode: 'QUESTION' });
     for (const c of due) {
       if (!c.nextTime) continue;
@@ -70,7 +71,9 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
     if (!c.dueDate) continue;
 
     try {
-      if (c.targetType === 'QUESTION') {
+      // QUESTION/KANJI 共に候補テーブルが存在する場合はロック(testId紐付け)を行う
+      // ロック済みの場合は ConditionalCheckFailedException となりスキップされる
+      if (c.candidateKey) {
         await putCandidate({ subject: c.subject, candidateKey: c.candidateKey, testId });
       }
       selected.push(c);
