@@ -23,6 +23,7 @@ export type ReviewTestItem = {
 
 export type ReviewTestDetail = ReviewTest & {
   items: ReviewTestItem[];
+  results: ReviewTestResult[];
 };
 
 export type ReviewTestResult = {

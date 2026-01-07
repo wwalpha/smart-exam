@@ -13,6 +13,11 @@ export const ReviewTestKanjiDetailPage = () => {
 
   const infoBadgeClass = 'px-4 py-2 text-sm';
 
+  const isAllAnswered =
+    review &&
+    review.items.length > 0 &&
+    review.items.every((item) => review.results.some((r) => r.targetId === item.targetId));
+
   const complete = useCallback(async () => {
     if (!review) return;
     await updateReviewTestStatus(review.id, { status: 'COMPLETED' });
@@ -38,7 +43,12 @@ export const ReviewTestKanjiDetailPage = () => {
             <Link to={`${basePath}/${review.id}/pdf`}>印刷</Link>
           </Button>
           {review.status !== 'COMPLETED' ? (
-            <Button type="button" variant="default" className="w-[100px]" onClick={complete}>
+            <Button
+              type="button"
+              variant="default"
+              className="w-[100px]"
+              onClick={complete}
+              disabled={!isAllAnswered}>
               完了
             </Button>
           ) : null}

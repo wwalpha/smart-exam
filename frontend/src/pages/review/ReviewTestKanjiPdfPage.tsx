@@ -2,20 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useReviewKanjiPdf } from '@/hooks/review';
-import { apiRequestBlob } from '@/services/apiClient';
+import { apiRequest } from '@/services/apiClient';
 import { toast } from 'sonner';
-
-const isPdfBlob = async (blob: Blob): Promise<boolean> => {
-  const prefix = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
-  return (
-    prefix.length === 5 &&
-    prefix[0] === 0x25 &&
-    prefix[1] === 0x50 &&
-    prefix[2] === 0x44 &&
-    prefix[3] === 0x46 &&
-    prefix[4] === 0x2d
-  );
-};
 
 export const ReviewTestKanjiPdfPage = () => {
   const { review, isLoading, error, basePath, navigate, id, pdfUrl } = useReviewKanjiPdf();
@@ -31,23 +19,25 @@ export const ReviewTestKanjiPdfPage = () => {
     const run = async () => {
       try {
         setIsFetching(true);
-        const blob = await apiRequestBlob({ method: 'GET', path: pdfUrl });
+        // Presigned URLを取得
+        const res = await apiRequest<{ url: string }>({ method: 'GET', path: pdfUrl });
         if (aborted) return;
+        setBlobUrl(res.url);
+      } catch (e) {
+        if (aborted) return;
+        console.error(e);
+        toast.error('PDFの取得に失敗しました');
+      } finally {
+        if (!aborted) setIsFetching(false);
+      }
+    };
 
-        if (!(await isPdfBlob(blob))) {
-          const text = await blob.text().catch(() => '');
-          toast.error('PDFの生成に失敗しました', {
-            description: text ? text.slice(0, 200) : undefined,
-          });
-          return;
-        }
+    run();
 
-        const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
-
-        const nextUrl = URL.createObjectURL(pdfBlob);
-        setBlobUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return nextUrl;
+    return () => {
+      aborted = true;
+    };
+  }, [pdfUrl]);
         });
       } catch (e) {
         toast.error('PDFの取得に失敗しました', {
