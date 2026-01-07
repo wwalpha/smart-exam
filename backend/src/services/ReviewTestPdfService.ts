@@ -1,10 +1,9 @@
+import { PDFDocument, rgb } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import type { ReviewTestDetail } from '@smart-exam/api-types';
 
 export const ReviewTestPdfService = {
   generatePdfBuffer: async (review: ReviewTestDetail): Promise<Buffer> => {
-    const { PDFDocument, rgb } = await import('pdf-lib');
-    const fontkit = (await import('@pdf-lib/fontkit')).default;
-
     const mmToPt = (mm: number): number => (mm * 72) / 25.4;
 
     const a4Width = 595.28;

@@ -38,26 +38,6 @@ export const ReviewTestKanjiPdfPage = () => {
       aborted = true;
     };
   }, [pdfUrl]);
-        });
-      } catch (e) {
-        toast.error('PDFの取得に失敗しました', {
-          description: e instanceof Error ? e.message : undefined,
-        });
-      } finally {
-        setIsFetching(false);
-      }
-    };
-
-    run();
-
-    return () => {
-      aborted = true;
-      setBlobUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return '';
-      });
-    };
-  }, [pdfUrl]);
 
   const handleDownload = useCallback(() => {
     if (!blobUrl) return;
