@@ -13,15 +13,28 @@ import { FileText, Trash2 } from 'lucide-react';
 export const ReviewTestKanjiListPage = () => {
   const { basePath, reviews, form, search, remove, ConfirmDialog } = useReviewKanjiList();
   const { setValue } = form;
+  const infoBadgeClass = 'px-4 py-2 text-sm';
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return <Badge variant="default">完了</Badge>;
+        return (
+          <Badge variant="default" className={infoBadgeClass}>
+            完了
+          </Badge>
+        );
       case 'IN_PROGRESS':
-        return <Badge variant="secondary">実施中</Badge>;
+        return (
+          <Badge variant="secondary" className={infoBadgeClass}>
+            実施中
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return (
+          <Badge variant="outline" className={infoBadgeClass}>
+            {status}
+          </Badge>
+        );
     }
   };
 
@@ -105,7 +118,9 @@ export const ReviewTestKanjiListPage = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
+                  <Badge variant="outline" className={infoBadgeClass}>
+                    {SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <Link to={`${basePath}/${test.id}`} className="font-medium hover:underline">
