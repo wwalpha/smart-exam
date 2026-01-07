@@ -6,19 +6,8 @@ import { formatYmdSlash } from '@/utils/date';
 import { useReviewQuestionGrading } from '@/hooks/review';
 
 export const ReviewTestQuestionGradingPage = () => {
-  const {
-    review,
-    isInitialLoading,
-    isSaving,
-    error,
-    basePath,
-    fields,
-    watch,
-    setValue,
-    setAllCorrect,
-    submit,
-    id,
-  } = useReviewQuestionGrading();
+  const { review, isInitialLoading, isSaving, error, basePath, fields, watch, setValue, setAllCorrect, submit, id } =
+    useReviewQuestionGrading();
 
   if (isInitialLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
@@ -27,7 +16,6 @@ export const ReviewTestQuestionGradingPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">採点入力: {review.testId}</h1>
         <Button asChild variant="outline">
           <Link to={`${basePath}/${id}`}>戻る</Link>
         </Button>
@@ -143,7 +131,6 @@ export const ReviewTestQuestionGradingPage = () => {
                 </div>
               );
             })()}
-
           </form>
         </CardContent>
       </Card>

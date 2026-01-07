@@ -28,7 +28,8 @@ const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']
 };
 
 export const ReviewTestQuestionDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewQuestionDetail();
+  const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } =
+    useReviewQuestionDetail();
   const navigate = useNavigate();
 
   const infoBadgeClass = 'px-4 py-2 text-sm';
@@ -154,7 +155,6 @@ export const ReviewTestQuestionDetailPage = () => {
     <div className="space-y-6 px-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">問題復習テスト詳細</h1>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>
@@ -186,18 +186,18 @@ export const ReviewTestQuestionDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className={infoBadgeClass}>
-                  科目: {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
-                </Badge>
-                <Badge variant="secondary" className={infoBadgeClass}>
-                  ステータス: {review.status}
-                </Badge>
-                <Badge variant="secondary" className={infoBadgeClass}>
-                  作成日時: {formatYmdSlash(review.createdDate)}
-                </Badge>
-                <Badge variant="secondary" className={infoBadgeClass}>
-                  問題数: {review.count}問
-                </Badge>
+              <Badge variant="secondary" className={infoBadgeClass}>
+                {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+              </Badge>
+              <Badge variant="secondary" className={infoBadgeClass}>
+                {formatYmdSlash(review.createdDate)}
+              </Badge>
+              <Badge variant="secondary" className={infoBadgeClass}>
+                {review.count}問
+              </Badge>
+              <Badge variant="secondary" className={infoBadgeClass}>
+                {review.status}
+              </Badge>
             </div>
           </CardContent>
         </Card>
@@ -220,14 +220,14 @@ export const ReviewTestQuestionDetailPage = () => {
                       <div className="flex items-start justify-between gap-3 border-b px-3 py-2">
                         <div className="min-w-0">
                           <div className="flex flex-wrap gap-2">
+                            {b.grade ? (
+                              <Badge variant="secondary" className={infoBadgeClass}>
+                                {b.grade}年生
+                              </Badge>
+                            ) : null}
                             {b.provider ? (
                               <Badge variant="secondary" className={infoBadgeClass}>
                                 {b.provider}
-                              </Badge>
-                            ) : null}
-                            {b.materialDate ? (
-                              <Badge variant="secondary" className={infoBadgeClass}>
-                                {formatYmdSlash(b.materialDate)}
                               </Badge>
                             ) : null}
                             {b.materialName ? (
@@ -235,9 +235,9 @@ export const ReviewTestQuestionDetailPage = () => {
                                 {b.materialName}
                               </Badge>
                             ) : null}
-                            {b.grade ? (
+                            {b.materialDate ? (
                               <Badge variant="secondary" className={infoBadgeClass}>
-                                {b.grade}
+                                {formatYmdSlash(b.materialDate)}
                               </Badge>
                             ) : null}
                           </div>

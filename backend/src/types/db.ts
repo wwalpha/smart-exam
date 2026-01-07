@@ -45,26 +45,6 @@ export interface MaterialQuestionTable {
 }
 
 /**
- * 実施テーブル
- */
-export interface AttemptTable {
-  /** 実施ID (PK) */
-  attemptId: string;
-  /** テストID (GSI1 PK) */
-  testId: string;
-  /** 科目ID */
-  subjectId: SubjectId;
-  /** ステータス */
-  status: 'IN_PROGRESS' | 'SUBMITTED';
-  /** 開始日時 (GSI1 SK) */
-  startedAt: string;
-  /** 提出日時 */
-  submittedAt?: string;
-  /** 結果リスト */
-  results: { questionId: string; number: number; isCorrect: boolean }[];
-}
-
-/**
  * 単語テーブル
  */
 export interface WordMasterTable {

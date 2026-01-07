@@ -27,7 +27,6 @@ export const ReviewTestKanjiDetailPage = () => {
     <div className="space-y-6 px-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">漢字復習テスト詳細</h1>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>
@@ -60,28 +59,25 @@ export const ReviewTestKanjiDetailPage = () => {
           <CardContent>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary" className={infoBadgeClass}>
-                科目: {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
               </Badge>
               <Badge variant="secondary" className={infoBadgeClass}>
-                ステータス: {review.status}
+                {formatYmdSlash(review.createdDate)}
               </Badge>
               <Badge variant="secondary" className={infoBadgeClass}>
-                作成日時: {formatYmdSlash(review.createdDate)}
+                {review.count}問
               </Badge>
               <Badge variant="secondary" className={infoBadgeClass}>
-                問題数: {review.count}問
+                {review.status}
               </Badge>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>問題リスト</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-[400px] overflow-y-auto">
-              <div className="grid grid-cols-4 gap-2">
+          <CardContent className="pt-6">
+            <div className="max-h-[600px] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2">
                 {review.items.map((item) => (
                   <div key={item.id} className="rounded border px-3 py-2 text-center text-sm font-medium">
                     {item.questionText}
