@@ -57,6 +57,8 @@ export type CreateMaterialRequest = {
   subject: SubjectId;
   /** 教材年月日 (YYYY-MM-DD) */
   materialDate: string;
+  /** 初回実施日 (YYYY-MM-DD) */
+  registeredDate: string;
   grade: string;
   provider: string;
 };
@@ -201,4 +203,6 @@ export type Material = {
   provider: string;
   /** 教材年月日 (YYYY-MM-DD) */
   materialDate: string;
+  /** 初回実施日 (YYYY-MM-DD) */
+  registeredDate: string;
 };
