@@ -32,6 +32,7 @@ export const useQuestionManagement = () => {
   const { confirm, ConfirmDialog } = useConfirm();
 
   const extractedRef = useRef(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const sortedQuestions = useMemo(() => {
     return [...questions].sort((a, b) => compareQuestionNumber(a.canonicalKey, b.canonicalKey));
@@ -45,6 +46,12 @@ export const useQuestionManagement = () => {
       fetchQuestions(id);
     }
   }, [id, fetchMaterial, fetchMaterialFiles, fetchQuestions]);
+
+  useEffect(() => {
+    if (detail && id && detail.id === id) {
+      setHasLoadedOnce(true);
+    }
+  }, [detail, id]);
 
   useEffect(() => {
     if (!id || !detail || detail.id !== id) return;
@@ -119,7 +126,7 @@ export const useQuestionManagement = () => {
     id,
     material: detail,
     questions: sortedQuestions,
-    isInitialLoading: status.isLoading && !detail,
+    isInitialLoading: status.isLoading && !hasLoadedOnce,
     isBusy: status.isLoading,
     busyQuestionId,
     error: status.error,

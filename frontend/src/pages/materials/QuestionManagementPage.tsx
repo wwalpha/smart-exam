@@ -153,7 +153,8 @@ export const QuestionManagementPage = () => {
                       <div className="flex items-center gap-2">
                         {q.reviewCandidate.status === 'OPEN' ? (
                           <Badge variant="outline">不正解</Badge>
-                        ) : q.reviewCandidate.status === 'EXCLUDED' ? (
+                        ) : q.reviewCandidate.status === 'EXCLUDED' ||
+                          (q.reviewCandidate.status === 'CLOSED' && q.reviewCandidate.correctCount > 0) ? (
                           <Badge variant="secondary">正解</Badge>
                         ) : (
                           <Badge variant="secondary">履歴</Badge>
@@ -173,8 +174,10 @@ export const QuestionManagementPage = () => {
 
                         const value = (() => {
                           if (!q.reviewCandidate) return '';
-                          if (q.reviewCandidate.status === 'EXCLUDED') return 'correct';
                           if (q.reviewCandidate.status === 'OPEN') return 'incorrect';
+                          if (q.reviewCandidate.status === 'EXCLUDED') return 'correct';
+                          if (q.reviewCandidate.status === 'CLOSED' && q.reviewCandidate.correctCount > 0)
+                            return 'correct';
                           return '';
                         })();
 

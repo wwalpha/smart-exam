@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 
@@ -14,11 +14,14 @@ const BASE_PATH = '/reviewtests/questions';
 
 export const useReviewQuestionGrading = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const { detail: currentTest, status } = useWordTestStore((s) => s.review);
   const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);
   const submitReviewTest = useWordTestStore((s) => s.submitReviewTestResults);
+
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [reviewSnapshot, setReviewSnapshot] = useState<typeof currentTest | null>(null);
 
   const form = useForm<GradingFormValues>({ defaultValues: { items: [] } });
   const { control, handleSubmit, reset, setValue, getValues, watch } = form;
@@ -28,6 +31,12 @@ export const useReviewQuestionGrading = () => {
   useEffect(() => {
     if (id) fetchReviewTest(id);
   }, [id, fetchReviewTest]);
+
+  useEffect(() => {
+    if (!currentTest) return;
+    setReviewSnapshot(currentTest);
+    setHasLoadedOnce(true);
+  }, [currentTest]);
 
   useEffect(() => {
     if (!currentTest) return;
@@ -41,10 +50,15 @@ export const useReviewQuestionGrading = () => {
 
   const submit = async (data: GradingFormValues) => {
     if (!id) return;
-    await submitReviewTest(id, {
-      results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
-    });
-    navigate(`${BASE_PATH}/${id}`);
+    setIsSaving(true);
+    try {
+      await submitReviewTest(id, {
+        results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
+      });
+      await fetchReviewTest(id);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const setAllCorrect = () => {
@@ -56,8 +70,9 @@ export const useReviewQuestionGrading = () => {
 
   return {
     id,
-    review: currentTest,
-    isLoading: status.isLoading,
+    review: reviewSnapshot,
+    isInitialLoading: status.isLoading && !hasLoadedOnce,
+    isSaving,
     error: status.error,
     basePath: BASE_PATH,
     fields,

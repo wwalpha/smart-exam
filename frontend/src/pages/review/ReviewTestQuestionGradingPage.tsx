@@ -6,10 +6,21 @@ import { formatYmdSlash } from '@/utils/date';
 import { useReviewQuestionGrading } from '@/hooks/review';
 
 export const ReviewTestQuestionGradingPage = () => {
-  const { review, isLoading, error, basePath, fields, watch, setValue, setAllCorrect, submit, id } =
-    useReviewQuestionGrading();
+  const {
+    review,
+    isInitialLoading,
+    isSaving,
+    error,
+    basePath,
+    fields,
+    watch,
+    setValue,
+    setAllCorrect,
+    submit,
+    id,
+  } = useReviewQuestionGrading();
 
-  if (isLoading) return <div className="p-8">Loading...</div>;
+  if (isInitialLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
   if (!review) return <div className="p-8">データの取得に失敗しました。</div>;
 
@@ -25,9 +36,12 @@ export const ReviewTestQuestionGradingPage = () => {
       <Card>
         <CardContent>
           <form onSubmit={submit}>
-            <div className="mb-4 flex items-center justify-end gap-2">
-              <Button type="button" variant="outline" onClick={setAllCorrect}>
+            <div className="mb-4 flex items-center justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={setAllCorrect} disabled={isSaving}>
                 全問正解
+              </Button>
+              <Button type="submit" disabled={isSaving}>
+                保存
               </Button>
             </div>
 
@@ -130,9 +144,6 @@ export const ReviewTestQuestionGradingPage = () => {
               );
             })()}
 
-            <div className="mt-6 flex justify-end">
-              <Button type="submit">採点を保存</Button>
-            </div>
           </form>
         </CardContent>
       </Card>

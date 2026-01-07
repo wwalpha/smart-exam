@@ -55,28 +55,14 @@ export const ReviewTestKanjiDetailPage = () => {
           <CardHeader>
             <CardTitle>基本情報</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">科目</span>
-                <span className="flex-1 text-left">
-                  {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
-                </span>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">問題数</span>
-                <span className="flex-1 text-left">{review.count}問</span>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">作成日時</span>
-                <span className="flex-1 text-left">{formatYmdSlash(review.createdDate)}</span>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">ステータス</span>
-                <div className="flex-1 text-left">
-                  <Badge variant="outline">{review.status}</Badge>
-                </div>
-              </div>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">
+                科目: {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+              </Badge>
+              <Badge variant="secondary">ステータス: {review.status}</Badge>
+              <Badge variant="secondary">作成日時: {formatYmdSlash(review.createdDate)}</Badge>
+              <Badge variant="secondary">問題数: {review.count}問</Badge>
             </div>
           </CardContent>
         </Card>
@@ -87,21 +73,10 @@ export const ReviewTestKanjiDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="max-h-[400px] overflow-y-auto">
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                {review.items.map((item, index) => (
-                  <div key={item.id} className="rounded border px-3 py-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium">
-                          {index + 1}. {item.questionText}
-                        </div>
-                      </div>
-                      <div className="shrink-0">
-                        {item.isCorrect === true && <Badge variant="default">正解</Badge>}
-                        {item.isCorrect === false && <Badge variant="destructive">不正解</Badge>}
-                        {item.isCorrect === undefined && <span className="text-muted-foreground">-</span>}
-                      </div>
-                    </div>
+              <div className="grid grid-cols-4 gap-2">
+                {review.items.map((item) => (
+                  <div key={item.id} className="rounded border px-3 py-2 text-center text-sm font-medium">
+                    {item.questionText}
                   </div>
                 ))}
               </div>

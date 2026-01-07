@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,11 @@ import * as MATERIAL_API from '@/services/materialApi';
 import { formatYmdSlash } from '@/utils/date';
 import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
+
+type PdfAvailability = {
+  QUESTION: boolean;
+  ANSWER: boolean;
+};
 
 const isPdfBlob = async (blob: Blob): Promise<boolean> => {
   const prefix = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
@@ -25,6 +30,85 @@ const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']
 export const ReviewTestQuestionDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewQuestionDetail();
   const navigate = useNavigate();
+
+  const blocks = useMemo(() => {
+    if (!review) return [];
+
+    const entries = review.items;
+    const result: Array<{
+      key: string;
+      grade: string;
+      provider: string;
+      materialDate: string;
+      materialName: string;
+      materialId: string | null;
+      items: typeof entries;
+    }> = [];
+    const byKey = new Map<string, (typeof result)[number]>();
+
+    for (const item of entries) {
+      const grade = item.grade ?? '';
+      const provider = item.provider ?? '';
+      const materialDate = item.materialDate ?? '';
+      const materialName = item.materialName ?? '';
+      const key = [grade, provider, materialDate, materialName].join('||');
+
+      const existing = byKey.get(key);
+      if (existing) {
+        existing.items.push(item);
+        continue;
+      }
+
+      const created = {
+        key,
+        grade,
+        provider,
+        materialDate,
+        materialName,
+        materialId: item.materialId ?? null,
+        items: [item],
+      };
+      byKey.set(key, created);
+      result.push(created);
+    }
+
+    return result;
+  }, [review]);
+
+  const [pdfAvailability, setPdfAvailability] = useState<Record<string, PdfAvailability>>({});
+
+  useEffect(() => {
+    if (!review) return;
+
+    let cancelled = false;
+
+    const uniqueMaterialIds = Array.from(
+      new Set(blocks.map((b) => b.materialId).filter((x): x is string => typeof x === 'string' && x.length > 0))
+    );
+
+    const run = async () => {
+      const next: Record<string, PdfAvailability> = {};
+      for (const materialId of uniqueMaterialIds) {
+        try {
+          const files = await MATERIAL_API.listMaterialFiles(materialId);
+          next[materialId] = {
+            QUESTION: files.some((f) => f.fileType === 'QUESTION'),
+            ANSWER: files.some((f) => f.fileType === 'ANSWER'),
+          };
+        } catch {
+          next[materialId] = { QUESTION: false, ANSWER: false };
+        }
+      }
+
+      if (cancelled) return;
+      setPdfAvailability(next);
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [review, blocks]);
 
   const complete = useCallback(async () => {
     if (!review) return;
@@ -98,26 +182,12 @@ export const ReviewTestQuestionDetailPage = () => {
           <CardHeader>
             <CardTitle>基本情報</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">科目</span>
-                <span className="flex-1 text-left">{SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}</span>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">問題数</span>
-                <span className="flex-1 text-left">{review.count}問</span>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">作成日時</span>
-                <span className="flex-1 text-left">{formatYmdSlash(review.createdDate)}</span>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-24 shrink-0 font-medium">ステータス</span>
-                <div className="flex-1 text-left">
-                  <Badge variant="outline">{review.status}</Badge>
-                </div>
-              </div>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">科目: {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
+              <Badge variant="secondary">ステータス: {review.status}</Badge>
+              <Badge variant="secondary">作成日時: {formatYmdSlash(review.createdDate)}</Badge>
+              <Badge variant="secondary">問題数: {review.count}問</Badge>
             </div>
           </CardContent>
         </Card>
@@ -128,101 +198,64 @@ export const ReviewTestQuestionDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="max-h-[400px] overflow-y-auto">
-              {(() => {
-                const entries = review.items.map((item, index) => ({ item, no: index + 1 }));
+              <div className="space-y-3">
+                {blocks.map((b) => {
+                  const materialId = b.materialId;
+                  const availability = materialId ? pdfAvailability[materialId] : undefined;
+                  const questionPdfOk = !!materialId && !!availability?.QUESTION;
+                  const answerPdfOk = !!materialId && !!availability?.ANSWER;
 
-                const blocks: Array<{
-                  key: string;
-                  grade: string;
-                  provider: string;
-                  materialDate: string;
-                  materialName: string;
-                  materialId: string | null;
-                  items: typeof entries;
-                }> = [];
-                const byKey = new Map<string, (typeof blocks)[number]>();
-
-                for (const e of entries) {
-                  const grade = e.item.grade ?? '';
-                  const provider = e.item.provider ?? '';
-                  const materialDate = e.item.materialDate ?? '';
-                  const materialName = e.item.materialName ?? '';
-                  const key = [grade, provider, materialDate, materialName].join('||');
-
-                  const existing = byKey.get(key);
-                  if (existing) {
-                    existing.items.push(e);
-                    continue;
-                  }
-
-                  const created = {
-                    key,
-                    grade,
-                    provider,
-                    materialDate,
-                    materialName,
-                    materialId: e.item.materialId ?? null,
-                    items: [e],
-                  };
-                  byKey.set(key, created);
-                  blocks.push(created);
-                }
-
-                return (
-                  <div className="space-y-3">
-                    {blocks.map((b) => (
-                      <div key={b.key} className="rounded border">
-                        <div className="flex items-start justify-between gap-3 border-b px-3 py-2">
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium">
-                              {[b.grade, b.provider, b.materialDate ? formatYmdSlash(b.materialDate) : '', b.materialName]
-                                .filter((v) => String(v).trim().length > 0)
-                                .join(' ')}
-                            </div>
+                  return (
+                    <div key={b.key} className="rounded border">
+                      <div className="flex items-start justify-between gap-3 border-b px-3 py-2">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap gap-2">
+                            {b.provider ? <Badge variant="secondary">{b.provider}</Badge> : null}
+                            {b.materialDate ? <Badge variant="secondary">{formatYmdSlash(b.materialDate)}</Badge> : null}
+                            {b.materialName ? <Badge variant="secondary">{b.materialName}</Badge> : null}
+                            {b.grade ? <Badge variant="secondary">{b.grade}</Badge> : null}
                           </div>
-                          {b.materialId ? (
-                            <div className="flex shrink-0 gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => previewMaterialPdf(b.materialId as string, 'QUESTION')}>
-                                問題PDF
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => previewMaterialPdf(b.materialId as string, 'ANSWER')}>
-                                解答PDF
-                              </Button>
-                            </div>
-                          ) : null}
                         </div>
 
-                        <div className="p-3">
-                          <div className="space-y-2">
-                            {b.items.map(({ item, no }) => (
-                              <div key={item.id} className="flex items-start justify-between gap-3 rounded border px-3 py-2">
-                                <div className="min-w-0">
-                                  <div className="text-sm font-medium">
-                                    {no}. {item.canonicalKey ?? item.questionText ?? item.displayLabel ?? '-'}
-                                  </div>
-                                </div>
-                                <div className="shrink-0">
-                                  {item.isCorrect === true && <Badge variant="default">正解</Badge>}
-                                  {item.isCorrect === false && <Badge variant="destructive">不正解</Badge>}
-                                  {item.isCorrect === undefined && <span className="text-muted-foreground">-</span>}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="flex shrink-0 gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={!questionPdfOk}
+                            onClick={() => {
+                              if (!materialId) return;
+                              previewMaterialPdf(materialId, 'QUESTION');
+                            }}>
+                            問題PDF
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={!answerPdfOk}
+                            onClick={() => {
+                              if (!materialId) return;
+                              previewMaterialPdf(materialId, 'ANSWER');
+                            }}>
+                            解答PDF
+                          </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                );
-              })()}
+
+                      <div className="p-3">
+                        <div className="grid grid-cols-4 gap-2">
+                          {b.items.map((item) => (
+                            <div key={item.id} className="rounded border px-3 py-2 text-center text-sm font-medium">
+                              {item.canonicalKey ?? '-'}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
