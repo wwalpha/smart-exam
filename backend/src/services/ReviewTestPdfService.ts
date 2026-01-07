@@ -34,33 +34,44 @@ export const ReviewTestPdfService = {
     const pdfDoc = await PDFDocument.create();
     pdfDoc.registerFontkit(fontkit);
 
-    // タイトルが欠けるケースがあるため、サブセット化しない（全グリフを埋め込む）
-    const jpFont = await pdfDoc.embedFont(fontBytes, { subset: false });
+    // NOTE: 漢字PDFはサイズ削減のためサブセット化、それ以外は欠け対策で全グリフ埋め込み
+    const shouldSubsetFont = review.mode === 'KANJI';
+    const jpFont = await pdfDoc.embedFont(fontBytes, { subset: shouldSubsetFont });
 
-    const createPage = () => {
-      const page = pdfDoc.addPage([a4Width, a4Height]);
-      const contentWidth = a4Width - margin * 2;
+    const createPage = (params?: {
+      pageWidth?: number;
+      pageHeight?: number;
+      titleSize?: number;
+      metaSize?: number;
+    }) => {
+      const pageWidth = params?.pageWidth ?? a4Width;
+      const pageHeight = params?.pageHeight ?? a4Height;
+      const titleSize = params?.titleSize ?? titleFontSize;
+      const metaSize = params?.metaSize ?? metaFontSize;
 
-      const titleY = a4Height - margin - titleFontSize;
+      const page = pdfDoc.addPage([pageWidth, pageHeight]);
+      const contentWidth = pageWidth - margin * 2;
+
+      const titleY = pageHeight - margin - titleSize;
       page.drawText(title, {
         x: margin,
         y: titleY,
-        size: titleFontSize,
+        size: titleSize,
         font: jpFont,
         color: rgb(0, 0, 0),
       });
 
-      const metaWidth = jpFont.widthOfTextAtSize(meta, metaFontSize);
+      const metaWidth = jpFont.widthOfTextAtSize(meta, metaSize);
       page.drawText(meta, {
         x: margin + contentWidth - metaWidth,
         y: titleY,
-        size: metaFontSize,
+        size: metaSize,
         font: jpFont,
         color: rgb(0, 0, 0),
       });
 
       let cursorY = titleY - headerGap;
-      return { page, contentWidth, cursorY };
+      return { page, contentWidth, cursorY, pageWidth, pageHeight };
     };
 
     const wrapTextByChar = (text: string, maxWidth: number): string[] => {
@@ -128,13 +139,26 @@ export const ReviewTestPdfService = {
     };
 
     const renderKanjiFixedLayout = (): void => {
+      // KANJIは横印刷 + 小さめの文字
+      const kanjiTitleFontSize = 14;
+      const kanjiMetaFontSize = 10;
+      const kanjiFontSize = 11;
+
       const itemsPerPage = 30;
       const rowsPerColumn = 15;
       const columnGap = mmToPt(8);
 
+      const pageWidth = a4Height;
+      const pageHeight = a4Width;
+
       const totalPages = Math.max(1, Math.ceil(review.items.length / itemsPerPage));
       for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
-        ({ page, contentWidth, cursorY } = createPage());
+        ({ page, contentWidth, cursorY } = createPage({
+          pageWidth,
+          pageHeight,
+          titleSize: kanjiTitleFontSize,
+          metaSize: kanjiMetaFontSize,
+        }));
 
         const columnWidth = (contentWidth - columnGap) / 2;
         const leftX = margin;
@@ -155,22 +179,21 @@ export const ReviewTestPdfService = {
 
           const baseX = col === 0 ? leftX : rightX;
           const baseY = topY - rowPitch * row;
-          const baselineY = baseY - questionFontSize;
+          const baselineY = baseY - kanjiFontSize;
 
           const item = review.items[i];
-          const label = `問題${i + 1}`;
           const q = getKanjiQuestionText(item);
-          const text = q ? `${label} ${q}` : `${label}`;
+          const text = q ? `${i + 1}. ${q}` : `${i + 1}.`;
 
           page.drawText(text, {
             x: baseX,
             y: baselineY,
-            size: questionFontSize,
+            size: kanjiFontSize,
             font: jpFont,
             color: rgb(0, 0, 0),
           });
 
-          const textWidth = jpFont.widthOfTextAtSize(text, questionFontSize);
+          const textWidth = jpFont.widthOfTextAtSize(text, kanjiFontSize);
           const lineStartX = Math.min(baseX + textWidth + mmToPt(2), baseX + columnWidth - mmToPt(20));
           const lineEndX = baseX + columnWidth;
 
@@ -186,18 +209,18 @@ export const ReviewTestPdfService = {
       }
     };
 
-    let { page, contentWidth, cursorY } = createPage();
-
-    const answerX = margin + numberColWidth + numberGap;
-    const answerRightX = margin + contentWidth;
-    const questionWidth = contentWidth - numberColWidth - numberGap;
-
     // 漢字復習テストは「1ページ30問固定(2列×15行)」
     if (review.mode === 'KANJI') {
       renderKanjiFixedLayout();
       const bytes = await pdfDoc.save();
       return Buffer.from(bytes);
     }
+
+    let { page, contentWidth, cursorY } = createPage();
+
+    const answerX = margin + numberColWidth + numberGap;
+    const answerRightX = margin + contentWidth;
+    const questionWidth = contentWidth - numberColWidth - numberGap;
 
     for (let idx = 0; idx < review.items.length; idx += 1) {
       const item = review.items[idx];

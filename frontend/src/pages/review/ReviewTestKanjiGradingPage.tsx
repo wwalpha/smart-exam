@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useReviewKanjiGrading } from '@/hooks/review';
 
 export const ReviewTestKanjiGradingPage = () => {
@@ -39,34 +40,40 @@ export const ReviewTestKanjiGradingPage = () => {
 
                 const isCorrect = watch(`items.${index}.isCorrect`) ?? true;
                 const qaText = [item.questionText, item.answerText].filter((v) => (v ?? '').trim().length > 0).join(' / ');
+                const value = isCorrect ? 'correct' : 'incorrect';
 
                 return (
                   <div
                     key={field.id}
-                    className="grid grid-cols-[56px,1fr,96px,120px] items-center gap-3 rounded border px-3 py-2">
-                    <div className="text-sm font-medium text-muted-foreground">{index + 1}</div>
+                    className="flex items-center gap-3 rounded border px-3 py-2">
+                    <div className="w-14 shrink-0 text-sm font-medium text-muted-foreground">{index + 1}</div>
 
-                    <div className="min-w-0 text-sm font-medium">
-                      <div className="truncate" title={qaText}>
+                    <div className="min-w-0 flex-1 text-sm font-medium">
+                      <div className="truncate whitespace-nowrap" title={qaText}>
                         {qaText}
                       </div>
                     </div>
 
-                    <div className="flex justify-center">
-                      {isCorrect ? <Badge variant="default">正解</Badge> : <Badge variant="destructive">不正解</Badge>}
-                    </div>
-
-                    <label className="flex items-center justify-end gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                        checked={!isCorrect}
-                        onChange={(ev) => {
-                          setValue(`items.${index}.isCorrect`, !ev.target.checked, { shouldDirty: true });
-                        }}
-                      />
-                      不正解
-                    </label>
+                    <RadioGroup
+                      value={value}
+                      onValueChange={(v) => {
+                        if (v === value) return;
+                        setValue(`items.${index}.isCorrect`, v === 'correct', { shouldDirty: true });
+                      }}
+                      className="flex shrink-0 items-center gap-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2 whitespace-nowrap">
+                        <RadioGroupItem value="correct" id={`kanji-correct-${field.id}`} />
+                        <Label className="whitespace-nowrap" htmlFor={`kanji-correct-${field.id}`}>
+                          正解
+                        </Label>
+                      </div>
+                      <div className="flex items-center gap-2 whitespace-nowrap">
+                        <RadioGroupItem value="incorrect" id={`kanji-incorrect-${field.id}`} />
+                        <Label className="whitespace-nowrap" htmlFor={`kanji-incorrect-${field.id}`}>
+                          不正解
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                 );
               })}
