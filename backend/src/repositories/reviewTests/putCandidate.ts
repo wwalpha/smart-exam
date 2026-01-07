@@ -10,5 +10,6 @@ export const putCandidate = async (params: {
     subject: params.subject,
     candidateKey: params.candidateKey,
     testId: params.testId,
+    status: 'LOCKED',
   });
 };

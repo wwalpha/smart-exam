@@ -3,7 +3,7 @@ import { toApiReviewTest } from './internal';
 import { ReviewTestsService } from '@/services';
 import { QuestionsService } from '@/services/QuestionsService';
 import { MaterialsService } from '@/services/MaterialsService';
-import { WordsService } from '@/services/WordsService';
+import { WordMasterService } from '@/services/WordMasterService';
 
 export const getReviewTest = async (testId: string): Promise<ReviewTestDetail | null> => {
   const test = await ReviewTestsService.get(testId);
@@ -12,7 +12,7 @@ export const getReviewTest = async (testId: string): Promise<ReviewTestDetail | 
   const resultByTargetId = new Map((test.results ?? []).map((r) => [r.id, r.isCorrect] as const));
 
   if (test.mode === 'KANJI') {
-    const words = await Promise.all(test.questions.map((id) => WordsService.get(id)));
+    const words = await Promise.all(test.questions.map((id) => WordMasterService.get(id)));
     const byId = new Map(words.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w.wordId, w] as const));
 
     return {

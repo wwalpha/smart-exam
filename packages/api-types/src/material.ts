@@ -143,7 +143,7 @@ export type ListMaterialFilesResponse = {
 /** 問題の復習候補情報（最新） */
 export type QuestionReviewCandidateSummary = {
   /** 状態 */
-  status: 'OPEN' | 'CLOSED' | 'EXCLUDED';
+  status: 'OPEN' | 'CLOSED' | 'EXCLUDED' | 'LOCKED';
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
   /** 連続正解回数 */

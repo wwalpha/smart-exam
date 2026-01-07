@@ -5,7 +5,7 @@ import { sortTargets, toReviewTargetKey } from './internal';
 import { ReviewTestsService } from '@/services';
 import { QuestionsService } from '@/services/QuestionsService';
 import { MaterialsService } from '@/services/MaterialsService';
-import { WordsService } from '@/services/WordsService';
+import { WordMasterService } from '@/services/WordMasterService';
 
 export const listReviewTestTargets = async (params: {
   mode: ReviewMode;
@@ -51,7 +51,7 @@ export const listReviewTestTargets = async (params: {
       materialById.set(m.materialId, { title: m.title, materialDate: m.materialDate });
     }
   } else {
-    const wRows = await Promise.all(Array.from(allTargetIds).map((wid) => WordsService.get(wid)));
+    const wRows = await Promise.all(Array.from(allTargetIds).map((wid) => WordMasterService.get(wid)));
     for (const w of wRows) {
       if (!w) continue;
       wordById.set(w.wordId, w as WordMasterTable);

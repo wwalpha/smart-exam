@@ -1,9 +1,9 @@
-import { WordsService } from '@/services/WordsService';
+import { WordMasterService } from '@/services/WordMasterService';
 import type { Kanji } from '@/repositories/repo.types';
 import type { UpdateKanjiRequest } from '@smart-exam/api-types';
 
 export const updateKanji = async (id: string, data: UpdateKanjiRequest): Promise<Kanji | null> => {
-  const updated = await WordsService.update(id, {
+  const updated = await WordMasterService.update(id, {
     ...(data.kanji !== undefined ? { question: data.kanji } : {}),
     ...(data.reading !== undefined ? { answer: data.reading } : {}),
     ...(data.subject !== undefined ? { subject: data.subject } : {}),

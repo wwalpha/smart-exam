@@ -141,14 +141,15 @@ export const ReviewTestCandidatesService = {
     subject: SubjectId;
     candidateKey: string;
     testId: string;
+    status?: 'LOCKED';
   }): Promise<void> => {
     await dbHelper.update({
       TableName: TABLE_NAME,
       Key: { subject: params.subject, candidateKey: params.candidateKey },
-      ConditionExpression: 'attribute_not_exists(#testId) OR #testId = :testId',
-      UpdateExpression: 'SET #testId = :testId',
-      ExpressionAttributeNames: { '#testId': 'testId' },
-      ExpressionAttributeValues: { ':testId': params.testId },
+      ConditionExpression: 'attribute_not_exists(#testId)',
+      UpdateExpression: 'SET #testId = :testId, #status = :status',
+      ExpressionAttributeNames: { '#testId': 'testId', '#status': 'status' },
+      ExpressionAttributeValues: { ':testId': params.testId, ':status': params.status ?? 'LOCKED' },
     });
   },
 
@@ -157,9 +158,9 @@ export const ReviewTestCandidatesService = {
       TableName: TABLE_NAME,
       Key: { subject: params.subject, candidateKey: params.candidateKey },
       ConditionExpression: '#testId = :testId',
-      UpdateExpression: 'REMOVE #testId',
-      ExpressionAttributeNames: { '#testId': 'testId' },
-      ExpressionAttributeValues: { ':testId': params.testId },
+      UpdateExpression: 'REMOVE #testId SET #status = :open',
+      ExpressionAttributeNames: { '#testId': 'testId', '#status': 'status' },
+      ExpressionAttributeValues: { ':testId': params.testId, ':open': 'OPEN' },
     });
   },
 

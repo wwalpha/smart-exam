@@ -5,7 +5,7 @@ import type { SubjectId } from '@smart-exam/api-types';
 
 const TABLE_NAME = ENV.TABLE_WORD_MASTER;
 
-export const WordsService = {
+export const WordMasterService = {
   create: async (item: WordMasterTable): Promise<void> => {
     await dbHelper.put({
       TableName: TABLE_NAME,

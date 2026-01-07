@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import { KanjiRepository } from '@/repositories';
-import { WordsService } from '@/services/WordsService';
+import { WordMasterService } from '@/services/WordMasterService';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 
-vi.mock('@/services/WordsService');
+vi.mock('@/services/WordMasterService');
 vi.mock('@/services/ReviewTestCandidatesService');
 
 describe('KanjiRepository.importKanji (pipe format)', () => {
   it('creates master and persists imported histories', async () => {
-    vi.mocked(WordsService.listKanji).mockResolvedValue([] as any);
-    vi.mocked(WordsService.create).mockResolvedValue();
+    vi.mocked(WordMasterService.listKanji).mockResolvedValue([] as any);
+    vi.mocked(WordMasterService.create).mockResolvedValue();
     vi.mocked(ReviewTestCandidatesService.deleteCandidatesByTargetId).mockResolvedValue();
     vi.mocked(ReviewTestCandidatesService.createCandidate).mockResolvedValue({} as any);
 
@@ -21,7 +21,7 @@ describe('KanjiRepository.importKanji (pipe format)', () => {
     expect(res.successCount).toBe(1);
     expect(res.errorCount).toBe(0);
 
-    expect(WordsService.create).toHaveBeenCalledTimes(1);
+    expect(WordMasterService.create).toHaveBeenCalledTimes(1);
 
     // 履歴3件 + 現在状態1件
     expect(ReviewTestCandidatesService.createCandidate).toHaveBeenCalledTimes(4);

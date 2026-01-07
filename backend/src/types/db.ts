@@ -99,7 +99,7 @@ export interface ReviewTestCandidateTable {
   /** モード */
   mode: ReviewMode;
   /** 状態 */
-  status: 'OPEN' | 'CLOSED' | 'EXCLUDED';
+  status: 'OPEN' | 'CLOSED' | 'EXCLUDED' | 'LOCKED';
   /** 連続正解回数（必須、default 0） */
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */

@@ -40,6 +40,37 @@ export const DateUtils = {
   },
 
   /**
+   * `YYYY/MM/DD` 等を `YYYY-MM-DD` に正規化する
+   */
+  formatYmd: (dateStr: string): string | null => {
+    // 既に YYYY-MM-DD ならそのまま
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    const s = dateStr.trim();
+    // try YYYY/MM/DD
+    const d1 = dayjs.tz(s, 'YYYY/MM/DD', JST_TZ);
+    if (d1.isValid()) return d1.format('YYYY-MM-DD');
+     // try YYYY-MM-DD (fallback)
+    const d2 = dayjs.tz(s, 'YYYY-MM-DD', JST_TZ);
+    if (d2.isValid()) return d2.format('YYYY-MM-DD');
+
+    return null;
+  },
+
+  /**
+   * `YYYY-MM-DD` 等を ISO8601(UTC) に変換する (時刻は 00:00:00)
+   */
+  toIso: (dateStr: string): string => {
+    const s = dateStr.trim();
+    const d1 = dayjs.tz(s, 'YYYY-MM-DD', JST_TZ);
+    if (d1.isValid()) return d1.startOf('day').format(ISO_WITH_OFFSET);
+
+    const d2 = dayjs.tz(s, 'YYYY/MM/DD', JST_TZ);
+    if (d2.isValid()) return d2.startOf('day').format(ISO_WITH_OFFSET);
+
+    return dayjs(s).tz(JST_TZ).startOf('day').format(ISO_WITH_OFFSET);
+  },
+
+  /**
    * `YYYY/MM/DD` を厳密に解釈して ISO8601(UTC) に変換する
    */
   parseYmdSlashToIso: (ymd: string): string | null => {

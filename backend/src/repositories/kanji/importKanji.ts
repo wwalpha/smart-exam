@@ -1,4 +1,4 @@
-import { WordsService } from '@/services/WordsService';
+import { WordMasterService } from '@/services/WordMasterService';
 import type { ImportKanjiRequest, ImportKanjiResponse } from '@smart-exam/api-types';
 import { createKanji } from './createKanji';
 import { parsePipeLine } from './importUtils';
@@ -24,7 +24,7 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
     .map((x) => x.trim())
     .filter((x) => x.length > 0);
 
-  const existing = await WordsService.listKanji();
+  const existing = await WordMasterService.listKanji();
   const existingByQuestion = new Map(existing.map((x) => [x.question, x.wordId] as const));
 
   let successCount = 0;
@@ -73,20 +73,19 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
       if (histories.length > 0) {
         await ReviewTestCandidatesService.deleteCandidatesByTargetId({ subject, targetId: targetWordId });
 
-        const sorted = [...histories].sort((a, b) => (a.submittedAtIso < b.submittedAtIso ? -1 : 1));
+        const sorted = [...histories].sort((a, b) => (a.submittedDate < b.submittedDate ? -1 : 1));
         const recent = sorted.slice(Math.max(0, sorted.length - 3));
 
         // 古い履歴は履歴としてのみ残す（状態計算には使わない）
         for (const h of sorted.slice(0, Math.max(0, sorted.length - 3))) {
-          const ymd = DateUtils.toYmd(h.submittedAtIso);
           await ReviewTestCandidatesService.createCandidate({
             subject,
             questionId: targetWordId,
             mode: 'KANJI',
-            nextTime: ymd,
+            nextTime: h.submittedDate,
             correctCount: 0,
             status: 'CLOSED',
-            createdAtIso: h.submittedAtIso,
+            createdAtIso: DateUtils.toIso(h.submittedDate),
           });
         }
 
@@ -96,7 +95,7 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
         let computedCorrectCount = 0;
 
         for (const h of recent) {
-          const baseDateYmd = DateUtils.toYmd(h.submittedAtIso);
+          const baseDateYmd = h.submittedDate;
           const computed = ReviewNextTime.compute({
             mode: 'KANJI',
             baseDateYmd,
@@ -112,11 +111,11 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
             nextTime: computed.nextTime,
             correctCount: computed.nextCorrectCount,
             status: 'CLOSED',
-            createdAtIso: h.submittedAtIso,
+            createdAtIso: DateUtils.toIso(h.submittedDate),
           });
 
           streak = computed.nextCorrectCount;
-          lastAttemptIso = h.submittedAtIso;
+          lastAttemptIso = DateUtils.toIso(h.submittedDate);
           computedNextTime = computed.nextTime;
           computedCorrectCount = computed.nextCorrectCount;
         }
@@ -132,6 +131,19 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
             createdAtIso: lastAttemptIso,
           });
         }
+      } else {
+        // 履歴がない場合（新規単語など）は、OPENな候補を作成してテスト対象にする
+        const now = DateUtils.now();
+        const today = DateUtils.todayYmd();
+        await ReviewTestCandidatesService.createCandidate({
+          subject,
+          questionId: targetWordId,
+          mode: 'KANJI',
+          nextTime: today,
+          correctCount: 0,
+          status: 'OPEN',
+          createdAtIso: now,
+        });
       }
     } catch (e) {
       errorCount += 1;

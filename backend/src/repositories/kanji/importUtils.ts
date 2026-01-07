@@ -1,8 +1,8 @@
 import { DateUtils } from '@/lib/dateUtils';
 
 export type ImportedHistoryEntry = {
-  startedAtIso: string;
-  submittedAtIso: string;
+  /** 実施日 (YYYY-MM-DD) */
+  submittedDate: string;
   isCorrect: boolean;
 };
 
@@ -30,12 +30,14 @@ export const parsePipeLine = (line: string): { kanji: string; reading: string; h
   for (const token of parts.slice(2)) {
     if (!token) continue;
     const [dateRaw, okngRaw = ''] = token.split(',');
-    const dateIso = parseYmdToIso(dateRaw ?? '');
+    // YYYY-MM-DD かチェック (DateUtils.parseYmdSlashToIso 等は使わず、入力値をそのまま扱うか、フォーマット変換する)
+    // ここでは単純に YYYY/MM/DD -> YYYY-MM-DD 置換などを行う
+    const ymd = DateUtils.formatYmd(dateRaw ?? '');
     const okng = parseOkNg(okngRaw);
-    if (!dateIso || okng === null) {
+    if (!ymd || okng === null) {
       throw new Error('履歴の形式が不正です');
     }
-    histories.push({ startedAtIso: dateIso, submittedAtIso: dateIso, isCorrect: okng });
+    histories.push({ submittedDate: ymd, isCorrect: okng });
   }
 
   return { kanji, reading, histories };
