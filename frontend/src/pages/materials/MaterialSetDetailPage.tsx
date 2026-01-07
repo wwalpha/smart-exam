@@ -5,16 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useMaterialDetail } from '@/hooks/materials';
 import { SUBJECT_LABEL } from '@/lib/Consts';
+import { MATERIAL_PDF_FILE_TYPES } from '@/lib/materialConsts';
+import { Input } from '@/components/ui/input';
 
 type PdfFileType = 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
 
-const PDF_FILE_TYPES: PdfFileType[] = ['QUESTION', 'ANSWER', 'GRADED_ANSWER'];
-
 export const MaterialSetDetailPage = () => {
-  const { material, filesByType, isLoading, error, id, fileTypeLabel, previewFile, replacePdf } = useMaterialDetail();
+  const {
+    material,
+    filesByType,
+    isInitialLoading,
+    isBusy,
+    error,
+    id,
+    fileTypeLabel,
+    previewFile,
+    replacePdf,
+    registeredDate,
+    setRegisteredDate,
+    saveRegisteredDate,
+  } = useMaterialDetail();
   const fileInputRefs = useRef<Partial<Record<PdfFileType, HTMLInputElement | null>>>({});
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return <div className="p-8">Loading...</div>;
   }
 
@@ -63,6 +76,15 @@ export const MaterialSetDetailPage = () => {
               <div>{material.materialDate || '-'}</div>
             </div>
             <div>
+              <div className="text-sm font-medium text-muted-foreground">初回実施日</div>
+              <div className="flex items-center gap-2">
+                <Input type="date" value={registeredDate} onChange={(e) => setRegisteredDate(e.target.value)} className="w-[180px]" />
+                <Button type="button" variant="outline" size="sm" onClick={() => void saveRegisteredDate()} disabled={isBusy}>
+                  更新
+                </Button>
+              </div>
+            </div>
+            <div>
               <div className="text-sm font-medium text-muted-foreground">教材名</div>
               <div className="text-lg font-medium">{material.name}</div>
             </div>
@@ -76,7 +98,7 @@ export const MaterialSetDetailPage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {PDF_FILE_TYPES.map((fileType) => {
+            {MATERIAL_PDF_FILE_TYPES.map((fileType) => {
               const file = filesByType[fileType];
 
               return (
@@ -107,7 +129,7 @@ export const MaterialSetDetailPage = () => {
                       size="sm"
                       className="w-[100px]"
                       onClick={() => file && previewFile(file.id)}
-                      disabled={!file}>
+                      disabled={!file || isBusy}>
                       プレビュー
                     </Button>
 
@@ -116,7 +138,8 @@ export const MaterialSetDetailPage = () => {
                       variant="outline"
                       size="sm"
                       className="w-[100px]"
-                      onClick={() => fileInputRefs.current[fileType]?.click()}>
+                      onClick={() => fileInputRefs.current[fileType]?.click()}
+                      disabled={isBusy}>
                       アップロード
                     </Button>
                   </div>

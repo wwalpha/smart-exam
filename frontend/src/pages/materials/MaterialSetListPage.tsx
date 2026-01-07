@@ -9,9 +9,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useMaterialList } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import { MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
-
-const PROVIDER_OPTIONS = ['SAPIX', '四谷'] as const;
 
 export const MaterialSetListPage = () => {
   const { materials, form, search, remove, ConfirmDialog } = useMaterialList();
@@ -80,7 +79,7 @@ export const MaterialSetListPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">全て</SelectItem>
-                    {PROVIDER_OPTIONS.map((p) => (
+                      {MATERIAL_PROVIDER_OPTIONS.map((p) => (
                       <SelectItem key={p} value={p}>
                         {p}
                       </SelectItem>
@@ -144,8 +143,8 @@ export const MaterialSetListPage = () => {
           </TableHeader>
           <TableBody>
             {pagedMaterials.map((material) => (
-              <TableRow key={material.id}>
-                <TableCell>
+              <TableRow key={material.id} className="h-8">
+                <TableCell className="py-1">
                   <div className="flex items-center gap-2">
                     <Button asChild variant="outline" size="icon" className="h-8 w-8" aria-label="詳細">
                       <Link to={`/materials/${material.id}`}>
@@ -156,19 +155,19 @@ export const MaterialSetListPage = () => {
                       variant="ghost"
                       size="icon"
                       aria-label="削除"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => remove(material.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell>{material.grade}年</TableCell>
-                <TableCell>{material.provider ?? ''}</TableCell>
-                <TableCell>
+                <TableCell className="py-1">{material.grade}年</TableCell>
+                <TableCell className="py-1">{material.provider ?? ''}</TableCell>
+                <TableCell className="py-1">
                   <Badge variant="outline">{SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                 </TableCell>
-                <TableCell>{material.materialDate}</TableCell>
-                <TableCell className="font-medium">{material.name}</TableCell>
+                <TableCell className="py-1">{material.materialDate}</TableCell>
+                <TableCell className="py-1 font-medium">{material.name}</TableCell>
               </TableRow>
             ))}
             {materials.length === 0 && (

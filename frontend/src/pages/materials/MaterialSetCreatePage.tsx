@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useMaterialCreate } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import { MATERIAL_PDF_FILE_TYPE_LABEL, MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const MaterialSetCreatePage = () => {
@@ -51,8 +52,11 @@ export const MaterialSetCreatePage = () => {
                     <SelectValue placeholder="選択してください" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="SAPIX">SAPIX</SelectItem>
-                    <SelectItem value="四谷">四谷</SelectItem>
+                    {MATERIAL_PROVIDER_OPTIONS.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {errors.provider?.message ? (
@@ -94,6 +98,19 @@ export const MaterialSetCreatePage = () => {
               </div>
 
               <div className="space-y-2">
+                <Label>初回実施日 *</Label>
+                <Input
+                  type="date"
+                  {...register('registeredDate', { required: '必須です' })}
+                  aria-invalid={!!errors.registeredDate}
+                  className={errors.registeredDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                />
+                {errors.registeredDate?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.registeredDate.message)}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
                 <Label>教材名 *</Label>
                 <Input
                   {...register('name', { required: '必須です' })}
@@ -111,15 +128,15 @@ export const MaterialSetCreatePage = () => {
               <h3 className="font-medium">ファイルアップロード</h3>
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <Label>問題用紙 (PDF)</Label>
+                  <Label>{MATERIAL_PDF_FILE_TYPE_LABEL.QUESTION}</Label>
                   <Input type="file" accept=".pdf" {...register('questionFile')} />
                 </div>
                 <div className="space-y-2">
-                  <Label>解答用紙 (PDF)</Label>
+                  <Label>{MATERIAL_PDF_FILE_TYPE_LABEL.ANSWER}</Label>
                   <Input type="file" accept=".pdf" {...register('answerFile')} />
                 </div>
                 <div className="space-y-2">
-                  <Label>採点済み答案 (PDF)</Label>
+                  <Label>{MATERIAL_PDF_FILE_TYPE_LABEL.GRADED_ANSWER}</Label>
                   <Input type="file" accept=".pdf" {...register('gradedFile')} />
                 </div>
               </div>

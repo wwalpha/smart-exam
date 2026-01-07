@@ -22,6 +22,7 @@ export const useMaterialCreate = () => {
         name: data.name,
         subject: data.subject,
         materialDate: data.materialDate,
+        registeredDate: data.registeredDate,
         grade: data.grade,
         provider: data.provider,
       },

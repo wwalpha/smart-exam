@@ -16,6 +16,7 @@ export const QuestionManagementPage = () => {
     questions,
     isInitialLoading,
     isBusy,
+    busyQuestionId,
     error,
     isDialogOpen,
     setIsDialogOpen,
@@ -50,7 +51,10 @@ export const QuestionManagementPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">問題管理</h1>
-          <p className="text-muted-foreground">{material?.name}</p>
+          <p className="text-muted-foreground">
+            {material?.name}
+            {material?.materialDate ? ` / ${material.materialDate}` : ''}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
@@ -164,30 +168,38 @@ export const QuestionManagementPage = () => {
                   <TableCell className="py-2">
                     <div className="flex justify-end">
                       <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-3"
-                          disabled={isBusy}
-                          onClick={() => markIncorrect(q.id)}>
-                          不正解
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-3"
-                          disabled={isBusy}
-                          onClick={() => markCorrect(q.id)}>
-                          正解
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          disabled={isBusy}
-                          onClick={() => remove(q.id)}>
-                          削除
-                        </Button>
+                        {(() => {
+                          const lastIsIncorrect = q.reviewCandidate ? q.reviewCandidate.correctCount === 0 : null;
+                          const isRowBusy = busyQuestionId === q.id;
+                          return (
+                            <>
+                              <Button
+                                variant={lastIsIncorrect === true ? 'default' : 'outline'}
+                                size="sm"
+                                className="h-8 px-3"
+                                disabled={isRowBusy}
+                                onClick={() => markIncorrect(q.id)}>
+                                不正解
+                              </Button>
+                              <Button
+                                variant={lastIsIncorrect === false ? 'default' : 'outline'}
+                                size="sm"
+                                className="h-8 px-3"
+                                disabled={isRowBusy}
+                                onClick={() => markCorrect(q.id)}>
+                                正解
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                disabled={isRowBusy}
+                                onClick={() => remove(q.id)}>
+                                削除
+                              </Button>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   </TableCell>

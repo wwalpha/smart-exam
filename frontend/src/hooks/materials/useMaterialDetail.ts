@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import { apiRequestBlob } from '@/services/apiClient';
 import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
+import { MATERIAL_PDF_FILE_TYPE_LABEL, MATERIAL_PDF_FILE_TYPES, type MaterialPdfFileType } from '@/lib/materialConsts';
 
 const isPdfBlob = async (blob: Blob): Promise<boolean> => {
   const prefix = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
@@ -16,9 +17,6 @@ const fileTypeOrder: Record<string, number> = {
   GRADED_ANSWER: 3,
 };
 
-type MaterialPdfFileType = 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
-
-const PDF_FILE_TYPES: MaterialPdfFileType[] = ['QUESTION', 'ANSWER', 'GRADED_ANSWER'];
 
 const toMs = (iso: string | undefined): number => {
   if (!iso) return 0;
@@ -27,9 +25,9 @@ const toMs = (iso: string | undefined): number => {
 };
 
 const fileTypeLabel = (fileType: string): string => {
-  if (fileType === 'QUESTION') return '問題用紙';
-  if (fileType === 'ANSWER') return '解答用紙';
-  if (fileType === 'GRADED_ANSWER') return '答案用紙';
+  if (fileType === 'QUESTION' || fileType === 'ANSWER' || fileType === 'GRADED_ANSWER') {
+    return MATERIAL_PDF_FILE_TYPE_LABEL[fileType];
+  }
   return fileType;
 };
 
@@ -39,6 +37,9 @@ export const useMaterialDetail = () => {
   const fetchMaterial = useWordTestStore((s) => s.fetchMaterial);
   const fetchMaterialFiles = useWordTestStore((s) => s.fetchMaterialFiles);
   const uploadMaterialPdf = useWordTestStore((s) => s.uploadMaterialPdf);
+  const updateMaterial = useWordTestStore((s) => s.updateMaterial);
+
+  const [registeredDate, setRegisteredDate] = useState<string>('');
 
   useEffect(() => {
     if (id) {
@@ -47,11 +48,16 @@ export const useMaterialDetail = () => {
     }
   }, [id, fetchMaterial, fetchMaterialFiles]);
 
+  useEffect(() => {
+    if (!detail) return;
+    setRegisteredDate(detail.registeredDate ?? '');
+  }, [detail]);
+
   const latestFilesByType = useMemo(() => {
     const byType: Partial<Record<MaterialPdfFileType, MaterialFile>> = {};
 
     for (const file of files) {
-      if (!PDF_FILE_TYPES.includes(file.fileType as MaterialPdfFileType)) continue;
+      if (!MATERIAL_PDF_FILE_TYPES.includes(file.fileType as MaterialPdfFileType)) continue;
       const t = file.fileType as MaterialPdfFileType;
       const current = byType[t];
       if (!current) {
@@ -67,7 +73,7 @@ export const useMaterialDetail = () => {
   }, [files]);
 
   const orderedFiles = useMemo(() => {
-    const list = PDF_FILE_TYPES.map((t) => latestFilesByType[t]).filter((x): x is MaterialFile => !!x);
+    const list = MATERIAL_PDF_FILE_TYPES.map((t) => latestFilesByType[t]).filter((x): x is MaterialFile => !!x);
     return [...list].sort((a, b) => {
       const ao = fileTypeOrder[a.fileType] ?? 99;
       const bo = fileTypeOrder[b.fileType] ?? 99;
@@ -75,6 +81,16 @@ export const useMaterialDetail = () => {
       return a.filename.localeCompare(b.filename);
     });
   }, [latestFilesByType]);
+
+  const saveRegisteredDate = useCallback(async () => {
+    if (!id) return;
+    try {
+      await updateMaterial(id, { registeredDate });
+      toast.success('更新しました');
+    } catch {
+      // store側でトーストを出す可能性があるため、ここでは追加表示しない
+    }
+  }, [id, registeredDate, updateMaterial]);
 
   const previewFile = useCallback(async (fileId: string) => {
     try {
@@ -120,11 +136,15 @@ export const useMaterialDetail = () => {
     material: detail,
     files: orderedFiles,
     filesByType: latestFilesByType,
-    isLoading: status.isLoading,
+    isInitialLoading: status.isLoading && !detail,
+    isBusy: status.isLoading,
     error: status.error,
     id,
     fileTypeLabel,
     previewFile,
     replacePdf,
+    registeredDate,
+    setRegisteredDate,
+    saveRegisteredDate,
   };
 };

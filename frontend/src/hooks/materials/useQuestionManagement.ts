@@ -25,6 +25,7 @@ export const useQuestionManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [bulkInput, setBulkInput] = useState('');
+  const [busyQuestionId, setBusyQuestionId] = useState<string | null>(null);
   const form = useForm<QuestionFormValues>();
   const { reset } = form;
   const { confirm, ConfirmDialog } = useConfirm();
@@ -94,13 +95,25 @@ export const useQuestionManagement = () => {
   };
 
   const markCorrect = async (questionId: string) => {
-    await markQuestionCorrect(questionId);
-    if (id) fetchQuestions(id);
+    if (busyQuestionId) return;
+    setBusyQuestionId(questionId);
+    try {
+      await markQuestionCorrect(questionId);
+      if (id) fetchQuestions(id);
+    } finally {
+      setBusyQuestionId(null);
+    }
   };
 
   const markIncorrect = async (questionId: string) => {
-    await markQuestionIncorrect(questionId);
-    if (id) fetchQuestions(id);
+    if (busyQuestionId) return;
+    setBusyQuestionId(questionId);
+    try {
+      await markQuestionIncorrect(questionId);
+      if (id) fetchQuestions(id);
+    } finally {
+      setBusyQuestionId(null);
+    }
   };
 
   return {
@@ -109,6 +122,7 @@ export const useQuestionManagement = () => {
     questions: sortedQuestions,
     isInitialLoading: status.isLoading && !detail,
     isBusy: status.isLoading,
+    busyQuestionId,
     error: status.error,
     isDialogOpen,
     setIsDialogOpen,
