@@ -27,6 +27,7 @@ export const useKanjiList = () => {
     fetchKanjiList({
       q: data.q,
       reading: data.reading,
+      // 「ALL」は API のフィルタ未指定として扱う
       subject: data.subject === 'ALL' ? undefined : data.subject,
     });
   };
@@ -41,6 +42,7 @@ export const useKanjiList = () => {
   };
 
   const removeMany = async (ids: string[]) => {
+    // 呼び出し側のバグ/二重クリックでも確認が出ないようにガードする
     if (ids.length === 0) return;
     if (await confirm(`選択した${ids.length}件を削除しますか？`, { variant: 'destructive' })) {
       await deleteManyKanji(ids);

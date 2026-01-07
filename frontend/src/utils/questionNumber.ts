@@ -1,5 +1,6 @@
 export const normalizeQuestionNumber = (raw: string): string | null => {
   const trimmed = raw.trim();
+  // 空文字は無効な問題番号として扱う
   if (!trimmed) return null;
 
   const replaced = trimmed
@@ -10,10 +11,12 @@ export const normalizeQuestionNumber = (raw: string): string | null => {
 
   // 例: 1-8, 1-8-1, 1-8-A, 1-8-あ, 1-8-あい, 1-9-カナ
   // 先頭〜途中は数値のみ、末尾は「数値」または「任意の文字列」を許可
+  // 末尾にサフィックスを許容するのは、教材の表記揺れ（A/あ/カナなど）を扱うため
   if (!/^\d+(?:-\d+)*(?:-[^-\s]+)?$/.test(replaced)) return null;
 
   const parts = replaced.split('-').filter((p) => p.length > 0);
   const last = parts.at(-1) ?? '';
+  // 英字1文字サフィックスは大文字へ正規化（並び順・同一視のため）
   if (/^[A-Za-z]$/.test(last)) {
     return [...parts.slice(0, -1), last.toUpperCase()].join('-');
   }
@@ -26,6 +29,7 @@ export const compareQuestionNumber = (a: string, b: string): number => {
     const last = parts.at(-1) ?? '';
     const isLastNumeric = /^\d+$/.test(last);
     if (!isLastNumeric) {
+      // 末尾が数値でない場合はサフィックスとして扱い、数値部分とは別に比較する
       const normalizedSuffix = /^[A-Za-z]+$/.test(last) ? last.toUpperCase() : last;
       return {
         nums: parts

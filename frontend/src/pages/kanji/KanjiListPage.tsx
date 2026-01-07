@@ -35,7 +35,9 @@ export const KanjiListPage = () => {
 
   const toggleSelectAll = () => {
     setSelectedIds((prev) => {
+      // 一覧が空のときは選択状態を必ず空にする
       if (kanjiList.length === 0) return new Set();
+      // すでに全件選択なら「解除」として扱う
       if (prev.size === kanjiList.length) return new Set();
       return new Set(kanjiList.map((k) => k.id));
     });
@@ -45,6 +47,7 @@ export const KanjiListPage = () => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       const pageIds = pagedList.map((k) => k.id);
+      // 「このページの全件が選択済み」かどうかで、解除/追加を切り替える
       const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => next.has(id));
       if (allOnPageSelected) {
         for (const id of pageIds) next.delete(id);
@@ -57,6 +60,7 @@ export const KanjiListPage = () => {
 
   const bulkDelete = async () => {
     const ids = Array.from(selectedIds);
+    // 選択がない場合は確認ダイアログを出さない
     if (ids.length === 0) return;
     await removeMany(ids);
     setSelectedIds(new Set());
@@ -64,7 +68,7 @@ export const KanjiListPage = () => {
   };
 
   return (
-    <div className="space-y-6 px-8 py-4">
+    <div className="space-y-6 p-8">
       <ConfirmDialog />
       <Card>
         <CardHeader>
@@ -169,7 +173,7 @@ export const KanjiListPage = () => {
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">
+              <TableHead className="w-12 px-2">
                 <div className="flex items-center justify-center">
                   <Checkbox
                     checked={pagedList.length > 0 && pagedList.every((k) => selectedIds.has(k.id))}
@@ -178,8 +182,10 @@ export const KanjiListPage = () => {
                   />
                 </div>
               </TableHead>
-              <TableHead className="w-24">操作</TableHead>
-              <TableHead className="w-24">科目</TableHead>
+              <TableHead className="w-24">
+                <span className="sr-only">操作</span>
+              </TableHead>
+              <TableHead className="w-24 text-center">科目</TableHead>
               <TableHead className="w-[45%]">問題</TableHead>
               <TableHead className="w-[35%]">解答</TableHead>
             </TableRow>
@@ -187,7 +193,7 @@ export const KanjiListPage = () => {
           <TableBody>
             {pagedList.map((kanji) => (
               <TableRow key={kanji.id}>
-                <TableCell className="px-2 py-1">
+                <TableCell className="w-12 px-2 py-2">
                   <div className="flex items-center justify-center">
                     <Checkbox
                       checked={selectedIds.has(kanji.id)}
@@ -203,7 +209,7 @@ export const KanjiListPage = () => {
                     />
                   </div>
                 </TableCell>
-                <TableCell className="px-2 py-1">
+                <TableCell className="px-2 py-2">
                   <div className="flex gap-2">
                     <Button asChild variant="ghost" size="icon" className="h-8 w-8" aria-label="編集">
                       <Link to={`/kanji/${kanji.id}`}>
@@ -220,17 +226,19 @@ export const KanjiListPage = () => {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell className="px-2 py-1 text-sm">
-                  <div className="truncate" title={SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}>
+                <TableCell className="px-2 py-2 text-sm text-center">
+                  <div
+                    className="truncate text-center"
+                    title={SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}>
                     {SUBJECT_LABEL[kanji.subject as keyof typeof SUBJECT_LABEL] ?? ''}
                   </div>
                 </TableCell>
-                <TableCell className="px-2 py-1 text-sm font-medium">
+                <TableCell className="px-2 py-2 text-sm font-medium">
                   <div className="truncate" title={kanji.kanji}>
                     {kanji.kanji}
                   </div>
                 </TableCell>
-                <TableCell className="px-2 py-1 text-sm">
+                <TableCell className="px-2 py-2 text-sm">
                   <div className="truncate" title={kanji.reading}>
                     {kanji.reading}
                   </div>

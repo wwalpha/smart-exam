@@ -25,6 +25,7 @@ const toMs = (iso: string | undefined): number => {
 };
 
 const fileTypeLabel = (fileType: string): string => {
+  // API側で想定外のfileTypeが返ってきても画面が壊れないように保険をかける
   if (fileType === 'QUESTION' || fileType === 'ANSWER' || fileType === 'GRADED_ANSWER') {
     return MATERIAL_PDF_FILE_TYPE_LABEL[fileType];
   }
@@ -42,6 +43,7 @@ export const useMaterialDetail = () => {
   const [registeredDate, setRegisteredDate] = useState<string>('');
 
   useEffect(() => {
+    // IDがある場合のみ取得（URLが不正なときに無駄なAPIを叩かない）
     if (id) {
       fetchMaterial(id);
       fetchMaterialFiles(id);
@@ -57,6 +59,7 @@ export const useMaterialDetail = () => {
     const byType: Partial<Record<MaterialPdfFileType, MaterialFile>> = {};
 
     for (const file of files) {
+      // QUESTION/ANSWER/GRADED_ANSWER 以外は一覧対象外
       if (!MATERIAL_PDF_FILE_TYPES.includes(file.fileType as MaterialPdfFileType)) continue;
       const t = file.fileType as MaterialPdfFileType;
       const current = byType[t];
@@ -64,6 +67,7 @@ export const useMaterialDetail = () => {
         byType[t] = file;
         continue;
       }
+      // 同じ種別は createdAt が新しいものを採用する
       if (toMs(file.createdAt) >= toMs(current.createdAt)) {
         byType[t] = file;
       }
@@ -83,6 +87,7 @@ export const useMaterialDetail = () => {
   }, [latestFilesByType]);
 
   const saveRegisteredDate = useCallback(async () => {
+    // IDが不正な状態では更新しない
     if (!id) return;
     try {
       await updateMaterial(id, { registeredDate });
@@ -94,6 +99,7 @@ export const useMaterialDetail = () => {
 
   const previewFile = useCallback(async (fileId: string) => {
     try {
+      // IDが不正な状態ではプレビューできない
       if (!id) return;
       const blob = await apiRequestBlob({
         method: 'GET',
@@ -116,7 +122,9 @@ export const useMaterialDetail = () => {
 
   const replacePdf = useCallback(
     async (fileType: MaterialPdfFileType, file: File) => {
+      // IDが不正な状態ではアップロードしない
       if (!id) return;
+      // MIMEが不正でも拡張子で救済する（ブラウザ依存対策）
       if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
         toast.error('PDFのみアップロードできます');
         return;
