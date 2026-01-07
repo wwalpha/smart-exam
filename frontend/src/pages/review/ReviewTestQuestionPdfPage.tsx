@@ -1,53 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useReviewQuestionPdf } from '@/hooks/review';
-import { apiRequest } from '@/services/apiClient';
 import { toast } from 'sonner';
 
 export const ReviewTestQuestionPdfPage = () => {
-  const { review, isLoading, error, basePath, navigate, id, pdfUrl } = useReviewQuestionPdf();
+  const { review, isLoading, error, basePath, navigate, id, presignedUrl, isFetchingPdfUrl, pdfUrlError } =
+    useReviewQuestionPdf();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const [blobUrl, setBlobUrl] = useState<string>('');
-  const [isFetching, setIsFetching] = useState(false);
-
-  useEffect(() => {
-    if (!pdfUrl) return;
-
-    let aborted = false;
-
-    const run = async () => {
-      try {
-        setIsFetching(true);
-        // Presigned URLを取得
-        const res = await apiRequest<{ url: string }>({ method: 'GET', path: pdfUrl });
-        if (aborted) return;
-        setBlobUrl(res.url);
-      } catch (e) {
-        if (aborted) return;
-        console.error(e);
-        toast.error('PDFの取得に失敗しました');
-      } finally {
-        if (!aborted) setIsFetching(false);
-      }
-    };
-
-    run();
-
-    return () => {
-      aborted = true;
-    };
-  }, [pdfUrl]);
 
   const handleDownload = useCallback(() => {
-    if (!blobUrl) return;
+    if (!presignedUrl) return;
     const a = document.createElement('a');
-    a.href = blobUrl;
+    a.href = presignedUrl;
     a.download = `review-test-${id ?? 'unknown'}.pdf`;
     document.body.appendChild(a);
     a.click();
     a.remove();
-  }, [blobUrl, id]);
+  }, [presignedUrl, id]);
 
   const handlePrint = useCallback(() => {
     const frame = iframeRef.current;
@@ -66,6 +36,7 @@ export const ReviewTestQuestionPdfPage = () => {
   if (isLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
   if (!review) return <div className="p-8">データの取得に失敗しました。</div>;
+  if (pdfUrlError) return <div className="p-8 text-red-500">{pdfUrlError}</div>;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-6">
@@ -75,10 +46,14 @@ export const ReviewTestQuestionPdfPage = () => {
           <Button variant="outline" className="w-[100px]" onClick={() => navigate(`${basePath}/${id}`)}>
             戻る
           </Button>
-          <Button variant="outline" className="w-[100px]" onClick={handlePrint} disabled={!blobUrl || isFetching}>
+          <Button
+            variant="outline"
+            className="w-[100px]"
+            onClick={handlePrint}
+            disabled={!presignedUrl || isFetchingPdfUrl}>
             印刷
           </Button>
-          <Button className="w-[100px]" onClick={handleDownload} disabled={!blobUrl || isFetching}>
+          <Button className="w-[100px]" onClick={handleDownload} disabled={!presignedUrl || isFetchingPdfUrl}>
             ダウンロード
           </Button>
         </div>
@@ -97,11 +72,16 @@ export const ReviewTestQuestionPdfPage = () => {
             </div>
 
             <div className="rounded-md border overflow-hidden">
-              {blobUrl ? (
-                <iframe ref={iframeRef} title="review-test-pdf" src={blobUrl} className="h-[75vh] w-full bg-white" />
+              {presignedUrl ? (
+                <iframe
+                  ref={iframeRef}
+                  title="review-test-pdf"
+                  src={presignedUrl}
+                  className="h-[75vh] w-full bg-white"
+                />
               ) : (
                 <div className="flex h-[75vh] items-center justify-center text-sm text-muted-foreground">
-                  {isFetching ? 'PDFを読み込み中...' : 'PDFの読み込みに失敗しました。'}
+                  {isFetchingPdfUrl ? 'PDFを読み込み中...' : 'PDFの読み込みに失敗しました。'}
                 </div>
               )}
             </div>

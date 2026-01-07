@@ -23,8 +23,8 @@ describe('KanjiRepository.importKanji (pipe format)', () => {
 
     expect(WordMasterService.create).toHaveBeenCalledTimes(1);
 
-    // 履歴3件 + 現在状態1件
-    expect(ReviewTestCandidatesService.createCandidate).toHaveBeenCalledTimes(4);
+    // 新規作成時OPEN1件（createKanji内） + 履歴3件 + 現在状態1件
+    expect(ReviewTestCandidatesService.createCandidate).toHaveBeenCalledTimes(5);
     expect(ReviewTestCandidatesService.deleteCandidatesByTargetId).toHaveBeenCalledTimes(1);
   });
 

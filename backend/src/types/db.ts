@@ -79,7 +79,7 @@ export interface ReviewTestTable {
   /** 提出日 (YYYY-MM-DD) */
   submittedDate?: string;
   /** PDF S3キー */
-  pdfS3Key: string;
+  pdfS3Key?: string;
   /** 採点結果 */
   results?: { id: string; isCorrect: boolean }[];
 }

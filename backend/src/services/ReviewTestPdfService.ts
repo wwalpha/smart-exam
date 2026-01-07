@@ -140,8 +140,6 @@ export const ReviewTestPdfService = {
 
     const renderKanjiFixedLayout = (): void => {
       // KANJIは横印刷 + 小さめの文字
-      const kanjiTitleFontSize = 14;
-      const kanjiMetaFontSize = 10;
       const kanjiFontSize = 11;
 
       const itemsPerPage = 30;
@@ -153,12 +151,10 @@ export const ReviewTestPdfService = {
 
       const totalPages = Math.max(1, Math.ceil(review.items.length / itemsPerPage));
       for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
-        ({ page, contentWidth, cursorY } = createPage({
-          pageWidth,
-          pageHeight,
-          titleSize: kanjiTitleFontSize,
-          metaSize: kanjiMetaFontSize,
-        }));
+        // 漢字テストPDFはタイトル・作成日を出力しない
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
+        contentWidth = pageWidth - margin * 2;
+        cursorY = pageHeight - margin;
 
         const columnWidth = (contentWidth - columnGap) / 2;
         const leftX = margin;

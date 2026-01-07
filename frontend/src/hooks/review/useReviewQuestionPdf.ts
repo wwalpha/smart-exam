@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
+import { apiRequest } from '@/services/apiClient';
 
 const BASE_PATH = '/reviewtests/questions';
 
@@ -17,7 +18,42 @@ export const useReviewQuestionPdf = () => {
     fetchReviewTest(id);
   }, [id, fetchReviewTest, currentTest?.id, currentTest?.testId]);
 
-  const pdfUrl = currentTest?.pdf?.url ?? (id ? `/api/review-tests/${id}/pdf` : '');
+  const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/review-tests/${id}/pdf` : '');
+
+  const [presignedUrl, setPresignedUrl] = useState<string>('');
+  const [isFetchingPdfUrl, setIsFetchingPdfUrl] = useState(false);
+  const [pdfUrlError, setPdfUrlError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pdfApiPath) {
+      setPresignedUrl('');
+      setPdfUrlError(null);
+      return;
+    }
+
+    let aborted = false;
+
+    const run = async () => {
+      try {
+        setIsFetchingPdfUrl(true);
+        setPdfUrlError(null);
+        const res = await apiRequest<{ url: string }>({ method: 'GET', path: pdfApiPath });
+        if (aborted) return;
+        setPresignedUrl(res.url);
+      } catch {
+        if (aborted) return;
+        setPresignedUrl('');
+        setPdfUrlError('PDFの取得に失敗しました');
+      } finally {
+        if (!aborted) setIsFetchingPdfUrl(false);
+      }
+    };
+
+    void run();
+    return () => {
+      aborted = true;
+    };
+  }, [pdfApiPath]);
 
   return {
     id,
@@ -25,7 +61,10 @@ export const useReviewQuestionPdf = () => {
     isLoading: status.isLoading,
     error: status.error,
     basePath: BASE_PATH,
-    pdfUrl,
+    pdfApiPath,
+    presignedUrl,
+    isFetchingPdfUrl,
+    pdfUrlError,
     navigate,
   };
 };

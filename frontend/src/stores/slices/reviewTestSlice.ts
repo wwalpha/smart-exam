@@ -1,11 +1,41 @@
 import type { StateCreator } from 'zustand';
-import type { ReviewSlice } from '@/stores/store.types';
+import orderBy from 'lodash/orderBy';
+import type { ReviewTestSlice } from '@/stores/store.types';
+import type { GradingData } from '@smart-exam/api-types';
+import * as WORDTEST_API from '@/services/wordtestApi';
 import * as REVIEW_API from '@/services/reviewApi';
 import * as REVIEW_ATTEMPT_API from '@/services/reviewAttemptApi';
 import { withStatus } from '../utils';
 
-export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> = (set, get) => {
-  type ReviewState = ReviewSlice['review'];
+export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], ReviewTestSlice> = (set, get) => {
+  type WordTestFeatureState = ReviewTestSlice['wordtest'];
+  type WordTestFeaturePatch = Omit<Partial<WordTestFeatureState>, 'status'> & {
+    status?: Partial<WordTestFeatureState['status']>;
+  };
+
+  const getWordTest = (): WordTestFeatureState => get().wordtest;
+
+  const updateWordTest = (patch: WordTestFeaturePatch) => {
+    const current = getWordTest();
+    set({
+      wordtest: {
+        ...current,
+        ...patch,
+        status: patch.status
+          ? {
+              ...current.status,
+              ...patch.status,
+            }
+          : current.status,
+      },
+    });
+  };
+
+  const setWordTestStatus = (next: Partial<WordTestFeatureState['status']>) => {
+    updateWordTest({ status: next });
+  };
+
+  type ReviewState = ReviewTestSlice['review'];
   type ReviewPatch = Partial<ReviewState>;
 
   const getReview = (): ReviewState => get().review;
@@ -26,7 +56,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
     });
   };
 
-  const setStatus = (next: Partial<ReviewState['status']>) => {
+  const setReviewStatus = (next: Partial<ReviewState['status']>) => {
     const current = getReview();
     updateReview({
       status: {
@@ -37,6 +67,99 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
   };
 
   return {
+    wordtest: {
+      lists: [],
+      details: {},
+      status: {
+        isLoading: false,
+        error: null,
+      },
+    },
+
+    fetchWordTests: async () => {
+      await withStatus(
+        setWordTestStatus,
+        async () => {
+          const response = await WORDTEST_API.listWordTests();
+          const nextLists = orderBy(response.datas, ['createdAt'], ['desc']);
+          updateWordTest({ lists: nextLists });
+        },
+        '単語テスト一覧の取得に失敗しました。'
+      );
+    },
+
+    fetchWordTest: async (wordTestId) => {
+      return await withStatus(
+        setWordTestStatus,
+        async () => {
+          const response = await WORDTEST_API.getWordTest({ wordTestId });
+
+          const current = getWordTest();
+          const nextDetails = {
+            ...current.details,
+            [response.id]: response,
+          };
+
+          updateWordTest({ details: nextDetails });
+
+          return response;
+        },
+        '単語テストの取得に失敗しました。',
+        { fallback: null }
+      );
+    },
+
+    createWordTest: async (request) => {
+      return await withStatus(
+        setWordTestStatus,
+        async () => {
+          const response = await WORDTEST_API.createWordTest(request);
+          const current = getWordTest();
+          const nextLists = orderBy([response, ...current.lists], ['createdAt'], ['desc']);
+          updateWordTest({ lists: nextLists });
+          return response;
+        },
+        '単語テストの作成に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    applyWordTestGrading: async (wordTestId, datas) => {
+      await withStatus(
+        setWordTestStatus,
+        async () => {
+          const gradingByQid = new Map<string, GradingData['grading']>(datas.map((x) => [x.qid, x.grading]));
+
+          await WORDTEST_API.applyWordTestGrading(wordTestId, { results: datas });
+
+          const listResponse = await WORDTEST_API.listWordTests();
+          const refreshedLists = orderBy(listResponse.datas, ['createdAt'], ['desc']);
+
+          const current = getWordTest();
+
+          const currentDetail = current.details[wordTestId];
+          const nextDetails = currentDetail
+            ? {
+                ...current.details,
+                [wordTestId]: {
+                  ...currentDetail,
+                  items: currentDetail.items.map((item) => ({
+                    ...item,
+                    grading: gradingByQid.get(item.qid) ?? item.grading,
+                  })),
+                },
+              }
+            : current.details;
+
+          updateWordTest({
+            lists: refreshedLists,
+            details: nextDetails,
+          });
+        },
+        '採点結果の反映に失敗しました。'
+      );
+    },
+
     review: {
       list: [],
       total: 0,
@@ -73,7 +196,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
 
     fetchReviewTests: async (params) => {
       await withStatus(
-        setStatus,
+        setReviewStatus,
         async () => {
           const response = await REVIEW_API.listReviewTests(params);
           updateReview({ list: response.items, total: response.total });
@@ -85,7 +208,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
 
     createReviewTest: async (request) => {
       return await withStatus(
-        setStatus,
+        setReviewStatus,
         async () => {
           return await REVIEW_API.createReviewTest(request);
         },
@@ -96,7 +219,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
 
     fetchReviewTest: async (id) => {
       await withStatus(
-        setStatus,
+        setReviewStatus,
         async () => {
           const response = await REVIEW_API.getReviewTest(id);
           updateReview({ detail: response });
@@ -108,10 +231,9 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
 
     updateReviewTestStatus: async (id, request) => {
       await withStatus(
-        setStatus,
+        setReviewStatus,
         async () => {
           const response = await REVIEW_API.updateReviewTestStatus(id, request);
-          // Update detail if it matches
           const currentDetail = getReview().detail;
           if (currentDetail && currentDetail.id === id) {
             updateReview({ detail: { ...currentDetail, status: response.status } });
@@ -124,7 +246,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
 
     deleteReviewTest: async (id) => {
       await withStatus(
-        setStatus,
+        setReviewStatus,
         async () => {
           await REVIEW_API.deleteReviewTest(id);
         },
@@ -135,7 +257,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
 
     submitReviewTestResults: async (id, request) => {
       await withStatus(
-        setStatus,
+        setReviewStatus,
         async () => {
           await REVIEW_API.submitReviewTestResults(id, request);
         },
@@ -145,7 +267,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
     },
 
     fetchReviewTestTargets: async (params) => {
-      const setTargetsStatus = (next: Partial<ReviewSlice['reviewTargets']['status']>) => {
+      const setTargetsStatus = (next: Partial<ReviewTestSlice['reviewTargets']['status']>) => {
         const current = get().reviewTargets;
         set({
           reviewTargets: {
@@ -175,7 +297,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
     },
 
     fetchReviewAttempts: async (params) => {
-      const setAttemptsStatus = (next: Partial<ReviewSlice['reviewAttempts']['status']>) => {
+      const setAttemptsStatus = (next: Partial<ReviewTestSlice['reviewAttempts']['status']>) => {
         const current = get().reviewAttempts;
         set({
           reviewAttempts: {
@@ -205,7 +327,7 @@ export const createReviewSlice: StateCreator<ReviewSlice, [], [], ReviewSlice> =
     },
 
     fetchReviewTestCandidates: async (params) => {
-      const setCandidatesStatus = (next: Partial<ReviewSlice['reviewCandidates']['status']>) => {
+      const setCandidatesStatus = (next: Partial<ReviewTestSlice['reviewCandidates']['status']>) => {
         const current = get().reviewCandidates;
         set({
           reviewCandidates: {

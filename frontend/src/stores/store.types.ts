@@ -111,28 +111,35 @@ export type KanjiState = {
 };
 
 /**
- * 単語テスト機能の Zustand slice（state + actions）
+ * 復習テスト機能（+ 単語テスト機能）をまとめた Zustand slice
  */
-export type WordTestSlice = {
+export type ReviewTestSlice = {
   /** 単語テスト state */
   wordtest: WordTestState;
-  /** 単語テスト一覧を取得する */
   fetchWordTests: () => Promise<void>;
-  /** 単語テスト詳細を取得する */
   fetchWordTest: (wordTestId: string) => Promise<GetWordTestDetailResponse | null>;
-  /** 単語テストを作成する */
   createWordTest: (request: CreateWordTestRequest) => Promise<CreateWordTestResponse>;
-  /** 採点結果を反映する */
   applyWordTestGrading: (wordTestId: string, datas: GradingData[]) => Promise<void>;
-};
 
-/**
- * 単語マスタ機能の Zustand slice
- */
-export type WordMasterSlice = {
-  wordmaster: WordMasterState;
-  fetchWordGroups: () => Promise<void>;
-  createWordGroup: (request: CreateWordGroupRequest) => Promise<CreateWordGroupResponse>;
+  /** 復習テスト state */
+  review: ReviewState;
+  reviewTargets: ReviewTargetState;
+  reviewAttempts: ReviewAttemptHistoryState;
+  reviewCandidates: ReviewCandidateState;
+  fetchReviewTests: (params: SearchReviewTestsRequest) => Promise<void>;
+  createReviewTest: (request: CreateReviewTestRequest) => Promise<ReviewTest>;
+  fetchReviewTest: (id: string) => Promise<void>;
+  updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest) => Promise<void>;
+  deleteReviewTest: (id: string) => Promise<void>;
+  submitReviewTestResults: (id: string, request: SubmitReviewTestResultsRequest) => Promise<void>;
+  fetchReviewTestTargets: (params: {
+    mode: 'QUESTION' | 'KANJI';
+    from: string;
+    to: string;
+    subject?: string;
+  }) => Promise<void>;
+  fetchReviewAttempts: (params: { targetType: 'QUESTION' | 'KANJI'; targetId: string; subject?: string }) => Promise<void>;
+  fetchReviewTestCandidates: (params?: { subject?: string; mode?: 'QUESTION' | 'KANJI' }) => Promise<void>;
 };
 
 /**
@@ -170,30 +177,6 @@ export type MaterialSlice = {
 /**
  * Review Slice
  */
-export type ReviewSlice = {
-  review: ReviewState;
-  reviewTargets: ReviewTargetState;
-  reviewAttempts: ReviewAttemptHistoryState;
-  reviewCandidates: ReviewCandidateState;
-  fetchReviewTests: (params: SearchReviewTestsRequest) => Promise<void>;
-  createReviewTest: (request: CreateReviewTestRequest) => Promise<ReviewTest>;
-  fetchReviewTest: (id: string) => Promise<void>;
-  updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest) => Promise<void>;
-  deleteReviewTest: (id: string) => Promise<void>;
-  submitReviewTestResults: (id: string, request: SubmitReviewTestResultsRequest) => Promise<void>;
-  fetchReviewTestTargets: (params: {
-    mode: 'QUESTION' | 'KANJI';
-    from: string;
-    to: string;
-    subject?: string;
-  }) => Promise<void>;
-  fetchReviewAttempts: (params: { targetType: 'QUESTION' | 'KANJI'; targetId: string; subject?: string }) => Promise<void>;
-  fetchReviewTestCandidates: (params?: { subject?: string; mode?: 'QUESTION' | 'KANJI' }) => Promise<void>;
-};
-
-/**
- * Kanji Slice
- */
 export type KanjiSlice = {
   kanji: KanjiState;
   fetchKanjiList: (params?: Record<string, unknown>) => Promise<void>;
@@ -203,6 +186,11 @@ export type KanjiSlice = {
   deleteKanji: (id: string) => Promise<void>;
   deleteManyKanji: (ids: string[]) => Promise<void>;
   importKanji: (request: ImportKanjiRequest) => Promise<ImportKanjiResponse>;
+
+  /** 単語グループ（wordmaster）も漢字系として統合 */
+  wordmaster: WordMasterState;
+  fetchWordGroups: () => Promise<void>;
+  createWordGroup: (request: CreateWordGroupRequest) => Promise<CreateWordGroupResponse>;
 };
 
 /**

@@ -1,41 +1,29 @@
-import { useEffect, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useReviewAttemptHistory, useReviewCandidateForTarget } from '@/hooks/review';
-import { useWordTestStore } from '@/stores';
+import { useKanjiAttemptHistoryPage } from '@/hooks/kanji';
 import { REVIEW_MODE } from '@smart-exam/api-types';
 
 export const KanjiAttemptHistoryPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const { detail, status } = useWordTestStore((s) => s.kanji);
-  const fetchKanji = useWordTestStore((s) => s.fetchKanji);
-
-  useEffect(() => {
-    if (id) void fetchKanji(id);
-  }, [id, fetchKanji]);
+  const { id, kanji, status, headerSub } = useKanjiAttemptHistoryPage();
 
   const history = useReviewAttemptHistory({
     targetType: REVIEW_MODE.KANJI,
-    targetId: id ?? null,
-    subject: detail?.subject ?? null,
-    enabled: Boolean(id && detail),
+    targetId: id,
+    subject: kanji?.subject ?? null,
+    enabled: Boolean(id && kanji),
   });
 
   const candidateState = useReviewCandidateForTarget({
     mode: REVIEW_MODE.KANJI,
-    targetId: id ?? null,
-    subject: detail?.subject ?? null,
-    enabled: Boolean(id && detail),
+    targetId: id,
+    subject: kanji?.subject ?? null,
+    enabled: Boolean(id && kanji),
   });
 
-  const headerSub = useMemo(() => {
-    if (detail) return `${detail.kanji} / ${detail.reading ?? ''}`;
-    return id ?? '';
-  }, [detail, id]);
-
-  if (status.isLoading && !detail) {
+  if (status.isLoading && !kanji) {
     return <div className="p-8">Loading...</div>;
   }
 

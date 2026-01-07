@@ -1,11 +1,18 @@
 import type { StateCreator } from 'zustand';
 import type { KanjiSlice } from '@/stores/store.types';
+import orderBy from 'lodash/orderBy';
 import * as KANJI_API from '@/services/kanjiApi';
+import * as WORDMASTER_API from '@/services/wordMasterApi';
 import { withStatus } from '../utils';
 
 export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (set, get) => {
   type KanjiState = KanjiSlice['kanji'];
   type KanjiPatch = Partial<KanjiState>;
+
+  type WordMasterFeatureState = KanjiSlice['wordmaster'];
+  type WordMasterFeaturePatch = Omit<Partial<WordMasterFeatureState>, 'status'> & {
+    status?: Partial<WordMasterFeatureState['status']>;
+  };
 
   const getKanji = (): KanjiState => get().kanji;
 
@@ -35,6 +42,28 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
     });
   };
 
+  const getWordMaster = (): WordMasterFeatureState => get().wordmaster;
+
+  const updateWordMaster = (patch: WordMasterFeaturePatch) => {
+    const current = getWordMaster();
+    set({
+      wordmaster: {
+        ...current,
+        ...patch,
+        status: patch.status
+          ? {
+              ...current.status,
+              ...patch.status,
+            }
+          : current.status,
+      },
+    });
+  };
+
+  const setWordMasterStatus = (next: Partial<WordMasterFeatureState['status']>) => {
+    updateWordMaster({ status: next });
+  };
+
 
 
   return {
@@ -42,6 +71,14 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
       list: [],
       total: 0,
       detail: null,
+      status: {
+        isLoading: false,
+        error: null,
+      },
+    },
+
+    wordmaster: {
+      groups: [],
       status: {
         isLoading: false,
         error: null,
@@ -143,6 +180,29 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
           return await KANJI_API.importKanji(request);
         },
         '漢字のインポートに失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    fetchWordGroups: async () => {
+      await withStatus(setWordMasterStatus, async () => {
+        const response = await WORDMASTER_API.listWordGroups();
+        const sorted = orderBy(response.datas, ['createdAt'], ['desc']);
+        updateWordMaster({ groups: sorted });
+      }, '単語グループ一覧の取得に失敗しました。');
+    },
+
+    createWordGroup: async (request) => {
+      return await withStatus(
+        setWordMasterStatus,
+        async () => {
+          const response = await WORDMASTER_API.createWordGroup(request);
+          const current = getWordMaster();
+          const nextGroups = orderBy([response, ...current.groups], ['createdAt'], ['desc']);
+          updateWordMaster({ groups: nextGroups });
+          return response;
+        },
+        '単語グループの作成に失敗しました。',
         { rethrow: true }
       );
     },
