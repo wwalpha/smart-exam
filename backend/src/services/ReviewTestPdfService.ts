@@ -123,11 +123,81 @@ export const ReviewTestPdfService = {
       return `教材: ${parts.join(' ')}`;
     };
 
+    const getKanjiQuestionText = (item: ReviewTestDetail['items'][number]): string => {
+      return item.kanji ?? item.questionText ?? item.displayLabel ?? item.canonicalKey ?? item.targetId ?? '';
+    };
+
+    const renderKanjiFixedLayout = (): void => {
+      const itemsPerPage = 30;
+      const rowsPerColumn = 15;
+      const columnGap = mmToPt(8);
+
+      const totalPages = Math.max(1, Math.ceil(review.items.length / itemsPerPage));
+      for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
+        ({ page, contentWidth, cursorY } = createPage());
+
+        const columnWidth = (contentWidth - columnGap) / 2;
+        const leftX = margin;
+        const rightX = margin + columnWidth + columnGap;
+
+        // 15行に収めるため、ページ内の可用高さからピッチを算出する
+        const topY = cursorY;
+        const availableHeight = topY - margin;
+        const rowPitch = availableHeight / rowsPerColumn;
+
+        const start = pageIndex * itemsPerPage;
+        const end = Math.min(review.items.length, start + itemsPerPage);
+
+        for (let i = start; i < end; i += 1) {
+          const local = i - start;
+          const col = local < rowsPerColumn ? 0 : 1;
+          const row = local % rowsPerColumn;
+
+          const baseX = col === 0 ? leftX : rightX;
+          const baseY = topY - rowPitch * row;
+          const baselineY = baseY - questionFontSize;
+
+          const item = review.items[i];
+          const label = `問題${i + 1}`;
+          const q = getKanjiQuestionText(item);
+          const text = q ? `${label} ${q}` : `${label}`;
+
+          page.drawText(text, {
+            x: baseX,
+            y: baselineY,
+            size: questionFontSize,
+            font: jpFont,
+            color: rgb(0, 0, 0),
+          });
+
+          const textWidth = jpFont.widthOfTextAtSize(text, questionFontSize);
+          const lineStartX = Math.min(baseX + textWidth + mmToPt(2), baseX + columnWidth - mmToPt(20));
+          const lineEndX = baseX + columnWidth;
+
+          if (lineStartX < lineEndX) {
+            page.drawLine({
+              start: { x: lineStartX, y: baselineY - mmToPt(1) },
+              end: { x: lineEndX, y: baselineY - mmToPt(1) },
+              thickness: 1,
+              color: rgb(0, 0, 0),
+            });
+          }
+        }
+      }
+    };
+
     let { page, contentWidth, cursorY } = createPage();
 
     const answerX = margin + numberColWidth + numberGap;
     const answerRightX = margin + contentWidth;
     const questionWidth = contentWidth - numberColWidth - numberGap;
+
+    // 漢字復習テストは「1ページ30問固定(2列×15行)」
+    if (review.mode === 'KANJI') {
+      renderKanjiFixedLayout();
+      const bytes = await pdfDoc.save();
+      return Buffer.from(bytes);
+    }
 
     for (let idx = 0; idx < review.items.length; idx += 1) {
       const item = review.items[idx];

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -8,21 +8,20 @@ import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const KanjiImportPage = () => {
-  const { form, submit, isSubmitting, error, validationErrors } = useKanjiImport();
+  const { form, submit, isSubmitting, error, validationErrors, resetUploadErrors } = useKanjiImport();
   const { register, setValue, watch } = form;
   const subject = watch('subject');
   const subjectErrorMessage = form.formState.errors.subject?.message;
   const fileErrorMessage = form.formState.errors.file?.message;
 
+  const fileRegister = register('file', { required: '必須です' });
+
   return (
-    <div className="space-y-6 p-8 max-w-3xl mx-auto">
+    <div className="space-y-6 p-8 max-w-3xl mx-auto pt-4">
       <Card>
-        <CardHeader>
-          <CardTitle>ファイルアップロード</CardTitle>
-        </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 pt-4">
               <Label>科目（必須）</Label>
               <input type="hidden" {...register('subject', { required: '必須です' })} />
               <Select
@@ -51,7 +50,11 @@ export const KanjiImportPage = () => {
               <Input
                 type="file"
                 accept="text/plain,.txt"
-                {...register('file', { required: '必須です' })}
+                {...fileRegister}
+                onChange={(e) => {
+                  resetUploadErrors();
+                  fileRegister.onChange(e);
+                }}
                 aria-invalid={!!form.formState.errors.file}
                 className={form.formState.errors.file ? 'border-destructive focus-visible:ring-destructive' : undefined}
               />

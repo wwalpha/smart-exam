@@ -27,8 +27,14 @@ export const useKanjiImport = () => {
     },
   });
 
-  const submit = async (data: FormValues) => {
+  const resetUploadErrors = (): void => {
     setValidationErrors([]);
+    setResult(null);
+    form.clearErrors('file');
+  };
+
+  const submit = async (data: FormValues) => {
+    resetUploadErrors();
     const subject = data.subject;
     const file = data.file?.[0];
     if (!subject || !file) return;
@@ -111,5 +117,6 @@ export const useKanjiImport = () => {
     navigate,
     error: status.error,
     validationErrors,
+    resetUploadErrors,
   };
 };
