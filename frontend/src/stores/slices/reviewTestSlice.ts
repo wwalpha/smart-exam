@@ -249,6 +249,12 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
         setReviewStatus,
         async () => {
           await REVIEW_API.deleteReviewTest(id);
+
+          const current = getReview();
+          const nextList = current.list.filter((x) => x.id !== id);
+          const nextTotal = current.total > 0 ? Math.max(0, current.total - 1) : current.total;
+          const nextDetail = current.detail && current.detail.id === id ? null : current.detail;
+          updateReview({ list: nextList, total: nextTotal, detail: nextDetail });
         },
         '復習テストの削除に失敗しました。',
         { rethrow: true }

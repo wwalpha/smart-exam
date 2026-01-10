@@ -7,6 +7,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ENV } from '@/lib/env';
 import { ReviewTestsService } from '@/services';
 import { ReviewTestPdfService } from '@/services/ReviewTestPdfService';
+import { ApiError } from '@/lib/apiError';
 
 type GetReviewTestPdfParams = {
   testId: string;
@@ -28,6 +29,15 @@ export const getReviewTestPdf: AsyncHandler<
   }
 
   if (testRow.mode === 'KANJI' && testRow.pdfS3Key) {
+    if (!ENV.FILES_BUCKET_NAME) {
+      throw new ApiError(
+        'FILES_BUCKET_NAME is not configured',
+        500,
+        ['internal_server_error'],
+        ['files_bucket_not_configured']
+      );
+    }
+
     const command = new GetObjectCommand({
       Bucket: ENV.FILES_BUCKET_NAME,
       Key: testRow.pdfS3Key,
@@ -48,6 +58,15 @@ export const getReviewTestPdf: AsyncHandler<
 
   const pdfBuffer = await ReviewTestPdfService.generatePdfBuffer(review);
   const key = testRow.pdfS3Key ?? `review-tests/${testId}.pdf`;
+
+  if (!ENV.FILES_BUCKET_NAME) {
+    throw new ApiError(
+      'FILES_BUCKET_NAME is not configured',
+      500,
+      ['internal_server_error'],
+      ['files_bucket_not_configured']
+    );
+  }
 
   await s3Client.send(
     new PutObjectCommand({

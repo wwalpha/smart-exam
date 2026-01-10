@@ -45,7 +45,8 @@ export const useReviewKanjiList = () => {
 
   return {
     basePath: BASE_PATH,
-    reviews: list,
+    // storeはKANJI/QUESTIONで共通のため、画面側でモード一致のみ表示する
+    reviews: list.filter((x) => x.mode === 'KANJI'),
     total,
     isLoading: status.isLoading,
     error: status.error,

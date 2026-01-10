@@ -12,6 +12,7 @@ import { listDueCandidates } from './listDueCandidates';
 import { putCandidate } from './putCandidate';
 import { parseFilterRange, ReviewCandidate, toApiReviewTest } from './internal';
 import { deleteReviewTest } from './deleteReviewTest';
+import { ApiError } from '@/lib/apiError';
 
 export const createReviewTest = async (req: CreateReviewTestRequest): Promise<ReviewTest> => {
   const testId = createUuid();
@@ -101,6 +102,15 @@ export const createReviewTest = async (req: CreateReviewTestRequest): Promise<Re
 
   if (req.mode === 'KANJI' && pdfS3Key) {
     try {
+      if (!ENV.FILES_BUCKET_NAME) {
+        throw new ApiError(
+          'FILES_BUCKET_NAME is not configured',
+          500,
+          ['internal_server_error'],
+          ['files_bucket_not_configured']
+        );
+      }
+
       const detail = await getReviewTest(testId);
       if (!detail) {
         throw new Error('Review test detail not found after creation');

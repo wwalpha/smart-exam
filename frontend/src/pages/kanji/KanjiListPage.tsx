@@ -186,8 +186,8 @@ export const KanjiListPage = () => {
                 <span className="sr-only">操作</span>
               </TableHead>
               <TableHead className="w-24 text-center">科目</TableHead>
-              <TableHead className="w-[45%]">問題</TableHead>
-              <TableHead className="w-[35%]">解答</TableHead>
+              <TableHead className="w-[45%] px-2">問題</TableHead>
+              <TableHead className="w-[35%] px-2">解答</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
