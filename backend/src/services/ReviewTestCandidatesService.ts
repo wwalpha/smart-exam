@@ -77,12 +77,14 @@ export const ReviewTestCandidatesService = {
   deleteCandidatesByTargetId: async (params: { subject: SubjectId; targetId: string }): Promise<void> => {
     const items = await ReviewTestCandidatesService.listCandidatesByTargetId({ targetId: params.targetId });
     const filtered = items.filter((x) => x.subject === params.subject);
-    for (const item of filtered) {
-      await dbHelper.delete({
-        TableName: TABLE_NAME,
-        Key: { subject: item.subject, candidateKey: item.candidateKey },
-      });
-    }
+    await Promise.all(
+      filtered.map(async (item) => {
+        await dbHelper.delete({
+          TableName: TABLE_NAME,
+          Key: { subject: item.subject, candidateKey: item.candidateKey },
+        });
+      }),
+    );
   },
 
   getLatestCandidateByTargetId: async (params: {
@@ -225,10 +227,7 @@ export const ReviewTestCandidatesService = {
     return (result.Items ?? []).map(normalizeCandidate);
   },
 
-  listCandidates: async (params: {
-    subject?: SubjectId;
-    mode?: ReviewMode;
-  }): Promise<ReviewTestCandidateTable[]> => {
+  listCandidates: async (params: { subject?: SubjectId; mode?: ReviewMode }): Promise<ReviewTestCandidateTable[]> => {
     const expAttrNames: Record<string, string> = {
       '#status': 'status',
       ...(params.mode ? { '#mode': 'mode' } : {}),

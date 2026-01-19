@@ -152,9 +152,9 @@ export const ReviewTestPdfService = {
       const totalPages = Math.max(1, Math.ceil(review.items.length / itemsPerPage));
       for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
         // 漢字テストPDFはタイトル・作成日を出力しない
-        page = pdfDoc.addPage([pageWidth, pageHeight]);
-        contentWidth = pageWidth - margin * 2;
-        cursorY = pageHeight - margin;
+        const page = pdfDoc.addPage([pageWidth, pageHeight]);
+        const contentWidth = pageWidth - margin * 2;
+        const cursorY = pageHeight - margin;
 
         const columnWidth = (contentWidth - columnGap) / 2;
         const leftX = margin;
