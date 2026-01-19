@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { KanjiRepository } from '@/repositories';
+import { KanjiRepository } from '@/services';
 import { WordMasterService } from '@/services/WordMasterService';
 import { ReviewTestCandidatesService } from '@/services/ReviewTestCandidatesService';
 

@@ -4,8 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import tsconfigPathsPluginPkg from '@esbuild-plugins/tsconfig-paths';
 
-const TsconfigPathsPlugin =
-  tsconfigPathsPluginPkg.TsconfigPathsPlugin ?? tsconfigPathsPluginPkg.default;
+const TsconfigPathsPlugin = tsconfigPathsPluginPkg.TsconfigPathsPlugin ?? tsconfigPathsPluginPkg.default;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

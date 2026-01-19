@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AnalyzePaperBodySchema, analyzePaper } from '@/handlers/bedrock';
-import { BedrockRepository } from '@/repositories';
+import { AnalyzePaperBodySchema, analyzePaper } from '@/controllers/bedrock';
+import { BedrockRepository } from '@/services';
 import { Request, Response } from 'express';
 import { validateBody } from '@/middlewares/validateZod';
 
-vi.mock('@/repositories');
+// repository methods are spied per-test
 
 describe('bedrock handler', () => {
   it('analyzePaper returns questions', async () => {
     const mockQuestions = ['1', '1-1'];
-    vi.mocked(BedrockRepository.analyzeExamPaper).mockResolvedValue(mockQuestions as any);
+    vi.spyOn(BedrockRepository, 'analyzeExamPaper').mockResolvedValue(mockQuestions as any);
 
     const req = {
       body: { s3Key: 'key', subject: 'math' },

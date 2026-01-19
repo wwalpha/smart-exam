@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Request, Response } from 'express';
-import { getDashboard } from '@/handlers/dashboard';
-import { DashboardRepository } from '@/repositories';
+import { getDashboard } from '@/controllers/dashboard';
+import { DashboardRepository } from '@/services';
 import type { DashboardData } from '@smart-exam/api-types';
 
-vi.mock('@/repositories');
+// repository methods are spied per-test
 
 describe('dashboard handler', () => {
   it('getDashboard returns DashboardData shape', async () => {
@@ -22,7 +22,7 @@ describe('dashboard handler', () => {
       inventoryCount: 0,
     };
 
-    vi.mocked(DashboardRepository.getDashboardData).mockResolvedValue(mockData);
+    vi.spyOn(DashboardRepository, 'getDashboardData').mockResolvedValue(mockData);
 
     const req = {} as Request;
     const res = {

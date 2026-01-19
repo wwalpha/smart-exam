@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Request, Response } from 'express';
-import { getMaterialFile } from '@/handlers/materials';
-import { MaterialRepository } from '@/repositories';
+import { getMaterialFile } from '@/controllers/materials';
+import { MaterialRepository } from '@/services';
 
 describe('materialFile handler', () => {
   it('returns pdf buffer', async () => {

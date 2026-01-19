@@ -1,4 +1,6 @@
 
+backend/lambda
+
 # Local .terraform directories
 .terraform/
 

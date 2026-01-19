@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listQuestions, createQuestion, updateQuestion, searchQuestions, deleteQuestion } from '@/handlers/questions';
-import { QuestionRepository } from '@/repositories';
+import { listQuestions, createQuestion, updateQuestion, searchQuestions, deleteQuestion } from '@/controllers/questions';
+import { QuestionRepository } from '@/services';
 import { Request, Response } from 'express';
 import type {
   CreateQuestionParams,

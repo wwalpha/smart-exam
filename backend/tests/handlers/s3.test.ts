@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { getUploadUrl } from '@/handlers/s3';
+import { getUploadUrl } from '@/controllers/s3';
 import { Request, Response } from 'express';
 
 vi.mock('@aws-sdk/client-s3');

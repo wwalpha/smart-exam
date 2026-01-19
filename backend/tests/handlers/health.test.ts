@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { handler } from '@/handlers/health';
+import { handler } from '@/controllers/health';
 
 describe('health handler', () => {
   it('returns ok', async () => {

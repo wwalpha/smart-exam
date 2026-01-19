@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listKanji, createKanji } from '@/handlers/kanji';
-import { KanjiRepository } from '@/repositories';
+import { listKanji, createKanji } from '@/controllers/kanji';
+import { KanjiRepository } from '@/services';
 import { Request, Response } from 'express';
 
-vi.mock('@/repositories');
+// repository methods are spied per-test
 
 describe('kanji handler', () => {
   it('listKanji returns items', async () => {
     const mockItems = [{ id: '1', kanji: '漢' }];
-    vi.mocked(KanjiRepository.listKanji).mockResolvedValue(mockItems as any);
+    vi.spyOn(KanjiRepository, 'listKanji').mockResolvedValue(mockItems as any);
 
     const req = {} as Request;
     const res = {
@@ -24,7 +24,7 @@ describe('kanji handler', () => {
 
   it('createKanji creates item', async () => {
     const mockItem = { id: '1', kanji: '漢' };
-    vi.mocked(KanjiRepository.createKanji).mockResolvedValue(mockItem as any);
+    vi.spyOn(KanjiRepository, 'createKanji').mockResolvedValue(mockItem as any);
 
     const req = {
       body: { kanji: '漢', subject: '1' },

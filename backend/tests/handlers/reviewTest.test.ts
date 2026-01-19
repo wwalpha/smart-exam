@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listReviewTests, createReviewTest, getReviewTest, listReviewTestTargets } from '@/handlers/reviewTests';
-import { ReviewTestRepository } from '@/repositories';
+import { listReviewTests, createReviewTest, getReviewTest, listReviewTestTargets } from '@/controllers/reviewTests';
+import { ReviewTestRepository } from '@/services';
 import { Request, Response } from 'express';
 import type { CreateReviewTestRequest, GetReviewTestParams } from '@smart-exam/api-types';
 
