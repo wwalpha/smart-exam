@@ -52,7 +52,9 @@ export const useKanjiImport = () => {
       return;
     }
 
-    const fileContent = await file.text();
+    const fileContentRaw = await file.text();
+    // 文書末尾の句点（。）があると最終行が壊れやすいので、import 前に削除する
+    const fileContent = fileContentRaw.replace(/\s+$/u, '').replace(/。$/u, '');
 
     const lines = fileContent.split(/\r?\n/);
     const errors: string[] = [];

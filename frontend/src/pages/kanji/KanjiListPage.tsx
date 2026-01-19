@@ -33,16 +33,6 @@ export const KanjiListPage = () => {
     runSearch(data);
   });
 
-  const toggleSelectAll = () => {
-    setSelectedIds((prev) => {
-      // 一覧が空のときは選択状態を必ず空にする
-      if (kanjiList.length === 0) return new Set();
-      // すでに全件選択なら「解除」として扱う
-      if (prev.size === kanjiList.length) return new Set();
-      return new Set(kanjiList.map((k) => k.id));
-    });
-  };
-
   const toggleSelectPage = () => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -116,7 +106,7 @@ export const KanjiListPage = () => {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-muted-foreground">全{total}件</div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={toggleSelectAll} disabled={kanjiList.length === 0}>
+          <Button type="button" variant="outline" size="sm" onClick={toggleSelectPage} disabled={pagedList.length === 0}>
             一括選択
           </Button>
           <Button

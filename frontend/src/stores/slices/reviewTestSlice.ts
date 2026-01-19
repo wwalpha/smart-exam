@@ -84,7 +84,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           const nextLists = orderBy(response.datas, ['createdAt'], ['desc']);
           updateWordTest({ lists: nextLists });
         },
-        '単語テスト一覧の取得に失敗しました。'
+        '単語テスト一覧の取得に失敗しました。',
       );
     },
 
@@ -105,7 +105,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           return response;
         },
         '単語テストの取得に失敗しました。',
-        { fallback: null }
+        { fallback: null },
       );
     },
 
@@ -120,7 +120,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           return response;
         },
         '単語テストの作成に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -156,7 +156,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
             details: nextDetails,
           });
         },
-        '採点結果の反映に失敗しました。'
+        '採点結果の反映に失敗しました。',
       );
     },
 
@@ -202,7 +202,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           updateReview({ list: response.items, total: response.total });
         },
         '復習テスト一覧の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -213,7 +213,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           return await REVIEW_API.createReviewTest(request);
         },
         '復習テストの作成に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -225,7 +225,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           updateReview({ detail: response });
         },
         '復習テスト詳細の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -235,12 +235,19 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
         async () => {
           const response = await REVIEW_API.updateReviewTestStatus(id, request);
           const currentDetail = getReview().detail;
+          const currentList = getReview().list;
           if (currentDetail && currentDetail.id === id) {
             updateReview({ detail: { ...currentDetail, status: response.status } });
           }
+
+          if (currentList.length > 0) {
+            updateReview({
+              list: currentList.map((item) => (item.id === id ? { ...item, status: response.status } : item)),
+            });
+          }
         },
         'ステータスの更新に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -257,7 +264,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           updateReview({ list: nextList, total: nextTotal, detail: nextDetail });
         },
         '復習テストの削除に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -268,7 +275,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           await REVIEW_API.submitReviewTestResults(id, request);
         },
         'テスト結果の送信に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -298,7 +305,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           });
         },
         '対象一覧の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -328,7 +335,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           });
         },
         '履歴の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -358,7 +365,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
           });
         },
         '候補一覧の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
   };

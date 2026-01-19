@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
+import { toast } from 'sonner';
 
 type GradingFormValues = {
   items: {
@@ -56,6 +57,10 @@ export const useReviewKanjiGrading = () => {
         results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
       });
       await fetchReviewTest(id);
+      toast.success('保存しました');
+    } catch (e) {
+      toast.error('保存に失敗しました');
+      throw e;
     } finally {
       setIsSaving(false);
     }

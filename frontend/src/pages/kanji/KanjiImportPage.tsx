@@ -28,10 +28,12 @@ export const KanjiImportPage = () => {
                 value={subject}
                 onValueChange={(v) =>
                   setValue('subject', v as WordTestSubject, { shouldDirty: true, shouldValidate: true })
-                }>
+                }
+              >
                 <SelectTrigger
                   aria-invalid={!!form.formState.errors.subject}
-                  className={form.formState.errors.subject ? 'border-destructive focus:ring-destructive' : undefined}>
+                  className={form.formState.errors.subject ? 'border-destructive focus:ring-destructive' : undefined}
+                >
                   <SelectValue placeholder="科目を選択" />
                 </SelectTrigger>
                 <SelectContent>

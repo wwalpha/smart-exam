@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import type { WordTestSubject } from '@typings/wordtest';
+import { SUBJECT } from '@/lib/Consts';
 
 type CreateFormValues = {
   subject: WordTestSubject | '';
@@ -18,7 +19,7 @@ export const useReviewKanjiCreate = () => {
 
   const form = useForm<CreateFormValues>({
     defaultValues: {
-      subject: '',
+      subject: SUBJECT.japanese,
       count: 60,
     },
   });

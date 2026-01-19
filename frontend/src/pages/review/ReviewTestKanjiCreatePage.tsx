@@ -19,10 +19,8 @@ export const ReviewTestKanjiCreatePage = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-8 space-y-6">
-      <h1 className="text-2xl font-bold">漢字復習テスト作成</h1>
-
       <Card>
-        <CardContent>
+        <CardContent className="pt-4">
           <form onSubmit={submit} className="space-y-6">
             <div className="space-y-2">
               <Label>科目</Label>
@@ -31,10 +29,12 @@ export const ReviewTestKanjiCreatePage = () => {
                 value={subject}
                 onValueChange={(v) =>
                   setValue('subject', v as WordTestSubject | '', { shouldDirty: true, shouldValidate: true })
-                }>
+                }
+              >
                 <SelectTrigger
                   aria-invalid={!!errors.subject}
-                  className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}>
+                  className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}
+                >
                   <SelectValue placeholder="科目を選択" />
                 </SelectTrigger>
                 <SelectContent>
@@ -42,7 +42,9 @@ export const ReviewTestKanjiCreatePage = () => {
                   <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.subject?.message ? <p className="text-sm text-destructive">{String(errors.subject.message)}</p> : null}
+              {errors.subject?.message ? (
+                <p className="text-sm text-destructive">{String(errors.subject.message)}</p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -60,7 +62,9 @@ export const ReviewTestKanjiCreatePage = () => {
                 aria-invalid={!!errors.count}
                 className={errors.count ? 'border-destructive focus-visible:ring-destructive' : undefined}
               />
-              {errors.count?.message ? <p className="text-sm text-destructive">{String(errors.count.message)}</p> : null}
+              {errors.count?.message ? (
+                <p className="text-sm text-destructive">{String(errors.count.message)}</p>
+              ) : null}
             </div>
 
             <div className="flex justify-end gap-4 pt-4">

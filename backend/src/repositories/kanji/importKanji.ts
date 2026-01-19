@@ -29,6 +29,9 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
   const existing = await WordMasterService.listKanji(subject);
   const existingByQuestion = new Map(existing.map((x) => [x.question, x.wordId] as const));
 
+  // 同一ファイル内の重複（並列実行時の競合も含む）を防ぐ
+  const seenQuestions = new Set<string>();
+
   let successCount = 0;
   let duplicateCount = 0;
   let errorCount = 0;
@@ -53,7 +56,8 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
       const parsedPipe = isPipeFormat ? parsePipeLine(line) : null;
       const cols = isPipeFormat ? [] : line.split(/\t|,/).map((x) => x.trim());
 
-      const kanji = parsedPipe?.kanji ?? cols[0];
+      const kanjiRaw = parsedPipe?.kanji ?? cols[0];
+      const kanji = (kanjiRaw ?? '').trim();
       const reading = parsedPipe?.reading ?? cols[1] ?? '';
       const histories = parsedPipe?.histories ?? [];
       if (!kanji) {
@@ -62,12 +66,14 @@ export const importKanji = async (data: ImportKanjiRequest): Promise<ImportKanji
         return;
       }
 
-      const existingId = existingByQuestion.get(kanji);
-      if (existingId) {
-        // 重複時はスキップ（要件変更: UPDATE -> SKIP）
+      // 既存データ or 同一ファイル内で重複している場合はスキップ
+      if (existingByQuestion.has(kanji) || seenQuestions.has(kanji)) {
         duplicateCount += 1;
         return;
       }
+
+      // await を跨ぐ前に予約して、並列処理でも重複登録を防ぐ
+      seenQuestions.add(kanji);
 
       // 履歴がある行は、createKanji() の「初期候補作成」を避けて余計な書き込みを減らす
       if (histories.length > 0) {
