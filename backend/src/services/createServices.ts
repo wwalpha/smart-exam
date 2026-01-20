@@ -1,29 +1,36 @@
 import type { Repositories } from '@/repositories/createRepositories';
-import * as BedrockDomain from '@/services/bedrock';
-import * as DashboardDomain from '@/services/dashboard';
-import * as KanjiDomain from '@/services/kanji';
-import * as MaterialsDomain from '@/services/materials';
-import * as QuestionsDomain from '@/services/questions';
-import * as ReviewTestsDomain from '@/services/reviewTests';
+import { createBedrockService, type BedrockService } from '@/services/bedrock/createBedrockService';
+import { createDashboardService, type DashboardService } from '@/services/dashboard/createDashboardService';
+import { createKanjiService, type KanjiService } from '@/services/kanji/createKanjiService';
+import { createMaterialsService, type MaterialsService } from '@/services/materials/createMaterialsService';
+import { createQuestionsService, type QuestionsService } from '@/services/questions/createQuestionsService';
+import {
+  createReviewAttemptsService,
+  type ReviewAttemptsService,
+} from '@/services/reviewAttempts/createReviewAttemptsService';
+import { createReviewTestsService, type ReviewTestsService } from '@/services/reviewTests/createReviewTestsService';
+import { createS3Service, type S3Service } from '@/services/s3/createS3Service';
 
 export type Services = {
-  bedrock: typeof BedrockDomain;
-  dashboard: typeof DashboardDomain;
-  kanji: typeof KanjiDomain;
-  materials: typeof MaterialsDomain;
-  questions: typeof QuestionsDomain;
-  reviewTests: typeof ReviewTestsDomain;
+  bedrock: BedrockService;
+  dashboard: DashboardService;
+  kanji: KanjiService;
+  materials: MaterialsService;
+  questions: QuestionsService;
+  reviewAttempts: ReviewAttemptsService;
+  reviewTests: ReviewTestsService;
+  s3: S3Service;
 };
 
-// 現時点では既存のドメイン関数が module import で依存を解決しているため、
-// DI の骨格だけ先に導入し、段階的に依存注入へ移行する。
-export const createServices = (_repositories: Repositories): Services => {
+export const createServices = (repositories: Repositories): Services => {
   return {
-    bedrock: BedrockDomain,
-    dashboard: DashboardDomain,
-    kanji: KanjiDomain,
-    materials: MaterialsDomain,
-    questions: QuestionsDomain,
-    reviewTests: ReviewTestsDomain,
+    bedrock: createBedrockService(repositories),
+    dashboard: createDashboardService(),
+    kanji: createKanjiService(repositories),
+    materials: createMaterialsService(repositories),
+    questions: createQuestionsService(repositories),
+    reviewAttempts: createReviewAttemptsService(repositories),
+    reviewTests: createReviewTestsService(repositories),
+    s3: createS3Service(repositories),
   };
 };

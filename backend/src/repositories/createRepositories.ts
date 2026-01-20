@@ -4,7 +4,7 @@ import { ReviewTestCandidatesRepository } from '@/repositories/ReviewTestCandida
 import { ReviewTestsRepository } from '@/repositories/ReviewTestsRepository';
 import { WordMasterRepository } from '@/repositories/WordMasterRepository';
 import { analyzeExamPaper } from '@/repositories/BedrockRepository';
-import { ReviewTestPdfService } from '@/repositories/ReviewTestPdfService';
+import { S3Repository } from '@/repositories/S3Repository';
 
 export type Repositories = {
   materials: typeof MaterialsRepository;
@@ -12,10 +12,10 @@ export type Repositories = {
   reviewTestCandidates: typeof ReviewTestCandidatesRepository;
   reviewTests: typeof ReviewTestsRepository;
   wordMaster: typeof WordMasterRepository;
+  s3: typeof S3Repository;
   bedrock: {
     analyzeExamPaper: typeof analyzeExamPaper;
   };
-  reviewTestPdf: typeof ReviewTestPdfService;
 };
 
 export const createRepositories = (): Repositories => {
@@ -25,7 +25,7 @@ export const createRepositories = (): Repositories => {
     reviewTestCandidates: ReviewTestCandidatesRepository,
     reviewTests: ReviewTestsRepository,
     wordMaster: WordMasterRepository,
+    s3: S3Repository,
     bedrock: { analyzeExamPaper },
-    reviewTestPdf: ReviewTestPdfService,
   };
 };
