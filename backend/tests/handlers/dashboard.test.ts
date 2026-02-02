@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Request, Response } from 'express';
-import { getDashboard } from '@/controllers/dashboard';
-import { DashboardRepository } from '@/services';
+import { createDashboardController } from '@/controllers/dashboard/createDashboardController';
+import type { Services } from '@/services';
 import type { DashboardData } from '@smart-exam/api-types';
 
 // repository methods are spied per-test
@@ -22,7 +22,13 @@ describe('dashboard handler', () => {
       inventoryCount: 0,
     };
 
-    vi.spyOn(DashboardRepository, 'getDashboardData').mockResolvedValue(mockData);
+    const services = {
+      dashboard: {
+        getDashboardData: vi.fn().mockResolvedValue(mockData),
+      },
+    } as unknown as Services;
+
+    const controller = createDashboardController(services);
 
     const req = {} as Request;
     const res = {
@@ -31,7 +37,7 @@ describe('dashboard handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await getDashboard(req, res, next);
+    await controller.getDashboard(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -39,7 +45,7 @@ describe('dashboard handler', () => {
         topIncorrectQuestions: expect.any(Array),
         lockedCount: 0,
         inventoryCount: 0,
-      })
+      }),
     );
   });
 });

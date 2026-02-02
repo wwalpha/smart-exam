@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listQuestions, createQuestion, updateQuestion, searchQuestions, deleteQuestion } from '@/controllers/questions';
-import { QuestionRepository } from '@/services';
+import { createQuestionsController } from '@/controllers/questions/createQuestionsController';
+import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type {
   CreateQuestionParams,
@@ -17,7 +17,13 @@ import type {
 describe('question handler', () => {
   it('listQuestions returns items', async () => {
     const mockItems = [{ id: '1', canonicalKey: '1-1' }];
-    vi.spyOn(QuestionRepository, 'listQuestions').mockResolvedValue(mockItems as any);
+    const services = {
+      questions: {
+        listQuestions: vi.fn().mockResolvedValue(mockItems as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createQuestionsController(services);
 
     const req = {
       params: { materialId: 'mat1' },
@@ -28,14 +34,20 @@ describe('question handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await listQuestions(req, res, next);
+    await controller.listQuestions(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith({ datas: mockItems });
   });
 
   it('createQuestion creates item', async () => {
     const mockItem = { id: '1', canonicalKey: '1-1' };
-    vi.spyOn(QuestionRepository, 'createQuestion').mockResolvedValue(mockItem as any);
+    const services = {
+      questions: {
+        createQuestion: vi.fn().mockResolvedValue(mockItem as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createQuestionsController(services);
 
     const req = {
       params: { materialId: 'mat1' },
@@ -47,7 +59,7 @@ describe('question handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await createQuestion(req, res, next);
+    await controller.createQuestion(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(mockItem);
@@ -55,7 +67,13 @@ describe('question handler', () => {
 
   it('updateQuestion updates item', async () => {
     const mockItem = { id: '1', canonicalKey: '1-2' };
-    vi.spyOn(QuestionRepository, 'updateQuestion').mockResolvedValue(mockItem as any);
+    const services = {
+      questions: {
+        updateQuestion: vi.fn().mockResolvedValue(mockItem as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createQuestionsController(services);
 
     const req = {
       params: { questionId: '1' },
@@ -67,7 +85,7 @@ describe('question handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await updateQuestion(req, res, next);
+    await controller.updateQuestion(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith(mockItem);
   });
@@ -84,7 +102,13 @@ describe('question handler', () => {
       },
     ];
 
-    vi.spyOn(QuestionRepository, 'searchQuestions').mockResolvedValue(mockItems as any);
+    const services = {
+      questions: {
+        searchQuestions: vi.fn().mockResolvedValue(mockItems as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createQuestionsController(services);
 
     const req = {
       body: { keyword: 'Q1', subject: '4' },
@@ -95,13 +119,19 @@ describe('question handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await searchQuestions(req, res, next);
+    await controller.searchQuestions(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith({ datas: mockItems } satisfies SearchQuestionsResponse);
   });
 
   it('deleteQuestion returns 204', async () => {
-    vi.spyOn(QuestionRepository, 'deleteQuestion').mockResolvedValue(undefined);
+    const services = {
+      questions: {
+        deleteQuestion: vi.fn().mockResolvedValue(true),
+      },
+    } as unknown as Services;
+
+    const controller = createQuestionsController(services);
 
     const req = {
       params: { questionId: 'q1' },
@@ -109,14 +139,14 @@ describe('question handler', () => {
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
-      end: vi.fn(),
+      send: vi.fn(),
     } as unknown as Response;
     const next = vi.fn();
 
-    await deleteQuestion(req, res, next);
+    await controller.deleteQuestion(req, res, next);
 
-    expect(QuestionRepository.deleteQuestion).toHaveBeenCalledWith('q1');
+    expect(services.questions.deleteQuestion).toHaveBeenCalledWith('q1');
     expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalled();
+    expect(res.send).toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AnalyzePaperBodySchema, analyzePaper } from '@/controllers/bedrock';
-import { BedrockRepository } from '@/services';
+import { AnalyzePaperBodySchema, createBedrockController } from '@/controllers/bedrock/createBedrockController';
+import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import { validateBody } from '@/middlewares/validateZod';
 
@@ -9,7 +9,14 @@ import { validateBody } from '@/middlewares/validateZod';
 describe('bedrock handler', () => {
   it('analyzePaper returns questions', async () => {
     const mockQuestions = ['1', '1-1'];
-    vi.spyOn(BedrockRepository, 'analyzeExamPaper').mockResolvedValue(mockQuestions as any);
+
+    const services = {
+      bedrock: {
+        analyzeExamPaper: vi.fn().mockResolvedValue(mockQuestions),
+      },
+    } as unknown as Services;
+
+    const controller = createBedrockController(services);
 
     const req = {
       body: { s3Key: 'key', subject: 'math' },
@@ -24,7 +31,7 @@ describe('bedrock handler', () => {
     mw(req, res, next);
     expect(next).toHaveBeenCalled();
 
-    await analyzePaper(req, res, next);
+    await controller.analyzePaper(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith({ questions: mockQuestions });
   });

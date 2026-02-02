@@ -46,7 +46,12 @@ export const UpdateQuestionBodySchema = z.object({
 });
 
 export const createQuestionsController = (services: Services) => {
-  const listQuestions: AsyncHandler<ListQuestionsParams, QuestionListResponse, {}, ParsedQs> = async (req, res) => {
+  const listQuestions: AsyncHandler<
+    ListQuestionsParams,
+    QuestionListResponse,
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const { materialId } = req.params;
     const items = await services.questions.listQuestions(materialId);
     res.json({ datas: items });
@@ -97,7 +102,7 @@ export const createQuestionsController = (services: Services) => {
   const deleteQuestion: AsyncHandler<
     DeleteQuestionParams,
     DeleteQuestionResponse | { error: string },
-    {},
+    Record<string, never>,
     ParsedQs
   > = async (req, res) => {
     const { questionId } = req.params;

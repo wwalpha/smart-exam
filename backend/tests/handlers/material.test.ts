@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listMaterials, createMaterial, getMaterial } from '@/controllers/materials';
-import { MaterialRepository } from '@/services';
+import { createMaterialsController } from '@/controllers/materials/createMaterialsController';
+import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type { CreateMaterialRequest, GetMaterialParams } from '@smart-exam/api-types';
 
@@ -9,7 +9,14 @@ import type { CreateMaterialRequest, GetMaterialParams } from '@smart-exam/api-t
 describe('material handler', () => {
   it('listMaterials returns items', async () => {
     const mockItems = [{ id: '1', name: 'Test Material' }];
-    vi.spyOn(MaterialRepository, 'listMaterials').mockResolvedValue(mockItems as any);
+
+    const services = {
+      materials: {
+        listMaterials: vi.fn().mockResolvedValue(mockItems as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createMaterialsController(services);
 
     const req = {} as Request;
     const res = {
@@ -18,14 +25,21 @@ describe('material handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await listMaterials(req, res, next);
+    await controller.listMaterials(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith({ items: mockItems, total: 1 });
   });
 
   it('createMaterial creates item', async () => {
     const mockItem = { id: '1', name: 'Test Material' };
-    vi.spyOn(MaterialRepository, 'createMaterial').mockResolvedValue(mockItem as any);
+
+    const services = {
+      materials: {
+        createMaterial: vi.fn().mockResolvedValue(mockItem as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createMaterialsController(services);
 
     const req = {
       body: {
@@ -34,6 +48,7 @@ describe('material handler', () => {
         grade: '4年',
         provider: 'SAPIX',
         materialDate: '2025-01-01',
+        registeredDate: '2025-01-01',
       },
     } as Request<Record<string, never>, unknown, CreateMaterialRequest>;
     const res = {
@@ -42,7 +57,7 @@ describe('material handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await createMaterial(req, res, next);
+    await controller.createMaterial(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(mockItem);
@@ -50,7 +65,14 @@ describe('material handler', () => {
 
   it('getMaterial returns item', async () => {
     const mockItem = { id: '1', name: 'Test Material' };
-    vi.spyOn(MaterialRepository, 'getMaterial').mockResolvedValue(mockItem as any);
+
+    const services = {
+      materials: {
+        getMaterial: vi.fn().mockResolvedValue(mockItem as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createMaterialsController(services);
 
     const req = {
       params: { materialId: '1' },
@@ -61,7 +83,7 @@ describe('material handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await getMaterial(req, res, next);
+    await controller.getMaterial(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith(mockItem);
   });

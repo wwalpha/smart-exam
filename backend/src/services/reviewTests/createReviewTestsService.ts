@@ -2,7 +2,6 @@ import type {
   CreateReviewTestRequest,
   ReviewMode,
   ReviewTest,
-  ReviewTestCandidateTable,
   ReviewTestDetail,
   ReviewTestTarget,
   SearchReviewTestsRequest,
@@ -17,7 +16,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
-import type { ReviewTestTable, WordMasterTable } from '@/types/db';
+import type { ReviewTestCandidateTable, ReviewTestTable, WordMasterTable } from '@/types/db';
 import type { Repositories } from '@/repositories/createRepositories';
 import { sortTargets, toApiReviewTest, toReviewTargetKey } from './internal';
 import { ReviewTestPdfService } from './reviewTestPdfService';

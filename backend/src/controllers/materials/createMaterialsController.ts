@@ -1,5 +1,6 @@
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody } from '@/types/express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { z } from 'zod';
 
@@ -73,33 +74,42 @@ type GetMaterialFileParams = {
 };
 
 export const createMaterialsController = (services: Services) => {
-  const listMaterials: AsyncHandler<{}, MaterialListResponse, {}, ParsedQs> = async (_req, res) => {
+  const listMaterials: AsyncHandler<ParamsDictionary, MaterialListResponse, Record<string, never>, ParsedQs> = async (
+    _req,
+    res,
+  ) => {
     const items = await services.materials.listMaterials();
     res.json({ items, total: items.length });
   };
 
-  const searchMaterials: AsyncHandler<{}, SearchMaterialsResponse, SearchMaterialsRequest, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const searchMaterials: AsyncHandler<
+    ParamsDictionary,
+    SearchMaterialsResponse,
+    SearchMaterialsRequest,
+    ParsedQs
+  > = async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchMaterialsBodySchema>;
     const result = await services.materials.searchMaterials(body);
     res.json(result);
   };
 
-  const createMaterial: AsyncHandler<{}, CreateMaterialResponse, CreateMaterialRequest, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const createMaterial: AsyncHandler<
+    ParamsDictionary,
+    CreateMaterialResponse,
+    CreateMaterialRequest,
+    ParsedQs
+  > = async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateMaterialBodySchema>;
     const item = await services.materials.createMaterial(body);
     res.status(201).json(item);
   };
 
-  const getMaterial: AsyncHandler<GetMaterialParams, GetMaterialResponse | { error: string }, {}, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const getMaterial: AsyncHandler<
+    GetMaterialParams,
+    GetMaterialResponse | { error: string },
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const { materialId } = req.params;
     const item = await services.materials.getMaterial(materialId);
     if (!item) {
@@ -148,7 +158,7 @@ export const createMaterialsController = (services: Services) => {
   const deleteMaterial: AsyncHandler<
     DeleteMaterialParams,
     DeleteMaterialResponse | { error: string },
-    {},
+    Record<string, never>,
     ParsedQs
   > = async (req, res) => {
     const { materialId } = req.params;
@@ -160,16 +170,21 @@ export const createMaterialsController = (services: Services) => {
     res.status(204).send();
   };
 
-  const listMaterialFiles: AsyncHandler<ListMaterialFilesParams, ListMaterialFilesResponse, {}, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const listMaterialFiles: AsyncHandler<
+    ListMaterialFilesParams,
+    ListMaterialFilesResponse,
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const { materialId } = req.params;
     const datas = await services.materials.listMaterialFiles(materialId);
     res.json({ datas });
   };
 
-  const getMaterialFile: AsyncHandler<GetMaterialFileParams, unknown, {}, ParsedQs> = async (req, res) => {
+  const getMaterialFile: AsyncHandler<GetMaterialFileParams, unknown, Record<string, never>, ParsedQs> = async (
+    req,
+    res,
+  ) => {
     const { materialId, fileId } = req.params;
 
     const file = await services.materials.getMaterialFile(materialId, fileId);

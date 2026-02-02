@@ -22,13 +22,11 @@ export const S3Repository = {
     prefix: string;
   }): Promise<Array<{ key: string; lastModified?: Date }>> => {
     const response = await AwsUtils.listS3ObjectsByPrefix(params);
-    return (response.Contents ?? [])
-      .map((obj) => {
-        const key = obj.Key;
-        if (!key) return null;
-        return { key, lastModified: obj.LastModified };
-      })
-      .filter((x): x is { key: string; lastModified?: Date } => x !== null);
+    return (response.Contents ?? []).flatMap((obj) => {
+      const key = obj.Key;
+      if (!key) return [];
+      return [{ key, lastModified: obj.LastModified }];
+    });
   },
 
   getObjectBuffer: async (params: {

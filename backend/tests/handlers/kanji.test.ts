@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { listKanji, createKanji } from '@/controllers/kanji';
-import { KanjiRepository } from '@/services';
+import { createKanjiController } from '@/controllers/kanji/createKanjiController';
+import type { Services } from '@/services';
 import { Request, Response } from 'express';
 
 // repository methods are spied per-test
@@ -8,7 +8,14 @@ import { Request, Response } from 'express';
 describe('kanji handler', () => {
   it('listKanji returns items', async () => {
     const mockItems = [{ id: '1', kanji: '漢' }];
-    vi.spyOn(KanjiRepository, 'listKanji').mockResolvedValue(mockItems as any);
+
+    const services = {
+      kanji: {
+        listKanji: vi.fn().mockResolvedValue(mockItems as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createKanjiController(services);
 
     const req = {} as Request;
     const res = {
@@ -17,14 +24,21 @@ describe('kanji handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await listKanji(req, res, next);
+    await controller.listKanji(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith({ items: mockItems, total: 1 });
   });
 
   it('createKanji creates item', async () => {
     const mockItem = { id: '1', kanji: '漢' };
-    vi.spyOn(KanjiRepository, 'createKanji').mockResolvedValue(mockItem as any);
+
+    const services = {
+      kanji: {
+        createKanji: vi.fn().mockResolvedValue(mockItem as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = createKanjiController(services);
 
     const req = {
       body: { kanji: '漢', subject: '1' },
@@ -35,7 +49,7 @@ describe('kanji handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await createKanji(req, res, next);
+    await controller.createKanji(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(mockItem);

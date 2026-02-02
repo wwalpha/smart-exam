@@ -70,7 +70,7 @@ export const ReviewTestPdfService = {
         color: rgb(0, 0, 0),
       });
 
-      let cursorY = titleY - headerGap;
+      const cursorY = titleY - headerGap;
       return { page, contentWidth, cursorY, pageWidth, pageHeight };
     };
 

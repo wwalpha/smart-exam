@@ -1,5 +1,6 @@
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody, ValidatedQuery } from '@/types/express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { z } from 'zod';
 
@@ -77,24 +78,33 @@ export const createReviewTestsController = (services: Services) => {
     mode: queryStringOptional().pipe(ReviewModeSchema.optional()),
   });
 
-  const listReviewTests: AsyncHandler<{}, { items: unknown[]; total: number }, {}, ParsedQs> = async (_req, res) => {
+  const listReviewTests: AsyncHandler<
+    ParamsDictionary,
+    { items: unknown[]; total: number },
+    Record<string, never>,
+    ParsedQs
+  > = async (_req, res) => {
     const items = await services.reviewTests.listReviewTests();
     res.json({ items, total: items.length });
   };
 
-  const searchReviewTests: AsyncHandler<{}, SearchReviewTestsResponse, SearchReviewTestsRequest, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const searchReviewTests: AsyncHandler<
+    ParamsDictionary,
+    SearchReviewTestsResponse,
+    SearchReviewTestsRequest,
+    ParsedQs
+  > = async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchReviewTestsBodySchema>;
     const result = await services.reviewTests.searchReviewTests(body);
     res.json(result);
   };
 
-  const createReviewTest: AsyncHandler<{}, CreateReviewTestResponse, CreateReviewTestRequest, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const createReviewTest: AsyncHandler<
+    ParamsDictionary,
+    CreateReviewTestResponse,
+    CreateReviewTestRequest,
+    ParsedQs
+  > = async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateReviewTestBodySchema>;
     const item = await services.reviewTests.createReviewTest(body);
     res.status(201).json(item);
@@ -103,7 +113,7 @@ export const createReviewTestsController = (services: Services) => {
   const getReviewTest: AsyncHandler<
     GetReviewTestParams,
     GetReviewTestResponse | { error: string },
-    {},
+    Record<string, never>,
     ParsedQs
   > = async (req, res) => {
     const { testId } = req.params;
@@ -115,10 +125,12 @@ export const createReviewTestsController = (services: Services) => {
     res.json(item);
   };
 
-  const getReviewTestPdf: AsyncHandler<{ testId: string }, { url: string } | { error: string }, {}, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const getReviewTestPdf: AsyncHandler<
+    { testId: string },
+    { url: string } | { error: string },
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const { testId } = req.params;
     const result = await services.reviewTests.getReviewTestPdfUrl(testId);
     if (!result) {
@@ -144,7 +156,10 @@ export const createReviewTestsController = (services: Services) => {
     res.json(item);
   };
 
-  const deleteReviewTest: AsyncHandler<DeleteReviewTestParams, void, {}, ParsedQs> = async (req, res) => {
+  const deleteReviewTest: AsyncHandler<DeleteReviewTestParams, void, Record<string, never>, ParsedQs> = async (
+    req,
+    res,
+  ) => {
     const { testId } = req.params;
     await services.reviewTests.deleteReviewTest(testId);
     res.status(204).send();
@@ -168,7 +183,12 @@ export const createReviewTestsController = (services: Services) => {
     res.status(204).send();
   };
 
-  const listReviewTestTargets: AsyncHandler<{}, ListReviewTestTargetsResponse, {}, ParsedQs> = async (req, res) => {
+  const listReviewTestTargets: AsyncHandler<
+    ParamsDictionary,
+    ListReviewTestTargetsResponse,
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListReviewTestTargetsQuerySchema>;
 
     const items = await services.reviewTests.listReviewTestTargets({
@@ -181,10 +201,12 @@ export const createReviewTestsController = (services: Services) => {
     res.json({ items });
   };
 
-  const listReviewTestCandidates: AsyncHandler<{}, ListReviewTestCandidatesResponse, {}, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const listReviewTestCandidates: AsyncHandler<
+    ParamsDictionary,
+    ListReviewTestCandidatesResponse,
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListReviewTestCandidatesQuerySchema>;
 
     const items = await services.reviewTests.listReviewTestCandidates({

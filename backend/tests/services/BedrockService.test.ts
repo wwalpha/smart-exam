@@ -26,14 +26,14 @@ vi.mock('@/lib/aws', () => ({
 
 vi.mock('@aws-sdk/client-bedrock-runtime', () => {
   class ConverseCommand {
-    constructor(_: any) {}
+    constructor() {}
   }
   return { ConverseCommand };
 });
 
-import { analyzeExamPaper } from '@/services/BedrockService';
+import { analyzeExamPaper } from '@/repositories/BedrockRepository';
 
-describe('BedrockService (unit)', () => {
+describe('BedrockRepository.analyzeExamPaper (unit)', () => {
   it('parses questions JSON from Bedrock response', async () => {
     const questions = await analyzeExamPaper('uploads/mock.pdf', 'math');
     expect(questions).toEqual(['1', '1-1']);

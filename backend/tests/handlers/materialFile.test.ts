@@ -1,15 +1,21 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Request, Response } from 'express';
-import { getMaterialFile } from '@/controllers/materials';
-import { MaterialRepository } from '@/services';
+import { createMaterialsController } from '@/controllers/materials/createMaterialsController';
+import type { Services } from '@/services';
 
 describe('materialFile handler', () => {
   it('returns pdf buffer', async () => {
-    vi.spyOn(MaterialRepository, 'getMaterialFile').mockResolvedValue({
-      body: Buffer.from('%PDF-1.4\n%mock'),
-      contentType: 'application/pdf',
-      filename: 'mock.pdf',
-    });
+    const services = {
+      materials: {
+        getMaterialFile: vi.fn().mockResolvedValue({
+          body: Buffer.from('%PDF-1.4\n%mock'),
+          contentType: 'application/pdf',
+          filename: 'mock.pdf',
+        }),
+      },
+    } as unknown as Services;
+
+    const controller = createMaterialsController(services);
 
     const req = {
       params: { materialId: 'm1', fileId: 'abc' },
@@ -21,9 +27,9 @@ describe('materialFile handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await getMaterialFile(req, res, next);
+    await controller.getMaterialFile(req, res, next);
 
-    expect(MaterialRepository.getMaterialFile).toHaveBeenCalledWith('m1', 'abc');
+    expect(services.materials.getMaterialFile).toHaveBeenCalledWith('m1', 'abc');
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.setHeader).toHaveBeenCalledWith('content-type', 'application/pdf');
     expect(res.send).toHaveBeenCalled();

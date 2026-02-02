@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
 
 import { nodeFileTrace } from '@vercel/nft';
 
@@ -9,7 +8,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const backendRoot = path.resolve(__dirname, '..');
-const monorepoRoot = path.resolve(backendRoot, '..');
 const distDir = path.join(backendRoot, 'dist');
 const outDir = path.join(backendRoot, 'lambda');
 
@@ -59,70 +57,7 @@ const copyDir = async (srcAbs, dstAbs) => {
       }
 
       await fs.copyFile(srcChild, dstChild);
-    })
-  );
-};
-
-const resolvePackageRoot = async (pkgName) => {
-  const require = createRequire(import.meta.url);
-
-  let resolvedEntry;
-  try {
-    resolvedEntry = require.resolve(pkgName, { paths: [backendRoot] });
-  } catch {
-    return null;
-  }
-
-  let dir = path.dirname(resolvedEntry);
-  for (;;) {
-    try {
-      await fs.stat(path.join(dir, 'package.json'));
-      return dir;
-    } catch {
-      // keep walking up
-    }
-
-    const parent = path.dirname(dir);
-    if (parent === dir) return null;
-    dir = parent;
-  }
-};
-
-const resolvePhysicalNodeModulesPackageRoot = async (pkgName) => {
-  const physicalPath = path.join(monorepoRoot, 'node_modules', ...pkgName.split('/'));
-  try {
-    const stat = await fs.stat(physicalPath);
-    return stat.isDirectory() ? physicalPath : null;
-  } catch {
-    return null;
-  }
-};
-
-const pruneNonRuntimeFiles = async (rootAbs) => {
-  const entries = await fs.readdir(rootAbs, { withFileTypes: true });
-  await Promise.all(
-    entries.map(async (entry) => {
-      const absPath = path.join(rootAbs, entry.name);
-
-      if (entry.isDirectory()) {
-        await pruneNonRuntimeFiles(absPath);
-        return;
-      }
-
-      const lower = entry.name.toLowerCase();
-      const isRemovable =
-        lower.endsWith('.d.ts') ||
-        lower.endsWith('.map') ||
-        lower.endsWith('.md') ||
-        lower === 'license' ||
-        lower.startsWith('license.') ||
-        lower === 'readme' ||
-        lower.startsWith('readme.');
-
-      if (isRemovable) {
-        await fs.rm(absPath, { force: true });
-      }
-    })
+    }),
   );
 };
 
@@ -132,7 +67,6 @@ const { fileList, warnings } = await nodeFileTrace(entryFiles, {
 });
 
 if (warnings.length > 0) {
-  // eslint-disable-next-line no-console
   console.warn('nodeFileTrace warnings:', warnings);
 }
 
@@ -165,12 +99,11 @@ try {
 await fs.writeFile(
   path.join(outDir, 'package.json'),
   JSON.stringify({ name: 'smart-exam-lambda', private: true, type: 'commonjs' }, null, 2) + '\n',
-  'utf8'
+  'utf8',
 );
 
 // Lambda handler resolution: ensure these paths exist in the zip root.
 // - index.handler => index.js
 // - handlers/bedrock.handler => handlers/bedrock.js
 
-// eslint-disable-next-line no-console
 console.log(`Packaged ${fileList.size} files into ${path.relative(backendRoot, outDir)}/`);

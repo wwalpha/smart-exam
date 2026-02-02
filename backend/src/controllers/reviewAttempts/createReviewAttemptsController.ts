@@ -1,5 +1,6 @@
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedQuery } from '@/types/express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { z } from 'zod';
 
@@ -21,7 +22,12 @@ export const createReviewAttemptsController = (services: Services) => {
     subject: queryStringOptional().pipe(SubjectIdSchema.optional()),
   });
 
-  const listReviewAttempts: AsyncHandler<{}, ListReviewAttemptsResponse, {}, ParsedQs> = async (req, res) => {
+  const listReviewAttempts: AsyncHandler<
+    ParamsDictionary,
+    ListReviewAttemptsResponse,
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListReviewAttemptsQuerySchema>;
 
     const items = await services.reviewAttempts.listReviewAttempts({

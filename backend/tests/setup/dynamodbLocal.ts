@@ -22,8 +22,11 @@ const createTables = async (client: DynamoDBClient) => {
   const create = async (command: CreateTableCommand) => {
     try {
       await client.send(command);
-    } catch (error: any) {
-      if (error?.name === 'ResourceInUseException') return;
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'name' in error) {
+        const maybeName = (error as { name?: unknown }).name;
+        if (maybeName === 'ResourceInUseException') return;
+      }
       throw error;
     }
   };
@@ -48,7 +51,7 @@ const createTables = async (client: DynamoDBClient) => {
           Projection: { ProjectionType: 'ALL' },
         },
       ],
-    })
+    }),
   );
 
   await create(
@@ -57,7 +60,7 @@ const createTables = async (client: DynamoDBClient) => {
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [{ AttributeName: 'wordId', AttributeType: 'S' }],
       KeySchema: [{ AttributeName: 'wordId', KeyType: 'HASH' }],
-    })
+    }),
   );
 
   await create(
@@ -83,7 +86,7 @@ const createTables = async (client: DynamoDBClient) => {
           Projection: { ProjectionType: 'ALL' },
         },
       ],
-    })
+    }),
   );
 
   await create(
@@ -105,7 +108,7 @@ const createTables = async (client: DynamoDBClient) => {
           Projection: { ProjectionType: 'ALL' },
         },
       ],
-    })
+    }),
   );
 
   await create(
@@ -114,7 +117,7 @@ const createTables = async (client: DynamoDBClient) => {
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [{ AttributeName: 'paperId', AttributeType: 'S' }],
       KeySchema: [{ AttributeName: 'paperId', KeyType: 'HASH' }],
-    })
+    }),
   );
 
   await create(
@@ -123,7 +126,7 @@ const createTables = async (client: DynamoDBClient) => {
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [{ AttributeName: 'resultId', AttributeType: 'S' }],
       KeySchema: [{ AttributeName: 'resultId', KeyType: 'HASH' }],
-    })
+    }),
   );
 };
 

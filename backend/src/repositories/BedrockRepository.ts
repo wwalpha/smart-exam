@@ -178,7 +178,7 @@ export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'):
     const jsonString = jsonMatch ? jsonMatch[0] : textContent;
     const result = JSON.parse(jsonString);
     return result.questions || [];
-  } catch (e) {
+  } catch {
     console.error('Failed to parse JSON from Bedrock:', textContent);
     throw new Error('Failed to parse Bedrock response');
   }

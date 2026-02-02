@@ -50,7 +50,10 @@ export const DeleteManyKanjiBodySchema = z.object({
 });
 
 export const createKanjiController = (services: Services) => {
-  const listKanji: AsyncHandler<ParamsDictionary, KanjiListResponse, {}, ParsedQs> = async (_req, res) => {
+  const listKanji: AsyncHandler<ParamsDictionary, KanjiListResponse, Record<string, never>, ParsedQs> = async (
+    _req,
+    res,
+  ) => {
     const items = await services.kanji.listKanji();
     res.json({ items, total: items.length });
   };
@@ -75,10 +78,12 @@ export const createKanjiController = (services: Services) => {
     res.status(201).json(item);
   };
 
-  const getKanji: AsyncHandler<GetKanjiParams, GetKanjiResponse | { error: string }, {}, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const getKanji: AsyncHandler<
+    GetKanjiParams,
+    GetKanjiResponse | { error: string },
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const { kanjiId } = req.params;
     const item = await services.kanji.getKanji(kanjiId);
     if (!item) {
@@ -103,10 +108,12 @@ export const createKanjiController = (services: Services) => {
     res.json(item);
   };
 
-  const deleteKanji: AsyncHandler<DeleteKanjiParams, DeleteKanjiResponse | { error: string }, {}, ParsedQs> = async (
-    req,
-    res,
-  ) => {
+  const deleteKanji: AsyncHandler<
+    DeleteKanjiParams,
+    DeleteKanjiResponse | { error: string },
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
     const { kanjiId } = req.params;
     const deleted = await services.kanji.deleteKanji(kanjiId);
     if (!deleted) {
