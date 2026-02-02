@@ -26,7 +26,8 @@ export type ReviewTestsService = {
   searchReviewTests: (params: SearchReviewTestsRequest) => Promise<SearchReviewTestsResponse>;
   createReviewTest: (req: CreateReviewTestRequest) => Promise<ReviewTest>;
   getReviewTest: (testId: string) => Promise<ReviewTestDetail | null>;
-  getReviewTestPdfUrl: (testId: string) => Promise<{ url: string } | null>;
+  getReviewTestPdfUrl: (testId: string, params?: { download?: boolean }) => Promise<{ url: string } | null>;
+  generateReviewTestPdfBuffer: (testId: string) => Promise<Buffer | null>;
   updateReviewTestStatus: (testId: string, req: UpdateReviewTestStatusRequest) => Promise<ReviewTest | null>;
   submitReviewTestResults: (testId: string, req: SubmitReviewTestResultsRequest) => Promise<boolean>;
   deleteReviewTest: (testId: string) => Promise<boolean>;
@@ -482,9 +483,11 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
     return true;
   };
 
-  const getReviewTestPdfUrl: ReviewTestsService['getReviewTestPdfUrl'] = async (testId) => {
+  const getReviewTestPdfUrl: ReviewTestsService['getReviewTestPdfUrl'] = async (testId, params) => {
     const testRow = await repositories.reviewTests.get(testId);
     if (!testRow) return null;
+
+    const responseContentDisposition = params?.download ? 'attachment' : 'inline';
 
     if (!ENV.FILES_BUCKET_NAME) {
       throw new ApiError(
@@ -500,7 +503,7 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
       const url = await repositories.s3.getPresignedGetUrl({
         bucket: ENV.FILES_BUCKET_NAME,
         key: testRow.pdfS3Key,
-        responseContentDisposition: 'inline',
+        responseContentDisposition,
         expiresInSeconds: 3600,
       });
       return { url };
@@ -523,11 +526,17 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
     const url = await repositories.s3.getPresignedGetUrl({
       bucket: ENV.FILES_BUCKET_NAME,
       key,
-      responseContentDisposition: 'inline',
+      responseContentDisposition,
       expiresInSeconds: 3600,
     });
 
     return { url };
+  };
+
+  const generateReviewTestPdfBuffer: ReviewTestsService['generateReviewTestPdfBuffer'] = async (testId) => {
+    const review = await getReviewTest(testId);
+    if (!review) return null;
+    return ReviewTestPdfService.generatePdfBuffer(review);
   };
 
   return {
@@ -536,6 +545,7 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
     createReviewTest,
     getReviewTest,
     getReviewTestPdfUrl,
+    generateReviewTestPdfBuffer,
     updateReviewTestStatus,
     submitReviewTestResults,
     deleteReviewTest,

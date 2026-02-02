@@ -132,7 +132,26 @@ export const createReviewTestsController = (services: Services) => {
     ParsedQs
   > = async (req, res) => {
     const { testId } = req.params;
-    const result = await services.reviewTests.getReviewTestPdfUrl(testId);
+
+    const direct = String(req.query.direct ?? '') === '1' || String(req.query.direct ?? '') === 'true';
+    const download = String(req.query.download ?? '') === '1' || String(req.query.download ?? '') === 'true';
+
+    // ローカル検証用: S3 / presign を経由せずにPDFを直接返す
+    if (direct) {
+      const pdf = await services.reviewTests.generateReviewTestPdfBuffer(testId);
+      if (!pdf) {
+        res.status(404).json({ error: 'Not Found' });
+        return;
+      }
+
+      const filename = `review-test-${testId}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `${download ? 'attachment' : 'inline'}; filename="${filename}"`);
+      res.status(200).send(pdf);
+      return;
+    }
+
+    const result = await services.reviewTests.getReviewTestPdfUrl(testId, { download });
     if (!result) {
       res.status(404).json({ error: 'Not Found' });
       return;

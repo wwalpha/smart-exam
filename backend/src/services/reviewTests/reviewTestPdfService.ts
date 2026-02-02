@@ -34,9 +34,9 @@ export const ReviewTestPdfService = {
     const pdfDoc = await PDFDocument.create();
     pdfDoc.registerFontkit(fontkit);
 
-    // NOTE: 漢字PDFはサイズ削減のためサブセット化、それ以外は欠け対策で全グリフ埋め込み
-    const shouldSubsetFont = review.mode === 'KANJI';
-    const jpFont = await pdfDoc.embedFont(fontBytes, { subset: shouldSubsetFont });
+    // 日本語PDFの「ズレ/欠け」を防ぐため、フォントはサブセット化しない（全グリフ埋め込み）。
+    // NOTE: 漢字PDFはサイズ削減のためサブセット化していたが、可変フォント/環境差で不安定になるため優先度を下げる。
+    const jpFont = await pdfDoc.embedFont(fontBytes, { subset: false });
 
     const createPage = (params?: {
       pageWidth?: number;
@@ -288,37 +288,51 @@ let cachedJapaneseFontBytes: Uint8Array | null = null;
 const loadJapaneseFontBytes = async (): Promise<Uint8Array> => {
   if (cachedJapaneseFontBytes) return cachedJapaneseFontBytes;
 
-  const { gunzip } = await import('node:zlib');
-  const { promisify } = await import('node:util');
-  const gunzipAsync = promisify(gunzip);
   const { readFile, stat } = await import('node:fs/promises');
   const path = await import('node:path');
 
-  const fontRelativePath = path.join('assets', 'fonts', 'NotoSansJP-wght.ttf.gz');
-  const candidates = [
-    path.join(process.cwd(), fontRelativePath),
-    path.join(process.cwd(), 'backend', fontRelativePath),
+  // 1) 推奨: Google Fonts 由来の可変フォント（TTF）をそのまま同梱して使用
+  const variableTtfRelativePath = path.join('assets', 'fonts', 'NotoSansJP-VariableFont_wght.ttf');
+  const variableCandidates = [
+    path.join(process.cwd(), variableTtfRelativePath),
+    path.join(process.cwd(), 'backend', variableTtfRelativePath),
   ];
 
-  let fontGzPath: string | null = null;
-  for (const candidate of candidates) {
+  for (const candidate of variableCandidates) {
     try {
       const s = await stat(candidate);
-      if (s.isFile()) {
-        fontGzPath = candidate;
-        break;
-      }
+      if (!s.isFile()) continue;
+      const font = await readFile(candidate);
+      cachedJapaneseFontBytes = new Uint8Array(font);
+      return cachedJapaneseFontBytes;
     } catch {
       // try next
     }
   }
 
-  if (!fontGzPath) {
-    throw new Error(`Font asset is missing: ${fontRelativePath}`);
+  // 2) 後方互換: 既存の gzip 同梱（サイズ削減）
+  const { gunzip } = await import('node:zlib');
+  const { promisify } = await import('node:util');
+  const gunzipAsync = promisify(gunzip);
+
+  const fontGzRelativePath = path.join('assets', 'fonts', 'NotoSansJP-wght.ttf.gz');
+  const gzCandidates = [
+    path.join(process.cwd(), fontGzRelativePath),
+    path.join(process.cwd(), 'backend', fontGzRelativePath),
+  ];
+
+  for (const candidate of gzCandidates) {
+    try {
+      const s = await stat(candidate);
+      if (!s.isFile()) continue;
+      const gz = await readFile(candidate);
+      const font = (await gunzipAsync(gz)) as Buffer;
+      cachedJapaneseFontBytes = new Uint8Array(font);
+      return cachedJapaneseFontBytes;
+    } catch {
+      // try next
+    }
   }
 
-  const gz = await readFile(fontGzPath);
-  const font = (await gunzipAsync(gz)) as Buffer;
-  cachedJapaneseFontBytes = new Uint8Array(font);
-  return cachedJapaneseFontBytes;
+  throw new Error(`Font asset is missing: ${variableTtfRelativePath} (or fallback: ${fontGzRelativePath})`);
 };

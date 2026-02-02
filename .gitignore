@@ -42,6 +42,9 @@ terraform.rc
 dist
 node_modules
 
+# Local verification artifacts
+tmp/
+
 # Env files
 .env
 .env.*

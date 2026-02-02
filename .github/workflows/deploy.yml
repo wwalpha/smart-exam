@@ -27,7 +27,7 @@ jobs:
       bedrock_function_name: ${{ steps.outputs.outputs.bedrock_function_name }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -90,6 +90,11 @@ jobs:
         run: |
           cd backend/lambda
           zip -9 -r ../function.zip .
+
+      - name: Verify Font Assets in Zip
+        run: |
+          unzip -l backend/function.zip | grep -E "assets/fonts/.*\\.ttf$"
+          unzip -l backend/function.zip | grep -E "assets/fonts/(OFL\\.txt|LICENSE_OFL\\.txt)$"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
