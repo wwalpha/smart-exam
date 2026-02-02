@@ -19,7 +19,9 @@ export async function apiRequest<TResponse, TBody = undefined>(
   params: ApiClientRequestParams<TBody>
 ): Promise<TResponse> {
   const headers: Record<string, string> = {};
-  if (!(params.body instanceof FormData)) {
+  // GET等で不要な Content-Type を付けるとブラウザが preflight(OPTIONS) を発行しやすくなる。
+  // API 側の互換性/安定性のため、JSON body を送る場合のみ明示する。
+  if (params.body !== undefined && !(params.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
 

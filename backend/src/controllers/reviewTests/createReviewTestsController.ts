@@ -147,7 +147,8 @@ export const createReviewTestsController = (services: Services) => {
       const filename = `review-test-${testId}.pdf`;
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `${download ? 'attachment' : 'inline'}; filename="${filename}"`);
-      res.status(200).send(pdf);
+      // NOTE: res is typed for JSON responses; end() avoids the Response body generic mismatch.
+      res.status(200).end(pdf);
       return;
     }
 
