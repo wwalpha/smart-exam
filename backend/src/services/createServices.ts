@@ -1,19 +1,13 @@
 import type { Repositories } from '@/repositories/createRepositories';
-import { createBedrockService, type BedrockService } from '@/services/bedrock/createBedrockService';
-import { createDashboardService, type DashboardService } from '@/services/dashboard/createDashboardService';
-import { createKanjiService, type KanjiService } from '@/services/kanji/createKanjiService';
-import {
-  createKanjiQuestionsService,
-  type KanjiQuestionsService,
-} from '@/services/kanjiQuestions/createKanjiQuestionsService';
-import { createMaterialsService, type MaterialsService } from '@/services/materials/createMaterialsService';
-import { createQuestionsService, type QuestionsService } from '@/services/questions/createQuestionsService';
-import {
-  createReviewAttemptsService,
-  type ReviewAttemptsService,
-} from '@/services/reviewAttempts/createReviewAttemptsService';
-import { createReviewTestsService, type ReviewTestsService } from '@/services/reviewTests/createReviewTestsService';
-import { createS3Service, type S3Service } from '@/services/s3/createS3Service';
+import { bedrockService, type BedrockService } from '@/services/bedrock';
+import { dashboardService, type DashboardService } from '@/services/dashboard';
+import { kanjiService, type KanjiService } from '@/services/kanji';
+import { kanjiQuestionsService, type KanjiQuestionsService } from '@/services/kanjiQuestions';
+import { materialsService, type MaterialsService } from '@/services/materials';
+import { questionsService, type QuestionsService } from '@/services/questions';
+import { reviewAttemptsService, type ReviewAttemptsService } from '@/services/reviewAttempts';
+import { reviewTestsService, type ReviewTestsService } from '@/services/reviewTests';
+import { s3Service, type S3Service } from '@/services/s3';
 
 export type Services = {
   bedrock: BedrockService;
@@ -29,14 +23,14 @@ export type Services = {
 
 export const createServices = (repositories: Repositories): Services => {
   return {
-    bedrock: createBedrockService(repositories),
-    dashboard: createDashboardService(),
-    kanji: createKanjiService(repositories),
-    kanjiQuestions: createKanjiQuestionsService(repositories),
-    materials: createMaterialsService(repositories),
-    questions: createQuestionsService(repositories),
-    reviewAttempts: createReviewAttemptsService(repositories),
-    reviewTests: createReviewTestsService(repositories),
-    s3: createS3Service(repositories),
+    bedrock: bedrockService(repositories),
+    dashboard: dashboardService(),
+    kanji: kanjiService(repositories),
+    kanjiQuestions: kanjiQuestionsService(repositories),
+    materials: materialsService(repositories),
+    questions: questionsService(repositories),
+    reviewAttempts: reviewAttemptsService(repositories),
+    reviewTests: reviewTestsService(repositories),
+    s3: s3Service(repositories),
   };
 };

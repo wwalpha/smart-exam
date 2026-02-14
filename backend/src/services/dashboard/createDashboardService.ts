@@ -2,6 +2,7 @@
 
 import type { DashboardData } from '@smart-exam/api-types';
 
+import { createGetDashboardData } from './getDashboardData';
 
 /** Type definition for DashboardService. */
 export type DashboardService = {
@@ -10,14 +11,7 @@ export type DashboardService = {
 
 /** Creates dashboard service. */
 export const createDashboardService = (): DashboardService => {
-  const getDashboardData = async (): Promise<DashboardData> => {
-    return {
-      todayTestCount: 0,
-      topIncorrectQuestions: [],
-      lockedCount: 0,
-      inventoryCount: 0,
-    };
-  };
+  const getDashboardData = createGetDashboardData();
 
   return { getDashboardData };
 };
