@@ -50,7 +50,8 @@ resource "aws_s3_bucket_cors_configuration" "files" {
 # frontend S3 bucket for static hosting (CloudFront distribution).
 # ----------------------------------------------------------------------------------------------
 resource "aws_s3_bucket" "frontend" {
-  bucket = "${var.project_name}-frontend-${local.suffix}"
+  bucket        = "${var.project_name}-frontend-${local.suffix}"
+  force_destroy = true
 }
 
 # ----------------------------------------------------------------------------------------------
