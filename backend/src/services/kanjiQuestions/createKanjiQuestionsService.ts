@@ -239,6 +239,23 @@ export const createKanjiQuestionsService = (repositories: Repositories): KanjiQu
       throw new ApiError('Not Found', 404, ['not_found']);
     }
 
+    const subject = updated.subject as KanjiQuestion['subject'];
+    const open = await repositories.reviewTestCandidates.getLatestOpenCandidateByTargetId({
+      subject,
+      targetId: id,
+    });
+    if (!open) {
+      await repositories.reviewTestCandidates.createCandidate({
+        subject,
+        questionId: id,
+        mode: 'KANJI',
+        nextTime: DateUtils.todayYmd(),
+        correctCount: 0,
+        status: 'OPEN',
+        createdAtIso: DateUtils.now(),
+      });
+    }
+
     return toKanjiQuestion(updated);
   };
 

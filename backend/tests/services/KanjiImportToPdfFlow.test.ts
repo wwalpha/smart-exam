@@ -1,0 +1,144 @@
+import { describe, expect, it, vi } from 'vitest';
+import { PDFDocument } from 'pdf-lib';
+
+import { createKanjiService } from '@/services/kanji/createKanjiService';
+import { createKanjiQuestionsService } from '@/services/kanjiQuestions/createKanjiQuestionsService';
+import { ReviewTestPdfService } from '@/services/reviewTests/reviewTestPdfService';
+import type { Repositories } from '@/repositories/createRepositories';
+import type { ReviewTestDetail } from '@smart-exam/api-types';
+
+describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)', () => {
+  it('keeps DRAFT out of OPEN candidates until verify, then generates PDF for VERIFIED', async () => {
+    type WordMasterItem = {
+      wordId: string;
+      subject: string;
+      question: string;
+      answer: string;
+      promptText?: string;
+      answerKanji?: string;
+      readingHiragana?: string;
+      underlineSpec?: { type: 'promptSpan'; start: number; length: number };
+      status?: 'DRAFT' | 'GENERATED' | 'VERIFIED' | 'ERROR';
+    };
+
+    const wordMasters = new Map<string, WordMasterItem>();
+    const candidateParams: Array<{ subject: string; questionId: string; status: string }> = [];
+
+    const repositories = {
+      wordMaster: {
+        listKanji: vi.fn().mockImplementation(async (subject?: string) => {
+          const items = Array.from(wordMasters.values());
+          return subject ? items.filter((x) => x.subject === subject) : items;
+        }),
+        create: vi.fn().mockImplementation(async (item: WordMasterItem) => {
+          wordMasters.set(item.wordId, item);
+        }),
+        get: vi.fn().mockImplementation(async (id: string) => {
+          return wordMasters.get(id) ?? null;
+        }),
+        updateKanjiQuestionFields: vi.fn().mockImplementation(async (id: string, updates: Partial<WordMasterItem>) => {
+          const existing = wordMasters.get(id);
+          if (!existing) return null;
+          const next = { ...existing, ...updates };
+          wordMasters.set(id, next);
+          return next;
+        }),
+      },
+      reviewTestCandidates: {
+        deleteCandidatesByTargetId: vi
+          .fn()
+          .mockImplementation(async (params: { subject: string; targetId: string }) => {
+            for (let i = candidateParams.length - 1; i >= 0; i -= 1) {
+              const c = candidateParams[i];
+              if (c.subject === params.subject && c.questionId === params.targetId) {
+                candidateParams.splice(i, 1);
+              }
+            }
+          }),
+        getLatestOpenCandidateByTargetId: vi
+          .fn()
+          .mockImplementation(async (params: { subject: string; targetId: string }) => {
+            for (let i = candidateParams.length - 1; i >= 0; i -= 1) {
+              const c = candidateParams[i];
+              if (c.subject === params.subject && c.questionId === params.targetId && c.status === 'OPEN') {
+                return { status: 'OPEN' } as unknown;
+              }
+            }
+            return null;
+          }),
+        createCandidate: vi
+          .fn()
+          .mockImplementation(async (params: { subject: string; questionId: string; status: string }) => {
+            candidateParams.push(params);
+            return params as unknown;
+          }),
+      },
+      bedrock: {
+        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
+          readingHiragana: 'けいせい',
+          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
+        }),
+      },
+    } as unknown as Repositories;
+
+    const kanjiService = createKanjiService(repositories);
+    const kanjiQuestionsService = createKanjiQuestionsService(repositories);
+
+    const imported = await kanjiService.importKanji({
+      subject: '1',
+      importType: 'QUESTIONS',
+      fileContent: '彼はけいせいを説明した。|形成|2026-02-01,OK|2026-02-05,NG\n',
+    });
+
+    expect(imported.successCount).toBe(1);
+    const id = imported.questionIds?.[0];
+    expect(id).toBeTruthy();
+
+    // import時点では OPEN は作られない（DRAFT混入事故防止）
+    expect(candidateParams.some((c) => c.status === 'OPEN')).toBe(false);
+
+    await kanjiQuestionsService.generateReading(String(id));
+    const verified = await kanjiQuestionsService.verify(String(id));
+    expect(verified.status).toBe('VERIFIED');
+
+    // verify時に OPEN が作られる
+    expect(candidateParams.some((c) => c.status === 'OPEN')).toBe(true);
+
+    const w = wordMasters.get(String(id));
+    expect(w?.status).toBe('VERIFIED');
+
+    const promptText = String(w?.promptText ?? '');
+
+    const review: ReviewTestDetail = {
+      id: 't1',
+      testId: 't1',
+      subject: '1',
+      mode: 'KANJI',
+      createdDate: '2026-02-14',
+      status: 'IN_PROGRESS',
+      pdf: { url: '/api/review-tests/t1/pdf', downloadUrl: '/api/review-tests/t1/pdf?download=1' },
+      count: 60,
+      questions: Array.from({ length: 60 }, (_v, i) => `w-${i + 1}`),
+      results: [],
+      items: Array.from({ length: 60 }, (_v, i) => ({
+        id: `item-${i + 1}`,
+        itemId: `item-${i + 1}`,
+        testId: 't1',
+        targetType: 'KANJI',
+        targetId: String(id),
+        questionText: promptText,
+        promptText,
+        answerKanji: w?.answerKanji,
+        readingHiragana: w?.readingHiragana,
+        underlineSpec: w?.underlineSpec,
+        status: 'VERIFIED',
+      })),
+    };
+
+    const pdf = await ReviewTestPdfService.generatePdfBuffer(review);
+    expect(pdf.length).toBeGreaterThan(100);
+
+    const doc = await PDFDocument.load(pdf);
+    expect(doc.getPageCount()).toBe(1);
+  });
+});

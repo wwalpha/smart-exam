@@ -206,6 +206,10 @@ describe('KanjiQuestionsService.patch/verify (unit)', () => {
           status: 'VERIFIED',
         } as unknown),
       },
+      reviewTestCandidates: {
+        getLatestOpenCandidateByTargetId: vi.fn().mockResolvedValue(null),
+        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+      },
     } as unknown as Repositories;
 
     const service = createKanjiQuestionsService(repositories);
@@ -216,5 +220,54 @@ describe('KanjiQuestionsService.patch/verify (unit)', () => {
       'q1',
       expect.objectContaining({ status: 'VERIFIED' }),
     );
+
+    expect(repositories.reviewTestCandidates.getLatestOpenCandidateByTargetId).toHaveBeenCalledWith({
+      subject: '1',
+      targetId: 'q1',
+    });
+    expect(repositories.reviewTestCandidates.createCandidate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: '1',
+        questionId: 'q1',
+        mode: 'KANJI',
+        status: 'OPEN',
+        correctCount: 0,
+      }),
+    );
+  });
+
+  it('verify does not create OPEN candidate if one already exists', async () => {
+    const repositories = {
+      wordMaster: {
+        get: vi.fn().mockResolvedValue({
+          wordId: 'q1',
+          subject: '1',
+          promptText: '彼はけいせいを説明した。',
+          answerKanji: '形成',
+          readingHiragana: 'けいせい',
+          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
+          status: 'GENERATED',
+        }),
+        updateKanjiQuestionFields: vi.fn().mockResolvedValue({
+          wordId: 'q1',
+          subject: '1',
+          promptText: '彼はけいせいを説明した。',
+          answerKanji: '形成',
+          readingHiragana: 'けいせい',
+          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
+          status: 'VERIFIED',
+        } as unknown),
+      },
+      reviewTestCandidates: {
+        getLatestOpenCandidateByTargetId: vi.fn().mockResolvedValue({ status: 'OPEN' } as unknown),
+        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+      },
+    } as unknown as Repositories;
+
+    const service = createKanjiQuestionsService(repositories);
+    const res = await service.verify('q1');
+
+    expect(res.status).toBe('VERIFIED');
+    expect(repositories.reviewTestCandidates.createCandidate).not.toHaveBeenCalled();
   });
 });

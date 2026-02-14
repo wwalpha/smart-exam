@@ -71,12 +71,10 @@ async function main(): Promise<void> {
   const outPath = path.join(outDir, `verify-kanji-worksheet-${testId}.pdf`);
   await writeFile(outPath, pdf);
 
-  // eslint-disable-next-line no-console
   console.log(outPath);
 }
 
 main().catch((e) => {
-  // eslint-disable-next-line no-console
   console.error(e);
   process.exitCode = 1;
 });

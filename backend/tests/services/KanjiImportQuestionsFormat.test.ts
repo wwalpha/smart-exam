@@ -56,6 +56,13 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.successCount).toBe(0);
     expect(res.errorCount).toBe(4);
     expect(res.errors.map((e) => e.line)).toEqual([1, 2, 3, 4]);
+
+    expect(res.errors.map((e) => e.reason)).toEqual([
+      '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）',
+      '履歴の形式が不正です',
+      '本文が空です',
+      '答え漢字が空です',
+    ]);
   });
 
   it('counts duplicates within file and existing', async () => {
@@ -87,5 +94,45 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.duplicateCount).toBe(2);
     expect(res.errorCount).toBe(0);
     expect(repositories.wordMaster.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('rebuilds candidates from histories but keeps final candidate EXCLUDED (no OPEN) to avoid DRAFT being due', async () => {
+    const repositories = {
+      wordMaster: {
+        listKanji: vi.fn().mockResolvedValue([] as unknown),
+        create: vi.fn().mockResolvedValue(undefined),
+      },
+      reviewTestCandidates: {
+        deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
+        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+      },
+    } as unknown as Repositories;
+
+    const service = createKanjiService(repositories);
+
+    const res = await service.importKanji({
+      subject: '1',
+      importType: 'QUESTIONS',
+      fileContent: '彼はけいせいを説明した。|形成|2026-02-01,OK|2026-02-05,NG\n',
+    });
+
+    expect(res.successCount).toBe(1);
+    expect(res.errorCount).toBe(0);
+
+    const created = (repositories.wordMaster.create as unknown as { mock: { calls: unknown[][] } }).mock.calls[0][0] as {
+      wordId: string;
+    };
+    const id = created.wordId;
+
+    expect(repositories.reviewTestCandidates.deleteCandidatesByTargetId).toHaveBeenCalledWith({
+      subject: '1',
+      targetId: id,
+    });
+
+    const statuses = (repositories.reviewTestCandidates.createCandidate as unknown as { mock: { calls: unknown[][] } }).mock.calls.map(
+      (c) => (c[0] as { status: string }).status,
+    );
+    expect(statuses).toContain('EXCLUDED');
+    expect(statuses).not.toContain('OPEN');
   });
 });

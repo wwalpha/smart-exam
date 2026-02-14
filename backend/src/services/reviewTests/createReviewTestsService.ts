@@ -152,6 +152,24 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
       });
     }
 
+    // KANJI worksheet は VERIFIED のみを印刷対象にする
+    // （DRAFT/GENERATED で候補が OPEN になっているケースがあると PDF 生成時に落ちるため、ここで除外する）
+    if (req.mode === 'KANJI' && candidates.length > 0) {
+      const ids = Array.from(new Set(candidates.map((c) => c.targetId)));
+      const words = await Promise.all(ids.map((id) => repositories.wordMaster.get(id)));
+      const byId = new Map(words.filter((w): w is WordMasterTable => w !== null).map((w) => [w.wordId, w] as const));
+
+      const printableIds = new Set(
+        Array.from(byId.values())
+          .filter((w) => String(w.status ?? '') === 'VERIFIED')
+          .map((w) => w.wordId),
+      );
+
+      const filtered = candidates.filter((c) => printableIds.has(c.targetId));
+      candidates.length = 0;
+      candidates.push(...filtered);
+    }
+
     // 要件 8.3: dueDate asc -> lastAttemptDate asc -> ID asc (deterministic)
     candidates.sort((a, b) => {
       if (a.dueDate !== b.dueDate) return (a.dueDate ?? '') < (b.dueDate ?? '') ? -1 : 1;
@@ -179,6 +197,10 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
 
     const targetIds = selected.map((c) => c.targetId);
     const pdfS3Key = req.mode === 'KANJI' ? `review-tests/${testId}.pdf` : undefined;
+
+    if (req.mode === 'KANJI' && targetIds.length === 0) {
+      throw new ApiError('No printable kanji items (no VERIFIED candidates)', 400, ['no_printable_items']);
+    }
 
     const testRow: ReviewTestTable = {
       testId,

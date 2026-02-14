@@ -6,6 +6,7 @@ import type {
   SearchKanjiRequest,
   SearchKanjiResponse,
   UpdateKanjiRequest,
+  SubjectId,
 } from '@smart-exam/api-types';
 
 import { DateUtils } from '@/lib/dateUtils';
@@ -13,7 +14,7 @@ import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
 import type { WordMasterTable } from '@/types/db';
 import type { Repositories } from '@/repositories/createRepositories';
-import { parsePipeLine } from './importUtils';
+import { parsePipeLine, parsePipeQuestionLine } from './importUtils';
 
 export type KanjiService = {
   listKanji: () => Promise<Kanji[]>;
@@ -27,6 +28,89 @@ export type KanjiService = {
 };
 
 export const createKanjiService = (repositories: Repositories): KanjiService => {
+  const rebuildCandidatesFromHistories = async (params: {
+    subject: SubjectId;
+    targetWordId: string;
+    histories: { submittedDate: string; isCorrect: boolean }[];
+    finalStatus: 'AUTO' | 'EXCLUDED';
+  }): Promise<void> => {
+    if (params.histories.length === 0) return;
+
+    // 履歴を再構築するため既存候補を削除
+    await repositories.reviewTestCandidates.deleteCandidatesByTargetId({
+      subject: params.subject,
+      targetId: params.targetWordId,
+    });
+
+    const sorted = [...params.histories].sort((a, b) => (a.submittedDate < b.submittedDate ? -1 : 1));
+    const recent = sorted.slice(Math.max(0, sorted.length - 3));
+
+    // 古い履歴は履歴としてのみ残す（状態計算には使わない）
+    await Promise.all(
+      sorted.slice(0, Math.max(0, sorted.length - 3)).map(async (h) => {
+        await repositories.reviewTestCandidates.createCandidate({
+          subject: params.subject,
+          questionId: params.targetWordId,
+          mode: 'KANJI',
+          nextTime: h.submittedDate,
+          correctCount: 0,
+          status: 'CLOSED',
+          createdAtIso: DateUtils.toIso(h.submittedDate),
+        });
+      }),
+    );
+
+    let streak = 0;
+    let lastAttemptIso = '';
+    let computedNextTime = '';
+    let computedCorrectCount = 0;
+
+    for (const h of recent) {
+      const baseDateYmd = h.submittedDate;
+      const computed = ReviewNextTime.compute({
+        mode: 'KANJI',
+        baseDateYmd,
+        isCorrect: h.isCorrect,
+        currentCorrectCount: streak,
+      });
+
+      // 直近3回の履歴は、次状態を含めて履歴として残す
+      await repositories.reviewTestCandidates.createCandidate({
+        subject: params.subject,
+        questionId: params.targetWordId,
+        mode: 'KANJI',
+        nextTime: computed.nextTime,
+        correctCount: computed.nextCorrectCount,
+        status: 'CLOSED',
+        createdAtIso: DateUtils.toIso(h.submittedDate),
+      });
+
+      streak = computed.nextCorrectCount;
+      lastAttemptIso = DateUtils.toIso(h.submittedDate);
+      computedNextTime = computed.nextTime;
+      computedCorrectCount = computed.nextCorrectCount;
+    }
+
+    if (!computedNextTime || !lastAttemptIso) return;
+
+    const finalStatus =
+      params.finalStatus === 'EXCLUDED'
+        ? 'EXCLUDED'
+        : computedNextTime === ReviewNextTime.EXCLUDED_NEXT_TIME
+          ? 'EXCLUDED'
+          : 'OPEN';
+
+    await repositories.reviewTestCandidates.createCandidate({
+      subject: params.subject,
+      questionId: params.targetWordId,
+      mode: 'KANJI',
+      nextTime: computedNextTime,
+      correctCount: computedCorrectCount,
+      status: finalStatus,
+      createdAtIso: lastAttemptIso,
+    });
+  };
+
   const listKanji: KanjiService['listKanji'] = async () => {
     const items = await repositories.wordMaster.listKanji();
     return items.map((dbItem) => ({
@@ -171,17 +255,7 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
       let errorCount = 0;
       const errors: ImportKanjiResponse['errors'] = [];
 
-      const parsePromptAnswerLine = (line: string): { promptText: string; answerKanji: string } | null => {
-        const first = line.indexOf('|');
-        if (first < 0) return null;
-        if (line.indexOf('|', first + 1) >= 0) return null;
-
-        const promptText = line.slice(0, first).trim();
-        const answerKanji = line.slice(first + 1).trim();
-        if (!promptText) return null;
-        if (!answerKanji) return null;
-        return { promptText, answerKanji };
-      };
+      const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
 
       // 既存 word_master の読み込み（この用途では重複判定は promptText+answerKanji で雑に行う）
       const existing = await repositories.wordMaster.listKanji(subject);
@@ -194,18 +268,40 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
 
       for (let index = 0; index < lines.length; index += 1) {
         const line = lines[index];
-        const parsed = parsePromptAnswerLine(line);
-        if (!parsed) {
+        if (!line.includes('|')) {
+          errorCount += 1;
+          errors.push({ line: index + 1, content: line, reason: formatErrorReason });
+          continue;
+        }
+
+        let parsed: { promptText: string; answerKanji: string; histories: { submittedDate: string; isCorrect: boolean }[] };
+        try {
+          parsed = parsePipeQuestionLine(line);
+        } catch (e) {
+          const message = e instanceof Error ? e.message : 'Unknown error';
           errorCount += 1;
           errors.push({
             line: index + 1,
             content: line,
-            reason: '形式が不正です（1行=「本文|答え漢字」、| は1つだけ）',
+            reason: message === 'フォーマットが不正です' ? formatErrorReason : message,
           });
           continue;
         }
 
-        const key = `${parsed.promptText}|${parsed.answerKanji}`;
+        const promptText = parsed.promptText.trim();
+        const answerKanji = parsed.answerKanji.trim();
+        if (!promptText) {
+          errorCount += 1;
+          errors.push({ line: index + 1, content: line, reason: '本文が空です' });
+          continue;
+        }
+        if (!answerKanji) {
+          errorCount += 1;
+          errors.push({ line: index + 1, content: line, reason: '答え漢字が空です' });
+          continue;
+        }
+
+        const key = `${promptText}|${answerKanji}`;
         if (existingKey.has(key) || seenKey.has(key)) {
           duplicateCount += 1;
           continue;
@@ -218,15 +314,24 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
           subject,
 
           // 互換のため既存必須属性は埋める（この機能では参照しない）
-          question: parsed.answerKanji,
+          question: answerKanji,
           answer: '',
 
-          promptText: parsed.promptText,
-          answerKanji: parsed.answerKanji,
+          promptText,
+          answerKanji,
           status: 'DRAFT',
         };
 
         await repositories.wordMaster.create(dbItem);
+
+        if (parsed.histories.length > 0) {
+          await rebuildCandidatesFromHistories({
+            subject,
+            targetWordId: id,
+            histories: parsed.histories,
+            finalStatus: 'EXCLUDED',
+          });
+        }
 
         successCount += 1;
         questionIds.push(id);
@@ -309,69 +414,12 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
 
         if (histories.length === 0) return;
 
-        // 履歴を再構築するため既存候補を削除
-        await repositories.reviewTestCandidates.deleteCandidatesByTargetId({ subject, targetId: targetWordId });
-
-        const sorted = [...histories].sort((a, b) => (a.submittedDate < b.submittedDate ? -1 : 1));
-        const recent = sorted.slice(Math.max(0, sorted.length - 3));
-
-        // 古い履歴は履歴としてのみ残す（状態計算には使わない）
-        await Promise.all(
-          sorted.slice(0, Math.max(0, sorted.length - 3)).map(async (h) => {
-            await repositories.reviewTestCandidates.createCandidate({
-              subject,
-              questionId: targetWordId,
-              mode: 'KANJI',
-              nextTime: h.submittedDate,
-              correctCount: 0,
-              status: 'CLOSED',
-              createdAtIso: DateUtils.toIso(h.submittedDate),
-            });
-          }),
-        );
-
-        let streak = 0;
-        let lastAttemptIso = '';
-        let computedNextTime = '';
-        let computedCorrectCount = 0;
-
-        for (const h of recent) {
-          const baseDateYmd = h.submittedDate;
-          const computed = ReviewNextTime.compute({
-            mode: 'KANJI',
-            baseDateYmd,
-            isCorrect: h.isCorrect,
-            currentCorrectCount: streak,
-          });
-
-          // 直近3回の履歴は、次状態を含めて履歴として残す
-          await repositories.reviewTestCandidates.createCandidate({
-            subject,
-            questionId: targetWordId,
-            mode: 'KANJI',
-            nextTime: computed.nextTime,
-            correctCount: computed.nextCorrectCount,
-            status: 'CLOSED',
-            createdAtIso: DateUtils.toIso(h.submittedDate),
-          });
-
-          streak = computed.nextCorrectCount;
-          lastAttemptIso = DateUtils.toIso(h.submittedDate);
-          computedNextTime = computed.nextTime;
-          computedCorrectCount = computed.nextCorrectCount;
-        }
-
-        if (computedNextTime && lastAttemptIso) {
-          await repositories.reviewTestCandidates.createCandidate({
-            subject,
-            questionId: targetWordId,
-            mode: 'KANJI',
-            nextTime: computedNextTime,
-            correctCount: computedCorrectCount,
-            status: computedNextTime === ReviewNextTime.EXCLUDED_NEXT_TIME ? 'EXCLUDED' : 'OPEN',
-            createdAtIso: lastAttemptIso,
-          });
-        }
+        await rebuildCandidatesFromHistories({
+          subject,
+          targetWordId,
+          histories,
+          finalStatus: 'AUTO',
+        });
       } catch (e) {
         errorCount += 1;
         errors.push({ line: index + 1, content: line, reason: e instanceof Error ? e.message : 'Unknown error' });
