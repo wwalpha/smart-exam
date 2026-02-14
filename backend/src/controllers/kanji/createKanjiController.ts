@@ -42,7 +42,7 @@ export const SearchKanjiBodySchema = z.object({
 
 export const ImportKanjiBodySchema = z.object({
   fileContent: z.string().min(1),
-  subject: SubjectIdSchema.optional(),
+  subject: SubjectIdSchema,
   importType: z.enum(['MASTER', 'QUESTIONS']).optional(),
 });
 

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createKanjiService } from '@/services/kanji/createKanjiService';
+import { ImportKanjiBodySchema } from '@/controllers/kanji/createKanjiController';
 import type { Repositories } from '@/repositories/createRepositories';
 
 describe('KanjiRepository.importKanji (pipe format)', () => {
@@ -33,19 +34,10 @@ describe('KanjiRepository.importKanji (pipe format)', () => {
   });
 
   it('fails when subject is missing', async () => {
-    const repositories = {
-      wordMaster: {
-        listKanji: vi.fn().mockResolvedValue([] as unknown),
-      },
-    } as unknown as Repositories;
-    const service = createKanjiService(repositories);
-
-    const res = await service.importKanji({
+    const parsed = ImportKanjiBodySchema.safeParse({
       fileContent: '漢字|かんじ',
+      importType: 'MASTER',
     });
-
-    expect(res.successCount).toBe(0);
-    expect(res.errorCount).toBeGreaterThan(0);
-    expect(res.errors.length).toBeGreaterThan(0);
+    expect(parsed.success).toBe(false);
   });
 });

@@ -88,8 +88,8 @@ export type DeleteManyKanjiResponse = Record<string, never>;
 export type ImportKanjiRequest = {
   /** CSV/TSV等のファイル内容 */
   fileContent: string;
-  /** 科目（指定時は全行に適用） */
-  subject?: SubjectId;
+  /** 科目（全行に適用） */
+  subject: SubjectId;
 
   /**
    * インポート種別

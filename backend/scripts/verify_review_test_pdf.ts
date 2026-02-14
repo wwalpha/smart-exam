@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ReviewTestPdfService } from '../src/services/reviewTests/reviewTestPdfService.ts';
+import type { ReviewTestDetail } from '@smart-exam/api-types';
 
 const REVIEW_MODE = {
   QUESTION: 'QUESTION',
@@ -30,13 +31,13 @@ async function main(): Promise<void> {
   const ymd = todayYmd();
   const testId = `verify-${ymd.replaceAll('-', '')}`;
 
-  const review = {
+  const review: ReviewTestDetail = {
     id: testId,
     testId,
-    subject: 'JAPANESE',
+    subject: '1',
     mode: REVIEW_MODE.QUESTION,
     createdDate: ymd,
-    status: 'IN_PROGRESS',
+    status: 'IN_PROGRESS' as const,
     pdf: {
       url: `/api/review-tests/${testId}/pdf`,
       downloadUrl: `/api/review-tests/${testId}/pdf?download=1`,

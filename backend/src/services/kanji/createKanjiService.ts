@@ -231,15 +231,6 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   const importKanji: KanjiService['importKanji'] = async (data) => {
     const importType = data.importType ?? 'MASTER';
 
-    if (!data.subject) {
-      return {
-        successCount: 0,
-        duplicateCount: 0,
-        errorCount: 1,
-        errors: [{ line: 1, content: '', reason: '科目は必須です' }],
-      };
-    }
-
     const subject = data.subject;
 
     const lines = data.fileContent

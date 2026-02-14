@@ -13,6 +13,26 @@ const parseOkNg = (raw: string): boolean | null => {
   return null;
 };
 
+const parseHistoryTokens = (tokens: string[]): ImportedHistoryEntry[] => {
+  const histories: ImportedHistoryEntry[] = [];
+  for (const token of tokens) {
+    if (!token) continue;
+    const [dateRaw, okngRaw = ''] = token.split(',');
+    let ymd = '';
+    try {
+      ymd = DateUtils.formatYmd(dateRaw ?? '') ?? '';
+    } catch {
+      ymd = '';
+    }
+    const okng = parseOkNg(okngRaw);
+    if (!ymd || okng === null) {
+      throw new Error('履歴の形式が不正です');
+    }
+    histories.push({ submittedDate: ymd, isCorrect: okng });
+  }
+  return histories;
+};
+
 // const parseYmdToIso = (ymd: string): string | null => {
 //   return DateUtils.parseYmdSlashToIso(ymd);
 // };
@@ -26,24 +46,7 @@ export const parsePipeLine = (line: string): { kanji: string; reading: string; h
   const kanji = parts[0];
   const reading = parts[1];
 
-  const histories: ImportedHistoryEntry[] = [];
-  for (const token of parts.slice(2)) {
-    if (!token) continue;
-    const [dateRaw, okngRaw = ''] = token.split(',');
-    // YYYY-MM-DD かチェック (DateUtils.parseYmdSlashToIso 等は使わず、入力値をそのまま扱うか、フォーマット変換する)
-    // ここでは単純に YYYY/MM/DD -> YYYY-MM-DD 置換などを行う
-    let ymd = '';
-    try {
-      ymd = DateUtils.formatYmd(dateRaw ?? '') ?? '';
-    } catch {
-      ymd = '';
-    }
-    const okng = parseOkNg(okngRaw);
-    if (!ymd || okng === null) {
-      throw new Error('履歴の形式が不正です');
-    }
-    histories.push({ submittedDate: ymd, isCorrect: okng });
-  }
+  const histories = parseHistoryTokens(parts.slice(2));
 
   return { kanji, reading, histories };
 };
@@ -63,22 +66,7 @@ export const parsePipeQuestionLine = (
   const promptText = parts[0];
   const answerKanji = parts[1];
 
-  const histories: ImportedHistoryEntry[] = [];
-  for (const token of parts.slice(2)) {
-    if (!token) continue;
-    const [dateRaw, okngRaw = ''] = token.split(',');
-    let ymd = '';
-    try {
-      ymd = DateUtils.formatYmd(dateRaw ?? '') ?? '';
-    } catch {
-      ymd = '';
-    }
-    const okng = parseOkNg(okngRaw);
-    if (!ymd || okng === null) {
-      throw new Error('履歴の形式が不正です');
-    }
-    histories.push({ submittedDate: ymd, isCorrect: okng });
-  }
+  const histories = parseHistoryTokens(parts.slice(2));
 
   return { promptText, answerKanji, histories };
 };
