@@ -6,6 +6,8 @@ import type { ParsedQs } from 'qs';
 
 import type { Services } from '@/services/createServices';
 
+import { ListExamsQuerySchema } from './listExamsController.schema';
+
 /** Creates list review tests controller. */
 export const listExamsController = (services: Services) => {
   const listExams: AsyncHandler<
@@ -18,5 +20,5 @@ export const listExamsController = (services: Services) => {
     res.json({ items, total: items.length });
   };
 
-  return { listExams };
+  return { ListExamsQuerySchema, listExams };
 };

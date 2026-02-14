@@ -37,14 +37,6 @@ export type CreateExamRequest = {
   count: number;
   /** モード (QUESTION: 問題, KANJI: 漢字) */
   mode: ReviewMode;
-  /** 対象期間（直近N日） */
-  days?: number;
-  /** 対象期間 (開始日 ISO) */
-  rangeFrom?: string;
-  /** 対象期間 (終了日 ISO) */
-  rangeTo?: string;
-  /** 正解済みの問題を含めるか */
-  includeCorrect?: boolean;
 };
 
 /** 復習テスト作成レスポンス */

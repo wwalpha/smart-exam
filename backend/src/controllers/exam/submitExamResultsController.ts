@@ -1,13 +1,13 @@
 // Module: submitExamResultsController responsibilities.
 
 import type { AsyncHandler } from '@/lib/handler';
-import type { ValidatedBody } from '@/types/express';
+import type { ValidatedBody, ValidatedParams } from '@/types/express';
 import type { ParsedQs } from 'qs';
 
 import type { SubmitExamResultsParams, SubmitExamResultsRequest } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { SubmitExamResultsBodySchema } from './submitExamResultsController.schema';
+import { SubmitExamResultsBodySchema, SubmitExamResultsParamsSchema } from './submitExamResultsController.schema';
 
 /** Creates submit review test results controller. */
 export const submitExamResultsController = (services: Services) => {
@@ -17,7 +17,7 @@ export const submitExamResultsController = (services: Services) => {
     SubmitExamResultsRequest,
     ParsedQs
   > = async (req, res) => {
-    const { testId } = req.params;
+    const { testId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof SubmitExamResultsParamsSchema>;
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SubmitExamResultsBodySchema>;
 
     const ok = await services.exams.submitExamResults(testId, body);
@@ -29,5 +29,5 @@ export const submitExamResultsController = (services: Services) => {
     res.status(204).send();
   };
 
-  return { SubmitExamResultsBodySchema, submitExamResults };
+  return { SubmitExamResultsParamsSchema, SubmitExamResultsBodySchema, submitExamResults };
 };

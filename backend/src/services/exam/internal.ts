@@ -1,7 +1,7 @@
 // Module: internal responsibilities.
 
 import { DateUtils } from '@/lib/dateUtils';
-import type { CreateExamRequest, Exam, ExamTarget, SubjectId } from '@smart-exam/api-types';
+import type { Exam, ExamTarget, SubjectId } from '@smart-exam/api-types';
 import type { ExamTable } from '@/types/db';
 
 /** Type definition for ReviewTargetType. */
@@ -35,19 +35,6 @@ export const targetKeyOf = (targetType: ReviewTargetType, targetId: string): str
 /** Converts data with to iso at start of day. */
 export const toIsoAtStartOfDay = (ymd: string): string => {
   return DateUtils.format(`${ymd}T00:00:00`);
-};
-
-/** parseFilterRange. */
-export const parseFilterRange = (req: CreateExamRequest): { fromYmd?: string; toYmd?: string } => {
-  if (typeof req.days === 'number' && req.days > 0) {
-    const today = DateUtils.todayYmd();
-    const from = DateUtils.addDaysYmd(today, -1 * (req.days - 1));
-    return { fromYmd: from, toYmd: today };
-  }
-
-  const fromYmd = req.rangeFrom ? DateUtils.toYmd(req.rangeFrom) : undefined;
-  const toYmd = req.rangeTo ? DateUtils.toYmd(req.rangeTo) : undefined;
-  return { fromYmd, toYmd };
 };
 
 /** isWithinRange. */

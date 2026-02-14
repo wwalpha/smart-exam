@@ -1,8 +1,12 @@
 export { CreateExamBodySchema } from './createExamController.schema';
+export { DeleteExamParamsSchema } from './deleteExamController.schema';
+export { GetExamParamsSchema } from './getExamController.schema';
+export { GetExamPdfParamsSchema, GetExamPdfQuerySchema } from './getExamPdfController.schema';
+export { ListExamsQuerySchema } from './listExamsController.schema';
 export { ListExamTargetsQuerySchema } from './listExamTargetsController.schema';
 export { SearchExamsBodySchema } from './searchExamsController.schema';
-export { SubmitExamResultsBodySchema } from './submitExamResultsController.schema';
-export { UpdateExamStatusBodySchema } from './updateExamStatusController.schema';
+export { SubmitExamResultsParamsSchema, SubmitExamResultsBodySchema } from './submitExamResultsController.schema';
+export { UpdateExamStatusParamsSchema, UpdateExamStatusBodySchema } from './updateExamStatusController.schema';
 
 export { createExamController } from './createExamController';
 export { deleteExamController } from './deleteExamController';

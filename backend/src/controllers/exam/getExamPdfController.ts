@@ -1,9 +1,12 @@
 // Module: getExamPdfController responsibilities.
 
 import type { AsyncHandler } from '@/lib/handler';
+import type { ValidatedParams, ValidatedQuery } from '@/types/express';
 import type { ParsedQs } from 'qs';
 
 import type { Services } from '@/services/createServices';
+
+import { GetExamPdfParamsSchema, GetExamPdfQuerySchema } from './getExamPdfController.schema';
 
 /** Creates get review test PDF controller. */
 export const getExamPdfController = (services: Services) => {
@@ -13,12 +16,12 @@ export const getExamPdfController = (services: Services) => {
     Record<string, never>,
     ParsedQs
   > = async (req, res) => {
-    const { testId } = req.params;
+    const { testId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof GetExamPdfParamsSchema>;
+    const query = (req.validated?.query ?? req.query) as ValidatedQuery<typeof GetExamPdfQuerySchema>;
 
-    const direct = String(req.query.direct ?? '') === '1' || String(req.query.direct ?? '') === 'true';
-    const download = String(req.query.download ?? '') === '1' || String(req.query.download ?? '') === 'true';
-    const includeGenerated =
-      String(req.query.includeGenerated ?? '') === '1' || String(req.query.includeGenerated ?? '') === 'true';
+    const direct = query.direct === true;
+    const download = query.download === true;
+    const includeGenerated = query.includeGenerated === true;
 
     // ローカル検証用: S3 / presign を経由せずにPDFを直接返す
     if (direct) {
@@ -44,5 +47,5 @@ export const getExamPdfController = (services: Services) => {
     res.json(result);
   };
 
-  return { getExamPdf };
+  return { GetExamPdfParamsSchema, GetExamPdfQuerySchema, getExamPdf };
 };
