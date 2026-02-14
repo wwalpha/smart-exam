@@ -41,8 +41,8 @@ resource "aws_lambda_function" "api" {
       TABLE_MATERIALS              = aws_dynamodb_table.materials.name
       TABLE_MATERIAL_QUESTIONS     = aws_dynamodb_table.material_questions.name
       TABLE_WORD_MASTER            = aws_dynamodb_table.word_master.name
-      TABLE_REVIEW_TEST_CANDIDATES = aws_dynamodb_table.review_test_candidates.name
-      TABLE_REVIEW_TESTS           = aws_dynamodb_table.review_tests.name
+      TABLE_REVIEW_TEST_CANDIDATES = aws_dynamodb_table.exam_candidates.name
+      TABLE_REVIEW_TESTS           = aws_dynamodb_table.exam.name
       BEDROCK_REGION               = "us-east-1"
     }
   }
