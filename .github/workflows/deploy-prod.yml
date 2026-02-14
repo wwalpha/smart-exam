@@ -1,0 +1,147 @@
+name: Deploy Production
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    environment: prod
+    outputs:
+      http_api_endpoint: ${{ steps.outputs.outputs.http_api_endpoint }}
+      cognito_user_pool_id: ${{ steps.outputs.outputs.cognito_user_pool_id }}
+      cognito_user_pool_client_id: ${{ steps.outputs.outputs.cognito_user_pool_client_id }}
+      frontend_bucket_name: ${{ steps.outputs.outputs.frontend_bucket_name }}
+      cloudfront_distribution_id: ${{ steps.outputs.outputs.cloudfront_distribution_id }}
+      lambda_function_name: ${{ steps.outputs.outputs.lambda_function_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ vars.TERRAFORM_BACKEND_BUCKET }}" \
+            -backend-config="key=${{ vars.TERRAFORM_BACKEND_KEY }}" \
+            -backend-config="region=${{ vars.TERRAFORM_BACKEND_REGION }}"
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: terraform apply -auto-approve
+
+      - name: Get Terraform Outputs
+        id: outputs
+        working-directory: ./terraform
+        run: |
+          echo "http_api_endpoint=$(terraform output -raw http_api_endpoint)" >> $GITHUB_OUTPUT
+          echo "cognito_user_pool_id=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_OUTPUT
+          echo "cognito_user_pool_client_id=$(terraform output -raw cognito_user_pool_client_id)" >> $GITHUB_OUTPUT
+          echo "frontend_bucket_name=$(terraform output -raw frontend_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> $GITHUB_OUTPUT
+
+  backend:
+    needs: terraform
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.12.0 --activate
+
+      - name: Install Dependencies (Yarn)
+        run: yarn install --immutable
+
+      - name: Build (Yarn)
+        run: |
+          yarn workspace @smart-exam/api-types build
+          yarn workspace smart-exam-backend build:lambda
+          yarn workspace smart-exam-backend package:lambda
+
+      - name: Zip Artifact
+        run: |
+          cd backend/lambda
+          zip -9 -r ../function.zip .
+
+      - name: Verify Font Assets in Zip
+        run: |
+          unzip -l backend/function.zip | grep -E "assets/fonts/.*\\.ttf$"
+          unzip -l backend/function.zip | grep -E "assets/fonts/(OFL\\.txt|LICENSE_OFL\\.txt)$"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy API Lambda
+        run: |
+          aws --no-cli-pager lambda update-function-code --function-name ${{ needs.terraform.outputs.lambda_function_name }} --zip-file fileb://backend/function.zip
+
+  frontend:
+    needs: terraform
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.12.0 --activate
+
+      - name: Install Dependencies (Yarn)
+        run: yarn install --immutable
+
+      - name: Build
+        env:
+          VITE_API_ENDPOINT: ${{ needs.terraform.outputs.http_api_endpoint }}
+          VITE_COGNITO_USER_POOL_ID: ${{ needs.terraform.outputs.cognito_user_pool_id }}
+          VITE_COGNITO_CLIENT_ID: ${{ needs.terraform.outputs.cognito_user_pool_client_id }}
+        run: |
+          yarn workspace @smart-exam/api-types build
+          yarn workspace frontend build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync to S3
+        run: |
+          aws --no-cli-pager s3 sync frontend/dist s3://${{ needs.terraform.outputs.frontend_bucket_name }} --delete
+
+      - name: Invalidate CloudFront
+        run: |
+          aws --no-cli-pager cloudfront create-invalidation --distribution-id ${{ needs.terraform.outputs.cloudfront_distribution_id }} --paths "/*"
