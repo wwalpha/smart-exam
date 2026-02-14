@@ -1,4 +1,4 @@
-// Module: createMaterialsController responsibilities.
+// Module: materialsController responsibilities.
 
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody } from '@/types/express';

@@ -1,4 +1,4 @@
-// Module: createQuestionsController responsibilities.
+// Module: questionsController responsibilities.
 
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody } from '@/types/express';

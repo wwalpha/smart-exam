@@ -1,4 +1,4 @@
-// Module: createReviewTestCandidatesController responsibilities.
+// Module: reviewTestCandidatesController responsibilities.
 
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedQuery } from '@/types/express';
