@@ -69,14 +69,6 @@ output "lambda_function_name" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# Lambda function name for Bedrock.
-# ----------------------------------------------------------------------------------------------
-output "bedrock_function_name" {
-  description = "Lambda function name for Bedrock."
-  value       = aws_lambda_function.bedrock.function_name
-}
-
-# ----------------------------------------------------------------------------------------------
 # SNS topic ARN for Lambda error alarms.
 # ----------------------------------------------------------------------------------------------
 output "lambda_alarm_sns_topic_arn" {

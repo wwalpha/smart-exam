@@ -24,7 +24,6 @@ jobs:
       frontend_bucket_name: ${{ steps.outputs.outputs.frontend_bucket_name }}
       cloudfront_distribution_id: ${{ steps.outputs.outputs.cloudfront_distribution_id }}
       lambda_function_name: ${{ steps.outputs.outputs.lambda_function_name }}
-      bedrock_function_name: ${{ steps.outputs.outputs.bedrock_function_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +57,6 @@ jobs:
           echo "frontend_bucket_name=$(terraform output -raw frontend_bucket_name)" >> $GITHUB_OUTPUT
           echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
           echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> $GITHUB_OUTPUT
-          echo "bedrock_function_name=$(terraform output -raw bedrock_function_name)" >> $GITHUB_OUTPUT
 
   backend:
     needs: terraform
@@ -105,10 +103,6 @@ jobs:
       - name: Deploy API Lambda
         run: |
           aws --no-cli-pager lambda update-function-code --function-name ${{ needs.terraform.outputs.lambda_function_name }} --zip-file fileb://backend/function.zip
-
-      - name: Deploy Bedrock Lambda
-        run: |
-          aws --no-cli-pager lambda update-function-code --function-name ${{ needs.terraform.outputs.bedrock_function_name }} --zip-file fileb://backend/function.zip
 
   frontend:
     needs: terraform
