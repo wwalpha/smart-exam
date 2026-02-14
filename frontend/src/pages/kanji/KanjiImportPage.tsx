@@ -6,15 +6,19 @@ import { Input } from '@/components/ui/input';
 import { useKanjiImport } from '@/hooks/kanji';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
+import { useRef } from 'react';
 
 export const KanjiImportPage = () => {
   const { form, submit, isSubmitting, error, validationErrors, resetUploadErrors } = useKanjiImport();
   const { register, setValue, watch } = form;
   const subject = watch('subject');
+  const fileList = watch('file');
+  const selectedFileName = fileList?.[0]?.name;
   const subjectErrorMessage = form.formState.errors.subject?.message;
   const fileErrorMessage = form.formState.errors.file?.message;
 
   const fileRegister = register('file', { required: '必須です' });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <div className="space-y-6 p-8 max-w-3xl mx-auto pt-4">
@@ -50,16 +54,40 @@ export const KanjiImportPage = () => {
                 形式: 問題|解答|YYYY/MM/DD,OK|YYYY/MM/DD,NG (1行1件 / DATEは任意)
               </p>
               <Input
+                ref={(el) => {
+                  fileInputRef.current = el;
+                  fileRegister.ref(el);
+                }}
                 type="file"
                 accept="text/plain,.txt"
-                {...fileRegister}
+                className="sr-only"
+                name={fileRegister.name}
+                onBlur={fileRegister.onBlur}
                 onChange={(e) => {
                   resetUploadErrors();
                   fileRegister.onChange(e);
                 }}
-                aria-invalid={!!form.formState.errors.file}
-                className={form.formState.errors.file ? 'border-destructive focus-visible:ring-destructive' : undefined}
               />
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                  }}
+                  aria-invalid={!!form.formState.errors.file}
+                  className={
+                    form.formState.errors.file
+                      ? 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive'
+                      : undefined
+                  }
+                >
+                  ファイル選択
+                </Button>
+                <div className="text-sm text-muted-foreground break-all">
+                  {selectedFileName ? `選択中: ${selectedFileName}` : '未選択'}
+                </div>
+              </div>
               {fileErrorMessage ? <p className="text-sm text-destructive">{fileErrorMessage}</p> : null}
               {validationErrors.length > 0 ? (
                 <div className="space-y-1">

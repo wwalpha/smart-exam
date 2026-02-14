@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { SUBJECT } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
+const KANJI_IMPORT_SUCCESS_TOAST_STATE = 'kanji-import-success' as const;
+
 type FormValues = {
   mode: 'SKIP' | 'UPDATE';
   subject: WordTestSubject;
@@ -110,8 +112,7 @@ export const useKanjiImport = () => {
     });
 
     if (response.errorCount === 0) {
-      toast.success('登録完了');
-      navigate('/kanji');
+      navigate('/kanji', { state: { toast: KANJI_IMPORT_SUCCESS_TOAST_STATE } });
       return;
     }
 

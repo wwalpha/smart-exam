@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,11 +10,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useKanjiList } from '@/hooks/kanji';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
+import { toast } from 'sonner';
+
+const KANJI_IMPORT_SUCCESS_TOAST_STATE = 'kanji-import-success' as const;
 
 export const KanjiListPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { kanjiList, total, form, runSearch, remove, removeMany, ConfirmDialog } = useKanjiList();
   const { register, setValue, watch, handleSubmit } = form;
   const subject = watch('subject');
+
+  useEffect(() => {
+    const state = location.state as unknown;
+    if (state && typeof state === 'object' && 'toast' in state && (state as { toast?: unknown }).toast === KANJI_IMPORT_SUCCESS_TOAST_STATE) {
+      toast.success('登録完了');
+      navigate('/kanji', { replace: true, state: null });
+    }
+  }, [location.state, navigate]);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
