@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 export type ApiClientRequestParams<TBody> = {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -9,6 +9,10 @@ export type ApiClientRequestParams<TBody> = {
 export type ApiClientBlobRequestParams = {
   method: 'GET' | 'POST';
   path: string;
+};
+
+type ApiErrorResponse = {
+  errors?: string[];
 };
 
 const axiosInstance = axios.create({
@@ -47,4 +51,9 @@ export async function apiRequestBlob(params: ApiClientBlobRequestParams): Promis
   });
 
   return response.data;
+}
+
+export function getApiErrorCodes(error: unknown): string[] {
+  if (!isAxiosError<ApiErrorResponse>(error)) return [];
+  return error.response?.data?.errors ?? [];
 }

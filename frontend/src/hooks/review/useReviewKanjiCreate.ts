@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import type { WordTestSubject } from '@typings/wordtest';
 import { SUBJECT } from '@/lib/Consts';
+import { toast } from 'sonner';
+import { getApiErrorCodes } from '@/services/apiClient';
 
 type CreateFormValues = {
   subject: WordTestSubject | '';
@@ -30,14 +32,25 @@ export const useReviewKanjiCreate = () => {
       return;
     }
 
-    const newTest = await createExam({
-      mode: 'KANJI',
-      subject: data.subject,
-      count: Number(data.count),
-    });
+    try {
+      const newTest = await createExam({
+        mode: 'KANJI',
+        subject: data.subject,
+        count: Number(data.count),
+      });
 
-    if (newTest) {
-      navigate(`${BASE_PATH}/${newTest.id}`);
+      if (newTest) {
+        navigate(`${BASE_PATH}/${newTest.id}`);
+      }
+    } catch (error) {
+      const apiErrors = getApiErrorCodes(error);
+
+      if (apiErrors.includes('no_printable_items')) {
+        toast.error('印刷可能な漢字問題がありません');
+        return;
+      }
+
+      toast.error('復習テストの作成に失敗しました');
     }
   };
 

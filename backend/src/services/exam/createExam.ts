@@ -64,6 +64,16 @@ export const createCreateExam = (deps: {
     });
   };
 
+  const listOpenCandidates = async (params: {
+    subject: SubjectId;
+    mode?: ReviewMode;
+  }): Promise<ExamCandidateTable[]> => {
+    return deps.repositories.examCandidates.listCandidates({
+      subject: params.subject,
+      mode: params.mode,
+    });
+  };
+
   const lockCandidate = async (params: { subject: SubjectId; candidateKey: string; testId: string }): Promise<void> => {
     await deps.repositories.examCandidates.lockCandidateIfUnlocked({
       subject: params.subject,
@@ -80,8 +90,14 @@ export const createCreateExam = (deps: {
     const candidates: ReviewCandidate[] = [];
 
     // 候補テーブルから取得する (要件: Master全スキャンではなく候補テーブルを使用)
-    const due = await listDueCandidates({ subject: req.subject, mode: req.mode });
-    for (const c of due) {
+    let sourceCandidates = await listDueCandidates({ subject: req.subject, mode: req.mode });
+    
+    // 期限到来候補が0件でも、OPEN在庫があれば作成できるようにフォールバックする
+    if (sourceCandidates.length === 0) {
+      sourceCandidates = await listOpenCandidates({ subject: req.subject, mode: req.mode });
+    }
+
+    for (const c of sourceCandidates) {
       if (!c.nextTime) continue;
       candidates.push({
         targetType: req.mode,
@@ -189,11 +205,8 @@ export const createCreateExam = (deps: {
     }
 
     const targetIds = selected.map((c) => c.targetId);
-    const pdfS3Key = req.mode === 'KANJI' ? `review-tests/${testId}.pdf` : undefined;
-
-    if (req.mode === 'KANJI' && targetIds.length === 0) {
-      throw new ApiError('No printable kanji items (missing required fields)', 400, ['no_printable_items']);
-    }
+    const hasKanjiTargets = req.mode === 'KANJI' && targetIds.length > 0;
+    const pdfS3Key = hasKanjiTargets ? `review-tests/${testId}.pdf` : undefined;
 
     const testRow: ExamTable = {
       testId,
@@ -209,7 +222,7 @@ export const createCreateExam = (deps: {
 
     await deps.repositories.exams.put(testRow);
 
-    if (req.mode === 'KANJI' && pdfS3Key) {
+    if (hasKanjiTargets && pdfS3Key) {
       try {
         if (!ENV.FILES_BUCKET_NAME) {
           throw new ApiError(
