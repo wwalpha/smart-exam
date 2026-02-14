@@ -22,11 +22,16 @@ export const WordMasterRepository = {
   },
 
   update: async (wordId: string, updates: Partial<WordMasterTable>): Promise<WordMasterTable | null> => {
+    const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
+    if (entries.length === 0) {
+      return WordMasterRepository.get(wordId);
+    }
+
     const expAttrNames: Record<string, string> = {};
     const expAttrValues: Record<string, unknown> = {};
     let updateExp = 'SET';
 
-    Object.entries(updates).forEach(([key, value], index) => {
+    entries.forEach(([key, value], index) => {
       const attrName = `#attr${index}`;
       const attrValue = `:val${index}`;
       expAttrNames[attrName] = key;
@@ -46,6 +51,16 @@ export const WordMasterRepository = {
     });
 
     return (result.Attributes as WordMasterTable) || null;
+  },
+
+  updateKanjiQuestionFields: async (
+    wordId: string,
+    updates: Pick<
+      Partial<WordMasterTable>,
+      'promptText' | 'answerKanji' | 'readingHiragana' | 'underlineSpec' | 'status' | 'ai' | 'error'
+    >,
+  ): Promise<WordMasterTable | null> => {
+    return WordMasterRepository.update(wordId, updates);
   },
 
   delete: async (wordId: string): Promise<void> => {

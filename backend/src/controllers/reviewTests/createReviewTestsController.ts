@@ -135,10 +135,12 @@ export const createReviewTestsController = (services: Services) => {
 
     const direct = String(req.query.direct ?? '') === '1' || String(req.query.direct ?? '') === 'true';
     const download = String(req.query.download ?? '') === '1' || String(req.query.download ?? '') === 'true';
+    const includeGenerated =
+      String(req.query.includeGenerated ?? '') === '1' || String(req.query.includeGenerated ?? '') === 'true';
 
     // ローカル検証用: S3 / presign を経由せずにPDFを直接返す
     if (direct) {
-      const pdf = await services.reviewTests.generateReviewTestPdfBuffer(testId);
+      const pdf = await services.reviewTests.generateReviewTestPdfBuffer(testId, { includeGenerated });
       if (!pdf) {
         res.status(404).json({ error: 'Not Found' });
         return;

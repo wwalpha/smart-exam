@@ -145,6 +145,8 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   };
 
   const importKanji: KanjiService['importKanji'] = async (data) => {
+    const importType = data.importType ?? 'MASTER';
+
     if (!data.subject) {
       return {
         successCount: 0,
@@ -158,8 +160,86 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
 
     const lines = data.fileContent
       .split(/\r?\n/)
-      .map((x) => x.trim())
+      .map((x) => x.replaceAll('　', ' ').trim())
       .filter((x) => x.length > 0);
+
+    const questionIds: string[] = [];
+
+    if (importType === 'QUESTIONS') {
+      let successCount = 0;
+      let duplicateCount = 0;
+      let errorCount = 0;
+      const errors: ImportKanjiResponse['errors'] = [];
+
+      const parsePromptAnswerLine = (line: string): { promptText: string; answerKanji: string } | null => {
+        const first = line.indexOf('|');
+        if (first < 0) return null;
+        if (line.indexOf('|', first + 1) >= 0) return null;
+
+        const promptText = line.slice(0, first).trim();
+        const answerKanji = line.slice(first + 1).trim();
+        if (!promptText) return null;
+        if (!answerKanji) return null;
+        return { promptText, answerKanji };
+      };
+
+      // 既存 word_master の読み込み（この用途では重複判定は promptText+answerKanji で雑に行う）
+      const existing = await repositories.wordMaster.listKanji(subject);
+      const existingKey = new Set(
+        existing
+          .map((x) => `${(x.promptText ?? '').trim()}|${(x.answerKanji ?? '').trim()}`)
+          .filter((x) => x !== '|'),
+      );
+      const seenKey = new Set<string>();
+
+      for (let index = 0; index < lines.length; index += 1) {
+        const line = lines[index];
+        const parsed = parsePromptAnswerLine(line);
+        if (!parsed) {
+          errorCount += 1;
+          errors.push({
+            line: index + 1,
+            content: line,
+            reason: '形式が不正です（1行=「本文|答え漢字」、| は1つだけ）',
+          });
+          continue;
+        }
+
+        const key = `${parsed.promptText}|${parsed.answerKanji}`;
+        if (existingKey.has(key) || seenKey.has(key)) {
+          duplicateCount += 1;
+          continue;
+        }
+        seenKey.add(key);
+
+        const id = createUuid();
+        const dbItem: WordMasterTable = {
+          wordId: id,
+          subject,
+
+          // 互換のため既存必須属性は埋める（この機能では参照しない）
+          question: parsed.answerKanji,
+          answer: '',
+
+          promptText: parsed.promptText,
+          answerKanji: parsed.answerKanji,
+          status: 'DRAFT',
+        };
+
+        await repositories.wordMaster.create(dbItem);
+
+        successCount += 1;
+        questionIds.push(id);
+      }
+
+      return {
+        successCount,
+        duplicateCount,
+        errorCount,
+        questionIds,
+        errors,
+      };
+    }
 
     // 科目が指定されているので Query(GSI) で取得し、Scan を避ける
     const existing = await repositories.wordMaster.listKanji(subject);
@@ -182,6 +262,7 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
         subject,
       };
       await repositories.wordMaster.create(dbItem);
+      questionIds.push(id);
       return id;
     };
 
@@ -220,6 +301,7 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
           const created = await createKanji({ kanji, reading, subject });
           existingByQuestion.set(kanji, created.id);
           successCount += 1;
+          questionIds.push(created.id);
         }
 
         const targetWordId = existingByQuestion.get(kanji);
@@ -313,6 +395,7 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
       successCount,
       duplicateCount,
       errorCount,
+      questionIds,
       errors,
     };
   };

@@ -27,7 +27,7 @@ export type ReviewTestsService = {
   createReviewTest: (req: CreateReviewTestRequest) => Promise<ReviewTest>;
   getReviewTest: (testId: string) => Promise<ReviewTestDetail | null>;
   getReviewTestPdfUrl: (testId: string, params?: { download?: boolean }) => Promise<{ url: string } | null>;
-  generateReviewTestPdfBuffer: (testId: string) => Promise<Buffer | null>;
+  generateReviewTestPdfBuffer: (testId: string, options?: { includeGenerated?: boolean }) => Promise<Buffer | null>;
   updateReviewTestStatus: (testId: string, req: UpdateReviewTestStatusRequest) => Promise<ReviewTest | null>;
   submitReviewTestResults: (testId: string, req: SubmitReviewTestResultsRequest) => Promise<boolean>;
   deleteReviewTest: (testId: string) => Promise<boolean>;
@@ -254,6 +254,13 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
             reading: w?.answer,
             questionText: w?.question,
             answerText: w?.answer,
+
+            // 漢字問題（本文内下線）用
+            promptText: w?.promptText,
+            answerKanji: w?.answerKanji,
+            readingHiragana: w?.readingHiragana,
+            underlineSpec: w?.underlineSpec,
+            status: w?.status,
             ...(typeof isCorrect === 'boolean' ? { isCorrect } : {}),
           };
         }),
@@ -513,7 +520,7 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
     const review = await getReviewTest(testId);
     if (!review) return null;
 
-    const pdfBuffer = await ReviewTestPdfService.generatePdfBuffer(review);
+    const pdfBuffer = await ReviewTestPdfService.generatePdfBuffer(review, { includeGenerated: false });
     const key = testRow.pdfS3Key ?? `review-tests/${testId}.pdf`;
 
     await repositories.s3.putObject({
@@ -533,10 +540,10 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
     return { url };
   };
 
-  const generateReviewTestPdfBuffer: ReviewTestsService['generateReviewTestPdfBuffer'] = async (testId) => {
+  const generateReviewTestPdfBuffer: ReviewTestsService['generateReviewTestPdfBuffer'] = async (testId, options) => {
     const review = await getReviewTest(testId);
     if (!review) return null;
-    return ReviewTestPdfService.generatePdfBuffer(review);
+    return ReviewTestPdfService.generatePdfBuffer(review, { includeGenerated: options?.includeGenerated });
   };
 
   return {

@@ -95,21 +95,9 @@ export const createApp = (): express.Express => {
     validateBody(controllers.kanji.CreateKanjiBodySchema),
     handleRequest(controllers.kanji.createKanji),
   );
-  app.get(
-    '/api/kanji/:kanjiId',
-    validateParams(KanjiIdParamsSchema),
-    handleRequest(controllers.kanji.getKanji),
-  );
-  app.patch(
-    '/api/kanji/:kanjiId',
-    validateParams(KanjiIdParamsSchema),
-    handleRequest(controllers.kanji.updateKanji),
-  );
-  app.delete(
-    '/api/kanji/:kanjiId',
-    validateParams(KanjiIdParamsSchema),
-    handleRequest(controllers.kanji.deleteKanji),
-  );
+  app.get('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(controllers.kanji.getKanji));
+  app.patch('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(controllers.kanji.updateKanji));
+  app.delete('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(controllers.kanji.deleteKanji));
   app.post(
     '/api/kanji/deletions',
     validateBody(controllers.kanji.DeleteManyKanjiBodySchema),
@@ -119,6 +107,25 @@ export const createApp = (): express.Express => {
     '/api/kanji/import',
     validateBody(controllers.kanji.ImportKanjiBodySchema),
     handleRequest(controllers.kanji.importKanji),
+  );
+
+  app.post(
+    '/api/kanji/questions/:questionId/generate-reading',
+    validateParams(QuestionIdParamsSchema),
+    handleRequest(controllers.kanjiQuestions.generateReading),
+  );
+
+  app.patch(
+    '/api/kanji/questions/:questionId',
+    validateParams(QuestionIdParamsSchema),
+    validateBody(controllers.kanjiQuestions.PatchKanjiQuestionBodySchema),
+    handleRequest(controllers.kanjiQuestions.patch),
+  );
+
+  app.post(
+    '/api/kanji/questions/:questionId/verify',
+    validateParams(QuestionIdParamsSchema),
+    handleRequest(controllers.kanjiQuestions.verify),
   );
 
   // Questions

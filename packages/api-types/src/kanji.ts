@@ -90,6 +90,13 @@ export type ImportKanjiRequest = {
   fileContent: string;
   /** 科目（指定時は全行に適用） */
   subject?: SubjectId;
+
+  /**
+   * インポート種別
+   * - MASTER: 従来の「漢字|よみ(|履歴...)」やCSV/TSV形式
+   * - QUESTIONS: 「本文|答え漢字」(漢字問題) 形式
+   */
+  importType?: 'MASTER' | 'QUESTIONS';
 };
 
 /** 漢字インポートレスポンス */
@@ -100,6 +107,8 @@ export type ImportKanjiResponse = {
   duplicateCount: number;
   /** エラー件数 */
   errorCount: number;
+  /** 作成されたID（DynamoDB上は wordId）。必要な場合のみ返す */
+  questionIds?: string[];
   /** エラー詳細 */
   errors: {
     /** 行番号 */

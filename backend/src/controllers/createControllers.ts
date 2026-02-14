@@ -1,6 +1,7 @@
 import { createBedrockController } from '@/controllers/bedrock/createBedrockController';
 import { createDashboardController } from '@/controllers/dashboard/createDashboardController';
 import { createKanjiController } from '@/controllers/kanji/createKanjiController';
+import { createKanjiQuestionsController } from '@/controllers/kanjiQuestions/createKanjiQuestionsController';
 import { createMaterialsController } from '@/controllers/materials/createMaterialsController';
 import { createQuestionsController } from '@/controllers/questions/createQuestionsController';
 import { createReviewAttemptsController } from '@/controllers/reviewAttempts/createReviewAttemptsController';
@@ -13,6 +14,7 @@ export type Controllers = {
   bedrock: ReturnType<typeof createBedrockController>;
   dashboard: ReturnType<typeof createDashboardController>;
   kanji: ReturnType<typeof createKanjiController>;
+  kanjiQuestions: ReturnType<typeof createKanjiQuestionsController>;
   materials: ReturnType<typeof createMaterialsController>;
   questions: ReturnType<typeof createQuestionsController>;
   reviewAttempts: ReturnType<typeof createReviewAttemptsController>;
@@ -25,6 +27,7 @@ export const createControllers = (services: Services): Controllers => {
     bedrock: createBedrockController(services),
     dashboard: createDashboardController(services),
     kanji: createKanjiController(services),
+    kanjiQuestions: createKanjiQuestionsController(services),
     materials: createMaterialsController(services),
     questions: createQuestionsController(services),
     reviewAttempts: createReviewAttemptsController(services),

@@ -2,8 +2,16 @@ import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { ReviewTestDetail } from '@smart-exam/api-types';
 
+import { ApiError } from '@/lib/apiError';
+
 export const ReviewTestPdfService = {
-  generatePdfBuffer: async (review: ReviewTestDetail): Promise<Buffer> => {
+  generatePdfBuffer: async (
+    review: ReviewTestDetail,
+    options?: {
+      /** 既定は VERIFIED のみ。ローカル検証などで GENERATED も含めたい場合に true。 */
+      includeGenerated?: boolean;
+    },
+  ): Promise<Buffer> => {
     const mmToPt = (mm: number): number => (mm * 72) / 25.4;
 
     const a4Width = 595.28;
@@ -127,80 +135,179 @@ export const ReviewTestPdfService = {
       return `教材: ${parts.join(' ')}`;
     };
 
-    const getKanjiQuestionText = (item: ReviewTestDetail['items'][number]): string => {
-      return item.kanji ?? item.questionText ?? item.displayLabel ?? item.canonicalKey ?? item.targetId ?? '';
-    };
+    const renderKanjiWorksheetLayout = (params?: { includeGenerated?: boolean }): void => {
+      const includeGenerated = params?.includeGenerated ?? false;
 
-    const renderKanjiFixedLayout = (): void => {
-      // KANJIは横印刷 + 小さめの文字
-      const kanjiFontSize = 11;
-
-      const itemsPerPage = 30;
-      const rowsPerColumn = 15;
-      const columnGap = mmToPt(8);
-
+      // A4横向き
       const pageWidth = a4Height;
       const pageHeight = a4Width;
 
-      const totalPages = Math.max(1, Math.ceil(review.items.length / itemsPerPage));
-      for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
-        // 漢字テストPDFはタイトル・作成日を出力しない
-        const page = pdfDoc.addPage([pageWidth, pageHeight]);
-        const contentWidth = pageWidth - margin * 2;
-        const cursorY = pageHeight - margin;
+      // 1ページ60問（左右30問ずつ）固定
+      const itemsPerPage = 60;
+      const rowsPerColumn = 30;
+      const columnGap = mmToPt(8);
 
-        const columnWidth = (contentWidth - columnGap) / 2;
-        const leftX = margin;
-        const rightX = margin + columnWidth + columnGap;
+      // 右端の漢字記入枠（固定幅）
+      const answerBoxWidth = mmToPt(22);
+      const answerBoxGap = mmToPt(2.5);
 
-        // 15行に収めるため、ページ内の可用高さからピッチを算出する
-        const topY = cursorY;
-        const availableHeight = topY - margin;
-        const rowPitch = availableHeight / rowsPerColumn;
+      // 本文用フォントサイズ（行数固定のため小さめ）
+      const baseFontSize = 9.5;
+      const minFontSize = 8;
 
-        const start = pageIndex * itemsPerPage;
-        const end = Math.min(review.items.length, start + itemsPerPage);
+      const allowedStatus = new Set<string>(includeGenerated ? ['VERIFIED', 'GENERATED'] : ['VERIFIED']);
+      const candidates = review.items.filter((x) => allowedStatus.has(String((x as { status?: string }).status)));
+      const items = candidates.slice(0, itemsPerPage);
 
-        for (let i = start; i < end; i += 1) {
-          const local = i - start;
-          const col = local < rowsPerColumn ? 0 : 1;
-          const row = local % rowsPerColumn;
+      if (items.length === 0) {
+        throw new ApiError('No printable kanji items (status filter)', 400, ['no_printable_items']);
+      }
 
-          const baseX = col === 0 ? leftX : rightX;
-          const baseY = topY - rowPitch * row;
-          const baselineY = baseY - kanjiFontSize;
+      const page = pdfDoc.addPage([pageWidth, pageHeight]);
+      const contentWidth = pageWidth - margin * 2;
+      const columnWidth = (contentWidth - columnGap) / 2;
+      const leftX = margin;
+      const rightX = margin + columnWidth + columnGap;
 
-          const item = review.items[i];
-          const q = getKanjiQuestionText(item);
-          const text = q ? `${i + 1}. ${q}` : `${i + 1}.`;
+      const topY = pageHeight - margin;
+      const availableHeight = topY - margin;
+      const rowPitch = availableHeight / rowsPerColumn;
 
-          page.drawText(text, {
-            x: baseX,
-            y: baselineY,
-            size: kanjiFontSize,
-            font: jpFont,
-            color: rgb(0, 0, 0),
-          });
+      const textMaxWidth = columnWidth - answerBoxWidth - answerBoxGap;
 
-          const textWidth = jpFont.widthOfTextAtSize(text, kanjiFontSize);
-          const lineStartX = Math.min(baseX + textWidth + mmToPt(2), baseX + columnWidth - mmToPt(20));
-          const lineEndX = baseX + columnWidth;
+      const drawPromptWithUnderline = (p: {
+        x: number;
+        y: number;
+        indexText: string;
+        promptText: string;
+        underlineSpec: { type: 'promptSpan'; start: number; length: number };
+      }): void => {
+        const start = p.underlineSpec.start;
+        const length = p.underlineSpec.length;
+        if (start < 0 || length <= 0 || start + length > p.promptText.length) {
+          throw new ApiError('underlineSpec out of range', 400, ['invalid_underline_spec']);
+        }
 
-          if (lineStartX < lineEndX) {
-            page.drawLine({
-              start: { x: lineStartX, y: baselineY - mmToPt(1) },
-              end: { x: lineEndX, y: baselineY - mmToPt(1) },
-              thickness: 1,
-              color: rgb(0, 0, 0),
-            });
+        const pre = p.promptText.slice(0, start);
+        const target = p.promptText.slice(start, start + length);
+        const post = p.promptText.slice(start + length);
+
+        let fontSize = baseFontSize;
+        const totalWidth = jpFont.widthOfTextAtSize(p.indexText + p.promptText, fontSize);
+        if (totalWidth > textMaxWidth) {
+          const scaled = (fontSize * textMaxWidth) / totalWidth;
+          fontSize = Math.max(minFontSize, scaled);
+        }
+
+        const prefixWidth = jpFont.widthOfTextAtSize(p.indexText + pre, fontSize);
+        const targetWidth = jpFont.widthOfTextAtSize(target, fontSize);
+        const remainingForPost = textMaxWidth - (prefixWidth + targetWidth);
+        if (remainingForPost < 0) {
+          throw new ApiError('promptText is too long to render', 400, ['prompt_too_long']);
+        }
+
+        let postRendered = post;
+        let truncated = false;
+        while (postRendered.length > 0) {
+          const w = jpFont.widthOfTextAtSize(postRendered, fontSize);
+          if (w <= remainingForPost) break;
+          truncated = true;
+          postRendered = postRendered.slice(0, -1);
+        }
+        if (truncated && postRendered.length > 0) {
+          while (postRendered.length > 0) {
+            const w = jpFont.widthOfTextAtSize(postRendered + '…', fontSize);
+            if (w <= remainingForPost) {
+              postRendered = postRendered + '…';
+              break;
+            }
+            postRendered = postRendered.slice(0, -1);
           }
         }
+
+        page.drawText(p.indexText + pre, {
+          x: p.x,
+          y: p.y,
+          size: fontSize,
+          font: jpFont,
+          color: rgb(0, 0, 0),
+        });
+        page.drawText(target, {
+          x: p.x + prefixWidth,
+          y: p.y,
+          size: fontSize,
+          font: jpFont,
+          color: rgb(0, 0, 0),
+        });
+        page.drawText(postRendered, {
+          x: p.x + prefixWidth + targetWidth,
+          y: p.y,
+          size: fontSize,
+          font: jpFont,
+          color: rgb(0, 0, 0),
+        });
+
+        page.drawLine({
+          start: { x: p.x + prefixWidth, y: p.y - mmToPt(0.6) },
+          end: { x: p.x + prefixWidth + targetWidth, y: p.y - mmToPt(0.6) },
+          thickness: 0.9,
+          color: rgb(0, 0, 0),
+        });
+      };
+
+      for (let local = 0; local < items.length; local += 1) {
+        const col = local < rowsPerColumn ? 0 : 1;
+        const row = local % rowsPerColumn;
+
+        const baseX = col === 0 ? leftX : rightX;
+        const rowTopY = topY - rowPitch * row;
+        const rowBottomY = rowTopY - rowPitch;
+
+        const item = items[local];
+        const promptText = String((item as { promptText?: string }).promptText ?? '').trim();
+        const readingHiragana = String((item as { readingHiragana?: string }).readingHiragana ?? '').trim();
+        const underlineSpec = (item as { underlineSpec?: { type: 'promptSpan'; start: number; length: number } })
+          .underlineSpec;
+
+        if (!promptText || !readingHiragana || !underlineSpec) {
+          throw new ApiError('Missing promptText/readingHiragana/underlineSpec', 400, ['missing_kanji_fields']);
+        }
+
+        const slice = promptText.slice(underlineSpec.start, underlineSpec.start + underlineSpec.length);
+        if (slice !== readingHiragana) {
+          throw new ApiError('underlineSpec does not match readingHiragana', 400, ['invalid_underline_spec']);
+        }
+
+        const indexText = `${local + 1}. `;
+        const textY = rowTopY - baseFontSize;
+
+        drawPromptWithUnderline({
+          x: baseX,
+          y: textY,
+          indexText,
+          promptText,
+          underlineSpec,
+        });
+
+        // 右端: 漢字記入枠（枠のみ、解答は出さない）
+        const boxHeight = rowPitch * 0.8;
+        const boxX = baseX + columnWidth - answerBoxWidth;
+        const boxY = rowBottomY + (rowPitch - boxHeight) / 2;
+        page.drawRectangle({
+          x: boxX,
+          y: boxY,
+          width: answerBoxWidth,
+          height: boxHeight,
+          borderWidth: 1,
+          borderColor: rgb(0, 0, 0),
+          color: undefined,
+        });
       }
     };
 
     // 漢字復習テストは「1ページ30問固定(2列×15行)」
     if (review.mode === 'KANJI') {
-      renderKanjiFixedLayout();
+      renderKanjiWorksheetLayout({ includeGenerated: options?.includeGenerated });
       const bytes = await pdfDoc.save();
       return Buffer.from(bytes);
     }

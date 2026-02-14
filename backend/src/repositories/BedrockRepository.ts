@@ -3,6 +3,11 @@ import { AwsUtils } from '@/lib/awsUtils';
 import { bedrockClient } from '@/lib/aws';
 import { ENV } from '@/lib/env';
 
+export type KanjiQuestionReadingResult = {
+  readingHiragana: string;
+  underlineSpec: { type: 'promptSpan'; start: number; length: number };
+};
+
 export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'): Promise<string[]> => {
   // 1. Get file from S3
   const bucket = ENV.FILES_BUCKET_NAME;
@@ -178,6 +183,71 @@ export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'):
     const jsonString = jsonMatch ? jsonMatch[0] : textContent;
     const result = JSON.parse(jsonString);
     return result.questions || [];
+  } catch {
+    console.error('Failed to parse JSON from Bedrock:', textContent);
+    throw new Error('Failed to parse Bedrock response');
+  }
+};
+
+export const generateKanjiQuestionReading = async (params: {
+  promptText: string;
+  answerKanji: string;
+  modelId?: string;
+  hint?: string;
+}): Promise<KanjiQuestionReadingResult> => {
+  const modelId = params.modelId ?? 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+
+  const prompt = `
+You are an AI assistant for Japanese kanji worksheet generation.
+
+Task:
+- Given a Japanese promptText (contains a hiragana reading somewhere) and answerKanji, identify the hiragana reading substring inside promptText that should be underlined.
+
+Output requirements (STRICT):
+- Return ONLY valid JSON.
+- No markdown, no code fences, no explanations.
+
+JSON schema:
+{
+  "readingHiragana": "<hiragana-only>",
+  "underlineSpec": { "type": "promptSpan", "start": <int>, "length": <int> }
+}
+
+Rules:
+- readingHiragana must be hiragana only (allow long vowel mark 'ー').
+- start/length are JavaScript string indices (UTF-16 code units).
+- The substring MUST match exactly: promptText.slice(start, start + length) === readingHiragana
+
+Input:
+promptText: ${JSON.stringify(params.promptText)}
+answerKanji: ${JSON.stringify(params.answerKanji)}
+${params.hint ? `hint: ${JSON.stringify(params.hint)}` : ''}
+`;
+
+  const command = new ConverseCommand({
+    modelId,
+    messages: [
+      {
+        role: 'user',
+        content: [{ text: prompt }],
+      },
+    ],
+    additionalModelRequestFields: {
+      max_tokens: 1024,
+    },
+  });
+
+  const response = await bedrockClient.send(command);
+  const textContent = response.output?.message?.content?.find((c) => c.text)?.text;
+  if (!textContent) {
+    throw new Error('No text content in Bedrock response');
+  }
+
+  try {
+    const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : textContent;
+    const result = JSON.parse(jsonString) as KanjiQuestionReadingResult;
+    return result;
   } catch {
     console.error('Failed to parse JSON from Bedrock:', textContent);
     throw new Error('Failed to parse Bedrock response');

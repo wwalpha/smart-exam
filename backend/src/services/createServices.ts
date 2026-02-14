@@ -2,6 +2,10 @@ import type { Repositories } from '@/repositories/createRepositories';
 import { createBedrockService, type BedrockService } from '@/services/bedrock/createBedrockService';
 import { createDashboardService, type DashboardService } from '@/services/dashboard/createDashboardService';
 import { createKanjiService, type KanjiService } from '@/services/kanji/createKanjiService';
+import {
+  createKanjiQuestionsService,
+  type KanjiQuestionsService,
+} from '@/services/kanjiQuestions/createKanjiQuestionsService';
 import { createMaterialsService, type MaterialsService } from '@/services/materials/createMaterialsService';
 import { createQuestionsService, type QuestionsService } from '@/services/questions/createQuestionsService';
 import {
@@ -15,6 +19,7 @@ export type Services = {
   bedrock: BedrockService;
   dashboard: DashboardService;
   kanji: KanjiService;
+  kanjiQuestions: KanjiQuestionsService;
   materials: MaterialsService;
   questions: QuestionsService;
   reviewAttempts: ReviewAttemptsService;
@@ -27,6 +32,7 @@ export const createServices = (repositories: Repositories): Services => {
     bedrock: createBedrockService(repositories),
     dashboard: createDashboardService(),
     kanji: createKanjiService(repositories),
+    kanjiQuestions: createKanjiQuestionsService(repositories),
     materials: createMaterialsService(repositories),
     questions: createQuestionsService(repositories),
     reviewAttempts: createReviewAttemptsService(repositories),
