@@ -126,7 +126,7 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
-  /api/tests/{testId}/attempts:
+  /api/exam/{testId}/attempts:
     post:
       tags: [Attempts]
       summary: Create a test attempt
@@ -184,7 +184,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /api/tests/{testId}/attempts/latest:
+  /api/exam/{testId}/attempts/latest:
     get:
       tags: [Attempts]
       summary: Get latest attempt for a test

@@ -6,19 +6,9 @@ import { kanjiController } from '@/controllers/kanji';
 import { materialsController } from '@/controllers/materials';
 import { questionsController } from '@/controllers/questions';
 import { listReviewAttemptsController } from '@/controllers/reviewAttempts';
-import { reviewTestCandidatesController } from '@/controllers/reviewTestCandidates';
-import {
-  createReviewTestController,
-  deleteReviewTestController,
-  getReviewTestController,
-  getReviewTestPdfController,
-  listReviewTestTargetsController,
-  listReviewTestsController,
-  searchReviewTestsController,
-  submitReviewTestResultsController,
-  updateReviewTestStatusController,
-} from '@/controllers/reviewTests';
+import { examCandidatesController } from '@/controllers/examCandidates';
 import { getUploadUrlController } from '@/controllers/s3';
+import { kanjiTestsController, questionTestsController } from '@/controllers/tests';
 
 import type { Services } from '@/services/createServices';
 
@@ -30,16 +20,11 @@ export type Controllers = {
   materials: ReturnType<typeof materialsController>;
   questions: ReturnType<typeof questionsController>;
   reviewAttempts: ReturnType<typeof listReviewAttemptsController>;
-  reviewTestCandidates: ReturnType<typeof reviewTestCandidatesController>;
-  reviewTests: ReturnType<typeof listReviewTestsController> &
-    ReturnType<typeof searchReviewTestsController> &
-    ReturnType<typeof createReviewTestController> &
-    ReturnType<typeof getReviewTestController> &
-    ReturnType<typeof getReviewTestPdfController> &
-    ReturnType<typeof updateReviewTestStatusController> &
-    ReturnType<typeof deleteReviewTestController> &
-    ReturnType<typeof submitReviewTestResultsController> &
-    ReturnType<typeof listReviewTestTargetsController>;
+  reviewTestCandidates: ReturnType<typeof examCandidatesController>;
+  tests: {
+    kanji: ReturnType<typeof kanjiTestsController>;
+    question: ReturnType<typeof questionTestsController>;
+  };
   s3: ReturnType<typeof getUploadUrlController>;
 };
 
@@ -52,17 +37,10 @@ export const createControllers = (services: Services): Controllers => {
     materials: materialsController(services),
     questions: questionsController(services),
     reviewAttempts: listReviewAttemptsController(services),
-    reviewTestCandidates: reviewTestCandidatesController(services),
-    reviewTests: {
-      ...listReviewTestsController(services),
-      ...searchReviewTestsController(services),
-      ...createReviewTestController(services),
-      ...getReviewTestController(services),
-      ...getReviewTestPdfController(services),
-      ...updateReviewTestStatusController(services),
-      ...deleteReviewTestController(services),
-      ...submitReviewTestResultsController(services),
-      ...listReviewTestTargetsController(services),
+    reviewTestCandidates: examCandidatesController(services),
+    tests: {
+      kanji: kanjiTestsController(services),
+      question: questionTestsController(services),
     },
     s3: getUploadUrlController(services),
   };

@@ -1,6 +1,8 @@
 # Backend API 一覧
 
-本書は [要件定義書_v1.2.md](../要件定義_v1.2.md) をベースに、Smart Exam の Backend API の「一覧」を記載します。
+本書は [要件定義書\_v1.2.md](../要件定義_v1.2.md) をベースに、Smart Exam の Backend API の「一覧」を記載します。
+
+実装上の正は Backend のルーティング定義（`backend/src/app/createApp.ts`）とし、本書は「エンドポイントの棚卸し」に留めます。
 
 - フロントエンド画面設計: [docs/frontend.md](frontend.md)
 - Request / Response の詳細定義は [docs/swagger.yml](swagger.yml) に記載します。
@@ -10,96 +12,144 @@
 
 ## 共通
 
-- GET /api/health
+- GET /health
   - ヘルスチェック
-- GET /api/me
-  - ログイン中ユーザー情報
+- GET /v1/health
+  - ヘルスチェック（互換パス）
 
 ---
 
-## Material Sets（教材セット）
+## S3（アップロード）
 
-- GET /api/material-sets
-  - 一覧取得（検索/フィルタ/ページング）
-  - Query: subject, grade, provider, from, to, q, limit, cursor
-- POST /api/material-sets
-  - 新規作成
-- GET /api/material-sets/{materialSetId}
-  - 詳細取得
-- PATCH /api/material-sets/{materialSetId}
-  - メタ情報更新
+- POST /api/upload-url
+  - S3 へアップロードするための署名付きURLを発行
 
 ---
 
-## Material Files（教材ファイル: PDF/画像）
+## Bedrock（解析）
 
-- POST /api/material-sets/{materialSetId}/files
-  - アップロード（推奨: multipart）
-- GET /api/material-sets/{materialSetId}/files
-  - ファイル一覧
-- GET /api/files/{fileId}/download
-  - ダウンロード（署名URL or stream）
-- PATCH /api/files/{fileId}
-  - ステータス更新（例: ARCHIVED）
+- POST /api/analyze-paper
+  - 試験用紙を解析して構造化データを生成
 
 ---
 
-## Questions（問題）
+## Dashboard
 
-- POST /api/material-sets/{materialSetId}/questions/candidates
-  - OCR/抽出候補の登録（候補扱い）
-- POST /api/material-sets/{materialSetId}/questions
-  - 問題の確定登録（手動確定）
-- GET /api/material-sets/{materialSetId}/questions
-  - 教材セット内の問題一覧
-- PATCH /api/questions/{questionId}
-  - 問題メタ更新（displayLabel/canonicalKey/tags等）
+- GET /api/dashboard
+  - ダッシュボード表示用の集計情報を取得
+
+---
+
+## Materials（教材）
+
+- GET /api/materials
+  - 教材一覧を取得
+- POST /api/materials/search
+  - 条件を指定して教材を検索
+- POST /api/materials
+  - 教材を新規作成
+- GET /api/materials/{materialId}
+  - 指定した教材の詳細を取得
+- PATCH /api/materials/{materialId}
+  - 指定した教材の情報を更新
+- DELETE /api/materials/{materialId}
+  - 指定した教材を削除
+- GET /api/materials/{materialId}/files
+  - 指定した教材に紐づくファイル一覧を取得
+- GET /api/materials/{materialId}/files/{fileId}
+  - 指定した教材ファイルの詳細を取得
 
 ---
 
 ## Kanji（漢字）
 
-- POST /api/kanji
-  - 漢字1件作成
-- POST /api/kanji/import
-  - 一括インポート（text形式）
 - GET /api/kanji
-  - 漢字一覧（検索/ページング）
-  - Query: q, limit, cursor
+  - 漢字データの一覧を取得
+- POST /api/kanji/search
+  - 条件を指定して漢字データを検索
+- POST /api/kanji
+  - 漢字データを新規作成
+- GET /api/kanji/{kanjiId}
+  - 指定した漢字データの詳細を取得
+- PATCH /api/kanji/{kanjiId}
+  - 指定した漢字データを更新
+- DELETE /api/kanji/{kanjiId}
+  - 指定した漢字データを削除
+- POST /api/kanji/deletions
+  - 複数の漢字データを一括削除
+- POST /api/kanji/import
+  - 漢字データを一括インポート
 
 ---
 
-## Attempts（正誤履歴: 追記型）
+## Questions（問題）
 
-- POST /api/questions/{questionId}/attempts
-  - 問題の正誤を記録（CORRECT/WRONG）
-- GET /api/questions/{questionId}/status
-  - 問題の派生状態（currentState/streak/dueDate/excluded/lastAttemptDate）
-- POST /api/kanji/{kanjiId}/attempts
-  - 漢字の正誤を記録
-- GET /api/kanji/{kanjiId}/status
-  - 漢字の派生状態
-
----
-
-## Review Tests（復習テスト: 生成/ロック/ライフサイクル）
-
-- POST /api/review-tests
-  - テスト生成（決定論ソート + ロック取得）
-- GET /api/review-tests
-  - テスト一覧（status/subject/ページング）
-  - Query: status, subject, limit, cursor
-- GET /api/review-tests/{testId}
-  - テスト詳細（items + 参照メタ）
-- PATCH /api/review-tests/{testId}
-  - ステータス更新（PAUSED/IN_PROGRESS/COMPLETED/CANCELED）
-- DELETE /api/review-tests/{testId}
-  - テスト削除（必ずロック解除）
+- POST /api/questions/search
+  - 条件を指定して問題を検索
+- GET /api/materials/{materialId}/questions
+  - 指定した教材に紐づく問題一覧を取得
+- POST /api/materials/{materialId}/questions
+  - 指定した教材に新しい問題を追加
+- PATCH /api/questions/{questionId}
+  - 指定した問題を更新
+- PUT /api/questions/{questionId}/review-candidate
+  - 指定した問題の復習候補を作成または更新
+- DELETE /api/questions/{questionId}/review-candidate
+  - 指定した問題の復習候補を削除
+- DELETE /api/questions/{questionId}
+  - 指定した問題を削除
 
 ---
 
-## Review Test Results（テスト結果入力: まとめて入力）
+## Tests（復習テスト）
 
-- POST /api/review-tests/{testId}/results
-  - テスト結果を一括登録（対象ごとの正誤、オプションで「全正解」等の簡易入力モード）
-  - 登録に伴い該当targetのロック解除
+### Kanji Tests
+
+- GET /api/exam/kanji
+  - 漢字テスト一覧を取得
+- POST /api/exam/kanji/search
+  - 条件を指定して漢字テストを検索
+- POST /api/exam/kanji
+  - 漢字テストを新規作成
+- GET /api/exam/kanji/targets
+  - 漢字テスト作成対象の候補一覧を取得
+
+- GET /api/exam/kanji/{testId}
+  - 指定した漢字テストの詳細を取得
+- GET /api/exam/kanji/{testId}/pdf
+  - 指定した漢字テストのPDF情報を取得
+- PATCH /api/exam/kanji/{testId}
+  - 指定した漢字テストのステータスを更新
+- DELETE /api/exam/kanji/{testId}
+  - 指定した漢字テストを削除
+- POST /api/exam/kanji/{testId}/results
+  - 指定した漢字テストの結果を登録
+
+### Question Tests
+
+- GET /api/exam/question
+  - 問題テスト一覧を取得
+- POST /api/exam/question/search
+  - 条件を指定して問題テストを検索
+- POST /api/exam/question
+  - 問題テストを新規作成
+- GET /api/exam/question/targets
+  - 問題テスト作成対象の候補一覧を取得
+
+- GET /api/exam/question/{testId}
+  - 指定した問題テストの詳細を取得
+- GET /api/exam/question/{testId}/pdf
+  - 指定した問題テストのPDF情報を取得
+- PATCH /api/exam/question/{testId}
+  - 指定した問題テストのステータスを更新
+- DELETE /api/exam/question/{testId}
+  - 指定した問題テストを削除
+- POST /api/exam/question/{testId}/results
+  - 指定した問題テストの結果を登録
+
+### Related
+
+- GET /api/review-test-candidates
+  - 復習テスト候補の一覧を取得
+- GET /api/review-attempts
+  - 復習テストの実施履歴を参照（読み取り専用）

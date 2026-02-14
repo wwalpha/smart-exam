@@ -14,16 +14,16 @@ import { QuestionAttemptHistoryListPage } from '@/pages/materials/QuestionAttemp
 import { QuestionAttemptHistoryPage } from '@/pages/materials/QuestionAttemptHistoryPage';
 
 // Review Tests (Questions & Kanji)
-import { ReviewTestQuestionListPage } from '@/pages/review/ReviewTestQuestionListPage';
-import { ReviewTestKanjiListPage } from '@/pages/review/ReviewTestKanjiListPage';
-import { ReviewTestQuestionCreatePage } from '@/pages/review/ReviewTestQuestionCreatePage';
-import { ReviewTestKanjiCreatePage } from '@/pages/review/ReviewTestKanjiCreatePage';
-import { ReviewTestQuestionDetailPage } from '@/pages/review/ReviewTestQuestionDetailPage';
-import { ReviewTestKanjiDetailPage } from '@/pages/review/ReviewTestKanjiDetailPage';
-import { ReviewTestQuestionGradingPage } from '@/pages/review/ReviewTestQuestionGradingPage';
-import { ReviewTestKanjiGradingPage } from '@/pages/review/ReviewTestKanjiGradingPage';
-import { ReviewTestQuestionPdfPage } from '@/pages/review/ReviewTestQuestionPdfPage';
-import { ReviewTestKanjiPdfPage } from '@/pages/review/ReviewTestKanjiPdfPage';
+import { ReviewTestQuestionListPage } from '@/pages/review/ExamQuestionListPage';
+import { ReviewTestKanjiListPage } from '@/pages/review/ExamKanjiListPage';
+import { ReviewTestQuestionCreatePage } from '@/pages/review/ExamQuestionCreatePage';
+import { ReviewTestKanjiCreatePage } from '@/pages/review/ExamKanjiCreatePage';
+import { ReviewTestQuestionDetailPage } from '@/pages/review/ExamQuestionDetailPage';
+import { ReviewTestKanjiDetailPage } from '@/pages/review/ExamKanjiDetailPage';
+import { ReviewTestQuestionGradingPage } from '@/pages/review/ExamQuestionGradingPage';
+import { ReviewTestKanjiGradingPage } from '@/pages/review/ExamKanjiGradingPage';
+import { ReviewTestQuestionPdfPage } from '@/pages/review/ExamQuestionPdfPage';
+import { ReviewTestKanjiPdfPage } from '@/pages/review/ExamKanjiPdfPage';
 
 // Kanji Management
 import { KanjiListPage } from '@/pages/kanji/KanjiListPage';

@@ -2,8 +2,8 @@
 
 export { MaterialsRepository } from './MaterialsRepository';
 export { QuestionsRepository } from './QuestionsRepository';
-export { ReviewTestCandidatesRepository } from './ReviewTestCandidatesRepository';
-export { ReviewTestsRepository } from './ReviewTestsRepository';
+export { ReviewTestCandidatesRepository } from './ExamCandidatesRepository';
+export { ReviewTestsRepository } from './ExamsRepository';
 export { WordMasterRepository } from './WordMasterRepository';
 export { S3Repository } from './S3Repository';
 

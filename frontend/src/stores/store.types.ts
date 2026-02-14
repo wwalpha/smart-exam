@@ -128,10 +128,10 @@ export type ReviewTestSlice = {
   reviewCandidates: ReviewCandidateState;
   fetchReviewTests: (params: SearchReviewTestsRequest) => Promise<void>;
   createReviewTest: (request: CreateReviewTestRequest) => Promise<ReviewTest>;
-  fetchReviewTest: (id: string) => Promise<void>;
-  updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest) => Promise<void>;
-  deleteReviewTest: (id: string) => Promise<void>;
-  submitReviewTestResults: (id: string, request: SubmitReviewTestResultsRequest) => Promise<void>;
+  fetchReviewTest: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  deleteReviewTest: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  submitReviewTestResults: (id: string, request: SubmitReviewTestResultsRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
   fetchReviewTestTargets: (params: {
     mode: 'QUESTION' | 'KANJI';
     from: string;

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createMaterialSlice } from '@/stores/slices/materialSlice';
-import { createReviewTestSlice } from '@/stores/slices/reviewTestSlice';
+import { createReviewTestSlice } from '@/stores/slices/examSlice';
 import { createKanjiSlice } from '@/stores/slices/kanjiSlice';
 import { createDashboardSlice } from '@/stores/slices/dashboardSlice';
 import type {

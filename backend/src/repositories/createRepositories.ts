@@ -2,8 +2,8 @@
 
 import { MaterialsRepository } from '@/repositories/MaterialsRepository';
 import { QuestionsRepository } from '@/repositories/QuestionsRepository';
-import { ReviewTestCandidatesRepository } from '@/repositories/ReviewTestCandidatesRepository';
-import { ReviewTestsRepository } from '@/repositories/ReviewTestsRepository';
+import { ReviewTestCandidatesRepository } from '@/repositories/ExamCandidatesRepository';
+import { ReviewTestsRepository } from '@/repositories/ExamsRepository';
 import { WordMasterRepository } from '@/repositories/WordMasterRepository';
 import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
 import { S3Repository } from '@/repositories/S3Repository';

@@ -89,7 +89,7 @@ resource "aws_dynamodb_table" "word_master" {
 # DynamoDB table for review test candidates.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "review_test_candidates" {
-  name         = "${var.project_name}_review_test_candidates"
+  name         = "${var.project_name}_test_candidates"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "subject"
   range_key    = "candidateKey"
@@ -133,7 +133,7 @@ resource "aws_dynamodb_table" "review_test_candidates" {
 # DynamoDB table for review tests.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "review_tests" {
-  name         = "${var.project_name}_review_tests"
+  name         = "${var.project_name}_tests"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "testId"
 

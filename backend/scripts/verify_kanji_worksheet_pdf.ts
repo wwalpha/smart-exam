@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { ReviewTestPdfService } from '../src/services/reviewTests/reviewTestPdfService.ts';
+import { ReviewTestPdfService } from '../src/services/exam/reviewTestPdfService.ts';
 import type { ReviewTestDetail } from '@smart-exam/api-types';
 
 const REVIEW_MODE = {
@@ -51,8 +51,8 @@ async function main(): Promise<void> {
     createdDate: ymd,
     status: 'IN_PROGRESS' as const,
     pdf: {
-      url: `/api/review-tests/${testId}/pdf`,
-      downloadUrl: `/api/review-tests/${testId}/pdf?download=1`,
+      url: `/api/exam/kanji/${testId}/pdf`,
+      downloadUrl: `/api/exam/kanji/${testId}/pdf?download=1`,
     },
     count: 60,
     questions: Array.from({ length: 60 }, (_v, i) => `w-${i + 1}`),

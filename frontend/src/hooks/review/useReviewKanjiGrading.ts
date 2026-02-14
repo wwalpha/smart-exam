@@ -30,7 +30,7 @@ export const useReviewKanjiGrading = () => {
   const { fields } = useFieldArray({ control, name: 'items' });
 
   useEffect(() => {
-    if (id) fetchReviewTest(id);
+    if (id) fetchReviewTest(id, 'KANJI');
   }, [id, fetchReviewTest]);
 
   useEffect(() => {
@@ -53,10 +53,14 @@ export const useReviewKanjiGrading = () => {
     if (!id) return;
     setIsSaving(true);
     try {
-      await submitReviewTest(id, {
-        results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
-      });
-      await fetchReviewTest(id);
+      await submitReviewTest(
+        id,
+        {
+          results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
+        },
+        'KANJI',
+      );
+      await fetchReviewTest(id, 'KANJI');
       toast.success('保存しました');
     } catch (e) {
       toast.error('保存に失敗しました');

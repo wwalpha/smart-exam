@@ -23,7 +23,8 @@ const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']
 };
 
 export const useReviewQuestionDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } = useReviewQuestionDetail();
+  const { review, isLoading, error, basePath, remove, updateReviewTestStatus, ConfirmDialog } =
+    useReviewQuestionDetail();
   const navigate = useNavigate();
 
   const blocks = useMemo(() => {
@@ -78,7 +79,7 @@ export const useReviewQuestionDetailPage = () => {
     let cancelled = false;
 
     const uniqueMaterialIds = Array.from(
-      new Set(blocks.map((b) => b.materialId).filter((x): x is string => typeof x === 'string' && x.length > 0))
+      new Set(blocks.map((b) => b.materialId).filter((x): x is string => typeof x === 'string' && x.length > 0)),
     );
 
     const run = async () => {
@@ -107,7 +108,7 @@ export const useReviewQuestionDetailPage = () => {
 
   const complete = useCallback(async () => {
     if (!review) return;
-    await updateReviewTestStatus(review.id, { status: 'COMPLETED' });
+    await updateReviewTestStatus(review.id, { status: 'COMPLETED' }, 'QUESTION');
     navigate(basePath);
   }, [review, updateReviewTestStatus, navigate, basePath]);
 

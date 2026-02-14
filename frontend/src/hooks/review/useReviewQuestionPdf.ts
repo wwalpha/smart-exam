@@ -15,10 +15,10 @@ export const useReviewQuestionPdf = () => {
   useEffect(() => {
     if (!id) return;
     if (currentTest?.id === id || currentTest?.testId === id) return;
-    fetchReviewTest(id);
+    fetchReviewTest(id, 'QUESTION');
   }, [id, fetchReviewTest, currentTest?.id, currentTest?.testId]);
 
-  const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/review-tests/${id}/pdf` : '');
+  const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/question/${id}/pdf` : '');
 
   const [presignedUrl, setPresignedUrl] = useState<string>('');
   const [isFetchingPdfUrl, setIsFetchingPdfUrl] = useState(false);

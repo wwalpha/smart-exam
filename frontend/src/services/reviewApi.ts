@@ -1,6 +1,7 @@
 import { apiRequest } from './apiClient';
 import type {
   ReviewTest,
+  ReviewMode,
   ReviewTestListResponse,
   CreateReviewTestRequest,
   ReviewTestDetail,
@@ -11,26 +12,36 @@ import type {
   ListReviewTestCandidatesResponse,
 } from '@smart-exam/api-types';
 
+const toModeSegment = (mode: ReviewMode): 'kanji' | 'question' => (mode === 'KANJI' ? 'kanji' : 'question');
+
 export const listReviewTests = async (params: SearchReviewTestsRequest): Promise<ReviewTestListResponse> => {
+  const path = params.mode === 'KANJI' ? '/api/exam/kanji/search' : '/api/exam/question/search';
+
   return apiRequest<ReviewTestListResponse, SearchReviewTestsRequest>({
     method: 'POST',
-    path: '/api/review-tests/search',
+    path,
     body: params,
   });
 };
 
 export const createReviewTest = async (request: CreateReviewTestRequest): Promise<ReviewTest> => {
+  const path = request.mode === 'KANJI' ? '/api/exam/kanji' : '/api/exam/question';
+
   return apiRequest<ReviewTest, CreateReviewTestRequest>({
     method: 'POST',
-    path: '/api/review-tests',
+    path,
     body: request,
   });
 };
 
 export const getReviewTest = async (testId: string): Promise<ReviewTestDetail> => {
+  return getReviewTestByMode(testId, 'QUESTION');
+};
+
+export const getReviewTestByMode = async (testId: string, mode: ReviewMode): Promise<ReviewTestDetail> => {
   return apiRequest<ReviewTestDetail>({
     method: 'GET',
-    path: `/api/review-tests/${testId}`,
+    path: `/api/exam/${toModeSegment(mode)}/${testId}`,
   });
 };
 
@@ -38,17 +49,29 @@ export const updateReviewTestStatus = async (
   testId: string,
   request: UpdateReviewTestStatusRequest
 ): Promise<ReviewTest> => {
+  return updateReviewTestStatusByMode(testId, request, 'QUESTION');
+};
+
+export const updateReviewTestStatusByMode = async (
+  testId: string,
+  request: UpdateReviewTestStatusRequest,
+  mode: ReviewMode
+): Promise<ReviewTest> => {
   return apiRequest<ReviewTest, UpdateReviewTestStatusRequest>({
     method: 'PATCH',
-    path: `/api/review-tests/${testId}`,
+    path: `/api/exam/${toModeSegment(mode)}/${testId}`,
     body: request,
   });
 };
 
 export const deleteReviewTest = async (testId: string): Promise<void> => {
+  return deleteReviewTestByMode(testId, 'QUESTION');
+};
+
+export const deleteReviewTestByMode = async (testId: string, mode: ReviewMode): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
-    path: `/api/review-tests/${testId}`,
+    path: `/api/exam/${toModeSegment(mode)}/${testId}`,
   });
 };
 
@@ -56,9 +79,17 @@ export const submitReviewTestResults = async (
   testId: string,
   request: SubmitReviewTestResultsRequest
 ): Promise<void> => {
+  return submitReviewTestResultsByMode(testId, request, 'QUESTION');
+};
+
+export const submitReviewTestResultsByMode = async (
+  testId: string,
+  request: SubmitReviewTestResultsRequest,
+  mode: ReviewMode
+): Promise<void> => {
   return apiRequest<void, SubmitReviewTestResultsRequest>({
     method: 'POST',
-    path: `/api/review-tests/${testId}/results`,
+    path: `/api/exam/${toModeSegment(mode)}/${testId}/results`,
     body: request,
   });
 };
@@ -70,15 +101,16 @@ export const listReviewTestTargets = async (params: {
   subject?: string;
 }): Promise<ListReviewTestTargetsResponse> => {
   const qs = new URLSearchParams({
-    mode: params.mode,
     from: params.from,
     to: params.to,
     ...(params.subject ? { subject: params.subject } : {}),
   });
 
+  const path = params.mode === 'KANJI' ? '/api/exam/kanji/targets' : '/api/exam/question/targets';
+
   return apiRequest<ListReviewTestTargetsResponse>({
     method: 'GET',
-    path: `/api/review-tests/targets?${qs.toString()}`,
+    path: `${path}?${qs.toString()}`,
   });
 };
 

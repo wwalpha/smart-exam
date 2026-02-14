@@ -65,7 +65,7 @@ const createTables = async (client: DynamoDBClient) => {
 
   await create(
     new CreateTableCommand({
-      TableName: 'review_test_candidates',
+      TableName: 'test_candidates',
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [
         { AttributeName: 'subject', AttributeType: 'S' },
@@ -86,6 +86,15 @@ const createTables = async (client: DynamoDBClient) => {
           Projection: { ProjectionType: 'ALL' },
         },
       ],
+    }),
+  );
+
+  await create(
+    new CreateTableCommand({
+      TableName: 'tests',
+      BillingMode: 'PAY_PER_REQUEST',
+      AttributeDefinitions: [{ AttributeName: 'testId', AttributeType: 'S' }],
+      KeySchema: [{ AttributeName: 'testId', KeyType: 'HASH' }],
     }),
   );
 
