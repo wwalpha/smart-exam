@@ -94,6 +94,18 @@ data "aws_iam_policy_document" "lambda_with_bedrock" {
       resources = ["*"]
     }
   }
+
+  dynamic "statement" {
+    for_each = var.enable_bedrock ? [1] : []
+    content {
+      effect = "Allow"
+      actions = [
+        "aws-marketplace:ViewSubscriptions",
+        "aws-marketplace:Subscribe",
+      ]
+      resources = ["*"]
+    }
+  }
 }
 
 # ----------------------------------------------------------------------------------------------

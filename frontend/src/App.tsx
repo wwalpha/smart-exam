@@ -104,14 +104,14 @@ export const App = () => {
         <Route path="/materials/attempts" element={<QuestionAttemptHistoryListPage />} />
         <Route path="/materials/:id/attempts" element={<QuestionAttemptHistoryPage />} />
 
-        {/* Review Tests (Questions) */}
+        {/* Exam (Questions) */}
         <Route path="/exam/questions" element={<ExamQuestionListPage />} />
         <Route path="/exam/questions/new" element={<ExamQuestionCreatePage />} />
         <Route path="/exam/questions/:id" element={<ExamQuestionDetailPage />} />
         <Route path="/exam/questions/:id/grading" element={<ExamQuestionGradingPage />} />
         <Route path="/exam/questions/:id/pdf" element={<ExamQuestionPdfPage />} />
 
-        {/* Review Tests (Kanji) */}
+        {/* Exam (Kanji) */}
         <Route path="/exam/kanji" element={<ExamKanjiListPage />} />
         <Route path="/exam/kanji/new" element={<ExamKanjiCreatePage />} />
         <Route path="/exam/kanji/:id" element={<ExamKanjiDetailPage />} />
