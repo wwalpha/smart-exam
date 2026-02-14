@@ -1,3 +1,5 @@
+// Module: createApp responsibilities.
+
 import cors from 'cors';
 import express from 'express';
 import { z } from 'zod';
@@ -8,6 +10,8 @@ import { validateBody, validateParams, validateQuery } from '@/middlewares/valid
 import { createRepositories } from '@/repositories/createRepositories';
 import { createServices } from '@/services/createServices';
 
+
+/** Creates app. */
 export const createApp = (): express.Express => {
   const repositories = createRepositories();
   const services = createServices(repositories);
@@ -186,8 +190,8 @@ export const createApp = (): express.Express => {
   );
   app.get(
     '/api/review-test-candidates',
-    validateQuery(controllers.reviewTests.ListReviewTestCandidatesQuerySchema),
-    handleRequest(controllers.reviewTests.listReviewTestCandidates),
+    validateQuery(controllers.reviewTestCandidates.ListReviewTestCandidatesQuerySchema),
+    handleRequest(controllers.reviewTestCandidates.listReviewTestCandidates),
   );
 
   // Derived review attempts (read-only)

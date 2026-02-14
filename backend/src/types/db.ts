@@ -1,4 +1,7 @@
+// Module: db responsibilities.
+
 import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
+
 
 /**
  * 教材テーブル
@@ -50,17 +53,12 @@ export interface MaterialQuestionTable {
 export interface WordMasterTable {
   /** 単語ID (PK) */
   wordId: string;
-  /** 問題文 */
+  /** 問題文（漢字問題の場合は本文） */
   question: string;
-  /** 解答 */
+  /** 解答（漢字問題の場合は記入すべき漢字） */
   answer: string;
   /** 科目 */
   subject: SubjectId;
-
-  /** 本文（漢字問題: 本文|答え漢字 形式の本文） */
-  promptText?: string;
-  /** 答え（漢字問題: 記入すべき漢字） */
-  answerKanji?: string;
   /** 読み（ひらがな、本文中で下線対象） */
   readingHiragana?: string;
   /** 下線指定（本文内の部分範囲） */
@@ -68,21 +66,6 @@ export interface WordMasterTable {
     type: 'promptSpan';
     start: number;
     length: number;
-  };
-  /** 生成/検証ステータス */
-  status?: 'DRAFT' | 'GENERATED' | 'VERIFIED' | 'ERROR';
-  /** AI生成メタ（任意） */
-  ai?: {
-    model: string;
-    promptVersion: string;
-    generatedAt: string;
-    rawHash?: string;
-  };
-  /** エラー情報（任意） */
-  error?: {
-    code: string;
-    message: string;
-    at: string;
   };
 }
 

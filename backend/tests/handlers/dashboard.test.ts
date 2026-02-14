@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Request, Response } from 'express';
-import { createDashboardController } from '@/controllers/dashboard/createDashboardController';
+import { getDashboardController } from '@/controllers/dashboard';
 import type { Services } from '@/services';
 import type { DashboardData } from '@smart-exam/api-types';
 
@@ -28,7 +28,7 @@ describe('dashboard handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createDashboardController(services);
+    const controller = getDashboardController(services);
 
     const req = {} as Request;
     const res = {

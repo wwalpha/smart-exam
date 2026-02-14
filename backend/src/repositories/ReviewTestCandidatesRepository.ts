@@ -1,9 +1,12 @@
+// Module: ReviewTestCandidatesRepository responsibilities.
+
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
 import { createUuid } from '../lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { ReviewTestCandidateTable } from '../types/db';
+
 
 const TABLE_NAME = ENV.TABLE_REVIEW_TEST_CANDIDATES;
 const INDEX_GSI_SUBJECT_NEXT_TIME = 'gsi_subject_next_time';
@@ -24,6 +27,7 @@ const nowIso = (): string => DateUtils.now();
 
 const toCandidateKeyUpperBound = (ymd: string): string => `${ymd}#~`;
 
+/** ReviewTestCandidatesRepository. */
 export const ReviewTestCandidatesRepository = {
   createCandidate: async (params: {
     subject: SubjectId;

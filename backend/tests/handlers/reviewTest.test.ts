@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createReviewTestsController } from '@/controllers/reviewTests/createReviewTestsController';
+import {
+  createReviewTestController,
+  getReviewTestController,
+  listReviewTestTargetsController,
+  listReviewTestsController,
+} from '@/controllers/reviewTests';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type { CreateReviewTestRequest, GetReviewTestParams } from '@smart-exam/api-types';
@@ -15,7 +20,12 @@ describe('reviewTest handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createReviewTestsController(services);
+    const controller = {
+      ...listReviewTestsController(services),
+      ...createReviewTestController(services),
+      ...getReviewTestController(services),
+      ...listReviewTestTargetsController(services),
+    };
 
     const req = {} as Request;
     const res = {
@@ -37,7 +47,12 @@ describe('reviewTest handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createReviewTestsController(services);
+    const controller = {
+      ...listReviewTestsController(services),
+      ...createReviewTestController(services),
+      ...getReviewTestController(services),
+      ...listReviewTestTargetsController(services),
+    };
 
     const req = {
       body: { subject: '1', mode: 'QUESTION', count: 20 },
@@ -62,7 +77,12 @@ describe('reviewTest handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createReviewTestsController(services);
+    const controller = {
+      ...listReviewTestsController(services),
+      ...createReviewTestController(services),
+      ...getReviewTestController(services),
+      ...listReviewTestTargetsController(services),
+    };
 
     const req = {
       params: { testId: '1' },
@@ -88,7 +108,12 @@ describe('reviewTest handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createReviewTestsController(services);
+    const controller = {
+      ...listReviewTestsController(services),
+      ...createReviewTestController(services),
+      ...getReviewTestController(services),
+      ...listReviewTestTargetsController(services),
+    };
 
     const req = {
       validated: {

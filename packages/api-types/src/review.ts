@@ -107,17 +107,10 @@ export type ReviewTestItem = {
   questionText?: string;
   /** 解答 */
   answerText?: string;
-
-  /** 漢字問題: 本文（本文|答え漢字 形式の本文） */
-  promptText?: string;
-  /** 漢字問題: 答え（記入すべき漢字） */
-  answerKanji?: string;
   /** 漢字問題: 読み（ひらがな、本文中で下線対象） */
   readingHiragana?: string;
   /** 漢字問題: 下線指定（本文内の部分範囲） */
   underlineSpec?: { type: 'promptSpan'; start: number; length: number };
-  /** 漢字問題: 生成/検証ステータス */
-  status?: 'DRAFT' | 'GENERATED' | 'VERIFIED' | 'ERROR';
   /** 正誤 (採点後) */
   isCorrect?: boolean;
   /** アイテムID (Frontend compatibility) */

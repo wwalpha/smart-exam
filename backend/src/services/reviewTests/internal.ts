@@ -1,5 +1,9 @@
+// Module: internal responsibilities.
+
 import { DateUtils } from '@/lib/dateUtils';
 import type {
+
+
   CreateReviewTestRequest,
   ReviewTest,
   ReviewTestTarget,
@@ -7,8 +11,10 @@ import type {
 } from '@smart-exam/api-types';
 import type { ReviewTestTable } from '@/types/db';
 
+/** Type definition for ReviewTargetType. */
 export type ReviewTargetType = 'QUESTION' | 'KANJI';
 
+/** Type definition for ReviewCandidate. */
 export type ReviewCandidate =
   | {
       targetType: 'QUESTION';
@@ -30,12 +36,15 @@ export type ReviewCandidate =
       candidateKey: string;
     };
 
+/** targetKeyOf. */
 export const targetKeyOf = (targetType: ReviewTargetType, targetId: string): string => `${targetType}#${targetId}`;
 
+/** Converts data with to iso at start of day. */
 export const toIsoAtStartOfDay = (ymd: string): string => {
   return DateUtils.format(`${ymd}T00:00:00`);
 };
 
+/** parseFilterRange. */
 export const parseFilterRange = (req: CreateReviewTestRequest): { fromYmd?: string; toYmd?: string } => {
   if (typeof req.days === 'number' && req.days > 0) {
     const today = DateUtils.todayYmd();
@@ -48,12 +57,14 @@ export const parseFilterRange = (req: CreateReviewTestRequest): { fromYmd?: stri
   return { fromYmd, toYmd };
 };
 
+/** isWithinRange. */
 export const isWithinRange = (ymd: string, range: { fromYmd?: string; toYmd?: string }): boolean => {
   if (range.fromYmd && ymd < range.fromYmd) return false;
   if (range.toYmd && ymd > range.toYmd) return false;
   return true;
 };
 
+/** computeDueDate. */
 export const computeDueDate = (params: {
   targetType: ReviewTargetType;
   registeredDate: string;
@@ -70,6 +81,7 @@ export const computeDueDate = (params: {
   return { dueDate: params.registeredDate, lastAttemptDate: params.registeredDate };
 };
 
+/** Converts data with to api review test. */
 export const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
   id: row.testId,
   testId: row.testId,
@@ -87,8 +99,10 @@ export const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
   results: row.results ?? [],
 });
 
+/** Converts data with to review target key. */
 export const toReviewTargetKey = (subject: SubjectId, targetId: string): string => `${subject}#${targetId}`;
 
+/** sortTargets. */
 export const sortTargets = (items: ReviewTestTarget[]): ReviewTestTarget[] => {
   const next = [...items];
   next.sort((a, b) => {

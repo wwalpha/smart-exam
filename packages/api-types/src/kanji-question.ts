@@ -8,21 +8,6 @@ export type KanjiUnderlineSpec = {
   length: number;
 };
 
-export type KanjiQuestionStatus = 'DRAFT' | 'GENERATED' | 'VERIFIED' | 'ERROR';
-
-export type KanjiAiMeta = {
-  model: string;
-  promptVersion: string;
-  generatedAt: string;
-  rawHash?: string;
-};
-
-export type KanjiErrorMeta = {
-  code: string;
-  message: string;
-  at: string;
-};
-
 /**
  * 漢字問題（本文中の読み(ひらがな)を下線にする用途）
  */
@@ -30,28 +15,24 @@ export type KanjiQuestion = {
   id: string;
   subject: SubjectId;
 
-  promptText: string;
-  answerKanji: string;
+  /** 問題文（本文） */
+  question: string;
+  /** 解答（記入すべき漢字） */
+  answer: string;
 
   readingHiragana?: string;
   underlineSpec?: KanjiUnderlineSpec;
-  status?: KanjiQuestionStatus;
-
-  ai?: KanjiAiMeta;
-  error?: KanjiErrorMeta;
 };
 
 export type KanjiQuestionGenerateReadingResponse = {
   id: string;
   readingHiragana: string;
   underlineSpec: KanjiUnderlineSpec;
-  status: KanjiQuestionStatus;
 };
 
 export type KanjiQuestionPatchRequest = {
   readingHiragana?: string;
   underlineSpec?: KanjiUnderlineSpec;
-  status?: KanjiQuestionStatus;
 };
 
 export type KanjiQuestionPatchResponse = KanjiQuestion;

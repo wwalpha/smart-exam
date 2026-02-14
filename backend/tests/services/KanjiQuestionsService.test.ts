@@ -4,13 +4,13 @@ import { createKanjiQuestionsService } from '@/services/kanjiQuestions/createKan
 import type { Repositories } from '@/repositories/createRepositories';
 
 describe('KanjiQuestionsService.generateReading (unit)', () => {
-  it('persists GENERATED when Bedrock result is valid', async () => {
+  it('persists reading/underline when Bedrock result is valid', async () => {
     const repositories = {
       wordMaster: {
         get: vi.fn().mockResolvedValue({
           wordId: 'q1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
+          question: '彼はけいせいを説明した。',
+          answer: '形成',
         }),
         updateKanjiQuestionFields: vi.fn().mockResolvedValue({} as unknown),
       },
@@ -30,7 +30,6 @@ describe('KanjiQuestionsService.generateReading (unit)', () => {
       id: 'q1',
       readingHiragana: 'けいせい',
       underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-      status: 'GENERATED',
     });
 
     expect(repositories.bedrock.generateKanjiQuestionReading).toHaveBeenCalledTimes(1);
@@ -38,12 +37,8 @@ describe('KanjiQuestionsService.generateReading (unit)', () => {
     expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledWith(
       'q1',
       expect.objectContaining({
-        status: 'GENERATED',
         readingHiragana: 'けいせい',
         underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-        ai: expect.objectContaining({
-          promptVersion: 'kanji-reading-v1',
-        }),
       }),
     );
   });
@@ -53,8 +48,8 @@ describe('KanjiQuestionsService.generateReading (unit)', () => {
       wordMaster: {
         get: vi.fn().mockResolvedValue({
           wordId: 'q1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
+          question: '彼はけいせいを説明した。',
+          answer: '形成',
         }),
         updateKanjiQuestionFields: vi.fn().mockResolvedValue({} as unknown),
       },
@@ -76,18 +71,18 @@ describe('KanjiQuestionsService.generateReading (unit)', () => {
 
     const res = await service.generateReading('q1');
 
-    expect(res.status).toBe('GENERATED');
+    expect(res.readingHiragana).toBe('けいせい');
     expect(repositories.bedrock.generateKanjiQuestionReading).toHaveBeenCalledTimes(2);
     expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledTimes(1);
   });
 
-  it('persists ERROR when all attempts fail', async () => {
+  it('throws when all attempts fail', async () => {
     const repositories = {
       wordMaster: {
         get: vi.fn().mockResolvedValue({
           wordId: 'q1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
+          question: '彼はけいせいを説明した。',
+          answer: '形成',
         }),
         updateKanjiQuestionFields: vi.fn().mockResolvedValue({} as unknown),
       },
@@ -104,16 +99,7 @@ describe('KanjiQuestionsService.generateReading (unit)', () => {
     await expect(service.generateReading('q1')).rejects.toThrow();
 
     expect(repositories.bedrock.generateKanjiQuestionReading).toHaveBeenCalledTimes(3);
-    expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledTimes(1);
-    expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledWith(
-      'q1',
-      expect.objectContaining({
-        status: 'ERROR',
-        error: expect.objectContaining({
-          code: 'GENERATE_READING_FAILED',
-        }),
-      }),
-    );
+    expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -124,18 +110,16 @@ describe('KanjiQuestionsService.patch/verify (unit)', () => {
         get: vi.fn().mockResolvedValue({
           wordId: 'q1',
           subject: '1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
-          status: 'DRAFT',
+          question: '彼はけいせいを説明した。',
+          answer: '形成',
         }),
         updateKanjiQuestionFields: vi.fn().mockResolvedValue({
           wordId: 'q1',
           subject: '1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
+          question: '彼はけいせいを説明した。',
+          answer: '形成',
           readingHiragana: 'けいせい',
           underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-          status: 'GENERATED',
         } as unknown),
       },
     } as unknown as Repositories;
@@ -151,59 +135,24 @@ describe('KanjiQuestionsService.patch/verify (unit)', () => {
       expect.objectContaining({
         id: 'q1',
         subject: '1',
-        promptText: '彼はけいせいを説明した。',
-        answerKanji: '形成',
+        question: '彼はけいせいを説明した。',
+        answer: '形成',
         readingHiragana: 'けいせい',
         underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-        status: 'GENERATED',
       }),
     );
     expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledTimes(1);
   });
-
-  it('patch rejects status VERIFIED (must use verify endpoint)', async () => {
+  it('verify creates OPEN candidate when fields exist and are valid', async () => {
     const repositories = {
       wordMaster: {
         get: vi.fn().mockResolvedValue({
           wordId: 'q1',
           subject: '1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
+          question: '彼はけいせいを説明した。',
+          answer: '形成',
           readingHiragana: 'けいせい',
           underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-          status: 'GENERATED',
-        }),
-      },
-    } as unknown as Repositories;
-
-    const service = createKanjiQuestionsService(repositories);
-    await expect(
-      service.patch('q1', {
-        status: 'VERIFIED',
-      }),
-    ).rejects.toMatchObject({ statusCode: 400 });
-  });
-
-  it('verify sets status VERIFIED when fields exist and are valid', async () => {
-    const repositories = {
-      wordMaster: {
-        get: vi.fn().mockResolvedValue({
-          wordId: 'q1',
-          subject: '1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
-          readingHiragana: 'けいせい',
-          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-          status: 'GENERATED',
-        }),
-        updateKanjiQuestionFields: vi.fn().mockResolvedValue({
-          wordId: 'q1',
-          subject: '1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
-          readingHiragana: 'けいせい',
-          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-          status: 'VERIFIED',
         } as unknown),
       },
       reviewTestCandidates: {
@@ -215,10 +164,13 @@ describe('KanjiQuestionsService.patch/verify (unit)', () => {
     const service = createKanjiQuestionsService(repositories);
     const res = await service.verify('q1');
 
-    expect(res.status).toBe('VERIFIED');
-    expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledWith(
-      'q1',
-      expect.objectContaining({ status: 'VERIFIED' }),
+    expect(res).toEqual(
+      expect.objectContaining({
+        id: 'q1',
+        subject: '1',
+        question: '彼はけいせいを説明した。',
+        answer: '形成',
+      }),
     );
 
     expect(repositories.reviewTestCandidates.getLatestOpenCandidateByTargetId).toHaveBeenCalledWith({
@@ -242,20 +194,10 @@ describe('KanjiQuestionsService.patch/verify (unit)', () => {
         get: vi.fn().mockResolvedValue({
           wordId: 'q1',
           subject: '1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
+          question: '彼はけいせいを説明した。',
+          answer: '形成',
           readingHiragana: 'けいせい',
           underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-          status: 'GENERATED',
-        }),
-        updateKanjiQuestionFields: vi.fn().mockResolvedValue({
-          wordId: 'q1',
-          subject: '1',
-          promptText: '彼はけいせいを説明した。',
-          answerKanji: '形成',
-          readingHiragana: 'けいせい',
-          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-          status: 'VERIFIED',
         } as unknown),
       },
       reviewTestCandidates: {
@@ -267,7 +209,7 @@ describe('KanjiQuestionsService.patch/verify (unit)', () => {
     const service = createKanjiQuestionsService(repositories);
     const res = await service.verify('q1');
 
-    expect(res.status).toBe('VERIFIED');
+    expect(res.id).toBe('q1');
     expect(repositories.reviewTestCandidates.createCandidate).not.toHaveBeenCalled();
   });
 });

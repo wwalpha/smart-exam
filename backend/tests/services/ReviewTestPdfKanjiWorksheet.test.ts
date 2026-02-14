@@ -5,7 +5,7 @@ import { ReviewTestPdfService } from '@/services/reviewTests/reviewTestPdfServic
 import type { ReviewTestDetail } from '@smart-exam/api-types';
 
 describe('ReviewTestPdfService (KANJI worksheet) smoke', () => {
-  it('generates a 1-page PDF for 60 VERIFIED items without throwing', async () => {
+  it('generates a 1-page PDF for 60 printable items without throwing', async () => {
     const promptText = 'チームのけいせいが不利なまま試合が進む。';
     const review: ReviewTestDetail = {
       id: 't1',
@@ -25,11 +25,9 @@ describe('ReviewTestPdfService (KANJI worksheet) smoke', () => {
         targetType: 'KANJI',
         targetId: `w-${i + 1}`,
         questionText: promptText,
-        promptText,
-        answerKanji: '形成',
+        answerText: '形成',
         readingHiragana: 'けいせい',
         underlineSpec: { type: 'promptSpan', start: 4, length: 4 },
-        status: 'VERIFIED',
       })),
     };
 

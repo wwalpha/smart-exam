@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createKanjiController } from '@/controllers/kanji/createKanjiController';
+import { kanjiController } from '@/controllers/kanji';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 
@@ -15,7 +15,7 @@ describe('kanji handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createKanjiController(services);
+    const controller = kanjiController(services);
 
     const req = {} as Request;
     const res = {
@@ -38,7 +38,7 @@ describe('kanji handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createKanjiController(services);
+    const controller = kanjiController(services);
 
     const req = {
       body: { kanji: '漢', subject: '1' },

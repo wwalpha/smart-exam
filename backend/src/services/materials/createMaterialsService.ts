@@ -1,4 +1,8 @@
+// Module: createMaterialsService responsibilities.
+
 import type {
+
+
   CreateMaterialRequest,
   Material,
   MaterialFile,
@@ -40,6 +44,7 @@ const toApiMaterial = (dbItem: MaterialTable): Material => {
   };
 };
 
+/** Type definition for MaterialsService. */
 export type MaterialsService = {
   listMaterials: () => Promise<Material[]>;
   searchMaterials: (params: SearchMaterialsRequest) => Promise<SearchMaterialsResponse>;
@@ -54,6 +59,7 @@ export type MaterialsService = {
   ) => Promise<{ body: Buffer; contentType: string; filename: string } | null>;
 };
 
+/** Creates materials service. */
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {
   const listMaterials: MaterialsService['listMaterials'] = async () => {
     const items = await repositories.materials.list();

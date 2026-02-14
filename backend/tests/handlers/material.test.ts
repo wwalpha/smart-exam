@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createMaterialsController } from '@/controllers/materials/createMaterialsController';
+import { materialsController } from '@/controllers/materials';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type { CreateMaterialRequest, GetMaterialParams } from '@smart-exam/api-types';
@@ -16,7 +16,7 @@ describe('material handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createMaterialsController(services);
+    const controller = materialsController(services);
 
     const req = {} as Request;
     const res = {
@@ -39,7 +39,7 @@ describe('material handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createMaterialsController(services);
+    const controller = materialsController(services);
 
     const req = {
       body: {
@@ -72,7 +72,7 @@ describe('material handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createMaterialsController(services);
+    const controller = materialsController(services);
 
     const req = {
       params: { materialId: '1' },

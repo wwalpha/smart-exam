@@ -1,13 +1,18 @@
+// Module: BedrockRepository responsibilities.
+
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { AwsUtils } from '@/lib/awsUtils';
 import { bedrockClient } from '@/lib/aws';
 import { ENV } from '@/lib/env';
 
+
+/** Type definition for KanjiQuestionReadingResult. */
 export type KanjiQuestionReadingResult = {
   readingHiragana: string;
   underlineSpec: { type: 'promptSpan'; start: number; length: number };
 };
 
+/** analyzeExamPaper. */
 export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'): Promise<string[]> => {
   // 1. Get file from S3
   const bucket = ENV.FILES_BUCKET_NAME;
@@ -189,9 +194,10 @@ export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'):
   }
 };
 
+/** generateKanjiQuestionReading. */
 export const generateKanjiQuestionReading = async (params: {
-  promptText: string;
-  answerKanji: string;
+  question: string;
+  answer: string;
   modelId?: string;
   hint?: string;
 }): Promise<KanjiQuestionReadingResult> => {
@@ -201,7 +207,7 @@ export const generateKanjiQuestionReading = async (params: {
 You are an AI assistant for Japanese kanji worksheet generation.
 
 Task:
-- Given a Japanese promptText (contains a hiragana reading somewhere) and answerKanji, identify the hiragana reading substring inside promptText that should be underlined.
+- Given a Japanese question (contains a hiragana reading somewhere) and answer (kanji to fill), identify the hiragana reading substring inside question that should be underlined.
 
 Output requirements (STRICT):
 - Return ONLY valid JSON.
@@ -216,11 +222,11 @@ JSON schema:
 Rules:
 - readingHiragana must be hiragana only (allow long vowel mark 'ー').
 - start/length are JavaScript string indices (UTF-16 code units).
-- The substring MUST match exactly: promptText.slice(start, start + length) === readingHiragana
+- The substring MUST match exactly: question.slice(start, start + length) === readingHiragana
 
 Input:
-promptText: ${JSON.stringify(params.promptText)}
-answerKanji: ${JSON.stringify(params.answerKanji)}
+question: ${JSON.stringify(params.question)}
+answer: ${JSON.stringify(params.answer)}
 ${params.hint ? `hint: ${JSON.stringify(params.hint)}` : ''}
 `;
 

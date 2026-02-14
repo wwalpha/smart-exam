@@ -5,16 +5,16 @@ import type {
   Kanji,
   SearchKanjiRequest,
   SearchKanjiResponse,
-  UpdateKanjiRequest,
   SubjectId,
+  UpdateKanjiRequest,
 } from '@smart-exam/api-types';
 
 import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
-import type { WordMasterTable } from '@/types/db';
 import type { Repositories } from '@/repositories/createRepositories';
-import { parsePipeLine, parsePipeQuestionLine } from './importUtils';
+import type { WordMasterTable } from '@/types/db';
+import { parsePipeQuestionLine } from './importUtils';
 
 export type KanjiService = {
   listKanji: () => Promise<Kanji[]>;
@@ -28,6 +28,46 @@ export type KanjiService = {
 };
 
 export const createKanjiService = (repositories: Repositories): KanjiService => {
+  const isHiraganaOnly = (s: string): boolean => {
+    // ぁ-ゖ: ひらがな、ー: 長音記号
+    return /^[ぁ-ゖー]+$/.test(s);
+  };
+
+  const buildValidator = (promptText: string) => {
+    return (result: {
+      readingHiragana: string;
+      underlineSpec: { type: string; start: number; length: number };
+    }) => {
+      const readingHiragana = String(result.readingHiragana ?? '').trim();
+      if (!readingHiragana) throw new Error('readingHiragana is empty');
+      if (!isHiraganaOnly(readingHiragana)) throw new Error('readingHiragana must be hiragana only');
+
+      const underlineSpec = result.underlineSpec;
+      if (!underlineSpec || underlineSpec.type !== 'promptSpan') {
+        throw new Error('underlineSpec.type must be promptSpan');
+      }
+      if (!Number.isInteger(underlineSpec.start) || !Number.isInteger(underlineSpec.length)) {
+        throw new Error('underlineSpec.start/length must be int');
+      }
+      if (underlineSpec.start < 0 || underlineSpec.length <= 0) {
+        throw new Error('underlineSpec.start/length out of range');
+      }
+      if (underlineSpec.start + underlineSpec.length > promptText.length) {
+        throw new Error('underlineSpec out of promptText range');
+      }
+
+      const slice = promptText.slice(underlineSpec.start, underlineSpec.start + underlineSpec.length);
+      if (slice !== readingHiragana) {
+        throw new Error('underlineSpec does not match readingHiragana');
+      }
+
+      return {
+        readingHiragana,
+        underlineSpec: { type: 'promptSpan' as const, start: underlineSpec.start, length: underlineSpec.length },
+      };
+    };
+  };
+
   const rebuildCandidatesFromHistories = async (params: {
     subject: SubjectId;
     targetWordId: string;
@@ -66,10 +106,9 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
     let computedCorrectCount = 0;
 
     for (const h of recent) {
-      const baseDateYmd = h.submittedDate;
       const computed = ReviewNextTime.compute({
         mode: 'KANJI',
-        baseDateYmd,
+        baseDateYmd: h.submittedDate,
         isCorrect: h.isCorrect,
         currentCorrectCount: streak,
       });
@@ -113,24 +152,22 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
 
   const listKanji: KanjiService['listKanji'] = async () => {
     const items = await repositories.wordMaster.listKanji();
-    return items.map((dbItem) => ({
-      id: dbItem.wordId,
-      kanji: dbItem.question,
-      reading: dbItem.answer,
-      subject: dbItem.subject,
-    }));
+    return items
+      .filter((x) => !x.underlineSpec)
+      .map((dbItem) => ({
+        id: dbItem.wordId,
+        kanji: dbItem.question,
+        reading: dbItem.answer,
+        subject: dbItem.subject,
+      }));
   };
 
   const searchKanji: KanjiService['searchKanji'] = async (params) => {
     const items = await listKanji();
 
-    const q = (params.q ?? '').trim();
-    const reading = (params.reading ?? '').trim();
-    const subject = (params.subject ?? '').trim();
-
-    const qLower = q.toLowerCase();
-    const readingLower = reading.toLowerCase();
-    const subjectLower = subject.toLowerCase();
+    const qLower = (params.q ?? '').trim().toLowerCase();
+    const readingLower = (params.reading ?? '').trim().toLowerCase();
+    const subjectLower = (params.subject ?? '').trim().toLowerCase();
 
     const filtered = items.filter((x) => {
       if (
@@ -185,6 +222,7 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   const getKanji: KanjiService['getKanji'] = async (id) => {
     const dbItem = await repositories.wordMaster.get(id);
     if (!dbItem) return null;
+    if (dbItem.underlineSpec) return null;
     return {
       id: dbItem.wordId,
       kanji: dbItem.question,
@@ -194,6 +232,10 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   };
 
   const updateKanji: KanjiService['updateKanji'] = async (id, data) => {
+    const existing = await repositories.wordMaster.get(id);
+    if (!existing) return null;
+    if (existing.underlineSpec) return null;
+
     const updated = await repositories.wordMaster.update(id, {
       ...(data.kanji !== undefined ? { question: data.kanji } : {}),
       ...(data.reading !== undefined ? { answer: data.reading } : {}),
@@ -211,6 +253,7 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   const deleteKanji: KanjiService['deleteKanji'] = async (id) => {
     const existing = await repositories.wordMaster.get(id);
     if (!existing) return false;
+    if (existing.underlineSpec) return false;
 
     await repositories.reviewTestCandidates.deleteCandidatesByTargetId({ subject: existing.subject, targetId: id });
     await repositories.wordMaster.delete(id);
@@ -222,15 +265,15 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
     for (const id of uniqueIds) {
       const existing = await repositories.wordMaster.get(id);
       if (!existing) continue;
+      if (existing.underlineSpec) continue;
 
       await repositories.reviewTestCandidates.deleteCandidatesByTargetId({ subject: existing.subject, targetId: id });
       await repositories.wordMaster.delete(id);
     }
   };
 
+  // NOTE: 形式は1種類のみ（本文|答え漢字|履歴...）。旧MASTER処理は廃止。
   const importKanji: KanjiService['importKanji'] = async (data) => {
-    const importType = data.importType ?? 'MASTER';
-
     const subject = data.subject;
 
     const lines = data.fileContent
@@ -240,195 +283,146 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
 
     const questionIds: string[] = [];
 
-    if (importType === 'QUESTIONS') {
-      let successCount = 0;
-      let duplicateCount = 0;
-      let errorCount = 0;
-      const errors: ImportKanjiResponse['errors'] = [];
-
-      const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
-
-      // 既存 word_master の読み込み（この用途では重複判定は promptText+answerKanji で雑に行う）
-      const existing = await repositories.wordMaster.listKanji(subject);
-      const existingKey = new Set(
-        existing
-          .map((x) => `${(x.promptText ?? '').trim()}|${(x.answerKanji ?? '').trim()}`)
-          .filter((x) => x !== '|'),
-      );
-      const seenKey = new Set<string>();
-
-      for (let index = 0; index < lines.length; index += 1) {
-        const line = lines[index];
-        if (!line.includes('|')) {
-          errorCount += 1;
-          errors.push({ line: index + 1, content: line, reason: formatErrorReason });
-          continue;
-        }
-
-        let parsed: { promptText: string; answerKanji: string; histories: { submittedDate: string; isCorrect: boolean }[] };
-        try {
-          parsed = parsePipeQuestionLine(line);
-        } catch (e) {
-          const message = e instanceof Error ? e.message : 'Unknown error';
-          errorCount += 1;
-          errors.push({
-            line: index + 1,
-            content: line,
-            reason: message === 'フォーマットが不正です' ? formatErrorReason : message,
-          });
-          continue;
-        }
-
-        const promptText = parsed.promptText.trim();
-        const answerKanji = parsed.answerKanji.trim();
-        if (!promptText) {
-          errorCount += 1;
-          errors.push({ line: index + 1, content: line, reason: '本文が空です' });
-          continue;
-        }
-        if (!answerKanji) {
-          errorCount += 1;
-          errors.push({ line: index + 1, content: line, reason: '答え漢字が空です' });
-          continue;
-        }
-
-        const key = `${promptText}|${answerKanji}`;
-        if (existingKey.has(key) || seenKey.has(key)) {
-          duplicateCount += 1;
-          continue;
-        }
-        seenKey.add(key);
-
-        const id = createUuid();
-        const dbItem: WordMasterTable = {
-          wordId: id,
-          subject,
-
-          // 互換のため既存必須属性は埋める（この機能では参照しない）
-          question: answerKanji,
-          answer: '',
-
-          promptText,
-          answerKanji,
-          status: 'DRAFT',
-        };
-
-        await repositories.wordMaster.create(dbItem);
-
-        if (parsed.histories.length > 0) {
-          await rebuildCandidatesFromHistories({
-            subject,
-            targetWordId: id,
-            histories: parsed.histories,
-            finalStatus: 'EXCLUDED',
-          });
-        }
-
-        successCount += 1;
-        questionIds.push(id);
-      }
-
-      return {
-        successCount,
-        duplicateCount,
-        errorCount,
-        questionIds,
-        errors,
-      };
-    }
-
-    // 科目が指定されているので Query(GSI) で取得し、Scan を避ける
-    const existing = await repositories.wordMaster.listKanji(subject);
-    const existingByQuestion = new Map(existing.map((x) => [x.question, x.wordId] as const));
-
-    // 同一ファイル内の重複（並列実行時の競合も含む）を防ぐ
-    const seenQuestions = new Set<string>();
-
     let successCount = 0;
     let duplicateCount = 0;
     let errorCount = 0;
     const errors: ImportKanjiResponse['errors'] = [];
 
-    const createWordMasterOnly = async (params: { kanji: string; reading: string }): Promise<string> => {
+    const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
+
+    const existing = (await repositories.wordMaster.listKanji(subject)).filter((x) => Boolean(x.underlineSpec));
+    const existingKey = new Set(
+      existing.map((x) => `${String(x.question ?? '').trim()}|${String(x.answer ?? '').trim()}`).filter((x) => x !== '|'),
+    );
+    const seenKey = new Set<string>();
+
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index];
+
+      if (!line.includes('|')) {
+        errorCount += 1;
+        errors.push({ line: index + 1, content: line, reason: formatErrorReason });
+        continue;
+      }
+
+      let parsed: {
+        question: string;
+        answer: string;
+        histories: { submittedDate: string; isCorrect: boolean }[];
+      };
+      try {
+        parsed = parsePipeQuestionLine(line);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        errorCount += 1;
+        errors.push({
+          line: index + 1,
+          content: line,
+          reason: message === 'フォーマットが不正です' ? formatErrorReason : message,
+        });
+        continue;
+      }
+
+      const question = parsed.question.trim();
+      const answer = parsed.answer.trim();
+      if (!question) {
+        errorCount += 1;
+        errors.push({ line: index + 1, content: line, reason: '本文が空です' });
+        continue;
+      }
+      if (!answer) {
+        errorCount += 1;
+        errors.push({ line: index + 1, content: line, reason: '答え漢字が空です' });
+        continue;
+      }
+
+      const key = `${question}|${answer}`;
+      if (existingKey.has(key) || seenKey.has(key)) {
+        duplicateCount += 1;
+        continue;
+      }
+      seenKey.add(key);
+
       const id = createUuid();
+
+      // WordMasterTable には VERFIED 相当のデータのみを保存する（statusは保持しない）
+      // -> 取り込み時に reading/underline を生成し、保存する
+      const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+      const validate = buildValidator(question);
+
+      const errorsForThisLine: string[] = [];
+      let generated: {
+        readingHiragana: string;
+        underlineSpec: { type: 'promptSpan'; start: number; length: number };
+      } | null = null;
+      try {
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          const hint =
+            errorsForThisLine.length > 0
+              ? `Previous validation error: ${errorsForThisLine[errorsForThisLine.length - 1]}. Fix JSON accordingly.`
+              : undefined;
+
+          try {
+            const raw = await repositories.bedrock.generateKanjiQuestionReading({
+              question,
+              answer,
+              modelId,
+              hint,
+            });
+            const validated = validate(raw);
+            generated = validated;
+            break;
+          } catch (e) {
+            const message = e instanceof Error ? e.message : 'Unknown error';
+            errorsForThisLine.push(message);
+            if (attempt >= 2) throw e;
+          }
+        }
+
+        if (!generated) {
+          throw new Error('Failed to generate reading/underline');
+        }
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        errorCount += 1;
+        errors.push({ line: index + 1, content: line, reason: `読み生成に失敗しました: ${message}` });
+        continue;
+      }
+
       const dbItem: WordMasterTable = {
         wordId: id,
-        question: params.kanji,
-        answer: params.reading || '',
         subject,
+        question,
+        answer,
+        readingHiragana: generated.readingHiragana,
+        underlineSpec: generated.underlineSpec,
       };
+
       await repositories.wordMaster.create(dbItem);
-      questionIds.push(id);
-      return id;
-    };
 
-    const processLine = async (index: number): Promise<void> => {
-      const line = lines[index];
-      try {
-        const isPipeFormat = line.includes('|');
-        const parsedPipe = isPipeFormat ? parsePipeLine(line) : null;
-        const cols = isPipeFormat ? [] : line.split(/\t|,/).map((x) => x.trim());
-
-        const kanjiRaw = parsedPipe?.kanji ?? cols[0];
-        const kanji = (kanjiRaw ?? '').trim();
-        const reading = parsedPipe?.reading ?? cols[1] ?? '';
-        const histories = parsedPipe?.histories ?? [];
-        if (!kanji) {
-          errorCount += 1;
-          errors.push({ line: index + 1, content: line, reason: '問題が空です' });
-          return;
-        }
-
-        // 既存データ or 同一ファイル内で重複している場合はスキップ
-        if (existingByQuestion.has(kanji) || seenQuestions.has(kanji)) {
-          duplicateCount += 1;
-          return;
-        }
-
-        // await を跨ぐ前に予約して、並列処理でも重複登録を防ぐ
-        seenQuestions.add(kanji);
-
-        // 履歴がある行は、createKanji() の「初期候補作成」を避けて余計な書き込みを減らす
-        if (histories.length > 0) {
-          const wordId = await createWordMasterOnly({ kanji, reading });
-          existingByQuestion.set(kanji, wordId);
-          successCount += 1;
-        } else {
-          const created = await createKanji({ kanji, reading, subject });
-          existingByQuestion.set(kanji, created.id);
-          successCount += 1;
-          questionIds.push(created.id);
-        }
-
-        const targetWordId = existingByQuestion.get(kanji);
-        if (!targetWordId) return;
-
-        if (histories.length === 0) return;
-
+      if (parsed.histories.length > 0) {
         await rebuildCandidatesFromHistories({
           subject,
-          targetWordId,
-          histories,
+          targetWordId: id,
+          histories: parsed.histories,
           finalStatus: 'AUTO',
         });
-      } catch (e) {
-        errorCount += 1;
-        errors.push({ line: index + 1, content: line, reason: e instanceof Error ? e.message : 'Unknown error' });
+      } else {
+        // 取り込み直後から復習対象にする
+        await repositories.reviewTestCandidates.createCandidate({
+          subject,
+          questionId: id,
+          mode: 'KANJI',
+          nextTime: DateUtils.todayYmd(),
+          correctCount: 0,
+          status: 'OPEN',
+          createdAtIso: DateUtils.now(),
+        });
       }
-    };
 
-    const concurrency = Math.min(8, Math.max(1, Number(process.env.IMPORT_CONCURRENCY ?? 6)));
-    let cursor = 0;
-    await Promise.all(
-      Array.from({ length: Math.min(concurrency, lines.length) }, async () => {
-        while (true) {
-          const index = cursor;
-          cursor += 1;
-          if (index >= lines.length) break;
-          await processLine(index);
-        }
-      }),
-    );
+      successCount += 1;
+      questionIds.push(id);
+    }
 
     return {
       successCount,

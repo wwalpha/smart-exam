@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AnalyzePaperBodySchema, createBedrockController } from '@/controllers/bedrock/createBedrockController';
+import { AnalyzePaperBodySchema, analyzePaperController } from '@/controllers/bedrock';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import { validateBody } from '@/middlewares/validateZod';
@@ -16,7 +16,7 @@ describe('bedrock handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createBedrockController(services);
+    const controller = analyzePaperController(services);
 
     const req = {
       body: { s3Key: 'key', subject: 'math' },

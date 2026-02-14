@@ -1,7 +1,10 @@
+// Module: createReviewAttemptsService responsibilities.
+
 import type { ReviewAttempt, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ReviewTestTable } from '@/types/db';
+
 
 const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
 
@@ -29,6 +32,7 @@ const getAttemptFromTest = (params: {
   };
 };
 
+/** Type definition for ReviewAttemptsService. */
 export type ReviewAttemptsService = {
   listReviewAttempts: (params: {
     targetType: ReviewTargetType;
@@ -37,6 +41,7 @@ export type ReviewAttemptsService = {
   }) => Promise<ReviewAttempt[]>;
 };
 
+/** Creates review attempts service. */
 export const createReviewAttemptsService = (repositories: Repositories): ReviewAttemptsService => {
   const listReviewAttempts: ReviewAttemptsService['listReviewAttempts'] = async (params) => {
     const items: ReviewTestTable[] = await repositories.reviewTests.scanAll();

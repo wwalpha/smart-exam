@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createS3Controller } from '@/controllers/s3/createS3Controller';
+import { getUploadUrlController } from '@/controllers/s3';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 
@@ -19,7 +19,7 @@ describe('s3 handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createS3Controller(services);
+    const controller = getUploadUrlController(services);
 
     const req = {
       body: { fileName: 'test.pdf', contentType: 'application/pdf' },

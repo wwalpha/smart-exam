@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createQuestionsController } from '@/controllers/questions/createQuestionsController';
+import { questionsController } from '@/controllers/questions';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type {
@@ -23,7 +23,7 @@ describe('question handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createQuestionsController(services);
+    const controller = questionsController(services);
 
     const req = {
       params: { materialId: 'mat1' },
@@ -47,7 +47,7 @@ describe('question handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createQuestionsController(services);
+    const controller = questionsController(services);
 
     const req = {
       params: { materialId: 'mat1' },
@@ -73,7 +73,7 @@ describe('question handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createQuestionsController(services);
+    const controller = questionsController(services);
 
     const req = {
       params: { questionId: '1' },
@@ -108,7 +108,7 @@ describe('question handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createQuestionsController(services);
+    const controller = questionsController(services);
 
     const req = {
       body: { keyword: 'Q1', subject: '4' },
@@ -131,7 +131,7 @@ describe('question handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createQuestionsController(services);
+    const controller = questionsController(services);
 
     const req = {
       params: { questionId: 'q1' },

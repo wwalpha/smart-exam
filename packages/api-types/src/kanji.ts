@@ -90,13 +90,6 @@ export type ImportKanjiRequest = {
   fileContent: string;
   /** 科目（全行に適用） */
   subject: SubjectId;
-
-  /**
-   * インポート種別
-   * - MASTER: 従来の「漢字|よみ(|履歴...)」やCSV/TSV形式
-   * - QUESTIONS: 「本文|答え漢字」(漢字問題) 形式
-   */
-  importType?: 'MASTER' | 'QUESTIONS';
 };
 
 /** 漢字インポートレスポンス */

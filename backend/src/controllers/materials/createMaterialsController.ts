@@ -1,8 +1,9 @@
+// Module: createMaterialsController responsibilities.
+
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody } from '@/types/express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import { z } from 'zod';
 
 import type {
   CreateMaterialRequest,
@@ -22,58 +23,21 @@ import type {
 } from '@smart-exam/api-types';
 
 import { ApiError } from '@/lib/apiError';
-import { DateUtils } from '@/lib/dateUtils';
-import { SubjectIdSchema } from '@/lib/zodSchemas';
 import type { Services } from '@/services/createServices';
 
-export const CreateMaterialBodySchema = z.object({
-  name: z.string().min(1),
-  subject: SubjectIdSchema,
-  materialDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
-  registeredDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
-  grade: z.string().min(1),
-  provider: z.string().min(1),
-});
-
-export const SearchMaterialsBodySchema = z.object({
-  subject: SubjectIdSchema.optional(),
-  grade: z.string().optional(),
-  provider: z.string().optional(),
-  from: z
-    .string()
-    .refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' })
-    .optional(),
-  to: z
-    .string()
-    .refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' })
-    .optional(),
-  q: z.string().optional(),
-});
-
-export const UpdateMaterialBodySchema = z.object({
-  name: z.string().min(1).optional(),
-  subject: SubjectIdSchema.optional(),
-  materialDate: z
-    .string()
-    .refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' })
-    .optional(),
-  grade: z.string().min(1).optional(),
-  provider: z.string().min(1).optional(),
-  registeredDate: z
-    .string()
-    .refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' })
-    .optional(),
-  questionPdfPath: z.string().min(1).optional(),
-  answerPdfPath: z.string().min(1).optional(),
-  answerSheetPath: z.string().min(1).optional(),
-});
+import {
+  CreateMaterialBodySchema,
+  SearchMaterialsBodySchema,
+  UpdateMaterialBodySchema,
+} from './createMaterialsController.schema';
 
 type GetMaterialFileParams = {
   materialId: string;
   fileId: string;
 };
 
-export const createMaterialsController = (services: Services) => {
+/** Creates materials controller. */
+export const materialsController = (services: Services) => {
   const listMaterials: AsyncHandler<ParamsDictionary, MaterialListResponse, Record<string, never>, ParsedQs> = async (
     _req,
     res,

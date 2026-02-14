@@ -1,37 +1,82 @@
-import { createBedrockController } from '@/controllers/bedrock/createBedrockController';
-import { createDashboardController } from '@/controllers/dashboard/createDashboardController';
-import { createKanjiController } from '@/controllers/kanji/createKanjiController';
-import { createKanjiQuestionsController } from '@/controllers/kanjiQuestions/createKanjiQuestionsController';
-import { createMaterialsController } from '@/controllers/materials/createMaterialsController';
-import { createQuestionsController } from '@/controllers/questions/createQuestionsController';
-import { createReviewAttemptsController } from '@/controllers/reviewAttempts/createReviewAttemptsController';
-import { createReviewTestsController } from '@/controllers/reviewTests/createReviewTestsController';
-import { createS3Controller } from '@/controllers/s3/createS3Controller';
+// Module: createControllers responsibilities.
+
+import { analyzePaperController } from '@/controllers/bedrock';
+import { getDashboardController } from '@/controllers/dashboard';
+import { kanjiController } from '@/controllers/kanji';
+import {
+  generateReadingController,
+  patchKanjiQuestionController,
+  verifyKanjiQuestionController,
+} from '@/controllers/kanjiQuestions';
+import { materialsController } from '@/controllers/materials';
+import { questionsController } from '@/controllers/questions';
+import { listReviewAttemptsController } from '@/controllers/reviewAttempts';
+import { reviewTestCandidatesController } from '@/controllers/reviewTestCandidates';
+import {
+  createReviewTestController,
+  deleteReviewTestController,
+  getReviewTestController,
+  getReviewTestPdfController,
+  listReviewTestTargetsController,
+  listReviewTestsController,
+  searchReviewTestsController,
+  submitReviewTestResultsController,
+  updateReviewTestStatusController,
+} from '@/controllers/reviewTests';
+import { getUploadUrlController } from '@/controllers/s3';
 
 import type { Services } from '@/services/createServices';
 
+/** Type definition for Controllers. */
 export type Controllers = {
-  bedrock: ReturnType<typeof createBedrockController>;
-  dashboard: ReturnType<typeof createDashboardController>;
-  kanji: ReturnType<typeof createKanjiController>;
-  kanjiQuestions: ReturnType<typeof createKanjiQuestionsController>;
-  materials: ReturnType<typeof createMaterialsController>;
-  questions: ReturnType<typeof createQuestionsController>;
-  reviewAttempts: ReturnType<typeof createReviewAttemptsController>;
-  reviewTests: ReturnType<typeof createReviewTestsController>;
-  s3: ReturnType<typeof createS3Controller>;
+  bedrock: ReturnType<typeof analyzePaperController>;
+  dashboard: ReturnType<typeof getDashboardController>;
+  kanji: ReturnType<typeof kanjiController>;
+  kanjiQuestions: ReturnType<typeof generateReadingController> &
+    ReturnType<typeof patchKanjiQuestionController> &
+    ReturnType<typeof verifyKanjiQuestionController>;
+  materials: ReturnType<typeof materialsController>;
+  questions: ReturnType<typeof questionsController>;
+  reviewAttempts: ReturnType<typeof listReviewAttemptsController>;
+  reviewTestCandidates: ReturnType<typeof reviewTestCandidatesController>;
+  reviewTests: ReturnType<typeof listReviewTestsController> &
+    ReturnType<typeof searchReviewTestsController> &
+    ReturnType<typeof createReviewTestController> &
+    ReturnType<typeof getReviewTestController> &
+    ReturnType<typeof getReviewTestPdfController> &
+    ReturnType<typeof updateReviewTestStatusController> &
+    ReturnType<typeof deleteReviewTestController> &
+    ReturnType<typeof submitReviewTestResultsController> &
+    ReturnType<typeof listReviewTestTargetsController>;
+  s3: ReturnType<typeof getUploadUrlController>;
 };
 
+/** Creates controllers. */
 export const createControllers = (services: Services): Controllers => {
   return {
-    bedrock: createBedrockController(services),
-    dashboard: createDashboardController(services),
-    kanji: createKanjiController(services),
-    kanjiQuestions: createKanjiQuestionsController(services),
-    materials: createMaterialsController(services),
-    questions: createQuestionsController(services),
-    reviewAttempts: createReviewAttemptsController(services),
-    reviewTests: createReviewTestsController(services),
-    s3: createS3Controller(services),
+    bedrock: analyzePaperController(services),
+    dashboard: getDashboardController(services),
+    kanji: kanjiController(services),
+    kanjiQuestions: {
+      ...generateReadingController(services),
+      ...patchKanjiQuestionController(services),
+      ...verifyKanjiQuestionController(services),
+    },
+    materials: materialsController(services),
+    questions: questionsController(services),
+    reviewAttempts: listReviewAttemptsController(services),
+    reviewTestCandidates: reviewTestCandidatesController(services),
+    reviewTests: {
+      ...listReviewTestsController(services),
+      ...searchReviewTestsController(services),
+      ...createReviewTestController(services),
+      ...getReviewTestController(services),
+      ...getReviewTestPdfController(services),
+      ...updateReviewTestStatusController(services),
+      ...deleteReviewTestController(services),
+      ...submitReviewTestResultsController(services),
+      ...listReviewTestTargetsController(services),
+    },
+    s3: getUploadUrlController(services),
   };
 };

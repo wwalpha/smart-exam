@@ -1,27 +1,16 @@
+// Module: listReviewAttemptsController responsibilities.
+
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedQuery } from '@/types/express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import { z } from 'zod';
-
-import { REVIEW_MODE } from '@smart-exam/api-types';
 import type { ListReviewAttemptsResponse, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
-
-import { SubjectIdSchema } from '@/lib/zodSchemas';
 import type { Services } from '@/services/createServices';
 
-const ReviewModeSchema = z.enum([REVIEW_MODE.QUESTION, REVIEW_MODE.KANJI]);
+import { ListReviewAttemptsQuerySchema } from './listReviewAttemptsController.schema';
 
-const queryString = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string());
-const queryStringOptional = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string().optional());
-
-export const createReviewAttemptsController = (services: Services) => {
-  const ListReviewAttemptsQuerySchema = z.object({
-    targetType: queryString().pipe(ReviewModeSchema),
-    targetId: queryString().pipe(z.string().min(1)),
-    subject: queryStringOptional().pipe(SubjectIdSchema.optional()),
-  });
-
+/** Creates list review attempts controller. */
+export const listReviewAttemptsController = (services: Services) => {
   const listReviewAttempts: AsyncHandler<
     ParamsDictionary,
     ListReviewAttemptsResponse,

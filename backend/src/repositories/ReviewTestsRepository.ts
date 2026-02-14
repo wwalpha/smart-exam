@@ -1,9 +1,13 @@
+// Module: ReviewTestsRepository responsibilities.
+
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
 import type { ReviewTestTable } from '../types/db';
 
+
 const TABLE_NAME = ENV.TABLE_REVIEW_TESTS;
 
+/** ReviewTestsRepository. */
 export const ReviewTestsRepository = {
   get: async (testId: string): Promise<ReviewTestTable | null> => {
     const result = await dbHelper.get<ReviewTestTable>({

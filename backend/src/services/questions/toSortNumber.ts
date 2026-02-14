@@ -1,3 +1,6 @@
+// Module: toSortNumber responsibilities.
+
+/** Converts data with to sort number. */
 export const toSortNumber = (canonicalKey: string): number => {
   const head = canonicalKey.split('-')[0] ?? '';
   const value = Number.parseInt(head, 10);

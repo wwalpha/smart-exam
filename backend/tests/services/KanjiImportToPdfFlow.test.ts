@@ -8,17 +8,14 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { ReviewTestDetail } from '@smart-exam/api-types';
 
 describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)', () => {
-  it('keeps DRAFT out of OPEN candidates until verify, then generates PDF for VERIFIED', async () => {
+  it('imports verified kanji question and generates worksheet PDF', async () => {
     type WordMasterItem = {
       wordId: string;
       subject: string;
       question: string;
       answer: string;
-      promptText?: string;
-      answerKanji?: string;
       readingHiragana?: string;
       underlineSpec?: { type: 'promptSpan'; start: number; length: number };
-      status?: 'DRAFT' | 'GENERATED' | 'VERIFIED' | 'ERROR';
     };
 
     const wordMasters = new Map<string, WordMasterItem>();
@@ -86,7 +83,6 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
 
     const imported = await kanjiService.importKanji({
       subject: '1',
-      importType: 'QUESTIONS',
       fileContent: '彼はけいせいを説明した。|形成|2026-02-01,OK|2026-02-05,NG\n',
     });
 
@@ -94,20 +90,16 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
     const id = imported.questionIds?.[0];
     expect(id).toBeTruthy();
 
-    // import時点では OPEN は作られない（DRAFT混入事故防止）
-    expect(candidateParams.some((c) => c.status === 'OPEN')).toBe(false);
+    // import時点で印刷に必要なフィールドが保存される
+    const w = wordMasters.get(String(id));
+    expect(w?.readingHiragana).toBe('けいせい');
+    expect(w?.underlineSpec).toEqual({ type: 'promptSpan', start: 2, length: 4 });
 
-    await kanjiQuestionsService.generateReading(String(id));
-    const verified = await kanjiQuestionsService.verify(String(id));
-    expect(verified.status).toBe('VERIFIED');
-
-    // verify時に OPEN が作られる
+    // verify API は候補OPENを保証する（既に存在すれば作らない）
+    await kanjiQuestionsService.verify(String(id));
     expect(candidateParams.some((c) => c.status === 'OPEN')).toBe(true);
 
-    const w = wordMasters.get(String(id));
-    expect(w?.status).toBe('VERIFIED');
-
-    const promptText = String(w?.promptText ?? '');
+    const questionText = String(w?.question ?? '');
 
     const review: ReviewTestDetail = {
       id: 't1',
@@ -126,12 +118,10 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
         testId: 't1',
         targetType: 'KANJI',
         targetId: String(id),
-        questionText: promptText,
-        promptText,
-        answerKanji: w?.answerKanji,
+        questionText,
+        answerText: w?.answer,
         readingHiragana: w?.readingHiragana,
         underlineSpec: w?.underlineSpec,
-        status: 'VERIFIED',
       })),
     };
 

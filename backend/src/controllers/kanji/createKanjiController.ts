@@ -1,8 +1,9 @@
+// Module: createKanjiController responsibilities.
+
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody } from '@/types/express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import { z } from 'zod';
 
 import type {
   CreateKanjiRequest,
@@ -22,35 +23,17 @@ import type {
   UpdateKanjiRequest,
   UpdateKanjiResponse,
 } from '@smart-exam/api-types';
-
-import { SubjectIdSchema } from '@/lib/zodSchemas';
 import type { Services } from '@/services/createServices';
 
-export const CreateKanjiBodySchema = z.object({
-  kanji: z.string().min(1),
-  reading: z.string().optional(),
-  subject: SubjectIdSchema,
-});
+import {
+  CreateKanjiBodySchema,
+  DeleteManyKanjiBodySchema,
+  ImportKanjiBodySchema,
+  SearchKanjiBodySchema,
+} from './createKanjiController.schema';
 
-export const SearchKanjiBodySchema = z.object({
-  q: z.string().optional(),
-  reading: z.string().optional(),
-  subject: SubjectIdSchema.optional(),
-  limit: z.number().int().positive().optional(),
-  cursor: z.string().optional(),
-});
-
-export const ImportKanjiBodySchema = z.object({
-  fileContent: z.string().min(1),
-  subject: SubjectIdSchema,
-  importType: z.enum(['MASTER', 'QUESTIONS']).optional(),
-});
-
-export const DeleteManyKanjiBodySchema = z.object({
-  kanjiIds: z.array(z.string().min(1)).min(1),
-});
-
-export const createKanjiController = (services: Services) => {
+/** Creates kanji controller. */
+export const kanjiController = (services: Services) => {
   const listKanji: AsyncHandler<ParamsDictionary, KanjiListResponse, Record<string, never>, ParsedQs> = async (
     _req,
     res,

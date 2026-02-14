@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Request, Response } from 'express';
-import { createMaterialsController } from '@/controllers/materials/createMaterialsController';
+import { materialsController } from '@/controllers/materials';
 import type { Services } from '@/services';
 
 describe('materialFile handler', () => {
@@ -15,7 +15,7 @@ describe('materialFile handler', () => {
       },
     } as unknown as Services;
 
-    const controller = createMaterialsController(services);
+    const controller = materialsController(services);
 
     const req = {
       params: { materialId: 'm1', fileId: 'abc' },

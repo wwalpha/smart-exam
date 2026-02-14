@@ -1,8 +1,9 @@
+// Module: createQuestionsController responsibilities.
+
 import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody } from '@/types/express';
 import type { ParsedQs } from 'qs';
 import type { ParamsDictionary } from 'express-serve-static-core';
-import { z } from 'zod';
 
 import type {
   CreateQuestionParams,
@@ -24,28 +25,16 @@ import type {
   UpsertQuestionReviewCandidateRequest,
   UpsertQuestionReviewCandidateResponse,
 } from '@smart-exam/api-types';
-
-import { SubjectIdSchema } from '@/lib/zodSchemas';
 import type { Services } from '@/services/createServices';
 
-export const SearchQuestionsBodySchema = z.object({
-  keyword: z.string().optional(),
-  subject: SubjectIdSchema.optional(),
-});
+import {
+  CreateQuestionBodySchema,
+  SearchQuestionsBodySchema,
+  UpdateQuestionBodySchema,
+} from './createQuestionsController.schema';
 
-export const CreateQuestionBodySchema = z.object({
-  canonicalKey: z.string().min(1),
-  subject: SubjectIdSchema,
-  tags: z.array(z.string().min(1)).optional(),
-});
-
-export const UpdateQuestionBodySchema = z.object({
-  canonicalKey: z.string().min(1).optional(),
-  subject: SubjectIdSchema.optional(),
-  tags: z.array(z.string().min(1)).optional(),
-});
-
-export const createQuestionsController = (services: Services) => {
+/** Creates questions controller. */
+export const questionsController = (services: Services) => {
   const listQuestions: AsyncHandler<
     ListQuestionsParams,
     QuestionListResponse,

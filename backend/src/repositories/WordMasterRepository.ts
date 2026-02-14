@@ -1,10 +1,14 @@
+// Module: WordMasterRepository responsibilities.
+
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
 import { WordMasterTable } from '../types/db';
 import type { SubjectId } from '@smart-exam/api-types';
 
+
 const TABLE_NAME = ENV.TABLE_WORD_MASTER;
 
+/** WordMasterRepository. */
 export const WordMasterRepository = {
   create: async (item: WordMasterTable): Promise<void> => {
     await dbHelper.put({
@@ -55,10 +59,7 @@ export const WordMasterRepository = {
 
   updateKanjiQuestionFields: async (
     wordId: string,
-    updates: Pick<
-      Partial<WordMasterTable>,
-      'promptText' | 'answerKanji' | 'readingHiragana' | 'underlineSpec' | 'status' | 'ai' | 'error'
-    >,
+    updates: Pick<Partial<WordMasterTable>, 'readingHiragana' | 'underlineSpec'>,
   ): Promise<WordMasterTable | null> => {
     return WordMasterRepository.update(wordId, updates);
   },

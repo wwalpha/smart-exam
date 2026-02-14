@@ -1,4 +1,8 @@
+// Module: createQuestionsService responsibilities.
+
 import type {
+
+
   CreateQuestionRequest,
   Question,
   QuestionListResponse,
@@ -13,6 +17,7 @@ import type { MaterialQuestionTable } from '@/types/db';
 import type { Repositories } from '@/repositories/createRepositories';
 import { toSortNumber } from './toSortNumber';
 
+/** Type definition for QuestionsService. */
 export type QuestionsService = {
   listQuestions: (materialId: string) => Promise<QuestionListResponse['datas']>;
   createQuestion: (data: CreateQuestionRequest & { materialId: string }) => Promise<Question>;
@@ -24,6 +29,7 @@ export type QuestionsService = {
   recalculateCandidatesForMaterial: (params: { materialId: string; registeredDate: string }) => Promise<void>;
 };
 
+/** Creates questions service. */
 export const createQuestionsService = (repositories: Repositories): QuestionsService => {
   const listQuestions: QuestionsService['listQuestions'] = async (materialId) => {
     const rows = await repositories.questions.listByMaterialId(materialId);

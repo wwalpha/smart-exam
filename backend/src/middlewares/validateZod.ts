@@ -1,5 +1,8 @@
+// Module: validateZod responsibilities.
+
 import type { RequestHandler } from 'express';
 import { z } from 'zod';
+
 
 const normalizePath = (path: readonly (string | number | symbol)[]): Array<string | number> => {
   return path.map((p) => {
@@ -64,14 +67,17 @@ const validate = (params: {
   };
 };
 
+/** validateBody. */
 export const validateBody = (schema: z.ZodType, options?: ValidateOptions): RequestHandler => {
   return validate({ schema, target: 'body', options });
 };
 
+/** validateQuery. */
 export const validateQuery = (schema: z.ZodType): RequestHandler => {
   return validate({ schema, target: 'query' });
 };
 
+/** validateParams. */
 export const validateParams = (schema: z.ZodType): RequestHandler => {
   return validate({ schema, target: 'params' });
 };

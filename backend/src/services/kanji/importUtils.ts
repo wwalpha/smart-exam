@@ -1,5 +1,9 @@
+// Module: importUtils responsibilities.
+
 import { DateUtils } from '@/lib/dateUtils';
 
+
+/** Type definition for ImportedHistoryEntry. */
 export type ImportedHistoryEntry = {
   /** 実施日 (YYYY-MM-DD) */
   submittedDate: string;
@@ -37,6 +41,7 @@ const parseHistoryTokens = (tokens: string[]): ImportedHistoryEntry[] => {
 //   return DateUtils.parseYmdSlashToIso(ymd);
 // };
 
+/** parsePipeLine. */
 export const parsePipeLine = (line: string): { kanji: string; reading: string; histories: ImportedHistoryEntry[] } => {
   const parts = line.split('|').map((x) => x.trim());
   if (parts.length < 2) {
@@ -51,11 +56,12 @@ export const parsePipeLine = (line: string): { kanji: string; reading: string; h
   return { kanji, reading, histories };
 };
 
+/** parsePipeQuestionLine. */
 export const parsePipeQuestionLine = (
   line: string,
 ): {
-  promptText: string;
-  answerKanji: string;
+  question: string;
+  answer: string;
   histories: ImportedHistoryEntry[];
 } => {
   const parts = line.split('|').map((x) => x.trim());
@@ -63,10 +69,10 @@ export const parsePipeQuestionLine = (
     throw new Error('フォーマットが不正です');
   }
 
-  const promptText = parts[0];
-  const answerKanji = parts[1];
+  const question = parts[0];
+  const answer = parts[1];
 
   const histories = parseHistoryTokens(parts.slice(2));
 
-  return { promptText, answerKanji, histories };
+  return { question, answer, histories };
 };

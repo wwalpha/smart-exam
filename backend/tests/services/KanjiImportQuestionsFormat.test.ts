@@ -4,11 +4,20 @@ import { createKanjiService } from '@/services/kanji/createKanjiService';
 import type { Repositories } from '@/repositories/createRepositories';
 
 describe('KanjiService.importKanji (QUESTIONS format)', () => {
-  it('creates DRAFT kanji questions from "prompt|answer" lines', async () => {
+  it('creates kanji questions with reading/underline from "prompt|answer" lines', async () => {
     const repositories = {
       wordMaster: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         create: vi.fn().mockResolvedValue(undefined),
+      },
+      reviewTestCandidates: {
+        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+      },
+      bedrock: {
+        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
+          readingHiragana: 'けいせい',
+          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
+        }),
       },
     } as unknown as Repositories;
 
@@ -16,7 +25,6 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
 
     const res = await service.importKanji({
       subject: '1',
-      importType: 'QUESTIONS',
       fileContent: '彼はけいせいを説明した。|形成\n',
     });
 
@@ -28,12 +36,10 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(repositories.wordMaster.create).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: '1',
-        promptText: '彼はけいせいを説明した。',
-        answerKanji: '形成',
-        status: 'DRAFT',
-        // backward-compat required fields
-        question: '形成',
-        answer: '',
+        question: '彼はけいせいを説明した。',
+        answer: '形成',
+        readingHiragana: 'けいせい',
+        underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
       }),
     );
   });
@@ -49,7 +55,6 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
 
     const res = await service.importKanji({
       subject: '1',
-      importType: 'QUESTIONS',
       fileContent: 'no-separator\na|b|c\n|abc\nabc|\n',
     });
 
@@ -70,11 +75,22 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
       wordMaster: {
         listKanji: vi.fn().mockResolvedValue([
           {
-            promptText: '彼はけいせいを説明した。',
-            answerKanji: '形成',
+            question: '彼はけいせいを説明した。',
+            answer: '形成',
+            // 既存データ扱いにするため（worksheet判定）
+            underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
           },
         ] as unknown),
         create: vi.fn().mockResolvedValue(undefined),
+      },
+      reviewTestCandidates: {
+        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+      },
+      bedrock: {
+        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
+          readingHiragana: 'めいかく',
+          underlineSpec: { type: 'promptSpan', start: 6, length: 4 },
+        }),
       },
     } as unknown as Repositories;
 
@@ -82,7 +98,6 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
 
     const res = await service.importKanji({
       subject: '1',
-      importType: 'QUESTIONS',
       fileContent: [
         '彼はけいせいを説明した。|形成', // existing duplicate
         '駅までの道をめいかくに示す|明確',
@@ -96,7 +111,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(repositories.wordMaster.create).toHaveBeenCalledTimes(1);
   });
 
-  it('rebuilds candidates from histories but keeps final candidate EXCLUDED (no OPEN) to avoid DRAFT being due', async () => {
+  it('rebuilds candidates from histories and creates a final candidate (OPEN/EXCLUDED)', async () => {
     const repositories = {
       wordMaster: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
@@ -106,20 +121,26 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
         createCandidate: vi.fn().mockResolvedValue({} as unknown),
       },
+      bedrock: {
+        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
+          readingHiragana: 'けいせい',
+          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
+        }),
+      },
     } as unknown as Repositories;
 
     const service = createKanjiService(repositories);
 
     const res = await service.importKanji({
       subject: '1',
-      importType: 'QUESTIONS',
       fileContent: '彼はけいせいを説明した。|形成|2026-02-01,OK|2026-02-05,NG\n',
     });
 
     expect(res.successCount).toBe(1);
     expect(res.errorCount).toBe(0);
 
-    const created = (repositories.wordMaster.create as unknown as { mock: { calls: unknown[][] } }).mock.calls[0][0] as {
+    const created = (repositories.wordMaster.create as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0][0] as {
       wordId: string;
     };
     const id = created.wordId;
@@ -129,10 +150,9 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
       targetId: id,
     });
 
-    const statuses = (repositories.reviewTestCandidates.createCandidate as unknown as { mock: { calls: unknown[][] } }).mock.calls.map(
-      (c) => (c[0] as { status: string }).status,
-    );
-    expect(statuses).toContain('EXCLUDED');
-    expect(statuses).not.toContain('OPEN');
+    const statuses = (
+      repositories.reviewTestCandidates.createCandidate as unknown as { mock: { calls: unknown[][] } }
+    ).mock.calls.map((c) => (c[0] as { status: string }).status);
+    expect(statuses.some((s) => s === 'OPEN' || s === 'EXCLUDED')).toBe(true);
   });
 });

@@ -1,9 +1,13 @@
+// Module: reviewTestPdfService responsibilities.
+
 import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { ReviewTestDetail } from '@smart-exam/api-types';
 
 import { ApiError } from '@/lib/apiError';
 
+
+/** ReviewTestPdfService. */
 export const ReviewTestPdfService = {
   generatePdfBuffer: async (
     review: ReviewTestDetail,
@@ -136,7 +140,7 @@ export const ReviewTestPdfService = {
     };
 
     const renderKanjiWorksheetLayout = (params?: { includeGenerated?: boolean }): void => {
-      const includeGenerated = params?.includeGenerated ?? false;
+      void params;
 
       // A4横向き
       const pageWidth = a4Height;
@@ -155,12 +159,17 @@ export const ReviewTestPdfService = {
       const baseFontSize = 9.5;
       const minFontSize = 8;
 
-      const allowedStatus = new Set<string>(includeGenerated ? ['VERIFIED', 'GENERATED'] : ['VERIFIED']);
-      const candidates = review.items.filter((x) => allowedStatus.has(String((x as { status?: string }).status)));
+      const candidates = review.items.filter(
+        (x) =>
+          String(x.questionText ?? '').trim().length > 0 &&
+          String(x.answerText ?? '').trim().length > 0 &&
+          String(x.readingHiragana ?? '').trim().length > 0 &&
+          Boolean(x.underlineSpec),
+      );
       const items = candidates.slice(0, itemsPerPage);
 
       if (items.length === 0) {
-        throw new ApiError('No printable kanji items (status filter)', 400, ['no_printable_items']);
+        throw new ApiError('No printable kanji items (missing required fields)', 400, ['no_printable_items']);
       }
 
       const page = pdfDoc.addPage([pageWidth, pageHeight]);
@@ -264,13 +273,13 @@ export const ReviewTestPdfService = {
         const rowBottomY = rowTopY - rowPitch;
 
         const item = items[local];
-        const promptText = String((item as { promptText?: string }).promptText ?? '').trim();
+        const promptText = String((item as { questionText?: string }).questionText ?? '').trim();
         const readingHiragana = String((item as { readingHiragana?: string }).readingHiragana ?? '').trim();
         const underlineSpec = (item as { underlineSpec?: { type: 'promptSpan'; start: number; length: number } })
           .underlineSpec;
 
         if (!promptText || !readingHiragana || !underlineSpec) {
-          throw new ApiError('Missing promptText/readingHiragana/underlineSpec', 400, ['missing_kanji_fields']);
+          throw new ApiError('Missing questionText/readingHiragana/underlineSpec', 400, ['missing_kanji_fields']);
         }
 
         const slice = promptText.slice(underlineSpec.start, underlineSpec.start + underlineSpec.length);

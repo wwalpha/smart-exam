@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-// NOTE: This test verifies that KANJI review test creation only uses VERIFIED items,
-// so the PDF generation step won't fail with no_printable_items.
+// NOTE: This test verifies that KANJI review test creation only uses printable items
+// (i.e., required kanji-question fields exist), so PDF generation won't fail with no_printable_items.
 describe('ReviewTestsService.createReviewTest (KANJI)', () => {
-  it('filters out non-VERIFIED candidates before selecting', async () => {
+  it('filters out non-printable candidates before selecting', async () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
     const { createReviewTestsService } = await import('@/services/reviewTests/createReviewTestsService');
@@ -65,22 +65,18 @@ describe('ReviewTestsService.createReviewTest (KANJI)', () => {
             return {
               wordId: 'w-verified',
               subject: '1',
-              question: '形成',
-              answer: '',
-              promptText: 'チームのけいせいが不利なまま試合が進む。',
-              answerKanji: '形成',
+              question: 'チームのけいせいが不利なまま試合が進む。',
+              answer: '形成',
               readingHiragana: 'けいせい',
               underlineSpec: { type: 'promptSpan', start: 4, length: 4 },
-              status: 'VERIFIED',
             } as unknown;
           }
           if (id === 'w-draft') {
             return {
               wordId: 'w-draft',
               subject: '1',
-              question: '形成',
-              answer: '',
-              status: 'DRAFT',
+              question: 'チームのけいせいが不利なまま試合が進む。',
+              answer: '形成',
             } as unknown;
           }
           return null;
@@ -122,7 +118,7 @@ describe('ReviewTestsService.createReviewTest (KANJI)', () => {
     expect(repositories.wordMaster.get).toHaveBeenCalledWith('w-draft');
     expect(repositories.wordMaster.get).toHaveBeenCalledWith('w-verified');
 
-    // should lock only the printable (VERIFIED) candidate
+    // should lock only the printable candidate
     expect(repositories.reviewTestCandidates.lockCandidateIfUnlocked).toHaveBeenCalledTimes(1);
 
     expect(repositories.s3.putObject).toHaveBeenCalledTimes(1);

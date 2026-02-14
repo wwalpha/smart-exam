@@ -2,17 +2,14 @@ import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody } from '@/types/express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import { z } from 'zod';
 
 import type { AnalyzePaperRequest, AnalyzePaperResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-export const AnalyzePaperBodySchema = z.object({
-  s3Key: z.string().min(1),
-  subject: z.enum(['math', 'science', 'society']),
-});
+import { AnalyzePaperBodySchema } from './analyzePaperController.schema';
 
-export const createBedrockController = (services: Services) => {
+/** Creates analyze paper controller. */
+export const analyzePaperController = (services: Services) => {
   const analyzePaper: AsyncHandler<
     ParamsDictionary,
     AnalyzePaperResponse | { error: string },

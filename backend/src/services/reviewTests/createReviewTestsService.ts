@@ -1,4 +1,8 @@
+// Module: createReviewTestsService responsibilities.
+
 import type {
+
+
   CreateReviewTestRequest,
   ReviewMode,
   ReviewTest,
@@ -21,6 +25,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 import { sortTargets, toApiReviewTest, toReviewTargetKey } from './internal';
 import { ReviewTestPdfService } from './reviewTestPdfService';
 
+/** Type definition for ReviewTestsService. */
 export type ReviewTestsService = {
   listReviewTests: () => Promise<ReviewTest[]>;
   searchReviewTests: (params: SearchReviewTestsRequest) => Promise<SearchReviewTestsResponse>;
@@ -50,7 +55,22 @@ type ReviewCandidate = {
   candidateKey?: string;
 };
 
+/** Creates review tests service. */
 export const createReviewTestsService = (repositories: Repositories): ReviewTestsService => {
+  const isPrintableKanjiWorksheetWord = (w: WordMasterTable): boolean => {
+    return Boolean(
+      String(w.question ?? '').trim() &&
+        String(w.answer ?? '').trim() &&
+        String(w.readingHiragana ?? '').trim() &&
+        w.underlineSpec &&
+        w.underlineSpec.type === 'promptSpan' &&
+        Number.isInteger(w.underlineSpec.start) &&
+        Number.isInteger(w.underlineSpec.length) &&
+        w.underlineSpec.start >= 0 &&
+        w.underlineSpec.length > 0,
+    );
+  };
+
   const listReviewTests: ReviewTestsService['listReviewTests'] = async () => {
     const items: ReviewTestTable[] = await repositories.reviewTests.scanAll();
 
@@ -152,8 +172,7 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
       });
     }
 
-    // KANJI worksheet は VERIFIED のみを印刷対象にする
-    // （DRAFT/GENERATED で候補が OPEN になっているケースがあると PDF 生成時に落ちるため、ここで除外する）
+    // KANJI worksheet は印刷に必要なフィールドが揃っているもののみを対象にする
     if (req.mode === 'KANJI' && candidates.length > 0) {
       const ids = Array.from(new Set(candidates.map((c) => c.targetId)));
       const words = await Promise.all(ids.map((id) => repositories.wordMaster.get(id)));
@@ -161,7 +180,7 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
 
       const printableIds = new Set(
         Array.from(byId.values())
-          .filter((w) => String(w.status ?? '') === 'VERIFIED')
+          .filter((w) => isPrintableKanjiWorksheetWord(w))
           .map((w) => w.wordId),
       );
 
@@ -199,7 +218,7 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
     const pdfS3Key = req.mode === 'KANJI' ? `review-tests/${testId}.pdf` : undefined;
 
     if (req.mode === 'KANJI' && targetIds.length === 0) {
-      throw new ApiError('No printable kanji items (no VERIFIED candidates)', 400, ['no_printable_items']);
+      throw new ApiError('No printable kanji items (missing required fields)', 400, ['no_printable_items']);
     }
 
     const testRow: ReviewTestTable = {
@@ -272,17 +291,12 @@ export const createReviewTestsService = (repositories: Repositories): ReviewTest
             testId,
             targetType: 'KANJI',
             targetId,
-            kanji: w?.question,
-            reading: w?.answer,
+            kanji: w?.answer,
+            reading: w?.readingHiragana,
             questionText: w?.question,
             answerText: w?.answer,
-
-            // 漢字問題（本文内下線）用
-            promptText: w?.promptText,
-            answerKanji: w?.answerKanji,
             readingHiragana: w?.readingHiragana,
             underlineSpec: w?.underlineSpec,
-            status: w?.status,
             ...(typeof isCorrect === 'boolean' ? { isCorrect } : {}),
           };
         }),
