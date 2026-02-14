@@ -31,7 +31,7 @@ resource "aws_lambda_function" "api" {
     ignore_changes = [source_code_hash]
   }
 
-  timeout     = 30
+  timeout     = 300
   memory_size = 1024
 
   environment {
