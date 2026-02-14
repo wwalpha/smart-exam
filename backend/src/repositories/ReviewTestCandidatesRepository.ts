@@ -1,21 +1,21 @@
-// Module: ExamCandidatesRepository responsibilities.
+// Module: ReviewTestCandidatesRepository responsibilities.
 
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
 import { createUuid } from '../lib/uuid';
 import { DateUtils } from '@/lib/dateUtils';
 import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
-import type { ExamCandidateTable } from '../types/db';
+import type { ReviewTestCandidateTable } from '../types/db';
 
 const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 const INDEX_GSI_SUBJECT_NEXT_TIME = 'gsi_subject_next_time';
 const INDEX_GSI_QUESTION_ID_CREATED_AT = 'gsi_question_id_created_at';
 
-type ExamCandidateTableRaw = Omit<ExamCandidateTable, 'correctCount'> & {
+type ReviewTestCandidateTableRaw = Omit<ReviewTestCandidateTable, 'correctCount'> & {
   correctCount?: number;
 };
 
-const normalizeCandidate = (raw: ExamCandidateTableRaw): ExamCandidateTable => {
+const normalizeCandidate = (raw: ReviewTestCandidateTableRaw): ReviewTestCandidateTable => {
   return {
     ...raw,
     correctCount: typeof raw.correctCount === 'number' ? raw.correctCount : 0,
@@ -26,9 +26,9 @@ const nowIso = (): string => DateUtils.now();
 
 const toCandidateKeyUpperBound = (ymd: string): string => `${ymd}#~`;
 
-/** ExamCandidatesRepository. */
-export const ExamCandidatesRepository = {
-  bulkCreateCandidates: async (items: ExamCandidateTable[]): Promise<void> => {
+/** ReviewTestCandidatesRepository. */
+export const ReviewTestCandidatesRepository = {
+  bulkCreateCandidates: async (items: ReviewTestCandidateTable[]): Promise<void> => {
     if (items.length === 0) return;
     await dbHelper.bulk(TABLE_NAME, items as unknown as Record<string, unknown>[]);
   },
@@ -41,12 +41,12 @@ export const ExamCandidatesRepository = {
     correctCount: number;
     status: 'OPEN' | 'EXCLUDED' | 'CLOSED';
     createdAtIso?: string;
-  }): Promise<ExamCandidateTable> => {
+  }): Promise<ReviewTestCandidateTable> => {
     const id = createUuid();
     const createdAt = params.createdAtIso ?? nowIso();
     const candidateKey = `${params.nextTime}#${id}`;
 
-    const item: ExamCandidateTable = {
+    const item: ReviewTestCandidateTable = {
       subject: params.subject,
       candidateKey,
       id,
@@ -68,8 +68,8 @@ export const ExamCandidatesRepository = {
     return item;
   },
 
-  listCandidatesByTargetId: async (params: { targetId: string }): Promise<ExamCandidateTable[]> => {
-    const result = await dbHelper.query<ExamCandidateTableRaw>({
+  listCandidatesByTargetId: async (params: { targetId: string }): Promise<ReviewTestCandidateTable[]> => {
+    const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
       TableName: TABLE_NAME,
       IndexName: INDEX_GSI_QUESTION_ID_CREATED_AT,
       KeyConditionExpression: '#questionId = :questionId',
@@ -83,7 +83,7 @@ export const ExamCandidatesRepository = {
   },
 
   deleteCandidatesByTargetId: async (params: { subject: SubjectId; targetId: string }): Promise<void> => {
-    const items = await ExamCandidatesRepository.listCandidatesByTargetId({ targetId: params.targetId });
+    const items = await ReviewTestCandidatesRepository.listCandidatesByTargetId({ targetId: params.targetId });
     const filtered = items.filter((x) => x.subject === params.subject);
     await Promise.all(
       filtered.map(async (item) => {
@@ -98,8 +98,8 @@ export const ExamCandidatesRepository = {
   getLatestCandidateByTargetId: async (params: {
     subject: SubjectId;
     targetId: string;
-  }): Promise<ExamCandidateTable | null> => {
-    const result = await dbHelper.query<ExamCandidateTableRaw>({
+  }): Promise<ReviewTestCandidateTable | null> => {
+    const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
       TableName: TABLE_NAME,
       IndexName: INDEX_GSI_QUESTION_ID_CREATED_AT,
       KeyConditionExpression: '#questionId = :questionId',
@@ -116,8 +116,8 @@ export const ExamCandidatesRepository = {
   getLatestOpenCandidateByTargetId: async (params: {
     subject: SubjectId;
     targetId: string;
-  }): Promise<ExamCandidateTable | null> => {
-    const result = await dbHelper.query<ExamCandidateTableRaw>({
+  }): Promise<ReviewTestCandidateTable | null> => {
+    const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
       TableName: TABLE_NAME,
       IndexName: INDEX_GSI_QUESTION_ID_CREATED_AT,
       KeyConditionExpression: '#questionId = :questionId',
@@ -139,12 +139,12 @@ export const ExamCandidatesRepository = {
   },
 
   deleteLatestOpenCandidateByTargetId: async (params: { subject: SubjectId; targetId: string }): Promise<void> => {
-    const open = await ExamCandidatesRepository.getLatestOpenCandidateByTargetId({
+    const open = await ReviewTestCandidatesRepository.getLatestOpenCandidateByTargetId({
       subject: params.subject,
       targetId: params.targetId,
     });
     if (!open) return;
-    await ExamCandidatesRepository.deleteCandidate({
+    await ReviewTestCandidatesRepository.deleteCandidate({
       subject: params.subject,
       candidateKey: open.candidateKey,
     });
@@ -211,7 +211,7 @@ export const ExamCandidatesRepository = {
     subject: SubjectId;
     mode?: ReviewMode;
     todayYmd: string;
-  }): Promise<ExamCandidateTable[]> => {
+  }): Promise<ReviewTestCandidateTable[]> => {
     const expNames: Record<string, string> = {
       '#subject': 'subject',
       '#candidateKey': 'candidateKey',
@@ -225,7 +225,7 @@ export const ExamCandidatesRepository = {
       ...(params.mode ? { ':mode': params.mode } : {}),
     };
 
-    const result = await dbHelper.query<ExamCandidateTableRaw>({
+    const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
       TableName: TABLE_NAME,
       IndexName: INDEX_GSI_SUBJECT_NEXT_TIME,
       KeyConditionExpression: '#subject = :subject AND #candidateKey <= :upper',
@@ -238,7 +238,7 @@ export const ExamCandidatesRepository = {
     return (result.Items ?? []).map(normalizeCandidate);
   },
 
-  listCandidates: async (params: { subject?: SubjectId; mode?: ReviewMode }): Promise<ExamCandidateTable[]> => {
+  listCandidates: async (params: { subject?: SubjectId; mode?: ReviewMode }): Promise<ReviewTestCandidateTable[]> => {
     const expAttrNames: Record<string, string> = {
       '#status': 'status',
       ...(params.mode ? { '#mode': 'mode' } : {}),
@@ -250,7 +250,7 @@ export const ExamCandidatesRepository = {
     const filterExp = params.mode ? '#status = :open AND #mode = :mode' : '#status = :open';
 
     if (params.subject) {
-      const result = await dbHelper.query<ExamCandidateTableRaw>({
+      const result = await dbHelper.query<ReviewTestCandidateTableRaw>({
         TableName: TABLE_NAME,
         KeyConditionExpression: '#subject = :subject',
         ExpressionAttributeNames: {
@@ -267,7 +267,7 @@ export const ExamCandidatesRepository = {
       return (result.Items ?? []).map(normalizeCandidate);
     }
 
-    const result = await dbHelper.scan<ExamCandidateTableRaw>({
+    const result = await dbHelper.scan<ReviewTestCandidateTableRaw>({
       TableName: TABLE_NAME,
       ExpressionAttributeNames: expAttrNames,
       ExpressionAttributeValues: expAttrValues,
@@ -278,13 +278,13 @@ export const ExamCandidatesRepository = {
   },
 
   deleteOpenCandidatesByTargetId: async (params: { subject: SubjectId; targetId: string }): Promise<void> => {
-    const open = await ExamCandidatesRepository.getLatestOpenCandidateByTargetId({
+    const open = await ReviewTestCandidatesRepository.getLatestOpenCandidateByTargetId({
       subject: params.subject,
       targetId: params.targetId,
     });
     if (!open) return;
 
-    await ExamCandidatesRepository.closeCandidateIfMatch({
+    await ReviewTestCandidatesRepository.closeCandidateIfMatch({
       subject: params.subject,
       candidateKey: open.candidateKey,
     });

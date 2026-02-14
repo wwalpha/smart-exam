@@ -86,10 +86,10 @@ resource "aws_dynamodb_table" "word_master" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for review test candidates.
+# DynamoDB table for exam candidates.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "review_test_candidates" {
-  name         = "${var.project_name}_test_candidates"
+resource "aws_dynamodb_table" "exam_candidates" {
+  name         = "${var.project_name}_exam_candidates"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "subject"
   range_key    = "candidateKey"
@@ -130,10 +130,10 @@ resource "aws_dynamodb_table" "review_test_candidates" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for review tests.
+# DynamoDB table for exam tests.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "review_tests" {
-  name         = "${var.project_name}_tests"
+resource "aws_dynamodb_table" "exam" {
+  name         = "${var.project_name}_exams"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "testId"
 
