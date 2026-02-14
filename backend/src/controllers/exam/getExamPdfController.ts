@@ -22,7 +22,7 @@ export const getExamPdfController = (services: Services) => {
 
     // ローカル検証用: S3 / presign を経由せずにPDFを直接返す
     if (direct) {
-      const pdf = await services.reviewTests.generateExamPdfBuffer(testId, { includeGenerated });
+      const pdf = await services.exams.generateExamPdfBuffer(testId, { includeGenerated });
       if (!pdf) {
         res.status(404).json({ error: 'Not Found' });
         return;
@@ -36,7 +36,7 @@ export const getExamPdfController = (services: Services) => {
       return;
     }
 
-    const result = await services.reviewTests.getExamPdfUrl(testId, { download });
+    const result = await services.exams.getExamPdfUrl(testId, { download });
     if (!result) {
       res.status(404).json({ error: 'Not Found' });
       return;

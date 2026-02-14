@@ -1,23 +1,23 @@
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { ReviewTestsService } from './createExamsService';
+import type { ExamsService } from './createExamsService';
 
-export const createDeleteReviewTest = (repositories: Repositories): ReviewTestsService['deleteExam'] => {
+export const createDeleteExam = (repositories: Repositories): ExamsService['deleteExam'] => {
   return async (testId): Promise<boolean> => {
-    const existing = await repositories.reviewTests.get(testId);
+    const existing = await repositories.exams.get(testId);
     if (!existing) return false;
 
     await Promise.all(
       (existing.questions ?? []).map(async (targetId) => {
         try {
-          const candidate = await repositories.reviewTestCandidates.getLatestCandidateByTargetId({
+          const candidate = await repositories.examCandidates.getLatestCandidateByTargetId({
             subject: existing.subject,
             targetId,
           });
           if (!candidate) return;
           if (candidate.testId !== testId) return;
 
-          await repositories.reviewTestCandidates.releaseLockIfMatch({
+          await repositories.examCandidates.releaseLockIfMatch({
             subject: existing.subject,
             candidateKey: candidate.candidateKey,
             testId,
@@ -30,7 +30,7 @@ export const createDeleteReviewTest = (repositories: Repositories): ReviewTestsS
       }),
     );
 
-    await repositories.reviewTests.delete(testId);
+    await repositories.exams.delete(testId);
 
     return true;
   };

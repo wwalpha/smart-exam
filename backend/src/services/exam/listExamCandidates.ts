@@ -1,14 +1,14 @@
 import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestCandidateTable } from '@/types/db';
+import type { ExamCandidateTable } from '@/types/db';
 
-import type { ReviewTestsService } from './createExamsService';
+import type { ExamsService } from './createExamsService';
 
-export const createListReviewTestCandidates = (
+export const createListExamCandidates = (
   repositories: Repositories,
-): ReviewTestsService['listExamCandidates'] => {
-  return async (params: { subject?: SubjectId; mode?: ReviewMode }): Promise<ReviewTestCandidateTable[]> => {
-    return await repositories.reviewTestCandidates.listCandidates(params);
+): ExamsService['listExamCandidates'] => {
+  return async (params: { subject?: SubjectId; mode?: ReviewMode }): Promise<ExamCandidateTable[]> => {
+    return await repositories.examCandidates.listCandidates(params);
   };
 };

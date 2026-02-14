@@ -164,10 +164,10 @@ export const QuestionAttemptHistoryListPage = () => {
               </TableHeader>
               <TableBody>
                 {dialog.attempts.map((a) => (
-                  <TableRow key={`${a.reviewTestId ?? ''}#${a.dateYmd}`}>
+                  <TableRow key={`${a.examId ?? ''}#${a.dateYmd}`}>
                     <TableCell>{a.dateYmd}</TableCell>
                     <TableCell>{a.isCorrect ? '正解' : '不正解'}</TableCell>
-                    <TableCell className="text-muted-foreground">{a.reviewTestId ?? '-'}</TableCell>
+                    <TableCell className="text-muted-foreground">{a.examId ?? '-'}</TableCell>
                   </TableRow>
                 ))}
                 {dialog.attempts.length === 0 ? (

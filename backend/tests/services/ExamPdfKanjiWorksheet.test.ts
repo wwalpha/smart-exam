@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 
-import { ReviewTestPdfService } from '@/services/exam/examPdfService';
-import type { ReviewTestDetail } from '@smart-exam/api-types';
+import { ExamPdfService } from '@/services/exam/examPdfService';
+import type { ExamDetail } from '@smart-exam/api-types';
 
-describe('ReviewTestPdfService (KANJI worksheet) smoke', () => {
+describe('ExamPdfService (KANJI worksheet) smoke', () => {
   it('generates a 1-page PDF for 60 printable items without throwing', async () => {
     const promptText = 'チームのけいせいが不利なまま試合が進む。';
-    const review: ReviewTestDetail = {
+    const review: ExamDetail = {
       id: 't1',
       testId: 't1',
       subject: '1',
@@ -31,7 +31,7 @@ describe('ReviewTestPdfService (KANJI worksheet) smoke', () => {
       })),
     };
 
-    const pdf = await ReviewTestPdfService.generatePdfBuffer(review);
+    const pdf = await ExamPdfService.generatePdfBuffer(review);
     expect(pdf.length).toBeGreaterThan(100);
 
     const doc = await PDFDocument.load(pdf);

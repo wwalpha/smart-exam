@@ -1,17 +1,17 @@
-import type { ReviewMode, ReviewTest, SubjectId } from '@smart-exam/api-types';
+import type { ReviewMode, Exam, SubjectId } from '@smart-exam/api-types';
 
 import { ApiError } from '@/lib/apiError';
 import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestCandidateTable, ReviewTestTable, WordMasterTable } from '@/types/db';
+import type { ExamCandidateTable, ExamTable, WordMasterTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from '@/services/kanji/computeKanjiQuestionFields';
 
-import type { ReviewTestsService } from './createExamsService';
-import { toApiReviewTest } from './internal';
-import { ReviewTestPdfService } from './examPdfService';
+import type { ExamsService } from './createExamsService';
+import { toApiExam } from './internal';
+import { ExamPdfService } from './examPdfService';
 
 type ReviewCandidate = {
   targetType: 'QUESTION' | 'KANJI';
@@ -23,11 +23,11 @@ type ReviewCandidate = {
   candidateKey?: string;
 };
 
-export const createCreateReviewTest = (deps: {
+export const createCreateExam = (deps: {
   repositories: Repositories;
-  getExam: ReviewTestsService['getExam'];
-  deleteExam: ReviewTestsService['deleteExam'];
-}): ReviewTestsService['createExam'] => {
+  getExam: ExamsService['getExam'];
+  deleteExam: ExamsService['deleteExam'];
+}): ExamsService['createExam'] => {
   const isPrintableKanjiWorksheetWord = (w: WordMasterTable): boolean => {
     return Boolean(
       String(w.question ?? '').trim() &&
@@ -54,10 +54,10 @@ export const createCreateReviewTest = (deps: {
     subject: SubjectId;
     mode?: ReviewMode;
     todayYmd?: string;
-  }): Promise<ReviewTestCandidateTable[]> => {
+  }): Promise<ExamCandidateTable[]> => {
     const today = params.todayYmd ?? DateUtils.todayYmd();
 
-    return deps.repositories.reviewTestCandidates.listDueCandidates({
+    return deps.repositories.examCandidates.listDueCandidates({
       subject: params.subject,
       mode: params.mode,
       todayYmd: today,
@@ -65,7 +65,7 @@ export const createCreateReviewTest = (deps: {
   };
 
   const lockCandidate = async (params: { subject: SubjectId; candidateKey: string; testId: string }): Promise<void> => {
-    await deps.repositories.reviewTestCandidates.lockCandidateIfUnlocked({
+    await deps.repositories.examCandidates.lockCandidateIfUnlocked({
       subject: params.subject,
       candidateKey: params.candidateKey,
       testId: params.testId,
@@ -73,7 +73,7 @@ export const createCreateReviewTest = (deps: {
     });
   };
 
-  return async (req): Promise<ReviewTest> => {
+  return async (req): Promise<Exam> => {
     const testId = createUuid();
     const createdDate = DateUtils.todayYmd();
 
@@ -195,7 +195,7 @@ export const createCreateReviewTest = (deps: {
       throw new ApiError('No printable kanji items (missing required fields)', 400, ['no_printable_items']);
     }
 
-    const testRow: ReviewTestTable = {
+    const testRow: ExamTable = {
       testId,
       subject: req.subject,
       mode: req.mode,
@@ -207,7 +207,7 @@ export const createCreateReviewTest = (deps: {
       results: [],
     };
 
-    await deps.repositories.reviewTests.put(testRow);
+    await deps.repositories.exams.put(testRow);
 
     if (req.mode === 'KANJI' && pdfS3Key) {
       try {
@@ -225,7 +225,7 @@ export const createCreateReviewTest = (deps: {
           throw new Error('Review test detail not found after creation');
         }
 
-        const pdfBuffer = await ReviewTestPdfService.generatePdfBuffer(detail);
+        const pdfBuffer = await ExamPdfService.generatePdfBuffer(detail);
         await deps.repositories.s3.putObject({
           bucket: ENV.FILES_BUCKET_NAME,
           key: pdfS3Key,
@@ -239,6 +239,6 @@ export const createCreateReviewTest = (deps: {
       }
     }
 
-    return toApiReviewTest(testRow) as ReviewTest;
+    return toApiExam(testRow) as Exam;
   };
 };

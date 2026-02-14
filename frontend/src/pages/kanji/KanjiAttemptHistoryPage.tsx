@@ -76,10 +76,10 @@ export const KanjiAttemptHistoryPage = () => {
             </TableHeader>
             <TableBody>
               {history.attempts.map((a) => (
-                <TableRow key={`${a.reviewTestId ?? ''}#${a.dateYmd}`}>
+                <TableRow key={`${a.examId ?? ''}#${a.dateYmd}`}>
                   <TableCell>{a.dateYmd}</TableCell>
                   <TableCell>{a.isCorrect ? '正解' : '不正解'}</TableCell>
-                  <TableCell className="text-muted-foreground">{a.reviewTestId ?? '-'}</TableCell>
+                  <TableCell className="text-muted-foreground">{a.examId ?? '-'}</TableCell>
                 </TableRow>
               ))}
               {history.attempts.length === 0 ? (

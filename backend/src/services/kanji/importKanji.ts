@@ -4,7 +4,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestCandidateTable, WordMasterTable } from '@/types/db';
+import type { ExamCandidateTable, WordMasterTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from './computeKanjiQuestionFields';
 import type { KanjiService } from './createKanjiService';
@@ -19,7 +19,7 @@ export const createImportKanji = (repositories: Repositories): KanjiService['imp
     correctCount: number;
     status: 'OPEN' | 'CLOSED' | 'EXCLUDED';
     createdAtIso?: string;
-  }): ReviewTestCandidateTable => {
+  }): ExamCandidateTable => {
     const id = createUuid();
     const createdAt = params.createdAtIso ?? DateUtils.now();
     return {
@@ -40,13 +40,13 @@ export const createImportKanji = (repositories: Repositories): KanjiService['imp
     targetWordId: string;
     histories: { submittedDate: string; isCorrect: boolean }[];
     finalStatus: 'AUTO' | 'EXCLUDED';
-  }): ReviewTestCandidateTable[] => {
+  }): ExamCandidateTable[] => {
     if (params.histories.length === 0) return [];
 
     const sorted = [...params.histories].sort((a, b) => (a.submittedDate < b.submittedDate ? -1 : 1));
     const recent = sorted.slice(Math.max(0, sorted.length - 3));
 
-    const candidates: ReviewTestCandidateTable[] = [];
+    const candidates: ExamCandidateTable[] = [];
 
     // 古い履歴は履歴としてのみ残す（状態計算には使わない）
     for (const h of sorted.slice(0, Math.max(0, sorted.length - 3))) {
@@ -211,7 +211,7 @@ export const createImportKanji = (repositories: Repositories): KanjiService['imp
     }
 
     const wordMasterItems: WordMasterTable[] = [];
-    const candidatesToCreate: ReviewTestCandidateTable[] = [];
+    const candidatesToCreate: ExamCandidateTable[] = [];
     const candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }> = [];
 
     const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
@@ -302,14 +302,14 @@ export const createImportKanji = (repositories: Repositories): KanjiService['imp
     if (candidateTargetsToDelete.length > 0) {
       await Promise.all(
         candidateTargetsToDelete.map(async (t) => {
-          await repositories.reviewTestCandidates.deleteCandidatesByTargetId({
+          await repositories.examCandidates.deleteCandidatesByTargetId({
             subject: t.subject,
             targetId: t.targetId,
           });
         }),
       );
     }
-    await repositories.reviewTestCandidates.bulkCreateCandidates(candidatesToCreate);
+    await repositories.examCandidates.bulkCreateCandidates(candidatesToCreate);
 
     return {
       successCount,

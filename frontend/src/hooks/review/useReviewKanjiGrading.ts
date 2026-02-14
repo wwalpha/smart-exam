@@ -17,8 +17,8 @@ export const useReviewKanjiGrading = () => {
   const { id } = useParams<{ id: string }>();
 
   const { detail: currentTest, status } = useWordTestStore((s) => s.review);
-  const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);
-  const submitReviewTest = useWordTestStore((s) => s.submitReviewTestResults);
+  const fetchExam = useWordTestStore((s) => s.fetchExam);
+  const submitExam = useWordTestStore((s) => s.submitExamResults);
 
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -30,8 +30,8 @@ export const useReviewKanjiGrading = () => {
   const { fields } = useFieldArray({ control, name: 'items' });
 
   useEffect(() => {
-    if (id) fetchReviewTest(id, 'KANJI');
-  }, [id, fetchReviewTest]);
+    if (id) fetchExam(id, 'KANJI');
+  }, [id, fetchExam]);
 
   useEffect(() => {
     if (!currentTest) return;
@@ -53,14 +53,14 @@ export const useReviewKanjiGrading = () => {
     if (!id) return;
     setIsSaving(true);
     try {
-      await submitReviewTest(
+      await submitExam(
         id,
         {
           results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
         },
         'KANJI',
       );
-      await fetchReviewTest(id, 'KANJI');
+      await fetchExam(id, 'KANJI');
       toast.success('保存しました');
     } catch (e) {
       toast.error('保存に失敗しました');

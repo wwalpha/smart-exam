@@ -1,11 +1,11 @@
-import type { SearchReviewTestsResponse } from '@smart-exam/api-types';
+import type { SearchExamsResponse } from '@smart-exam/api-types';
 
-import type { ReviewTestsService } from './createExamsService';
+import type { ExamsService } from './createExamsService';
 
-export const createSearchReviewTests = (deps: {
-  listExams: ReviewTestsService['listExams'];
-}): ReviewTestsService['searchExams'] => {
-  return async (params): Promise<SearchReviewTestsResponse> => {
+export const createSearchExams = (deps: {
+  listExams: ExamsService['listExams'];
+}): ExamsService['searchExams'] => {
+  return async (params): Promise<SearchExamsResponse> => {
     const items = await deps.listExams();
 
     const filtered = items.filter((x) => {

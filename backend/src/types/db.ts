@@ -72,7 +72,7 @@ export interface WordMasterTable {
 /**
  * 復習テストテーブル
  */
-export interface ReviewTestTable {
+export interface ExamTable {
   /** テストID (PK) */
   testId: string;
   /** 科目 */
@@ -98,7 +98,7 @@ export interface ReviewTestTable {
 /**
  * 復習テスト候補テーブル
  */
-export interface ReviewTestCandidateTable {
+export interface ExamCandidateTable {
   /** 科目 (PK) */
   subject: SubjectId;
   /** 候補キー (SK): nextTime#candidateId */

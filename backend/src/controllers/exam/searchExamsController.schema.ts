@@ -6,8 +6,8 @@ import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 const ReviewModeSchema = z.enum([REVIEW_MODE.QUESTION, REVIEW_MODE.KANJI]);
 
-/** SearchReviewTestsBodySchema validates input shape. */
-export const SearchReviewTestsBodySchema = z.object({
+/** SearchExamsBodySchema validates input shape. */
+export const SearchExamsBodySchema = z.object({
   subject: z.union([z.literal('ALL'), SubjectIdSchema]),
   mode: ReviewModeSchema,
   status: z.union([z.literal('ALL'), z.literal('IN_PROGRESS'), z.literal('COMPLETED')]).optional(),

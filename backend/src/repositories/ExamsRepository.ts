@@ -1,37 +1,37 @@
-// Module: ReviewTestsRepository responsibilities.
+// Module: ExamsRepository responsibilities.
 
 import { dbHelper } from '../lib/aws';
 import { ENV } from '../lib/env';
-import type { ReviewTestTable } from '../types/db';
+import type { ExamTable } from '../types/db';
 
 
 const TABLE_NAME = ENV.TABLE_REVIEW_TESTS;
 
-/** ReviewTestsRepository. */
-export const ReviewTestsRepository = {
-  get: async (testId: string): Promise<ReviewTestTable | null> => {
-    const result = await dbHelper.get<ReviewTestTable>({
+/** ExamsRepository. */
+export const ExamsRepository = {
+  get: async (testId: string): Promise<ExamTable | null> => {
+    const result = await dbHelper.get<ExamTable>({
       TableName: TABLE_NAME,
       Key: { testId },
     });
     return result?.Item ?? null;
   },
 
-  put: async (item: ReviewTestTable): Promise<void> => {
+  put: async (item: ExamTable): Promise<void> => {
     await dbHelper.put({
       TableName: TABLE_NAME,
       Item: item,
     });
   },
 
-  scanAll: async (): Promise<ReviewTestTable[]> => {
-    const result = await dbHelper.scan<ReviewTestTable>({
+  scanAll: async (): Promise<ExamTable[]> => {
+    const result = await dbHelper.scan<ExamTable>({
       TableName: TABLE_NAME,
     });
     return result.Items ?? [];
   },
 
-  updateStatus: async (testId: string, status: ReviewTestTable['status']): Promise<ReviewTestTable | null> => {
+  updateStatus: async (testId: string, status: ExamTable['status']): Promise<ExamTable | null> => {
     const result = await dbHelper.update({
       TableName: TABLE_NAME,
       Key: { testId },
@@ -41,10 +41,10 @@ export const ReviewTestsRepository = {
       ReturnValues: 'ALL_NEW',
     });
 
-    return (result.Attributes as ReviewTestTable) || null;
+    return (result.Attributes as ExamTable) || null;
   },
 
-  updatePdfS3Key: async (testId: string, pdfS3Key: string): Promise<ReviewTestTable | null> => {
+  updatePdfS3Key: async (testId: string, pdfS3Key: string): Promise<ExamTable | null> => {
     const result = await dbHelper.update({
       TableName: TABLE_NAME,
       Key: { testId },
@@ -54,7 +54,7 @@ export const ReviewTestsRepository = {
       ReturnValues: 'ALL_NEW',
     });
 
-    return (result.Attributes as ReviewTestTable) || null;
+    return (result.Attributes as ExamTable) || null;
   },
 
   delete: async (testId: string): Promise<void> => {

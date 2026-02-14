@@ -14,7 +14,7 @@ export const listExamsController = (services: Services) => {
     Record<string, never>,
     ParsedQs
   > = async (_req, res) => {
-    const items = await services.reviewTests.listExams();
+    const items = await services.exams.listExams();
     res.json({ items, total: items.length });
   };
 

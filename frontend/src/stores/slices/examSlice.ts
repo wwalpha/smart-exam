@@ -1,14 +1,14 @@
 import type { StateCreator } from 'zustand';
 import orderBy from 'lodash/orderBy';
-import type { ReviewTestSlice } from '@/stores/store.types';
+import type { ExamSlice } from '@/stores/store.types';
 import type { GradingData } from '@smart-exam/api-types';
 import * as WORDTEST_API from '@/services/wordtestApi';
 import * as REVIEW_API from '@/services/reviewApi';
 import * as REVIEW_ATTEMPT_API from '@/services/reviewAttemptApi';
 import { withStatus } from '../utils';
 
-export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], ReviewTestSlice> = (set, get) => {
-  type WordTestFeatureState = ReviewTestSlice['wordtest'];
+export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set, get) => {
+  type WordTestFeatureState = ExamSlice['wordtest'];
   type WordTestFeaturePatch = Omit<Partial<WordTestFeatureState>, 'status'> & {
     status?: Partial<WordTestFeatureState['status']>;
   };
@@ -35,7 +35,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
     updateWordTest({ status: next });
   };
 
-  type ReviewState = ReviewTestSlice['review'];
+  type ReviewState = ExamSlice['review'];
   type ReviewPatch = Partial<ReviewState>;
 
   const getReview = (): ReviewState => get().review;
@@ -194,11 +194,11 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       },
     },
 
-    fetchReviewTests: async (params) => {
+    fetchExams: async (params) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.listReviewTests(params);
+          const response = await REVIEW_API.listExams(params);
           updateReview({ list: response.items, total: response.total });
         },
         '復習テスト一覧の取得に失敗しました。',
@@ -206,22 +206,22 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       );
     },
 
-    createReviewTest: async (request) => {
+    createExam: async (request) => {
       return await withStatus(
         setReviewStatus,
         async () => {
-          return await REVIEW_API.createReviewTest(request);
+          return await REVIEW_API.createExam(request);
         },
         '復習テストの作成に失敗しました。',
         { rethrow: true },
       );
     },
 
-    fetchReviewTest: async (id, mode) => {
+    fetchExam: async (id, mode) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.getReviewTestByMode(id, mode);
+          const response = await REVIEW_API.getExamByMode(id, mode);
           updateReview({ detail: response });
         },
         '復習テスト詳細の取得に失敗しました。',
@@ -229,11 +229,11 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       );
     },
 
-    updateReviewTestStatus: async (id, request, mode) => {
+    updateExamStatus: async (id, request, mode) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.updateReviewTestStatusByMode(id, request, mode);
+          const response = await REVIEW_API.updateExamStatusByMode(id, request, mode);
           const currentDetail = getReview().detail;
           const currentList = getReview().list;
           if (currentDetail && currentDetail.id === id) {
@@ -251,11 +251,11 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       );
     },
 
-    deleteReviewTest: async (id, mode) => {
+    deleteExam: async (id, mode) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          await REVIEW_API.deleteReviewTestByMode(id, mode);
+          await REVIEW_API.deleteExamByMode(id, mode);
 
           const current = getReview();
           const nextList = current.list.filter((x) => x.id !== id);
@@ -268,19 +268,19 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       );
     },
 
-    submitReviewTestResults: async (id, request, mode) => {
+    submitExamResults: async (id, request, mode) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          await REVIEW_API.submitReviewTestResultsByMode(id, request, mode);
+          await REVIEW_API.submitExamResultsByMode(id, request, mode);
         },
         'テスト結果の送信に失敗しました。',
         { rethrow: true },
       );
     },
 
-    fetchReviewTestTargets: async (params) => {
-      const setTargetsStatus = (next: Partial<ReviewTestSlice['reviewTargets']['status']>) => {
+    fetchExamTargets: async (params) => {
+      const setTargetsStatus = (next: Partial<ExamSlice['reviewTargets']['status']>) => {
         const current = get().reviewTargets;
         set({
           reviewTargets: {
@@ -296,7 +296,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       await withStatus(
         setTargetsStatus,
         async () => {
-          const response = await REVIEW_API.listReviewTestTargets(params);
+          const response = await REVIEW_API.listExamTargets(params);
           set({
             reviewTargets: {
               items: response.items,
@@ -310,7 +310,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
     },
 
     fetchReviewAttempts: async (params) => {
-      const setAttemptsStatus = (next: Partial<ReviewTestSlice['reviewAttempts']['status']>) => {
+      const setAttemptsStatus = (next: Partial<ExamSlice['reviewAttempts']['status']>) => {
         const current = get().reviewAttempts;
         set({
           reviewAttempts: {
@@ -339,8 +339,8 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       );
     },
 
-    fetchReviewTestCandidates: async (params) => {
-      const setCandidatesStatus = (next: Partial<ReviewTestSlice['reviewCandidates']['status']>) => {
+    fetchExamCandidates: async (params) => {
+      const setCandidatesStatus = (next: Partial<ExamSlice['reviewCandidates']['status']>) => {
         const current = get().reviewCandidates;
         set({
           reviewCandidates: {
@@ -356,7 +356,7 @@ export const createReviewTestSlice: StateCreator<ReviewTestSlice, [], [], Review
       await withStatus(
         setCandidatesStatus,
         async () => {
-          const response = await REVIEW_API.listReviewTestCandidates(params);
+          const response = await REVIEW_API.listExamCandidates(params);
           set({
             reviewCandidates: {
               items: response.items,

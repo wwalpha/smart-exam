@@ -10,13 +10,13 @@ export const useReviewKanjiPdf = () => {
   const navigate = useNavigate();
 
   const { detail: currentTest, status } = useWordTestStore((s) => s.review);
-  const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);
+  const fetchExam = useWordTestStore((s) => s.fetchExam);
 
   useEffect(() => {
     if (!id) return;
     if (currentTest?.id === id || currentTest?.testId === id) return;
-    fetchReviewTest(id, 'KANJI');
-  }, [id, fetchReviewTest, currentTest?.id, currentTest?.testId]);
+    fetchExam(id, 'KANJI');
+  }, [id, fetchExam, currentTest?.id, currentTest?.testId]);
 
   const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/kanji/${id}/pdf` : '');
 

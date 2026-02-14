@@ -2,20 +2,20 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { ReviewTestsService } from './createExamsService';
+import type { ExamsService } from './createExamsService';
 
-export const createSubmitReviewTestResults = (
+export const createSubmitExamResults = (
   repositories: Repositories,
-): ReviewTestsService['submitExamResults'] => {
+): ExamsService['submitExamResults'] => {
   return async (testId, req): Promise<boolean> => {
-    const test = await repositories.reviewTests.get(testId);
+    const test = await repositories.exams.get(testId);
     if (!test) return false;
 
     const dateYmd = req.date ? DateUtils.toYmd(req.date) : DateUtils.todayYmd();
 
     const nextResults = req.results.map((r) => ({ id: r.id, isCorrect: r.isCorrect }));
 
-    await repositories.reviewTests.put({
+    await repositories.exams.put({
       ...test,
       submittedDate: dateYmd,
       results: nextResults,
@@ -27,7 +27,7 @@ export const createSubmitReviewTestResults = (
       test.questions.map(async (targetId) => {
         const isCorrect = resultByTargetId.get(targetId);
 
-        const open = await repositories.reviewTestCandidates.getLatestOpenCandidateByTargetId({
+        const open = await repositories.examCandidates.getLatestOpenCandidateByTargetId({
           subject: test.subject,
           targetId,
         });
@@ -44,14 +44,14 @@ export const createSubmitReviewTestResults = (
             });
 
             if (open) {
-              await repositories.reviewTestCandidates.closeCandidateIfMatch({
+              await repositories.examCandidates.closeCandidateIfMatch({
                 subject: test.subject,
                 candidateKey: open.candidateKey,
                 expectedTestId: testId,
               });
             }
 
-            await repositories.reviewTestCandidates.createCandidate({
+            await repositories.examCandidates.createCandidate({
               subject: test.subject,
               questionId: targetId,
               mode: test.mode,
@@ -63,7 +63,7 @@ export const createSubmitReviewTestResults = (
           }
 
           if (open && open.testId === testId) {
-            await repositories.reviewTestCandidates.releaseLockIfMatch({
+            await repositories.examCandidates.releaseLockIfMatch({
               subject: test.subject,
               candidateKey: open.candidateKey,
               testId,

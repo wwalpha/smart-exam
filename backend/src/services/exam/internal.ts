@@ -1,8 +1,8 @@
 // Module: internal responsibilities.
 
 import { DateUtils } from '@/lib/dateUtils';
-import type { CreateReviewTestRequest, ReviewTest, ReviewTestTarget, SubjectId } from '@smart-exam/api-types';
-import type { ReviewTestTable } from '@/types/db';
+import type { CreateExamRequest, Exam, ExamTarget, SubjectId } from '@smart-exam/api-types';
+import type { ExamTable } from '@/types/db';
 
 /** Type definition for ReviewTargetType. */
 export type ReviewTargetType = 'QUESTION' | 'KANJI';
@@ -38,7 +38,7 @@ export const toIsoAtStartOfDay = (ymd: string): string => {
 };
 
 /** parseFilterRange. */
-export const parseFilterRange = (req: CreateReviewTestRequest): { fromYmd?: string; toYmd?: string } => {
+export const parseFilterRange = (req: CreateExamRequest): { fromYmd?: string; toYmd?: string } => {
   if (typeof req.days === 'number' && req.days > 0) {
     const today = DateUtils.todayYmd();
     const from = DateUtils.addDaysYmd(today, -1 * (req.days - 1));
@@ -75,7 +75,7 @@ export const computeDueDate = (params: {
 };
 
 /** Converts data with to api review test. */
-export const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
+export const toApiExam = (row: ExamTable): Exam => ({
   id: row.testId,
   testId: row.testId,
   subject: row.subject,
@@ -96,7 +96,7 @@ export const toApiReviewTest = (row: ReviewTestTable): ReviewTest => ({
 export const toReviewTargetKey = (subject: SubjectId, targetId: string): string => `${subject}#${targetId}`;
 
 /** sortTargets. */
-export const sortTargets = (items: ReviewTestTarget[]): ReviewTestTarget[] => {
+export const sortTargets = (items: ExamTarget[]): ExamTarget[] => {
   const next = [...items];
   next.sort((a, b) => {
     if (a.lastTestCreatedDate !== b.lastTestCreatedDate) {

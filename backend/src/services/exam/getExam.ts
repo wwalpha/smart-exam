@@ -1,13 +1,13 @@
-import type { ReviewTestDetail } from '@smart-exam/api-types';
+import type { ExamDetail } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { ReviewTestsService } from './createExamsService';
-import { toApiReviewTest } from './internal';
+import type { ExamsService } from './createExamsService';
+import { toApiExam } from './internal';
 
-export const createGetReviewTest = (repositories: Repositories): ReviewTestsService['getExam'] => {
-  return async (testId): Promise<ReviewTestDetail | null> => {
-    const test = await repositories.reviewTests.get(testId);
+export const createGetExam = (repositories: Repositories): ExamsService['getExam'] => {
+  return async (testId): Promise<ExamDetail | null> => {
+    const test = await repositories.exams.get(testId);
     if (!test) return null;
 
     const resultByTargetId = new Map((test.results ?? []).map((r) => [r.id, r.isCorrect] as const));
@@ -19,7 +19,7 @@ export const createGetReviewTest = (repositories: Repositories): ReviewTestsServ
       );
 
       return {
-        ...toApiReviewTest(test),
+        ...toApiExam(test),
         items: test.questions.map((targetId) => {
           const w = byId.get(targetId);
           const isCorrect = resultByTargetId.get(targetId);
@@ -53,7 +53,7 @@ export const createGetReviewTest = (repositories: Repositories): ReviewTestsServ
     );
 
     return {
-      ...toApiReviewTest(test),
+      ...toApiExam(test),
       items: test.questions.map((targetId) => {
         const q = qById.get(targetId);
         const m = q ? mById.get(q.materialId) : undefined;

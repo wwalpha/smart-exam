@@ -1,12 +1,12 @@
-import type { ReviewTestsService } from './createExamsService';
-import { ReviewTestPdfService } from './examPdfService';
+import type { ExamsService } from './createExamsService';
+import { ExamPdfService } from './examPdfService';
 
-export const createGenerateReviewTestPdfBuffer = (deps: {
-  getExam: ReviewTestsService['getExam'];
-}): ReviewTestsService['generateExamPdfBuffer'] => {
+export const createGenerateExamPdfBuffer = (deps: {
+  getExam: ExamsService['getExam'];
+}): ExamsService['generateExamPdfBuffer'] => {
   return async (testId, options) => {
     const review = await deps.getExam(testId);
     if (!review) return null;
-    return ReviewTestPdfService.generatePdfBuffer(review, { includeGenerated: options?.includeGenerated });
+    return ExamPdfService.generatePdfBuffer(review, { includeGenerated: options?.includeGenerated });
   };
 };

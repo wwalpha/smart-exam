@@ -16,8 +16,8 @@ export const useReviewQuestionGrading = () => {
   const { id } = useParams<{ id: string }>();
 
   const { detail: currentTest, status } = useWordTestStore((s) => s.review);
-  const fetchReviewTest = useWordTestStore((s) => s.fetchReviewTest);
-  const submitReviewTest = useWordTestStore((s) => s.submitReviewTestResults);
+  const fetchExam = useWordTestStore((s) => s.fetchExam);
+  const submitExam = useWordTestStore((s) => s.submitExamResults);
 
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -29,8 +29,8 @@ export const useReviewQuestionGrading = () => {
   const { fields } = useFieldArray({ control, name: 'items' });
 
   useEffect(() => {
-    if (id) fetchReviewTest(id, 'QUESTION');
-  }, [id, fetchReviewTest]);
+    if (id) fetchExam(id, 'QUESTION');
+  }, [id, fetchExam]);
 
   useEffect(() => {
     if (!currentTest) return;
@@ -52,14 +52,14 @@ export const useReviewQuestionGrading = () => {
     if (!id) return;
     setIsSaving(true);
     try {
-      await submitReviewTest(
+      await submitExam(
         id,
         {
           results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
         },
         'QUESTION',
       );
-      await fetchReviewTest(id, 'QUESTION');
+      await fetchExam(id, 'QUESTION');
     } finally {
       setIsSaving(false);
     }

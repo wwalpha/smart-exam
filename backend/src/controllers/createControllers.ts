@@ -20,7 +20,7 @@ export type Controllers = {
   materials: ReturnType<typeof materialsController>;
   questions: ReturnType<typeof questionsController>;
   reviewAttempts: ReturnType<typeof listReviewAttemptsController>;
-  reviewTestCandidates: ReturnType<typeof examCandidatesController>;
+  examCandidates: ReturnType<typeof examCandidatesController>;
   tests: {
     kanji: ReturnType<typeof kanjiTestsController>;
     question: ReturnType<typeof questionTestsController>;
@@ -37,7 +37,7 @@ export const createControllers = (services: Services): Controllers => {
     materials: materialsController(services),
     questions: questionsController(services),
     reviewAttempts: listReviewAttemptsController(services),
-    reviewTestCandidates: examCandidatesController(services),
+    examCandidates: examCandidatesController(services),
     tests: {
       kanji: kanjiTestsController(services),
       question: questionTestsController(services),

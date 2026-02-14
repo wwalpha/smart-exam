@@ -10,21 +10,21 @@ export const createRecalculateCandidatesForMaterial = (
     const questions = await repositories.questions.listByMaterialId(params.materialId);
 
     for (const q of questions) {
-      const open = await repositories.reviewTestCandidates.getLatestOpenCandidateByTargetId({
+      const open = await repositories.examCandidates.getLatestOpenCandidateByTargetId({
         subject: q.subjectId,
         targetId: q.questionId,
       });
 
       if (!open) continue;
 
-      await repositories.reviewTestCandidates.closeCandidateIfMatch({
+      await repositories.examCandidates.closeCandidateIfMatch({
         subject: q.subjectId,
         candidateKey: open.candidateKey,
       });
 
       // 旧仕様のデータで正解系のOPENが残っていた場合は、候補から除外する
       if (open.correctCount > 0) {
-        await repositories.reviewTestCandidates.createCandidate({
+        await repositories.examCandidates.createCandidate({
           subject: q.subjectId,
           questionId: q.questionId,
           mode: 'QUESTION',
@@ -42,7 +42,7 @@ export const createRecalculateCandidatesForMaterial = (
         currentCorrectCount: 0,
       });
 
-      await repositories.reviewTestCandidates.createCandidate({
+      await repositories.examCandidates.createCandidate({
         subject: q.subjectId,
         questionId: q.questionId,
         mode: 'QUESTION',

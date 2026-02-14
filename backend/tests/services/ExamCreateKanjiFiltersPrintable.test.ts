@@ -4,14 +4,14 @@ import type { Repositories } from '@/repositories/createRepositories';
 
 // NOTE: This test verifies that KANJI review test creation only uses printable items
 // (i.e., required kanji-question fields exist), so PDF generation won't fail with no_printable_items.
-describe('ReviewTestsService.createReviewTest (KANJI)', () => {
+describe('ExamsService.createExam (KANJI)', () => {
   it('filters out non-printable candidates before selecting', async () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
     const { createExamsService } = await import('@/services/exam/createExamsService');
 
     const repositories = {
-      reviewTestCandidates: {
+      examCandidates: {
         listDueCandidates: vi.fn().mockResolvedValue([
           {
             subject: '1',
@@ -40,10 +40,10 @@ describe('ReviewTestsService.createReviewTest (KANJI)', () => {
         getLatestCandidateByTargetId: vi.fn().mockResolvedValue(null),
         releaseLockIfMatch: vi.fn().mockResolvedValue(undefined),
       },
-      reviewTests: {
+      exams: {
         put: vi.fn().mockResolvedValue(undefined),
         get: vi.fn().mockImplementation(async (testId: string) => {
-          // minimal ReviewTestTable for getReviewTest()
+          // minimal ExamTable for getExam()
           return {
             testId,
             subject: '1',
@@ -119,7 +119,7 @@ describe('ReviewTestsService.createReviewTest (KANJI)', () => {
     expect(repositories.wordMaster.get).toHaveBeenCalledWith('w-verified');
 
     // should lock only the printable candidate
-    expect(repositories.reviewTestCandidates.lockCandidateIfUnlocked).toHaveBeenCalledTimes(1);
+    expect(repositories.examCandidates.lockCandidateIfUnlocked).toHaveBeenCalledTimes(1);
 
     expect(repositories.s3.putObject).toHaveBeenCalledTimes(1);
   });

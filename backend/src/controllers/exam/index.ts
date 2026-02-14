@@ -1,8 +1,8 @@
-export { CreateReviewTestBodySchema } from './createExamController.schema';
-export { ListReviewTestTargetsQuerySchema } from './listExamTargetsController.schema';
-export { SearchReviewTestsBodySchema } from './searchExamsController.schema';
-export { SubmitReviewTestResultsBodySchema } from './submitExamResultsController.schema';
-export { UpdateReviewTestStatusBodySchema } from './updateExamStatusController.schema';
+export { CreateExamBodySchema } from './createExamController.schema';
+export { ListExamTargetsQuerySchema } from './listExamTargetsController.schema';
+export { SearchExamsBodySchema } from './searchExamsController.schema';
+export { SubmitExamResultsBodySchema } from './submitExamResultsController.schema';
+export { UpdateExamStatusBodySchema } from './updateExamStatusController.schema';
 
 export { createExamController } from './createExamController';
 export { deleteExamController } from './deleteExamController';

@@ -10,27 +10,27 @@ export type ReviewMode = (typeof REVIEW_MODE)[keyof typeof REVIEW_MODE];
 export type ReviewTargetType = ReviewMode;
 
 /** `GET /review-tests/:testId` */
-export type GetReviewTestParams = {
+export type GetExamParams = {
   testId: string;
 };
 
 /** `PATCH /review-tests/:testId` */
-export type UpdateReviewTestStatusParams = {
+export type UpdateExamStatusParams = {
   testId: string;
 };
 
 /** `DELETE /review-tests/:testId` */
-export type DeleteReviewTestParams = {
+export type DeleteExamParams = {
   testId: string;
 };
 
 /** `POST /review-tests/:testId/results` */
-export type SubmitReviewTestResultsParams = {
+export type SubmitExamResultsParams = {
   testId: string;
 };
 
 /** 復習テスト作成リクエスト */
-export type CreateReviewTestRequest = {
+export type CreateExamRequest = {
   /** 科目 */
   subject: SubjectId;
   /** 出題数 */
@@ -48,15 +48,15 @@ export type CreateReviewTestRequest = {
 };
 
 /** 復習テスト作成レスポンス */
-export type CreateReviewTestResponse = ReviewTest;
+export type CreateExamResponse = Exam;
 
 /** 復習テスト取得レスポンス */
-export type GetReviewTestResponse = ReviewTestDetail;
+export type GetExamResponse = ExamDetail;
 
 /** 復習テスト一覧取得レスポンス */
-export type ReviewTestListResponse = {
+export type ExamListResponse = {
   /** 復習テストリスト */
-  items: ReviewTest[];
+  items: Exam[];
   /** 総件数 */
   total: number;
   /** 次ページ用カーソル */
@@ -64,7 +64,7 @@ export type ReviewTestListResponse = {
 };
 
 /** `POST /review-tests/search` */
-export type SearchReviewTestsRequest = {
+export type SearchExamsRequest = {
   subject: 'ALL' | SubjectId;
   mode: ReviewMode;
   status?: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
@@ -73,12 +73,12 @@ export type SearchReviewTestsRequest = {
 };
 
 /** `POST /review-tests/search` */
-export type SearchReviewTestsResponse = ReviewTestListResponse;
+export type SearchExamsResponse = ExamListResponse;
 
 /**
  * 復習テストの出題アイテム
  */
-export type ReviewTestItem = {
+export type ExamItem = {
   /** アイテムID */
   id: string;
   /** テストID */
@@ -118,23 +118,23 @@ export type ReviewTestItem = {
 };
 
 /** 復習テスト詳細 */
-export type ReviewTestDetail = ReviewTest & {
+export type ExamDetail = Exam & {
   /** 出題アイテムリスト */
-  items: ReviewTestItem[];
+  items: ExamItem[];
 };
 
 /** 復習テストステータス更新リクエスト */
-export type UpdateReviewTestStatusRequest = {
+export type UpdateExamStatusRequest = {
   status: 'IN_PROGRESS' | 'COMPLETED';
 };
 
 /** 復習テストステータス更新レスポンス */
-export type UpdateReviewTestStatusResponse = ReviewTest;
+export type UpdateExamStatusResponse = Exam;
 
 /**
  * 復習テスト
  */
-export type ReviewTest = {
+export type Exam = {
   /** ID */
   id: string;
   /** 表示用ID */
@@ -167,7 +167,7 @@ export type ReviewTest = {
 /**
  * 復習テスト結果
  */
-export type ReviewTestResult = {
+export type ExamResult = {
   /** 対象ID */
   id: string;
   /** 正誤 */
@@ -175,9 +175,9 @@ export type ReviewTestResult = {
 };
 
 /** 復習テスト結果送信リクエスト */
-export type SubmitReviewTestResultsRequest = {
+export type SubmitExamResultsRequest = {
   /** 結果リスト */
-  results: ReviewTestResult[];
+  results: ExamResult[];
   /** 実施日 (ISO 8601) */
   date?: string;
 };
@@ -201,7 +201,7 @@ export type ReviewAttempt = {
   /** メモ */
   memo?: string;
   /** 復習テストID (由来がある場合) */
-  reviewTestId?: string;
+  examId?: string;
 };
 
 /** `GET /review-attempts?targetType=...&targetId=...` */
@@ -240,7 +240,7 @@ export type DeleteReviewAttemptResponse = {
 /**
  * 復習テスト対象（指定期間内に出題された対象のユニーク一覧）
  */
-export type ReviewTestTarget = {
+export type ExamTarget = {
   /** 対象種別 */
   targetType: ReviewTargetType;
   /** 対象ID */
@@ -268,14 +268,14 @@ export type ReviewTestTarget = {
 };
 
 /** `GET /review-tests/targets?mode=...&from=YYYY-MM-DD&to=YYYY-MM-DD` */
-export type ListReviewTestTargetsResponse = {
-  items: ReviewTestTarget[];
+export type ListExamTargetsResponse = {
+  items: ExamTarget[];
 };
 
 /**
- * 復習テスト候補（ReviewTestCandidateTable）
+ * 復習テスト候補（ExamCandidateTable）
  */
-export type ReviewTestCandidate = {
+export type ExamCandidate = {
   /** 候補ID */
   id: string;
   /** 科目 */
@@ -293,6 +293,6 @@ export type ReviewTestCandidate = {
 };
 
 /** `GET /review-test-candidates?subject=...&mode=...` */
-export type ListReviewTestCandidatesResponse = {
-  items: ReviewTestCandidate[];
+export type ListExamCandidatesResponse = {
+  items: ExamCandidate[];
 };

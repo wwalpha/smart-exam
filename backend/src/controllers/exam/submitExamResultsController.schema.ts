@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-/** SubmitReviewTestResultsBodySchema validates input shape. */
-export const SubmitReviewTestResultsBodySchema = z.object({
+/** SubmitExamResultsBodySchema validates input shape. */
+export const SubmitExamResultsBodySchema = z.object({
   results: z.array(
     z.object({
       id: z.string().min(1),

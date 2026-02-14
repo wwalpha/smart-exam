@@ -1,17 +1,17 @@
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestTable } from '@/types/db';
+import type { ExamTable } from '@/types/db';
 
-import type { ReviewTestsService } from './createExamsService';
-import { toApiReviewTest } from './internal';
+import type { ExamsService } from './createExamsService';
+import { toApiExam } from './internal';
 
-export const createUpdateReviewTestStatus = (
+export const createUpdateExamStatus = (
   repositories: Repositories,
-): ReviewTestsService['updateExamStatus'] => {
+): ExamsService['updateExamStatus'] => {
   return async (testId, req) => {
-    const existing = await repositories.reviewTests.get(testId);
+    const existing = await repositories.exams.get(testId);
     if (!existing) return null;
 
-    const updated: ReviewTestTable | null = await repositories.reviewTests.updateStatus(testId, req.status);
-    return updated ? toApiReviewTest(updated) : null;
+    const updated: ExamTable | null = await repositories.exams.updateStatus(testId, req.status);
+    return updated ? toApiExam(updated) : null;
   };
 };

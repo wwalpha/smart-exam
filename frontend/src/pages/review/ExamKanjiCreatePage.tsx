@@ -7,7 +7,7 @@ import { useReviewKanjiCreate } from '@/hooks/review';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
-export const ReviewTestKanjiCreatePage = () => {
+export const ExamKanjiCreatePage = () => {
   const { form, submit } = useReviewKanjiCreate();
   const {
     register,

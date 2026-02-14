@@ -12,8 +12,8 @@ const BASE_PATH = '/reviewtests/questions';
 
 export const useReviewQuestionList = () => {
   const { list, total, status } = useWordTestStore((s) => s.review);
-  const fetchReviewTests = useWordTestStore((s) => s.fetchReviewTests);
-  const deleteReviewTest = useWordTestStore((s) => s.deleteReviewTest);
+  const fetchExams = useWordTestStore((s) => s.fetchExams);
+  const deleteExam = useWordTestStore((s) => s.deleteExam);
   const { confirm, ConfirmDialog } = useConfirm();
 
   const form = useForm<SearchFormValues>({
@@ -24,7 +24,7 @@ export const useReviewQuestionList = () => {
   });
 
   const search = (data: SearchFormValues) => {
-    fetchReviewTests({
+    fetchExams({
       mode: 'QUESTION',
       subject: data.subject,
       ...(data.status === 'ALL' ? {} : { status: data.status }),
@@ -33,9 +33,9 @@ export const useReviewQuestionList = () => {
 
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
-      await deleteReviewTest(id, 'QUESTION');
+      await deleteExam(id, 'QUESTION');
       const current = form.getValues();
-      fetchReviewTests({
+      fetchExams({
         mode: 'QUESTION',
         subject: current.subject,
         ...(current.status === 'ALL' ? {} : { status: current.status }),

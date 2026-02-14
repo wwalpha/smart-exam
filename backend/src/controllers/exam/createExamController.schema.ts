@@ -25,8 +25,8 @@ const BooleanFromUnknownSchema = z.preprocess((v) => {
   return v;
 }, z.boolean());
 
-/** CreateReviewTestBodySchema validates input shape. */
-export const CreateReviewTestBodySchema = z.object({
+/** CreateExamBodySchema validates input shape. */
+export const CreateExamBodySchema = z.object({
   subject: SubjectIdSchema,
   count: PositiveIntFromUnknownSchema,
   mode: ReviewModeSchema,

@@ -7,7 +7,7 @@ export const createDeleteQuestion = (repositories: Repositories): QuestionsServi
     const existing = await repositories.questions.get(questionId);
     if (!existing) return false;
 
-    await repositories.reviewTestCandidates.deleteOpenCandidatesByTargetId({
+    await repositories.examCandidates.deleteOpenCandidatesByTargetId({
       subject: existing.subjectId,
       targetId: questionId,
     });

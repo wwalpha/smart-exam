@@ -14,7 +14,7 @@ const BASE_PATH = '/reviewtests/kanji';
 export const useReviewKanjiCreate = () => {
   const navigate = useNavigate();
 
-  const createReviewTest = useWordTestStore((s) => s.createReviewTest);
+  const createExam = useWordTestStore((s) => s.createExam);
   const status = useWordTestStore((s) => s.review.status);
 
   const form = useForm<CreateFormValues>({
@@ -30,7 +30,7 @@ export const useReviewKanjiCreate = () => {
       return;
     }
 
-    const newTest = await createReviewTest({
+    const newTest = await createExam({
       mode: 'KANJI',
       subject: data.subject,
       count: Number(data.count),

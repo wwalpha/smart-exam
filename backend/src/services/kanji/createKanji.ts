@@ -23,7 +23,7 @@ export const createCreateKanji = (repositories: Repositories): KanjiService['cre
     await repositories.wordMaster.create(dbItem);
 
     // 候補を作成（新規作成時はOPEN）
-    await repositories.reviewTestCandidates.createCandidate({
+    await repositories.examCandidates.createCandidate({
       subject: data.subject,
       questionId: id,
       mode: 'KANJI',

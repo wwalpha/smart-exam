@@ -3,19 +3,19 @@
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParsedQs } from 'qs';
 
-import type { GetReviewTestParams, GetReviewTestResponse } from '@smart-exam/api-types';
+import type { GetExamParams, GetExamResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
 /** Creates get review test controller. */
 export const getExamController = (services: Services) => {
   const getExam: AsyncHandler<
-    GetReviewTestParams,
-    GetReviewTestResponse | { error: string },
+    GetExamParams,
+    GetExamResponse | { error: string },
     Record<string, never>,
     ParsedQs
   > = async (req, res) => {
     const { testId } = req.params;
-    const item = await services.reviewTests.getExam(testId);
+    const item = await services.exams.getExam(testId);
     if (!item) {
       res.status(404).json({ error: 'Not Found' });
       return;

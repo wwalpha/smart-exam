@@ -35,16 +35,16 @@ export type CreateQuestionParams = {
 };
 
 /** `GET /review-tests/:testId` */
-export type GetReviewTestParams = {
+export type GetExamParams = {
   testId: string;
 };
 
 /** `PATCH /review-tests/:testId` */
-export type UpdateReviewTestStatusParams = {
+export type UpdateExamStatusParams = {
   testId: string;
 };
 
 /** `DELETE /review-tests/:testId` */
-export type DeleteReviewTestParams = {
+export type DeleteExamParams = {
   testId: string;
 };

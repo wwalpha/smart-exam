@@ -6,7 +6,7 @@ import { useReviewQuestionDetailPage } from '@/hooks/review';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 import { formatYmdSlash } from '@/utils/date';
 
-export const ReviewTestQuestionDetailPage = () => {
+export const ExamQuestionDetailPage = () => {
   const { review, isLoading, error, basePath, remove, ConfirmDialog, blocks, pdfAvailability, previewMaterialPdf, complete } =
     useReviewQuestionDetailPage();
 

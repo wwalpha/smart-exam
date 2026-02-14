@@ -1,16 +1,16 @@
 import type {
-  CreateReviewTestRequest,
-  CreateReviewTestResponse,
-  ListReviewTestTargetsResponse,
+  CreateExamRequest,
+  CreateExamResponse,
+  ListExamTargetsResponse,
   ReviewMode,
-  SearchReviewTestsRequest,
-  SearchReviewTestsResponse,
+  SearchExamsRequest,
+  SearchExamsResponse,
   SubjectId,
-  SubmitReviewTestResultsParams,
-  SubmitReviewTestResultsRequest,
-  UpdateReviewTestStatusParams,
-  UpdateReviewTestStatusRequest,
-  UpdateReviewTestStatusResponse,
+  SubmitExamResultsParams,
+  SubmitExamResultsRequest,
+  UpdateExamStatusParams,
+  UpdateExamStatusRequest,
+  UpdateExamStatusResponse,
 } from '@smart-exam/api-types';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
@@ -24,32 +24,32 @@ import {
   ListTestTargetsQuerySchema,
   SearchTestsBodySchema,
 } from './testController.schema';
-import { SubmitReviewTestResultsBodySchema } from '@/controllers/exam/submitExamResultsController.schema';
-import { UpdateReviewTestStatusBodySchema } from '@/controllers/exam/updateExamStatusController.schema';
+import { SubmitExamResultsBodySchema } from '@/controllers/exam/submitExamResultsController.schema';
+import { UpdateExamStatusBodySchema } from '@/controllers/exam/updateExamStatusController.schema';
 
 export const createModeScopedTestsController = (services: Services, mode: ReviewMode) => {
   const ensureModeMatched = async (testId: string): Promise<boolean> => {
-    const item = await services.reviewTests.getExam(testId);
+    const item = await services.exams.getExam(testId);
     if (!item) return false;
     return item.mode === mode;
   };
 
   const listTests: AsyncHandler<ParamsDictionary, { items: unknown[]; total: number }, Record<string, never>, ParsedQs> =
     async (_req, res) => {
-      const items = await services.reviewTests.listExams();
+      const items = await services.exams.listExams();
       const filtered = items.filter((item) => item.mode === mode);
       res.json({ items: filtered, total: filtered.length });
     };
 
   const searchTests: AsyncHandler<
     ParamsDictionary,
-    SearchReviewTestsResponse,
-    SearchReviewTestsRequest,
+    SearchExamsResponse,
+    SearchExamsRequest,
     ParsedQs
   > = async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchTestsBodySchema>;
 
-    const result = await services.reviewTests.searchExams({
+    const result = await services.exams.searchExams({
       ...body,
       mode,
     });
@@ -57,12 +57,12 @@ export const createModeScopedTestsController = (services: Services, mode: Review
     res.json(result);
   };
 
-  const createTest: AsyncHandler<ParamsDictionary, CreateReviewTestResponse, CreateReviewTestRequest, ParsedQs> = async (
+  const createTest: AsyncHandler<ParamsDictionary, CreateExamResponse, CreateExamRequest, ParsedQs> = async (
     req,
     res,
   ) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateTestBodySchema>;
-    const item = await services.reviewTests.createExam({
+    const item = await services.exams.createExam({
       ...body,
       mode,
     });
@@ -71,13 +71,13 @@ export const createModeScopedTestsController = (services: Services, mode: Review
 
   const listTestTargets: AsyncHandler<
     ParamsDictionary,
-    ListReviewTestTargetsResponse,
+    ListExamTargetsResponse,
     Record<string, never>,
     ParsedQs
   > = async (req, res) => {
     const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListTestTargetsQuerySchema>;
 
-    const items = await services.reviewTests.listExamTargets({
+    const items = await services.exams.listExamTargets({
       mode,
       fromYmd: q.from,
       toYmd: q.to,
@@ -92,7 +92,7 @@ export const createModeScopedTestsController = (services: Services, mode: Review
     res,
   ) => {
     const { testId } = req.params;
-    const item = await services.reviewTests.getExam(testId);
+    const item = await services.exams.getExam(testId);
     if (!item || item.mode !== mode) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -115,7 +115,7 @@ export const createModeScopedTestsController = (services: Services, mode: Review
         String(req.query.includeGenerated ?? '') === '1' || String(req.query.includeGenerated ?? '') === 'true';
 
       if (direct) {
-        const pdf = await services.reviewTests.generateExamPdfBuffer(testId, { includeGenerated });
+        const pdf = await services.exams.generateExamPdfBuffer(testId, { includeGenerated });
         if (!pdf) {
           res.status(404).json({ error: 'Not Found' });
           return;
@@ -128,7 +128,7 @@ export const createModeScopedTestsController = (services: Services, mode: Review
         return;
       }
 
-      const result = await services.reviewTests.getExamPdfUrl(testId, { download });
+      const result = await services.exams.getExamPdfUrl(testId, { download });
       if (!result) {
         res.status(404).json({ error: 'Not Found' });
         return;
@@ -137,9 +137,9 @@ export const createModeScopedTestsController = (services: Services, mode: Review
     };
 
   const updateTestStatus: AsyncHandler<
-    UpdateReviewTestStatusParams,
-    UpdateReviewTestStatusResponse | { error: string },
-    UpdateReviewTestStatusRequest,
+    UpdateExamStatusParams,
+    UpdateExamStatusResponse | { error: string },
+    UpdateExamStatusRequest,
     ParsedQs
   > = async (req, res) => {
     const { testId } = req.params;
@@ -149,8 +149,8 @@ export const createModeScopedTestsController = (services: Services, mode: Review
       return;
     }
 
-    const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateReviewTestStatusBodySchema>;
-    const item = await services.reviewTests.updateExamStatus(testId, body);
+    const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateExamStatusBodySchema>;
+    const item = await services.exams.updateExamStatus(testId, body);
     if (!item) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -168,14 +168,14 @@ export const createModeScopedTestsController = (services: Services, mode: Review
       res.status(404).json({ error: 'Not Found' });
       return;
     }
-    await services.reviewTests.deleteExam(testId);
+    await services.exams.deleteExam(testId);
     res.status(204).send();
   };
 
   const submitTestResults: AsyncHandler<
-    SubmitReviewTestResultsParams,
+    SubmitExamResultsParams,
     void | { error: string },
-    SubmitReviewTestResultsRequest,
+    SubmitExamResultsRequest,
     ParsedQs
   > = async (req, res) => {
     const { testId } = req.params;
@@ -185,8 +185,8 @@ export const createModeScopedTestsController = (services: Services, mode: Review
       return;
     }
 
-    const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SubmitReviewTestResultsBodySchema>;
-    const ok = await services.reviewTests.submitExamResults(testId, body);
+    const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SubmitExamResultsBodySchema>;
+    const ok = await services.exams.submitExamResults(testId, body);
     if (!ok) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -198,8 +198,8 @@ export const createModeScopedTestsController = (services: Services, mode: Review
     CreateTestBodySchema,
     SearchTestsBodySchema,
     ListTestTargetsQuerySchema,
-    UpdateReviewTestStatusBodySchema,
-    SubmitReviewTestResultsBodySchema,
+    UpdateExamStatusBodySchema,
+    SubmitExamResultsBodySchema,
     listTests,
     searchTests,
     createTest,

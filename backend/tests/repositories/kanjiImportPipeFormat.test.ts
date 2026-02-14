@@ -11,7 +11,7 @@ describe('KanjiService.importKanji (single pipe format)', () => {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
-      reviewTestCandidates: {
+      examCandidates: {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
         bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
@@ -43,10 +43,10 @@ describe('KanjiService.importKanji (single pipe format)', () => {
 
     // 履歴3件（CLOSED） + 最終状態1件（OPEN/EXCLUDED）
     const createdCandidates = (
-      repositories.reviewTestCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
+      repositories.examCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
     ).mock.calls[0][0] as unknown[];
     expect(createdCandidates.length).toBe(4);
-    expect(repositories.reviewTestCandidates.deleteCandidatesByTargetId).toHaveBeenCalledTimes(1);
+    expect(repositories.examCandidates.deleteCandidatesByTargetId).toHaveBeenCalledTimes(1);
   });
 
   it('fails when subject is missing', async () => {

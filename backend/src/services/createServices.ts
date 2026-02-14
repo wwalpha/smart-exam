@@ -5,7 +5,7 @@ import { kanjiService, type KanjiService } from '@/services/kanji';
 import { materialsService, type MaterialsService } from '@/services/materials';
 import { questionsService, type QuestionsService } from '@/services/questions';
 import { reviewAttemptsService, type ReviewAttemptsService } from '@/services/reviewAttempts';
-import { reviewTestsService, type ReviewTestsService } from '@/services/exam';
+import { examsService, type ExamsService } from '@/services/exam';
 import { s3Service, type S3Service } from '@/services/s3';
 
 export type Services = {
@@ -15,7 +15,7 @@ export type Services = {
   materials: MaterialsService;
   questions: QuestionsService;
   reviewAttempts: ReviewAttemptsService;
-  reviewTests: ReviewTestsService;
+  exams: ExamsService;
   s3: S3Service;
 };
 
@@ -27,7 +27,7 @@ export const createServices = (repositories: Repositories): Services => {
     materials: materialsService(repositories),
     questions: questionsService(repositories),
     reviewAttempts: reviewAttemptsService(repositories),
-    reviewTests: reviewTestsService(repositories),
+    exams: examsService(repositories),
     s3: s3Service(repositories),
   };
 };

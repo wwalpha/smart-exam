@@ -14,21 +14,21 @@ import type {
   Question,
   CreateQuestionRequest,
   UpdateQuestionRequest,
-  ReviewTest,
-  CreateReviewTestRequest,
-  ReviewTestDetail,
-  UpdateReviewTestStatusRequest,
-  SubmitReviewTestResultsRequest,
-  ReviewTestTarget,
+  Exam,
+  CreateExamRequest,
+  ExamDetail,
+  UpdateExamStatusRequest,
+  SubmitExamResultsRequest,
+  ExamTarget,
   ReviewAttempt,
-  ReviewTestCandidate,
+  ExamCandidate,
   Kanji,
   CreateKanjiRequest,
   UpdateKanjiRequest,
   ImportKanjiRequest,
   ImportKanjiResponse,
   DashboardData,
-  SearchReviewTestsRequest,
+  SearchExamsRequest,
 } from '@smart-exam/api-types';
 
 /**
@@ -79,14 +79,14 @@ export type MaterialState = {
  * Review Slice State
  */
 export type ReviewState = {
-  list: ReviewTest[];
+  list: Exam[];
   total: number;
-  detail: ReviewTestDetail | null;
+  detail: ExamDetail | null;
   status: ApiStatus;
 };
 
 export type ReviewTargetState = {
-  items: ReviewTestTarget[];
+  items: ExamTarget[];
   status: ApiStatus;
 };
 
@@ -96,7 +96,7 @@ export type ReviewAttemptHistoryState = {
 };
 
 export type ReviewCandidateState = {
-  items: ReviewTestCandidate[];
+  items: ExamCandidate[];
   status: ApiStatus;
 };
 
@@ -113,7 +113,7 @@ export type KanjiState = {
 /**
  * 復習テスト機能（+ 単語テスト機能）をまとめた Zustand slice
  */
-export type ReviewTestSlice = {
+export type ExamSlice = {
   /** 単語テスト state */
   wordtest: WordTestState;
   fetchWordTests: () => Promise<void>;
@@ -126,20 +126,20 @@ export type ReviewTestSlice = {
   reviewTargets: ReviewTargetState;
   reviewAttempts: ReviewAttemptHistoryState;
   reviewCandidates: ReviewCandidateState;
-  fetchReviewTests: (params: SearchReviewTestsRequest) => Promise<void>;
-  createReviewTest: (request: CreateReviewTestRequest) => Promise<ReviewTest>;
-  fetchReviewTest: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
-  updateReviewTestStatus: (id: string, request: UpdateReviewTestStatusRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
-  deleteReviewTest: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
-  submitReviewTestResults: (id: string, request: SubmitReviewTestResultsRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
-  fetchReviewTestTargets: (params: {
+  fetchExams: (params: SearchExamsRequest) => Promise<void>;
+  createExam: (request: CreateExamRequest) => Promise<Exam>;
+  fetchExam: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  updateExamStatus: (id: string, request: UpdateExamStatusRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  deleteExam: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  submitExamResults: (id: string, request: SubmitExamResultsRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  fetchExamTargets: (params: {
     mode: 'QUESTION' | 'KANJI';
     from: string;
     to: string;
     subject?: string;
   }) => Promise<void>;
   fetchReviewAttempts: (params: { targetType: 'QUESTION' | 'KANJI'; targetId: string; subject?: string }) => Promise<void>;
-  fetchReviewTestCandidates: (params?: { subject?: string; mode?: 'QUESTION' | 'KANJI' }) => Promise<void>;
+  fetchExamCandidates: (params?: { subject?: string; mode?: 'QUESTION' | 'KANJI' }) => Promise<void>;
 };
 
 /**

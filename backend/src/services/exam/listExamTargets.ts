@@ -1,24 +1,24 @@
-import type { ReviewTestTarget, ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ExamTarget, ReviewMode, SubjectId } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestTable, WordMasterTable } from '@/types/db';
+import type { ExamTable, WordMasterTable } from '@/types/db';
 
-import type { ReviewTestsService } from './createExamsService';
+import type { ExamsService } from './createExamsService';
 import { sortTargets, toReviewTargetKey } from './internal';
 
-export const createListReviewTestTargets = (
+export const createListExamTargets = (
   repositories: Repositories,
-): ReviewTestsService['listExamTargets'] => {
+): ExamsService['listExamTargets'] => {
   return async (params: {
     mode: ReviewMode;
     fromYmd: string;
     toYmd: string;
     subject?: SubjectId;
-  }): Promise<ReviewTestTarget[]> => {
+  }): Promise<ExamTarget[]> => {
     const from = params.fromYmd;
     const to = params.toYmd;
 
-    const rows: ReviewTestTable[] = await repositories.reviewTests.scanAll();
+    const rows: ExamTable[] = await repositories.exams.scanAll();
 
     const filteredRows = rows.filter((t) => {
       if (t.mode !== params.mode) return false;
@@ -28,7 +28,7 @@ export const createListReviewTestTargets = (
       return true;
     });
 
-    const byKey = new Map<string, ReviewTestTarget>();
+    const byKey = new Map<string, ExamTarget>();
 
     const allTargetIds = new Set<string>();
     for (const t of filteredRows) {

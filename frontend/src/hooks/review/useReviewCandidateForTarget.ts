@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useWordTestStore } from '@/stores';
-import type { ReviewMode, ReviewTestCandidate } from '@smart-exam/api-types';
+import type { ReviewMode, ExamCandidate } from '@smart-exam/api-types';
 import type { SubjectId } from '@smart-exam/api-types';
 
 export const useReviewCandidateForTarget = (params: {
@@ -10,17 +10,17 @@ export const useReviewCandidateForTarget = (params: {
   enabled: boolean;
 }) => {
   const { items, status } = useWordTestStore((s) => s.reviewCandidates);
-  const fetchReviewTestCandidates = useWordTestStore((s) => s.fetchReviewTestCandidates);
+  const fetchExamCandidates = useWordTestStore((s) => s.fetchExamCandidates);
 
   useEffect(() => {
     if (!params.enabled) return;
-    void fetchReviewTestCandidates({
+    void fetchExamCandidates({
       mode: params.mode,
       subject: params.subject ?? undefined,
     });
-  }, [params.enabled, params.mode, params.subject, fetchReviewTestCandidates]);
+  }, [params.enabled, params.mode, params.subject, fetchExamCandidates]);
 
-  const candidate = useMemo<ReviewTestCandidate | null>(() => {
+  const candidate = useMemo<ExamCandidate | null>(() => {
     if (!params.targetId) return null;
     return (
       items.find((x) => {

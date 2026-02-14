@@ -7,7 +7,7 @@ import {
 } from '@/controllers/exam';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
-import type { CreateReviewTestRequest, GetReviewTestParams } from '@smart-exam/api-types';
+import type { CreateExamRequest, GetExamParams } from '@smart-exam/api-types';
 
 // repository methods are spied per-test
 
@@ -15,7 +15,7 @@ describe('exam handler', () => {
   it('listExams returns items', async () => {
     const mockItems = [{ id: '1', status: 'IN_PROGRESS' }];
     const services = {
-      reviewTests: {
+      exams: {
         listExams: vi.fn().mockResolvedValue(mockItems as unknown),
       },
     } as unknown as Services;
@@ -42,7 +42,7 @@ describe('exam handler', () => {
   it('createExam creates item', async () => {
     const mockItem = { id: '1', status: 'IN_PROGRESS' };
     const services = {
-      reviewTests: {
+      exams: {
         createExam: vi.fn().mockResolvedValue(mockItem as unknown),
       },
     } as unknown as Services;
@@ -56,7 +56,7 @@ describe('exam handler', () => {
 
     const req = {
       body: { subject: '1', mode: 'QUESTION', count: 20 },
-    } as unknown as Request<Record<string, never>, unknown, CreateReviewTestRequest>;
+    } as unknown as Request<Record<string, never>, unknown, CreateExamRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -72,7 +72,7 @@ describe('exam handler', () => {
   it('getExam returns item', async () => {
     const mockItem = { id: '1', status: 'IN_PROGRESS', items: [] };
     const services = {
-      reviewTests: {
+      exams: {
         getExam: vi.fn().mockResolvedValue(mockItem as unknown),
       },
     } as unknown as Services;
@@ -86,7 +86,7 @@ describe('exam handler', () => {
 
     const req = {
       params: { testId: '1' },
-    } as unknown as Request<GetReviewTestParams>;
+    } as unknown as Request<GetExamParams>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
@@ -103,7 +103,7 @@ describe('exam handler', () => {
       { targetType: 'QUESTION', targetId: 'q1', subject: '1', lastTestCreatedDate: '2026-01-01', includedCount: 2 },
     ];
     const services = {
-      reviewTests: {
+      exams: {
         listExamTargets: vi.fn().mockResolvedValue(mockTargets as unknown),
       },
     } as unknown as Services;

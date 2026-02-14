@@ -2,15 +2,15 @@
 
 import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-import type { ReviewTestDetail } from '@smart-exam/api-types';
+import type { ExamDetail } from '@smart-exam/api-types';
 
 import { ApiError } from '@/lib/apiError';
 
 
-/** ReviewTestPdfService. */
-export const ReviewTestPdfService = {
+/** ExamPdfService. */
+export const ExamPdfService = {
   generatePdfBuffer: async (
-    review: ReviewTestDetail,
+    review: ExamDetail,
     options?: {
       /** 既定は VERIFIED のみ。ローカル検証などで GENERATED も含めたい場合に true。 */
       includeGenerated?: boolean;
@@ -126,11 +126,11 @@ export const ReviewTestPdfService = {
       return lines;
     };
 
-    const getQuestionText = (item: ReviewTestDetail['items'][number]): string => {
+    const getQuestionText = (item: ExamDetail['items'][number]): string => {
       return item.questionText ?? item.displayLabel ?? item.canonicalKey ?? item.kanji ?? item.targetId ?? '';
     };
 
-    const getMaterialLine = (item: ReviewTestDetail['items'][number]): string => {
+    const getMaterialLine = (item: ExamDetail['items'][number]): string => {
       const name = item.materialName ?? '';
       const date = item.materialDate ?? '';
       const key = item.canonicalKey ?? '';

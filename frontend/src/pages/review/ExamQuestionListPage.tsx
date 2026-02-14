@@ -10,7 +10,7 @@ import { formatYmdSlash } from '@/utils/date';
 import type { WordTestSubject } from '@typings/wordtest';
 import { FileText, Trash2 } from 'lucide-react';
 
-export const ReviewTestQuestionListPage = () => {
+export const ExamQuestionListPage = () => {
   const { basePath, reviews, form, search, remove, ConfirmDialog } = useReviewQuestionList();
   const { setValue } = form;
 

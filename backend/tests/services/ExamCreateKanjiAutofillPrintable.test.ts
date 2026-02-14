@@ -1,21 +1,21 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ReviewTestDetail } from '@smart-exam/api-types';
+import type { ExamDetail } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 
-describe('createReviewTest (KANJI) autofill printable fields', () => {
+describe('createExam (KANJI) autofill printable fields', () => {
   it('tries to generate reading/underline when printable is empty', async () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
 
-    const { createCreateReviewTest } = await import('@/services/exam/createExam');
+    const { createCreateExam } = await import('@/services/exam/createExam');
 
     const wordId = 'w-draft';
     const question = '彼はけいせいを説明した。';
     const answer = '形成';
 
     const repositories = {
-      reviewTestCandidates: {
+      examCandidates: {
         listDueCandidates: vi.fn().mockResolvedValue([
           {
             subject: '1',
@@ -52,7 +52,7 @@ describe('createReviewTest (KANJI) autofill printable fields', () => {
           items: [{ id: wordId, readingHiragana: 'けいせい' }],
         }),
       },
-      reviewTests: {
+      exams: {
         put: vi.fn().mockResolvedValue(undefined),
       },
       s3: {
@@ -84,10 +84,10 @@ describe('createReviewTest (KANJI) autofill printable fields', () => {
           underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
         },
       ],
-    } satisfies ReviewTestDetail);
+    } satisfies ExamDetail);
 
     const deleteExam = vi.fn().mockResolvedValue(true);
-    const createExam = createCreateReviewTest({ repositories, getExam, deleteExam });
+    const createExam = createCreateExam({ repositories, getExam, deleteExam });
 
     await expect(createExam({ subject: '1', mode: 'KANJI', count: 60 })).resolves.toEqual(
       expect.objectContaining({ mode: 'KANJI' }),

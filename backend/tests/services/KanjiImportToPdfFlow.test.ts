@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 
 import { createKanjiService } from '@/services/kanji/createKanjiService';
-import { ReviewTestPdfService } from '@/services/exam/examPdfService';
+import { ExamPdfService } from '@/services/exam/examPdfService';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestDetail } from '@smart-exam/api-types';
+import type { ExamDetail } from '@smart-exam/api-types';
 
 describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)', () => {
   it('imports verified kanji question and generates worksheet PDF', async () => {
@@ -45,7 +45,7 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
           return next;
         }),
       },
-      reviewTestCandidates: {
+      examCandidates: {
         deleteCandidatesByTargetId: vi
           .fn()
           .mockImplementation(async (params: { subject: string; targetId: string }) => {
@@ -116,7 +116,7 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
 
     const questionText = String(w?.question ?? '');
 
-    const review: ReviewTestDetail = {
+    const review: ExamDetail = {
       id: 't1',
       testId: 't1',
       subject: '1',
@@ -140,7 +140,7 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
       })),
     };
 
-    const pdf = await ReviewTestPdfService.generatePdfBuffer(review);
+    const pdf = await ExamPdfService.generatePdfBuffer(review);
     expect(pdf.length).toBeGreaterThan(100);
 
     const doc = await PDFDocument.load(pdf);

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatYmdSlash } from '@/utils/date';
 import { useReviewQuestionGrading } from '@/hooks/review';
 
-export const ReviewTestQuestionGradingPage = () => {
+export const ExamQuestionGradingPage = () => {
   const { review, isInitialLoading, isSaving, error, basePath, fields, watch, setValue, setAllCorrect, submit, id } =
     useReviewQuestionGrading();
 

@@ -7,14 +7,14 @@ export const createMarkQuestionCorrect = (repositories: Repositories): Questions
     const q = await repositories.questions.get(questionId);
     if (!q) return false;
 
-    const open = await repositories.reviewTestCandidates.getLatestOpenCandidateByTargetId({
+    const open = await repositories.examCandidates.getLatestOpenCandidateByTargetId({
       subject: q.subjectId,
       targetId: questionId,
     });
 
     if (open) {
       // 正解の場合は候補にしない（DBに残さない）
-      await repositories.reviewTestCandidates.deleteCandidate({
+      await repositories.examCandidates.deleteCandidate({
         subject: q.subjectId,
         candidateKey: open.candidateKey,
       });

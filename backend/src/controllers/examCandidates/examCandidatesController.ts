@@ -4,22 +4,22 @@ import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedQuery } from '@/types/express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import type { ListReviewTestCandidatesResponse, ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ListExamCandidatesResponse, ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { ListReviewTestCandidatesQuerySchema } from './examCandidatesController.schema';
+import { ListExamCandidatesQuerySchema } from './examCandidatesController.schema';
 
 /** Creates review test candidates controller. */
 export const examCandidatesController = (services: Services) => {
   const listExamCandidates: AsyncHandler<
     ParamsDictionary,
-    ListReviewTestCandidatesResponse,
+    ListExamCandidatesResponse,
     Record<string, never>,
     ParsedQs
   > = async (req, res) => {
-    const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListReviewTestCandidatesQuerySchema>;
+    const q = (req.validated?.query ?? req.query) as ValidatedQuery<typeof ListExamCandidatesQuerySchema>;
 
-    const items = await services.reviewTests.listExamCandidates({
+    const items = await services.exams.listExamCandidates({
       subject: q.subject as SubjectId | undefined,
       mode: q.mode as ReviewMode | undefined,
     });
@@ -38,7 +38,7 @@ export const examCandidatesController = (services: Services) => {
   };
 
   return {
-    ListReviewTestCandidatesQuerySchema,
+    ListExamCandidatesQuerySchema,
     listExamCandidates,
   };
 };

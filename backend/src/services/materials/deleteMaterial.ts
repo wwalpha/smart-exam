@@ -12,7 +12,7 @@ export const createDeleteMaterial = (repositories: Repositories): MaterialsServi
 
     // 教材削除時は、復習候補と問題もまとめて削除する（孤児候補や復習テストへの混入を防ぐため）
     for (const q of materialQuestions) {
-      await repositories.reviewTestCandidates.deleteOpenCandidatesByTargetId({
+      await repositories.examCandidates.deleteOpenCandidatesByTargetId({
         subject: q.subjectId,
         targetId: q.questionId,
       });
@@ -21,7 +21,7 @@ export const createDeleteMaterial = (repositories: Repositories): MaterialsServi
 
     if (materialQuestions.length > 0) {
       const deletedQuestionIds = new Set(materialQuestions.map((q) => q.questionId));
-      const tests = await repositories.reviewTests.scanAll();
+      const tests = await repositories.exams.scanAll();
 
       for (const test of tests) {
         if (test.mode !== 'QUESTION') continue;
@@ -34,7 +34,7 @@ export const createDeleteMaterial = (repositories: Repositories): MaterialsServi
         const nextQuestions = (test.questions ?? []).filter((qid) => !deletedQuestionIds.has(qid));
         const nextResults = test.results ? test.results.filter((r) => !deletedQuestionIds.has(r.id)) : undefined;
 
-        await repositories.reviewTests.put({
+        await repositories.exams.put({
           ...test,
           questions: nextQuestions,
           count: nextQuestions.length,

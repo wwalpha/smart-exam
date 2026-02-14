@@ -7,7 +7,7 @@ import { useReviewQuestionCreate } from '@/hooks/review';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
-export const ReviewTestQuestionCreatePage = () => {
+export const ExamQuestionCreatePage = () => {
   const { form, submit } = useReviewQuestionCreate();
   const {
     register,

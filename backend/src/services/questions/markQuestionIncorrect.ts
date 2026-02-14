@@ -13,14 +13,14 @@ export const createMarkQuestionIncorrect = (repositories: Repositories): Questio
     const preferred = material?.registeredDate ?? material?.materialDate ?? '';
     const baseDateYmd = DateUtils.isValidYmd(preferred) ? preferred : DateUtils.todayYmd();
 
-    const open = await repositories.reviewTestCandidates.getLatestOpenCandidateByTargetId({
+    const open = await repositories.examCandidates.getLatestOpenCandidateByTargetId({
       subject: q.subjectId,
       targetId: questionId,
     });
 
     const currentCorrectCount = open ? open.correctCount : 0;
     if (open) {
-      await repositories.reviewTestCandidates.closeCandidateIfMatch({
+      await repositories.examCandidates.closeCandidateIfMatch({
         subject: q.subjectId,
         candidateKey: open.candidateKey,
       });
@@ -33,7 +33,7 @@ export const createMarkQuestionIncorrect = (repositories: Repositories): Questio
       currentCorrectCount,
     });
 
-    await repositories.reviewTestCandidates.createCandidate({
+    await repositories.examCandidates.createCandidate({
       subject: q.subjectId,
       questionId,
       mode: 'QUESTION',

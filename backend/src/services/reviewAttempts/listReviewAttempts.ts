@@ -1,14 +1,14 @@
 import type { ReviewAttempt, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestTable } from '@/types/db';
+import type { ExamTable } from '@/types/db';
 
 import type { ReviewAttemptsService } from './createReviewAttemptsService';
 
 const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
 
 const getAttemptFromTest = (params: {
-  test: ReviewTestTable;
+  test: ExamTable;
   targetType: ReviewTargetType;
   targetId: string;
 }): ReviewAttempt | null => {
@@ -27,13 +27,13 @@ const getAttemptFromTest = (params: {
     dateYmd,
     attemptedAt: toAttemptedAt(dateYmd),
     isCorrect,
-    reviewTestId: test.testId,
+    examId: test.testId,
   };
 };
 
 export const createListReviewAttempts = (repositories: Repositories): ReviewAttemptsService['listReviewAttempts'] => {
   return async (params: { targetType: ReviewTargetType; targetId: string; subject?: SubjectId }) => {
-    const items: ReviewTestTable[] = await repositories.reviewTests.scanAll();
+    const items: ExamTable[] = await repositories.exams.scanAll();
 
     const filtered = items
       .filter((t) => {
@@ -46,8 +46,8 @@ export const createListReviewAttempts = (repositories: Repositories): ReviewAtte
     // stable ordering: date desc then testId desc
     filtered.sort((a, b) => {
       if (a.dateYmd !== b.dateYmd) return a.dateYmd < b.dateYmd ? 1 : -1;
-      if ((a.reviewTestId ?? '') !== (b.reviewTestId ?? ''))
-        return (a.reviewTestId ?? '') < (b.reviewTestId ?? '') ? 1 : -1;
+      if ((a.examId ?? '') !== (b.examId ?? ''))
+        return (a.examId ?? '') < (b.examId ?? '') ? 1 : -1;
       return a.attemptedAt < b.attemptedAt ? 1 : -1;
     });
 

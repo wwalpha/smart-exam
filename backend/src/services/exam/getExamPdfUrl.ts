@@ -2,15 +2,15 @@ import { ApiError } from '@/lib/apiError';
 import { ENV } from '@/lib/env';
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { ReviewTestsService } from './createExamsService';
-import { ReviewTestPdfService } from './examPdfService';
+import type { ExamsService } from './createExamsService';
+import { ExamPdfService } from './examPdfService';
 
-export const createGetReviewTestPdfUrl = (deps: {
+export const createGetExamPdfUrl = (deps: {
   repositories: Repositories;
-  getExam: ReviewTestsService['getExam'];
-}): ReviewTestsService['getExamPdfUrl'] => {
+  getExam: ExamsService['getExam'];
+}): ExamsService['getExamPdfUrl'] => {
   return async (testId, params): Promise<{ url: string } | null> => {
-    const testRow = await deps.repositories.reviewTests.get(testId);
+    const testRow = await deps.repositories.exams.get(testId);
     if (!testRow) return null;
 
     const responseContentDisposition = params?.download ? 'attachment' : 'inline';
@@ -39,7 +39,7 @@ export const createGetReviewTestPdfUrl = (deps: {
     const review = await deps.getExam(testId);
     if (!review) return null;
 
-    const pdfBuffer = await ReviewTestPdfService.generatePdfBuffer(review, { includeGenerated: false });
+    const pdfBuffer = await ExamPdfService.generatePdfBuffer(review, { includeGenerated: false });
     const key = testRow.pdfS3Key ?? `review-tests/${testId}.pdf`;
 
     await deps.repositories.s3.putObject({
@@ -50,7 +50,7 @@ export const createGetReviewTestPdfUrl = (deps: {
     });
 
     if (testRow.pdfS3Key !== key) {
-      await deps.repositories.reviewTests.updatePdfS3Key(testId, key);
+      await deps.repositories.exams.updatePdfS3Key(testId, key);
     }
 
     const url = await deps.repositories.s3.getPresignedGetUrl({

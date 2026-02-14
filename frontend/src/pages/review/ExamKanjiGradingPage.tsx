@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useReviewKanjiGrading } from '@/hooks/review';
 
-export const ReviewTestKanjiGradingPage = () => {
+export const ExamKanjiGradingPage = () => {
   const { review, isInitialLoading, isSaving, error, basePath, fields, watch, setValue, setAllCorrect, submit, id } =
     useReviewKanjiGrading();
 

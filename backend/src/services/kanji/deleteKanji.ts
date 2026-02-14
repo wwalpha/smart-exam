@@ -7,9 +7,9 @@ export const createDeleteKanji = (repositories: Repositories): KanjiService['del
     const existing = await repositories.wordMaster.get(id);
     if (!existing) return false;
 
-    await repositories.reviewTestCandidates.deleteCandidatesByTargetId({ subject: existing.subject, targetId: id });
+    await repositories.examCandidates.deleteCandidatesByTargetId({ subject: existing.subject, targetId: id });
 
-    const tests = await repositories.reviewTests.scanAll();
+    const tests = await repositories.exams.scanAll();
     const affected = tests.filter((t) => t.mode === 'KANJI' && Array.isArray(t.questions) && t.questions.includes(id));
 
     await Promise.all(
@@ -19,7 +19,7 @@ export const createDeleteKanji = (repositories: Repositories): KanjiService['del
 
         // 既存PDFに削除済み漢字が残るのを避けるため、pdfS3Key を削除して再生成ルートに落とす
         const { pdfS3Key: _pdfS3Key, ...rest } = t;
-        await repositories.reviewTests.put({
+        await repositories.exams.put({
           ...rest,
           questions: nextQuestions,
           count: nextQuestions.length,

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** UpdateReviewTestStatusBodySchema validates input shape. */
-export const UpdateReviewTestStatusBodySchema = z.object({
+/** UpdateExamStatusBodySchema validates input shape. */
+export const UpdateExamStatusBodySchema = z.object({
   status: z.enum(['IN_PROGRESS', 'COMPLETED']),
 });

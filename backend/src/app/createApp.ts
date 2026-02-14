@@ -216,8 +216,8 @@ export const createApp = (): express.Express => {
   // 復習テスト候補の一覧を取得するAPI
   app.get(
     '/api/review-test-candidates',
-    validateQuery(controllers.reviewTestCandidates.ListReviewTestCandidatesQuerySchema),
-    handleRequest(controllers.reviewTestCandidates.listExamCandidates),
+    validateQuery(controllers.examCandidates.ListExamCandidatesQuerySchema),
+    handleRequest(controllers.examCandidates.listExamCandidates),
   );
 
   // 復習テストの実施履歴を参照する読み取り専用API
@@ -243,7 +243,7 @@ export const createApp = (): express.Express => {
   app.patch(
     '/api/exam/kanji/:testId',
     validateParams(TestIdParamsSchema),
-    validateBody(controllers.tests.kanji.UpdateReviewTestStatusBodySchema),
+    validateBody(controllers.tests.kanji.UpdateExamStatusBodySchema),
     handleRequest(controllers.tests.kanji.updateTestStatus),
   );
   // 指定した漢字テストを削除するAPI
@@ -256,7 +256,7 @@ export const createApp = (): express.Express => {
   app.post(
     '/api/exam/kanji/:testId/results',
     validateParams(TestIdParamsSchema),
-    validateBody(controllers.tests.kanji.SubmitReviewTestResultsBodySchema),
+    validateBody(controllers.tests.kanji.SubmitExamResultsBodySchema),
     handleRequest(controllers.tests.kanji.submitTestResults),
   );
 
@@ -276,7 +276,7 @@ export const createApp = (): express.Express => {
   app.patch(
     '/api/exam/question/:testId',
     validateParams(TestIdParamsSchema),
-    validateBody(controllers.tests.question.UpdateReviewTestStatusBodySchema),
+    validateBody(controllers.tests.question.UpdateExamStatusBodySchema),
     handleRequest(controllers.tests.question.updateTestStatus),
   );
   // 指定した問題テストを削除するAPI
@@ -289,7 +289,7 @@ export const createApp = (): express.Express => {
   app.post(
     '/api/exam/question/:testId/results',
     validateParams(TestIdParamsSchema),
-    validateBody(controllers.tests.question.SubmitReviewTestResultsBodySchema),
+    validateBody(controllers.tests.question.SubmitExamResultsBodySchema),
     handleRequest(controllers.tests.question.submitTestResults),
   );
 

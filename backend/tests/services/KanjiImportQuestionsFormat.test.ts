@@ -10,7 +10,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
-      reviewTestCandidates: {
+      examCandidates: {
         bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
@@ -56,7 +56,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
-      reviewTestCandidates: {
+      examCandidates: {
         bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
@@ -96,7 +96,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
         ] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
-      reviewTestCandidates: {
+      examCandidates: {
         bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
@@ -136,7 +136,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
-      reviewTestCandidates: {
+      examCandidates: {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
         bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
@@ -168,13 +168,13 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
       .calls[0][0] as Array<{ wordId: string }>;
     const id = created[0].wordId;
 
-    expect(repositories.reviewTestCandidates.deleteCandidatesByTargetId).toHaveBeenCalledWith({
+    expect(repositories.examCandidates.deleteCandidatesByTargetId).toHaveBeenCalledWith({
       subject: '1',
       targetId: id,
     });
 
     const createdCandidates = (
-      repositories.reviewTestCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
+      repositories.examCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
     ).mock.calls[0][0] as Array<{ status: string }>;
     expect(createdCandidates.some((c) => c.status === 'OPEN' || c.status === 'EXCLUDED')).toBe(true);
   });

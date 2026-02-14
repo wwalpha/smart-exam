@@ -1,70 +1,70 @@
 // Module: createExamsService responsibilities.
 
 import type {
-  CreateReviewTestRequest,
+  CreateExamRequest,
   ReviewMode,
-  ReviewTest,
-  ReviewTestDetail,
-  ReviewTestTarget,
-  SearchReviewTestsRequest,
-  SearchReviewTestsResponse,
+  Exam,
+  ExamDetail,
+  ExamTarget,
+  SearchExamsRequest,
+  SearchExamsResponse,
   SubjectId,
-  SubmitReviewTestResultsRequest,
-  UpdateReviewTestStatusRequest,
+  SubmitExamResultsRequest,
+  UpdateExamStatusRequest,
 } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ReviewTestCandidateTable } from '@/types/db';
+import type { ExamCandidateTable } from '@/types/db';
 
-import { createCreateReviewTest } from './createExam';
-import { createDeleteReviewTest } from './deleteExam';
-import { createGenerateReviewTestPdfBuffer } from './generateExamPdfBuffer';
-import { createGetReviewTest } from './getExam';
-import { createGetReviewTestPdfUrl } from './getExamPdfUrl';
-import { createListReviewTestCandidates } from './listExamCandidates';
-import { createListReviewTestTargets } from './listExamTargets';
-import { createListReviewTests } from './listExams';
-import { createSearchReviewTests } from './searchExams';
-import { createSubmitReviewTestResults } from './submitExamResults';
-import { createUpdateReviewTestStatus } from './updateExamStatus';
+import { createCreateExam } from './createExam';
+import { createDeleteExam } from './deleteExam';
+import { createGenerateExamPdfBuffer } from './generateExamPdfBuffer';
+import { createGetExam } from './getExam';
+import { createGetExamPdfUrl } from './getExamPdfUrl';
+import { createListExamCandidates } from './listExamCandidates';
+import { createListExamTargets } from './listExamTargets';
+import { createListExams } from './listExams';
+import { createSearchExams } from './searchExams';
+import { createSubmitExamResults } from './submitExamResults';
+import { createUpdateExamStatus } from './updateExamStatus';
 
-/** Type definition for ReviewTestsService. */
-export type ReviewTestsService = {
-  listExams: () => Promise<ReviewTest[]>;
-  searchExams: (params: SearchReviewTestsRequest) => Promise<SearchReviewTestsResponse>;
-  createExam: (req: CreateReviewTestRequest) => Promise<ReviewTest>;
-  getExam: (testId: string) => Promise<ReviewTestDetail | null>;
+/** Type definition for ExamsService. */
+export type ExamsService = {
+  listExams: () => Promise<Exam[]>;
+  searchExams: (params: SearchExamsRequest) => Promise<SearchExamsResponse>;
+  createExam: (req: CreateExamRequest) => Promise<Exam>;
+  getExam: (testId: string) => Promise<ExamDetail | null>;
   getExamPdfUrl: (testId: string, params?: { download?: boolean }) => Promise<{ url: string } | null>;
   generateExamPdfBuffer: (testId: string, options?: { includeGenerated?: boolean }) => Promise<Buffer | null>;
-  updateExamStatus: (testId: string, req: UpdateReviewTestStatusRequest) => Promise<ReviewTest | null>;
-  submitExamResults: (testId: string, req: SubmitReviewTestResultsRequest) => Promise<boolean>;
+  updateExamStatus: (testId: string, req: UpdateExamStatusRequest) => Promise<Exam | null>;
+  submitExamResults: (testId: string, req: SubmitExamResultsRequest) => Promise<boolean>;
   deleteExam: (testId: string) => Promise<boolean>;
   listExamTargets: (params: {
     mode: ReviewMode;
     fromYmd: string;
     toYmd: string;
     subject?: SubjectId;
-  }) => Promise<ReviewTestTarget[]>;
-  listExamCandidates: (params: { subject?: SubjectId; mode?: ReviewMode }) => Promise<ReviewTestCandidateTable[]>;
+  }) => Promise<ExamTarget[]>;
+  listExamCandidates: (params: { subject?: SubjectId; mode?: ReviewMode }) => Promise<ExamCandidateTable[]>;
 };
 
 /** Creates review tests service. */
-export const createExamsService = (repositories: Repositories): ReviewTestsService => {
-  const listExams = createListReviewTests(repositories);
-  const searchExams = createSearchReviewTests({ listExams });
+export const createExamsService = (repositories: Repositories): ExamsService => {
+  const listExams = createListExams(repositories);
+  const searchExams = createSearchExams({ listExams });
 
-  const deleteExam = createDeleteReviewTest(repositories);
-  const getExam = createGetReviewTest(repositories);
+  const deleteExam = createDeleteExam(repositories);
+  const getExam = createGetExam(repositories);
 
-  const createExam = createCreateReviewTest({ repositories, getExam, deleteExam });
+  const createExam = createCreateExam({ repositories, getExam, deleteExam });
 
-  const listExamTargets = createListReviewTestTargets(repositories);
-  const listExamCandidates = createListReviewTestCandidates(repositories);
-  const updateExamStatus = createUpdateReviewTestStatus(repositories);
-  const submitExamResults = createSubmitReviewTestResults(repositories);
+  const listExamTargets = createListExamTargets(repositories);
+  const listExamCandidates = createListExamCandidates(repositories);
+  const updateExamStatus = createUpdateExamStatus(repositories);
+  const submitExamResults = createSubmitExamResults(repositories);
 
-  const getExamPdfUrl = createGetReviewTestPdfUrl({ repositories, getExam });
-  const generateExamPdfBuffer = createGenerateReviewTestPdfBuffer({ getExam });
+  const getExamPdfUrl = createGetExamPdfUrl({ repositories, getExam });
+  const generateExamPdfBuffer = createGenerateExamPdfBuffer({ getExam });
 
   return {
     listExams,

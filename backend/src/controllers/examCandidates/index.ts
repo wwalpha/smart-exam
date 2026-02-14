@@ -1,2 +1,2 @@
-export { ListReviewTestCandidatesQuerySchema } from './examCandidatesController.schema';
+export { ListExamCandidatesQuerySchema } from './examCandidatesController.schema';
 export { examCandidatesController } from './examCandidatesController';

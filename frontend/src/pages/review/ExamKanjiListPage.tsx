@@ -10,7 +10,7 @@ import { formatYmdSlash } from '@/utils/date';
 import type { WordTestSubject } from '@typings/wordtest';
 import { FileText, Trash2 } from 'lucide-react';
 
-export const ReviewTestKanjiListPage = () => {
+export const ExamKanjiListPage = () => {
   const { basePath, reviews, form, search, remove, ConfirmDialog } = useReviewKanjiList();
   const { setValue } = form;
   const infoBadgeClass = 'px-4 py-2 text-sm';

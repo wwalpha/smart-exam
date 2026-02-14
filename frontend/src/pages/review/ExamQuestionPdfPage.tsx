@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useReviewQuestionPdf } from '@/hooks/review';
 import { toast } from 'sonner';
 
-export const ReviewTestQuestionPdfPage = () => {
+export const ExamQuestionPdfPage = () => {
   const { review, isLoading, error, basePath, navigate, id, presignedUrl, isFetchingPdfUrl, pdfUrlError } =
     useReviewQuestionPdf();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);

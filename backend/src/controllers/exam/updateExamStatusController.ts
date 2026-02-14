@@ -5,25 +5,25 @@ import type { ValidatedBody } from '@/types/express';
 import type { ParsedQs } from 'qs';
 
 import type {
-  UpdateReviewTestStatusParams,
-  UpdateReviewTestStatusRequest,
-  UpdateReviewTestStatusResponse,
+  UpdateExamStatusParams,
+  UpdateExamStatusRequest,
+  UpdateExamStatusResponse,
 } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { UpdateReviewTestStatusBodySchema } from './updateExamStatusController.schema';
+import { UpdateExamStatusBodySchema } from './updateExamStatusController.schema';
 
 /** Creates update review test status controller. */
 export const updateExamStatusController = (services: Services) => {
   const updateExamStatus: AsyncHandler<
-    UpdateReviewTestStatusParams,
-    UpdateReviewTestStatusResponse | { error: string },
-    UpdateReviewTestStatusRequest,
+    UpdateExamStatusParams,
+    UpdateExamStatusResponse | { error: string },
+    UpdateExamStatusRequest,
     ParsedQs
   > = async (req, res) => {
     const { testId } = req.params;
-    const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateReviewTestStatusBodySchema>;
-    const item = await services.reviewTests.updateExamStatus(testId, body);
+    const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateExamStatusBodySchema>;
+    const item = await services.exams.updateExamStatus(testId, body);
     if (!item) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -31,5 +31,5 @@ export const updateExamStatusController = (services: Services) => {
     res.json(item);
   };
 
-  return { UpdateReviewTestStatusBodySchema, updateExamStatus };
+  return { UpdateExamStatusBodySchema, updateExamStatus };
 };

@@ -10,7 +10,7 @@ type FormValues = {
 
 export const useReviewTargets = (params: { mode: ReviewMode }) => {
   const { items, status } = useWordTestStore((s) => s.reviewTargets);
-  const fetchReviewTestTargets = useWordTestStore((s) => s.fetchReviewTestTargets);
+  const fetchExamTargets = useWordTestStore((s) => s.fetchExamTargets);
 
   const today = new Date();
   const defaultTo = format(today, 'yyyy-MM-dd');
@@ -24,7 +24,7 @@ export const useReviewTargets = (params: { mode: ReviewMode }) => {
   });
 
   const submit = form.handleSubmit(async (data) => {
-    await fetchReviewTestTargets({
+    await fetchExamTargets({
       mode: params.mode,
       from: data.from,
       to: data.to,

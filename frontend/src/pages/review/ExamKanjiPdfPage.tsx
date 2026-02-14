@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useReviewKanjiPdf } from '@/hooks/review';
 import { toast } from 'sonner';
 
-export const ReviewTestKanjiPdfPage = () => {
+export const ExamKanjiPdfPage = () => {
   const { review, isLoading, error, basePath, navigate, id, presignedUrl, isFetchingPdfUrl, pdfUrlError } =
     useReviewKanjiPdf();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);

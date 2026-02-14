@@ -13,7 +13,7 @@ const BASE_PATH = '/reviewtests/questions';
 export const useReviewQuestionCreate = () => {
   const navigate = useNavigate();
 
-  const createReviewTest = useWordTestStore((s) => s.createReviewTest);
+  const createExam = useWordTestStore((s) => s.createExam);
   const status = useWordTestStore((s) => s.review.status);
 
   const form = useForm<CreateFormValues>({
@@ -29,7 +29,7 @@ export const useReviewQuestionCreate = () => {
       return;
     }
 
-    const newTest = await createReviewTest({
+    const newTest = await createExam({
       mode: 'QUESTION',
       subject: data.subject,
       count: Number(data.count),

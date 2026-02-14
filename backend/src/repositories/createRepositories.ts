@@ -2,8 +2,8 @@
 
 import { MaterialsRepository } from '@/repositories/MaterialsRepository';
 import { QuestionsRepository } from '@/repositories/QuestionsRepository';
-import { ReviewTestCandidatesRepository } from '@/repositories/ExamCandidatesRepository';
-import { ReviewTestsRepository } from '@/repositories/ExamsRepository';
+import { ExamCandidatesRepository } from '@/repositories/ExamCandidatesRepository';
+import { ExamsRepository } from '@/repositories/ExamsRepository';
 import { WordMasterRepository } from '@/repositories/WordMasterRepository';
 import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
 import { S3Repository } from '@/repositories/S3Repository';
@@ -13,8 +13,8 @@ import { S3Repository } from '@/repositories/S3Repository';
 export type Repositories = {
   materials: typeof MaterialsRepository;
   questions: typeof QuestionsRepository;
-  reviewTestCandidates: typeof ReviewTestCandidatesRepository;
-  reviewTests: typeof ReviewTestsRepository;
+  examCandidates: typeof ExamCandidatesRepository;
+  exams: typeof ExamsRepository;
   wordMaster: typeof WordMasterRepository;
   s3: typeof S3Repository;
   bedrock: {
@@ -28,8 +28,8 @@ export const createRepositories = (): Repositories => {
   return {
     materials: MaterialsRepository,
     questions: QuestionsRepository,
-    reviewTestCandidates: ReviewTestCandidatesRepository,
-    reviewTests: ReviewTestsRepository,
+    examCandidates: ExamCandidatesRepository,
+    exams: ExamsRepository,
     wordMaster: WordMasterRepository,
     s3: S3Repository,
     bedrock: { analyzeExamPaper, generateKanjiQuestionReadingsBulk },
