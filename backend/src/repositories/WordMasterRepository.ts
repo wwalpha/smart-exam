@@ -10,6 +10,11 @@ const TABLE_NAME = ENV.TABLE_WORD_MASTER;
 
 /** WordMasterRepository. */
 export const WordMasterRepository = {
+  bulkCreate: async (items: WordMasterTable[]): Promise<void> => {
+    if (items.length === 0) return;
+    await dbHelper.bulk(TABLE_NAME, items as unknown as Record<string, unknown>[]);
+  },
+
   create: async (item: WordMasterTable): Promise<void> => {
     await dbHelper.put({
       TableName: TABLE_NAME,

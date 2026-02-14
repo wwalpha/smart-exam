@@ -9,17 +9,23 @@ describe('KanjiService.importKanji (single pipe format)', () => {
     const repositories = {
       wordMaster: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
-        create: vi.fn().mockResolvedValue(undefined),
+        bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       reviewTestCandidates: {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
-        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+        bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
-        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
-          readingHiragana: 'しゅっぱん',
-          underlineSpec: { type: 'promptSpan', start: 3, length: 5 },
-        }),
+        generateKanjiQuestionReadingsBulk: vi
+          .fn()
+          .mockImplementation(async (params: { items: Array<{ id: string }> }) => {
+            return {
+              items: params.items.map((x) => ({
+                id: x.id,
+                readingHiragana: 'しゅっぱん',
+              })),
+            };
+          }),
       },
     } as unknown as Repositories;
 
@@ -33,10 +39,13 @@ describe('KanjiService.importKanji (single pipe format)', () => {
     expect(res.successCount).toBe(1);
     expect(res.errorCount).toBe(0);
 
-    expect(repositories.wordMaster.create).toHaveBeenCalledTimes(1);
+    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledTimes(1);
 
     // 履歴3件（CLOSED） + 最終状態1件（OPEN/EXCLUDED）
-    expect(repositories.reviewTestCandidates.createCandidate).toHaveBeenCalledTimes(4);
+    const createdCandidates = (
+      repositories.reviewTestCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
+    ).mock.calls[0][0] as unknown[];
+    expect(createdCandidates.length).toBe(4);
     expect(repositories.reviewTestCandidates.deleteCandidatesByTargetId).toHaveBeenCalledTimes(1);
   });
 

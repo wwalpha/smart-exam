@@ -12,6 +12,17 @@ export type KanjiQuestionReadingResult = {
   underlineSpec: { type: 'promptSpan'; start: number; length: number };
 };
 
+export type KanjiQuestionReadingBulkInput = {
+  id: string;
+  question: string;
+  answer: string;
+};
+
+export type KanjiQuestionReadingBulkResult = {
+  id: string;
+  readingHiragana: string;
+};
+
 /** analyzeExamPaper. */
 export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'): Promise<string[]> => {
   // 1. Get file from S3
@@ -254,6 +265,74 @@ ${params.hint ? `hint: ${JSON.stringify(params.hint)}` : ''}
     const jsonString = jsonMatch ? jsonMatch[0] : textContent;
     const result = JSON.parse(jsonString) as KanjiQuestionReadingResult;
     return result;
+  } catch {
+    console.error('Failed to parse JSON from Bedrock:', textContent);
+    throw new Error('Failed to parse Bedrock response');
+  }
+};
+
+/** generateKanjiQuestionReadingsBulk. */
+export const generateKanjiQuestionReadingsBulk = async (params: {
+  items: KanjiQuestionReadingBulkInput[];
+  modelId?: string;
+  hint?: string;
+}): Promise<{ items: KanjiQuestionReadingBulkResult[] }> => {
+  const modelId = params.modelId ?? 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+
+  const prompt = `
+You are an AI assistant for Japanese kanji worksheet generation.
+
+Task:
+- For each input item, choose the hiragana reading substring that should be underlined.
+
+Output requirements (STRICT):
+- Return ONLY valid JSON.
+- No markdown, no code fences, no explanations.
+
+JSON schema:
+{
+  "items": [
+    { "id": "<id>", "readingHiragana": "<hiragana-only>" }
+  ]
+}
+
+Rules:
+- Keep the same id.
+- readingHiragana must be hiragana only (allow long vowel mark 'ー').
+- readingHiragana MUST be an exact substring of the given question text (copy it exactly from question).
+- Choose a contiguous run of hiragana/ー that represents the reading for the answer's kanji.
+- If multiple candidates exist, pick the one most directly corresponding to the answer; if still tied, pick the first occurrence.
+- Output one result per input id.
+
+Input JSON:
+${JSON.stringify(params.items)}
+${params.hint ? `\nhint: ${JSON.stringify(params.hint)}` : ''}
+`;
+
+  const command = new ConverseCommand({
+    modelId,
+    messages: [
+      {
+        role: 'user',
+        content: [{ text: prompt }],
+      },
+    ],
+    additionalModelRequestFields: {
+      max_tokens: 4096,
+    },
+  });
+
+  const response = await bedrockClient.send(command);
+  const textContent = response.output?.message?.content?.find((c) => c.text)?.text;
+  if (!textContent) {
+    throw new Error('No text content in Bedrock response');
+  }
+
+  try {
+    const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : textContent;
+    const result = JSON.parse(jsonString) as { items?: KanjiQuestionReadingBulkResult[] };
+    return { items: Array.isArray(result.items) ? result.items : [] };
   } catch {
     console.error('Failed to parse JSON from Bedrock:', textContent);
     throw new Error('Failed to parse Bedrock response');

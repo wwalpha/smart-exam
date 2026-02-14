@@ -8,16 +8,22 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     const repositories = {
       wordMaster: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
-        create: vi.fn().mockResolvedValue(undefined),
+        bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       reviewTestCandidates: {
-        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+        bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
-        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
-          readingHiragana: 'けいせい',
-          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-        }),
+        generateKanjiQuestionReadingsBulk: vi
+          .fn()
+          .mockImplementation(async (params: { items: Array<{ id: string }> }) => {
+            return {
+              items: params.items.map((x) => ({
+                id: x.id,
+                readingHiragana: 'けいせい',
+              })),
+            };
+          }),
       },
     } as unknown as Repositories;
 
@@ -32,8 +38,8 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.errorCount).toBe(0);
     expect(res.questionIds?.length).toBe(1);
 
-    expect(repositories.wordMaster.create).toHaveBeenCalledTimes(1);
-    expect(repositories.wordMaster.create).toHaveBeenCalledWith(
+    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledWith([
       expect.objectContaining({
         subject: '1',
         question: '彼はけいせいを説明した。',
@@ -41,13 +47,20 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
         readingHiragana: 'けいせい',
         underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
       }),
-    );
+    ]);
   });
 
   it('returns line-numbered errors for invalid lines', async () => {
     const repositories = {
       wordMaster: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
+        bulkCreate: vi.fn().mockResolvedValue(undefined),
+      },
+      reviewTestCandidates: {
+        bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
+      },
+      bedrock: {
+        generateKanjiQuestionReadingsBulk: vi.fn().mockResolvedValue({ items: [] }),
       },
     } as unknown as Repositories;
 
@@ -81,16 +94,22 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
             underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
           },
         ] as unknown),
-        create: vi.fn().mockResolvedValue(undefined),
+        bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       reviewTestCandidates: {
-        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+        bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
-        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
-          readingHiragana: 'めいかく',
-          underlineSpec: { type: 'promptSpan', start: 6, length: 4 },
-        }),
+        generateKanjiQuestionReadingsBulk: vi
+          .fn()
+          .mockImplementation(async (params: { items: Array<{ id: string }> }) => {
+            return {
+              items: params.items.map((x) => ({
+                id: x.id,
+                readingHiragana: 'めいかく',
+              })),
+            };
+          }),
       },
     } as unknown as Repositories;
 
@@ -108,24 +127,30 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.successCount).toBe(1);
     expect(res.duplicateCount).toBe(2);
     expect(res.errorCount).toBe(0);
-    expect(repositories.wordMaster.create).toHaveBeenCalledTimes(1);
+    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
   it('rebuilds candidates from histories and creates a final candidate (OPEN/EXCLUDED)', async () => {
     const repositories = {
       wordMaster: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
-        create: vi.fn().mockResolvedValue(undefined),
+        bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       reviewTestCandidates: {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
-        createCandidate: vi.fn().mockResolvedValue({} as unknown),
+        bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
-        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
-          readingHiragana: 'けいせい',
-          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-        }),
+        generateKanjiQuestionReadingsBulk: vi
+          .fn()
+          .mockImplementation(async (params: { items: Array<{ id: string }> }) => {
+            return {
+              items: params.items.map((x) => ({
+                id: x.id,
+                readingHiragana: 'けいせい',
+              })),
+            };
+          }),
       },
     } as unknown as Repositories;
 
@@ -139,20 +164,18 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.successCount).toBe(1);
     expect(res.errorCount).toBe(0);
 
-    const created = (repositories.wordMaster.create as unknown as { mock: { calls: unknown[][] } }).mock
-      .calls[0][0] as {
-      wordId: string;
-    };
-    const id = created.wordId;
+    const created = (repositories.wordMaster.bulkCreate as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0][0] as Array<{ wordId: string }>;
+    const id = created[0].wordId;
 
     expect(repositories.reviewTestCandidates.deleteCandidatesByTargetId).toHaveBeenCalledWith({
       subject: '1',
       targetId: id,
     });
 
-    const statuses = (
-      repositories.reviewTestCandidates.createCandidate as unknown as { mock: { calls: unknown[][] } }
-    ).mock.calls.map((c) => (c[0] as { status: string }).status);
-    expect(statuses.some((s) => s === 'OPEN' || s === 'EXCLUDED')).toBe(true);
+    const createdCandidates = (
+      repositories.reviewTestCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
+    ).mock.calls[0][0] as Array<{ status: string }>;
+    expect(createdCandidates.some((c) => c.status === 'OPEN' || c.status === 'EXCLUDED')).toBe(true);
   });
 });

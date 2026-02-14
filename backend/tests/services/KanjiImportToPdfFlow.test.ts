@@ -27,6 +27,11 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
           const items = Array.from(wordMasters.values());
           return subject ? items.filter((x) => x.subject === subject) : items;
         }),
+        bulkCreate: vi.fn().mockImplementation(async (items: WordMasterItem[]) => {
+          for (const item of items) {
+            wordMasters.set(item.wordId, item);
+          }
+        }),
         create: vi.fn().mockImplementation(async (item: WordMasterItem) => {
           wordMasters.set(item.wordId, item);
         }),
@@ -52,6 +57,13 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
               }
             }
           }),
+        bulkCreateCandidates: vi
+          .fn()
+          .mockImplementation(async (items: Array<{ subject: string; questionId: string; status: string }>) => {
+            for (const item of items) {
+              candidateParams.push({ subject: item.subject, questionId: item.questionId, status: item.status });
+            }
+          }),
         getLatestOpenCandidateByTargetId: vi
           .fn()
           .mockImplementation(async (params: { subject: string; targetId: string }) => {
@@ -71,10 +83,16 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
           }),
       },
       bedrock: {
-        generateKanjiQuestionReading: vi.fn().mockResolvedValue({
-          readingHiragana: 'けいせい',
-          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-        }),
+        generateKanjiQuestionReadingsBulk: vi
+          .fn()
+          .mockImplementation(async (params: { items: Array<{ id: string }> }) => {
+            return {
+              items: params.items.map((x) => ({
+                id: x.id,
+                readingHiragana: 'けいせい',
+              })),
+            };
+          }),
       },
     } as unknown as Repositories;
 

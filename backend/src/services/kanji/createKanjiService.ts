@@ -13,7 +13,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { WordMasterTable } from '@/types/db';
+import type { ReviewTestCandidateTable, WordMasterTable } from '@/types/db';
 import { parsePipeQuestionLine } from './importUtils';
 
 export type KanjiService = {
@@ -68,27 +68,47 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
     };
   };
 
-  const rebuildCandidatesFromHistories = async (params: {
+  const buildCandidateRow = (params: {
+    subject: SubjectId;
+    questionId: string;
+    mode: 'KANJI';
+    nextTime: string;
+    correctCount: number;
+    status: 'OPEN' | 'CLOSED' | 'EXCLUDED';
+    createdAtIso?: string;
+  }): ReviewTestCandidateTable => {
+    const id = createUuid();
+    const createdAt = params.createdAtIso ?? DateUtils.now();
+    return {
+      subject: params.subject,
+      candidateKey: `${params.nextTime}#${id}`,
+      id,
+      questionId: params.questionId,
+      mode: params.mode,
+      status: params.status,
+      correctCount: Math.max(0, Math.trunc(params.correctCount)),
+      nextTime: params.nextTime,
+      createdAt,
+    };
+  };
+
+  const buildCandidatesFromHistories = (params: {
     subject: SubjectId;
     targetWordId: string;
     histories: { submittedDate: string; isCorrect: boolean }[];
     finalStatus: 'AUTO' | 'EXCLUDED';
-  }): Promise<void> => {
-    if (params.histories.length === 0) return;
-
-    // 履歴を再構築するため既存候補を削除
-    await repositories.reviewTestCandidates.deleteCandidatesByTargetId({
-      subject: params.subject,
-      targetId: params.targetWordId,
-    });
+  }): ReviewTestCandidateTable[] => {
+    if (params.histories.length === 0) return [];
 
     const sorted = [...params.histories].sort((a, b) => (a.submittedDate < b.submittedDate ? -1 : 1));
     const recent = sorted.slice(Math.max(0, sorted.length - 3));
 
+    const candidates: ReviewTestCandidateTable[] = [];
+
     // 古い履歴は履歴としてのみ残す（状態計算には使わない）
-    await Promise.all(
-      sorted.slice(0, Math.max(0, sorted.length - 3)).map(async (h) => {
-        await repositories.reviewTestCandidates.createCandidate({
+    for (const h of sorted.slice(0, Math.max(0, sorted.length - 3))) {
+      candidates.push(
+        buildCandidateRow({
           subject: params.subject,
           questionId: params.targetWordId,
           mode: 'KANJI',
@@ -96,9 +116,9 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
           correctCount: 0,
           status: 'CLOSED',
           createdAtIso: DateUtils.toIso(h.submittedDate),
-        });
-      }),
-    );
+        }),
+      );
+    }
 
     let streak = 0;
     let lastAttemptIso = '';
@@ -114,15 +134,17 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
       });
 
       // 直近3回の履歴は、次状態を含めて履歴として残す
-      await repositories.reviewTestCandidates.createCandidate({
-        subject: params.subject,
-        questionId: params.targetWordId,
-        mode: 'KANJI',
-        nextTime: computed.nextTime,
-        correctCount: computed.nextCorrectCount,
-        status: 'CLOSED',
-        createdAtIso: DateUtils.toIso(h.submittedDate),
-      });
+      candidates.push(
+        buildCandidateRow({
+          subject: params.subject,
+          questionId: params.targetWordId,
+          mode: 'KANJI',
+          nextTime: computed.nextTime,
+          correctCount: computed.nextCorrectCount,
+          status: 'CLOSED',
+          createdAtIso: DateUtils.toIso(h.submittedDate),
+        }),
+      );
 
       streak = computed.nextCorrectCount;
       lastAttemptIso = DateUtils.toIso(h.submittedDate);
@@ -130,7 +152,7 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
       computedCorrectCount = computed.nextCorrectCount;
     }
 
-    if (!computedNextTime || !lastAttemptIso) return;
+    if (!computedNextTime || !lastAttemptIso) return candidates;
 
     const finalStatus =
       params.finalStatus === 'EXCLUDED'
@@ -139,27 +161,29 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
           ? 'EXCLUDED'
           : 'OPEN';
 
-    await repositories.reviewTestCandidates.createCandidate({
-      subject: params.subject,
-      questionId: params.targetWordId,
-      mode: 'KANJI',
-      nextTime: computedNextTime,
-      correctCount: computedCorrectCount,
-      status: finalStatus,
-      createdAtIso: lastAttemptIso,
-    });
+    candidates.push(
+      buildCandidateRow({
+        subject: params.subject,
+        questionId: params.targetWordId,
+        mode: 'KANJI',
+        nextTime: computedNextTime,
+        correctCount: computedCorrectCount,
+        status: finalStatus,
+        createdAtIso: lastAttemptIso,
+      }),
+    );
+
+    return candidates;
   };
 
   const listKanji: KanjiService['listKanji'] = async () => {
     const items = await repositories.wordMaster.listKanji();
-    return items
-      .filter((x) => !x.underlineSpec)
-      .map((dbItem) => ({
-        id: dbItem.wordId,
-        kanji: dbItem.question,
-        reading: dbItem.answer,
-        subject: dbItem.subject,
-      }));
+    return items.map((dbItem) => ({
+      id: dbItem.wordId,
+      kanji: dbItem.question,
+      reading: dbItem.answer,
+      subject: dbItem.subject,
+    }));
   };
 
   const searchKanji: KanjiService['searchKanji'] = async (params) => {
@@ -222,7 +246,6 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   const getKanji: KanjiService['getKanji'] = async (id) => {
     const dbItem = await repositories.wordMaster.get(id);
     if (!dbItem) return null;
-    if (dbItem.underlineSpec) return null;
     return {
       id: dbItem.wordId,
       kanji: dbItem.question,
@@ -234,12 +257,56 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   const updateKanji: KanjiService['updateKanji'] = async (id, data) => {
     const existing = await repositories.wordMaster.get(id);
     if (!existing) return null;
-    if (existing.underlineSpec) return null;
+
+    const nextQuestion = data.kanji !== undefined ? data.kanji : String(existing.question ?? '');
+    const nextAnswer = data.reading !== undefined ? data.reading : String(existing.answer ?? '');
+
+    const shouldRegenerateKanjiQuestionFields =
+      (data.kanji !== undefined || data.reading !== undefined) &&
+      Boolean(existing.readingHiragana || existing.underlineSpec);
+
+    const kanjiQuestionFields = shouldRegenerateKanjiQuestionFields
+      ? (() => {
+          const question = String(nextQuestion ?? '').trim();
+          const answer = String(nextAnswer ?? '').trim();
+          if (!question || !answer) {
+            throw new Error('question/answer is missing');
+          }
+          return { question, answer };
+        })()
+      : null;
+
+    const regenerated = shouldRegenerateKanjiQuestionFields
+      ? await (async () => {
+          const bulk = await repositories.bedrock.generateKanjiQuestionReadingsBulk({
+            items: [{ id, question: kanjiQuestionFields!.question, answer: kanjiQuestionFields!.answer }],
+          });
+          const raw = bulk.items.find((x) => x.id === id);
+          if (!raw) throw new Error('読み生成に失敗しました: 結果が返りませんでした');
+
+          const validate = buildValidator(kanjiQuestionFields!.question);
+          const readingHiragana = String(raw.readingHiragana ?? '').trim();
+          const startIndex = kanjiQuestionFields!.question.indexOf(readingHiragana);
+          if (startIndex < 0) {
+            throw new Error('readingHiragana is not found in question');
+          }
+
+          const validated = validate({
+            readingHiragana,
+            underlineSpec: { type: 'promptSpan', start: startIndex, length: readingHiragana.length },
+          });
+          return {
+            readingHiragana: validated.readingHiragana,
+            underlineSpec: validated.underlineSpec,
+          };
+        })()
+      : null;
 
     const updated = await repositories.wordMaster.update(id, {
       ...(data.kanji !== undefined ? { question: data.kanji } : {}),
       ...(data.reading !== undefined ? { answer: data.reading } : {}),
       ...(data.subject !== undefined ? { subject: data.subject } : {}),
+      ...(regenerated ? { readingHiragana: regenerated.readingHiragana, underlineSpec: regenerated.underlineSpec } : {}),
     });
     if (!updated) return null;
     return {
@@ -253,7 +320,6 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
   const deleteKanji: KanjiService['deleteKanji'] = async (id) => {
     const existing = await repositories.wordMaster.get(id);
     if (!existing) return false;
-    if (existing.underlineSpec) return false;
 
     await repositories.reviewTestCandidates.deleteCandidatesByTargetId({ subject: existing.subject, targetId: id });
     await repositories.wordMaster.delete(id);
@@ -265,7 +331,6 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
     for (const id of uniqueIds) {
       const existing = await repositories.wordMaster.get(id);
       if (!existing) continue;
-      if (existing.underlineSpec) continue;
 
       await repositories.reviewTestCandidates.deleteCandidatesByTargetId({ subject: existing.subject, targetId: id });
       await repositories.wordMaster.delete(id);
@@ -295,6 +360,15 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
       existing.map((x) => `${String(x.question ?? '').trim()}|${String(x.answer ?? '').trim()}`).filter((x) => x !== '|'),
     );
     const seenKey = new Set<string>();
+
+    const validRows: Array<{
+      lineNumber: number;
+      content: string;
+      question: string;
+      answer: string;
+      histories: { submittedDate: string; isCorrect: boolean }[];
+      wordId: string;
+    }> = [];
 
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index];
@@ -343,86 +417,115 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
       }
       seenKey.add(key);
 
-      const id = createUuid();
+      validRows.push({
+        lineNumber: index + 1,
+        content: line,
+        question,
+        answer,
+        histories: parsed.histories,
+        wordId: createUuid(),
+      });
+    }
 
-      // WordMasterTable には VERFIED 相当のデータのみを保存する（statusは保持しない）
-      // -> 取り込み時に reading/underline を生成し、保存する
-      const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
-      const validate = buildValidator(question);
+    const wordMasterItems: WordMasterTable[] = [];
+    const candidatesToCreate: ReviewTestCandidateTable[] = [];
+    const candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }> = [];
 
-      const errorsForThisLine: string[] = [];
-      let generated: {
-        readingHiragana: string;
-        underlineSpec: { type: 'promptSpan'; start: number; length: number };
-      } | null = null;
+    const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+    const batchSize = 100;
+    for (let start = 0; start < validRows.length; start += batchSize) {
+      const batch = validRows.slice(start, start + batchSize);
+
+      let bulkGenerated: { items: Array<{ id: string; readingHiragana: string }> };
       try {
-        for (let attempt = 0; attempt < 3; attempt += 1) {
-          const hint =
-            errorsForThisLine.length > 0
-              ? `Previous validation error: ${errorsForThisLine[errorsForThisLine.length - 1]}. Fix JSON accordingly.`
-              : undefined;
-
-          try {
-            const raw = await repositories.bedrock.generateKanjiQuestionReading({
-              question,
-              answer,
-              modelId,
-              hint,
-            });
-            const validated = validate(raw);
-            generated = validated;
-            break;
-          } catch (e) {
-            const message = e instanceof Error ? e.message : 'Unknown error';
-            errorsForThisLine.push(message);
-            if (attempt >= 2) throw e;
-          }
-        }
-
-        if (!generated) {
-          throw new Error('Failed to generate reading/underline');
-        }
+        bulkGenerated = await repositories.bedrock.generateKanjiQuestionReadingsBulk({
+          items: batch.map((r) => ({ id: r.wordId, question: r.question, answer: r.answer })),
+          modelId,
+        });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Unknown error';
-        errorCount += 1;
-        errors.push({ line: index + 1, content: line, reason: `読み生成に失敗しました: ${message}` });
+        for (const row of batch) {
+          errorCount += 1;
+          errors.push({ line: row.lineNumber, content: row.content, reason: `読み生成に失敗しました: ${message}` });
+        }
         continue;
       }
 
-      const dbItem: WordMasterTable = {
-        wordId: id,
-        subject,
-        question,
-        answer,
-        readingHiragana: generated.readingHiragana,
-        underlineSpec: generated.underlineSpec,
-      };
+      const byId = new Map(bulkGenerated.items.map((x) => [String(x.id ?? ''), x] as const));
+      for (const row of batch) {
+        const raw = byId.get(row.wordId);
+        if (!raw) {
+          errorCount += 1;
+          errors.push({ line: row.lineNumber, content: row.content, reason: '読み生成に失敗しました: 結果が返りませんでした' });
+          continue;
+        }
 
-      await repositories.wordMaster.create(dbItem);
+        try {
+          const validate = buildValidator(row.question);
+          const readingHiragana = String(raw.readingHiragana ?? '').trim();
+          const startIndex = row.question.indexOf(readingHiragana);
+          if (startIndex < 0) {
+            throw new Error('readingHiragana is not found in question');
+          }
+          const validated = validate({
+            readingHiragana,
+            underlineSpec: { type: 'promptSpan', start: startIndex, length: readingHiragana.length },
+          });
 
-      if (parsed.histories.length > 0) {
-        await rebuildCandidatesFromHistories({
-          subject,
-          targetWordId: id,
-          histories: parsed.histories,
-          finalStatus: 'AUTO',
-        });
-      } else {
-        // 取り込み直後から復習対象にする
-        await repositories.reviewTestCandidates.createCandidate({
-          subject,
-          questionId: id,
-          mode: 'KANJI',
-          nextTime: DateUtils.todayYmd(),
-          correctCount: 0,
-          status: 'OPEN',
-          createdAtIso: DateUtils.now(),
-        });
+          wordMasterItems.push({
+            wordId: row.wordId,
+            subject,
+            question: row.question,
+            answer: row.answer,
+            readingHiragana: validated.readingHiragana,
+            underlineSpec: validated.underlineSpec,
+          });
+
+          if (row.histories.length > 0) {
+            candidateTargetsToDelete.push({ subject, targetId: row.wordId });
+            candidatesToCreate.push(
+              ...buildCandidatesFromHistories({
+                subject,
+                targetWordId: row.wordId,
+                histories: row.histories,
+                finalStatus: 'AUTO',
+              }),
+            );
+          } else {
+            candidatesToCreate.push(
+              buildCandidateRow({
+                subject,
+                questionId: row.wordId,
+                mode: 'KANJI',
+                nextTime: DateUtils.todayYmd(),
+                correctCount: 0,
+                status: 'OPEN',
+                createdAtIso: DateUtils.now(),
+              }),
+            );
+          }
+
+          successCount += 1;
+          questionIds.push(row.wordId);
+        } catch (e) {
+          const message = e instanceof Error ? e.message : 'Unknown error';
+          errorCount += 1;
+          errors.push({ line: row.lineNumber, content: row.content, reason: `読み生成に失敗しました: ${message}` });
+          continue;
+        }
       }
-
-      successCount += 1;
-      questionIds.push(id);
     }
+
+    await repositories.wordMaster.bulkCreate(wordMasterItems);
+
+    if (candidateTargetsToDelete.length > 0) {
+      await Promise.all(
+        candidateTargetsToDelete.map(async (t) => {
+          await repositories.reviewTestCandidates.deleteCandidatesByTargetId({ subject: t.subject, targetId: t.targetId });
+        }),
+      );
+    }
+    await repositories.reviewTestCandidates.bulkCreateCandidates(candidatesToCreate);
 
     return {
       successCount,

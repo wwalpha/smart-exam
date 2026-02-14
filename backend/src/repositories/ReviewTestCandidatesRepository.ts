@@ -29,6 +29,11 @@ const toCandidateKeyUpperBound = (ymd: string): string => `${ymd}#~`;
 
 /** ReviewTestCandidatesRepository. */
 export const ReviewTestCandidatesRepository = {
+  bulkCreateCandidates: async (items: ReviewTestCandidateTable[]): Promise<void> => {
+    if (items.length === 0) return;
+    await dbHelper.bulk(TABLE_NAME, items as unknown as Record<string, unknown>[]);
+  },
+
   createCandidate: async (params: {
     subject: SubjectId;
     questionId: string;
