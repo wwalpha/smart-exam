@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
 
-const BASE_PATH = '/reviewtests/kanji';
+const BASE_PATH = '/exam/kanji';
 
 export const useReviewKanjiDetail = () => {
   const { id } = useParams<{ id: string }>();

@@ -43,8 +43,8 @@ export const App = () => {
 
   const sidebarItems = [
     { label: 'ダッシュボード', to: '/' },
-    { label: '問題復習テスト', to: '/reviewtests/questions' },
-    { label: '漢字復習テスト', to: '/reviewtests/kanji' },
+    { label: '問題復習テスト', to: '/exam/questions' },
+    { label: '漢字復習テスト', to: '/exam/kanji' },
     { label: '教材管理', to: '/materials' },
     { label: '漢字管理', to: '/kanji' },
     { label: '問題検索', to: '/search/questions' },
@@ -62,17 +62,17 @@ export const App = () => {
       { pattern: '/materials/:id/questions', title: '問題管理' },
       { pattern: '/materials/:id', title: '教材セット詳細' },
 
-      { pattern: '/reviewtests/questions', title: '問題復習テスト一覧' },
-      { pattern: '/reviewtests/questions/new', title: '問題復習テスト作成' },
-      { pattern: '/reviewtests/questions/:id/grading', title: '採点' },
-      { pattern: '/reviewtests/questions/:id/pdf', title: 'PDF' },
-      { pattern: '/reviewtests/questions/:id', title: '詳細' },
+      { pattern: '/exam/questions', title: '問題復習テスト一覧' },
+      { pattern: '/exam/questions/new', title: '問題復習テスト作成' },
+      { pattern: '/exam/questions/:id/grading', title: '採点' },
+      { pattern: '/exam/questions/:id/pdf', title: 'PDF' },
+      { pattern: '/exam/questions/:id', title: '詳細' },
 
-      { pattern: '/reviewtests/kanji', title: '漢字復習テスト一覧' },
-      { pattern: '/reviewtests/kanji/new', title: '漢字復習テスト作成' },
-      { pattern: '/reviewtests/kanji/:id/grading', title: '採点' },
-      { pattern: '/reviewtests/kanji/:id/pdf', title: 'PDF' },
-      { pattern: '/reviewtests/kanji/:id', title: '詳細' },
+      { pattern: '/exam/kanji', title: '漢字復習テスト一覧' },
+      { pattern: '/exam/kanji/new', title: '漢字復習テスト作成' },
+      { pattern: '/exam/kanji/:id/grading', title: '採点' },
+      { pattern: '/exam/kanji/:id/pdf', title: 'PDF' },
+      { pattern: '/exam/kanji/:id', title: '詳細' },
 
       { pattern: '/kanji', title: '漢字一覧' },
       { pattern: '/kanji/new', title: '漢字登録' },
@@ -105,18 +105,18 @@ export const App = () => {
         <Route path="/materials/:id/attempts" element={<QuestionAttemptHistoryPage />} />
 
         {/* Review Tests (Questions) */}
-        <Route path="/reviewtests/questions" element={<ExamQuestionListPage />} />
-        <Route path="/reviewtests/questions/new" element={<ExamQuestionCreatePage />} />
-        <Route path="/reviewtests/questions/:id" element={<ExamQuestionDetailPage />} />
-        <Route path="/reviewtests/questions/:id/grading" element={<ExamQuestionGradingPage />} />
-        <Route path="/reviewtests/questions/:id/pdf" element={<ExamQuestionPdfPage />} />
+        <Route path="/exam/questions" element={<ExamQuestionListPage />} />
+        <Route path="/exam/questions/new" element={<ExamQuestionCreatePage />} />
+        <Route path="/exam/questions/:id" element={<ExamQuestionDetailPage />} />
+        <Route path="/exam/questions/:id/grading" element={<ExamQuestionGradingPage />} />
+        <Route path="/exam/questions/:id/pdf" element={<ExamQuestionPdfPage />} />
 
         {/* Review Tests (Kanji) */}
-        <Route path="/reviewtests/kanji" element={<ExamKanjiListPage />} />
-        <Route path="/reviewtests/kanji/new" element={<ExamKanjiCreatePage />} />
-        <Route path="/reviewtests/kanji/:id" element={<ExamKanjiDetailPage />} />
-        <Route path="/reviewtests/kanji/:id/grading" element={<ExamKanjiGradingPage />} />
-        <Route path="/reviewtests/kanji/:id/pdf" element={<ExamKanjiPdfPage />} />
+        <Route path="/exam/kanji" element={<ExamKanjiListPage />} />
+        <Route path="/exam/kanji/new" element={<ExamKanjiCreatePage />} />
+        <Route path="/exam/kanji/:id" element={<ExamKanjiDetailPage />} />
+        <Route path="/exam/kanji/:id/grading" element={<ExamKanjiGradingPage />} />
+        <Route path="/exam/kanji/:id/pdf" element={<ExamKanjiPdfPage />} />
 
         {/* Kanji Management */}
         <Route path="/kanji" element={<KanjiListPage />} />

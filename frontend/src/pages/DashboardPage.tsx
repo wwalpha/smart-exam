@@ -72,7 +72,7 @@ export const DashboardPage = () => {
             </div>
             <div className="mt-4">
               <Button asChild variant="outline" size="sm">
-                <Link to="/reviewtests/questions">問題テスト一覧へ</Link>
+                <Link to="/exam/questions">問題テスト一覧へ</Link>
               </Button>
             </div>
           </CardContent>

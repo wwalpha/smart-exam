@@ -9,7 +9,7 @@ type CreateFormValues = {
   count: number;
 };
 
-const BASE_PATH = '/reviewtests/kanji';
+const BASE_PATH = '/exam/kanji';
 
 export const useReviewKanjiCreate = () => {
   const navigate = useNavigate();

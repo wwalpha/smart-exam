@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import { apiRequest } from '@/services/apiClient';
 
-const BASE_PATH = '/reviewtests/questions';
+const BASE_PATH = '/exam/questions';
 
 export const useReviewQuestionPdf = () => {
   const { id } = useParams<{ id: string }>();

@@ -2,8 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { ReviewTestPdfService } from '../src/services/exam/reviewTestPdfService.ts';
-import type { ReviewTestDetail } from '@smart-exam/api-types';
+import { ExamPdfService } from '../src/services/exam/examPdfService.ts';
+import type { ExamDetail } from '@smart-exam/api-types';
 
 const REVIEW_MODE = {
   QUESTION: 'QUESTION',
@@ -31,7 +31,7 @@ async function main(): Promise<void> {
   const ymd = todayYmd();
   const testId = `verify-${ymd.replaceAll('-', '')}`;
 
-  const review: ReviewTestDetail = {
+  const exam: ExamDetail = {
     id: testId,
     testId,
     subject: '1',
@@ -55,7 +55,7 @@ async function main(): Promise<void> {
     })),
   };
 
-  const pdf = await ReviewTestPdfService.generatePdfBuffer(review);
+  const pdf = await ExamPdfService.generatePdfBuffer(exam);
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
@@ -63,7 +63,7 @@ async function main(): Promise<void> {
   const outDir = path.join(repoRoot, 'tmp');
   await mkdir(outDir, { recursive: true });
 
-  const outPath = path.join(outDir, `verify-review-tests-${testId}.pdf`);
+  const outPath = path.join(outDir, `verify-exam-${testId}.pdf`);
   await writeFile(outPath, pdf);
 
   console.log(outPath);

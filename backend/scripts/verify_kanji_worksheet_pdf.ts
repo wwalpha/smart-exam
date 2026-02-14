@@ -2,8 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { ReviewTestPdfService } from '../src/services/exam/reviewTestPdfService.ts';
-import type { ReviewTestDetail } from '@smart-exam/api-types';
+import { ExamPdfService } from '../src/services/exam/examPdfService.ts';
+import type { ExamDetail } from '@smart-exam/api-types';
 
 const REVIEW_MODE = {
   KANJI: 'KANJI',
@@ -43,7 +43,7 @@ async function main(): Promise<void> {
   const ymd = todayYmd();
   const testId = `verify-kanji-${ymd.replaceAll('-', '')}`;
 
-  const review: ReviewTestDetail = {
+  const exam: ExamDetail = {
     id: testId,
     testId,
     subject: '1',
@@ -60,7 +60,7 @@ async function main(): Promise<void> {
     items: buildItems(60),
   };
 
-  const pdf = await ReviewTestPdfService.generatePdfBuffer(review);
+  const pdf = await ExamPdfService.generatePdfBuffer(exam);
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);

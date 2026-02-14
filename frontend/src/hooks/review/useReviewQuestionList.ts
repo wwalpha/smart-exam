@@ -8,7 +8,7 @@ type SearchFormValues = {
   status: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
 };
 
-const BASE_PATH = '/reviewtests/questions';
+const BASE_PATH = '/exam/questions';
 
 export const useReviewQuestionList = () => {
   const { list, total, status } = useWordTestStore((s) => s.review);

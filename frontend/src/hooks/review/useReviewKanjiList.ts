@@ -8,7 +8,7 @@ type SearchFormValues = {
   status: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
 };
 
-const BASE_PATH = '/reviewtests/kanji';
+const BASE_PATH = '/exam/kanji';
 
 export const useReviewKanjiList = () => {
   const { list, total, status } = useWordTestStore((s) => s.review);

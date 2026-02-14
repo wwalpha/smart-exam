@@ -1,4 +1,4 @@
-export type ReviewTest = {
+export type Exam = {
   id: string;
   testId: string; // Display ID
   subject: string;
@@ -8,7 +8,7 @@ export type ReviewTest = {
   updatedAt: string;
 };
 
-export type ReviewTestItem = {
+export type ExamItem = {
   id: string;
   testId: string;
   targetType: 'QUESTION' | 'KANJI';
@@ -21,12 +21,12 @@ export type ReviewTestItem = {
   materialSetDate?: string;
 };
 
-export type ReviewTestDetail = ReviewTest & {
-  items: ReviewTestItem[];
-  results: ReviewTestResult[];
+export type ExamDetail = Exam & {
+  items: ExamItem[];
+  results: ExamResult[];
 };
 
-export type ReviewTestResult = {
+export type ExamResult = {
   targetId: string;
   isCorrect: boolean;
 };

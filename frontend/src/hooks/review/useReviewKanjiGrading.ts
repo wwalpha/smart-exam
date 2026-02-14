@@ -11,7 +11,7 @@ type GradingFormValues = {
   }[];
 };
 
-const BASE_PATH = '/reviewtests/kanji';
+const BASE_PATH = '/exam/kanji';
 
 export const useReviewKanjiGrading = () => {
   const { id } = useParams<{ id: string }>();

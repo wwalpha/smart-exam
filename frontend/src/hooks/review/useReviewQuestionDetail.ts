@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
 
-const BASE_PATH = '/reviewtests/questions';
+const BASE_PATH = '/exam/questions';
 
 export const useReviewQuestionDetail = () => {
   const { id } = useParams<{ id: string }>();

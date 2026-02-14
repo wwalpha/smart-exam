@@ -8,7 +8,7 @@ type CreateFormValues = {
   count: number;
 };
 
-const BASE_PATH = '/reviewtests/questions';
+const BASE_PATH = '/exam/questions';
 
 export const useReviewQuestionCreate = () => {
   const navigate = useNavigate();
