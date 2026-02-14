@@ -40,7 +40,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ vars.TERRAFORM_BACKEND_BUCKET }}" \
-            -backend-config="key=${{ vars.TERRAFORM_BACKEND_KEY }}" \
+            -backend-config="key=${{ vars.TERRAFORM_BACKEND_KEY }}-us-east-1" \
             -backend-config="region=${{ vars.TERRAFORM_BACKEND_REGION }}"
 
       - name: Terraform Apply
