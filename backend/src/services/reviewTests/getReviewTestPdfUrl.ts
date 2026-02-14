@@ -49,6 +49,10 @@ export const createGetReviewTestPdfUrl = (deps: {
       contentType: 'application/pdf',
     });
 
+    if (testRow.pdfS3Key !== key) {
+      await deps.repositories.reviewTests.updatePdfS3Key(testId, key);
+    }
+
     const url = await deps.repositories.s3.getPresignedGetUrl({
       bucket: ENV.FILES_BUCKET_NAME,
       key,

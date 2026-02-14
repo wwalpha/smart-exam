@@ -10,7 +10,6 @@ import { validateBody, validateParams, validateQuery } from '@/middlewares/valid
 import { createRepositories } from '@/repositories/createRepositories';
 import { createServices } from '@/services/createServices';
 
-
 /** Creates app. */
 export const createApp = (): express.Express => {
   const repositories = createRepositories();
@@ -126,13 +125,6 @@ export const createApp = (): express.Express => {
     '/api/kanji/import',
     validateBody(controllers.kanji.ImportKanjiBodySchema),
     handleRequest(controllers.kanji.importKanji),
-  );
-
-  // 指定した問題に対して読み問題を生成するAPI
-  app.post(
-    '/api/kanji/questions/:questionId/generate-reading',
-    validateParams(QuestionIdParamsSchema),
-    handleRequest(controllers.kanjiQuestions.generateReading),
   );
 
   // 条件を指定して問題を検索するAPI

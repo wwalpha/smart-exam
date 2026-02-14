@@ -1,1 +1,0 @@
-export { generateReadingController } from './generateReadingController';

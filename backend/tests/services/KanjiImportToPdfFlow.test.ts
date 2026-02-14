@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 
 import { createKanjiService } from '@/services/kanji/createKanjiService';
-import { createKanjiQuestionsService } from '@/services/kanjiQuestions/createKanjiQuestionsService';
 import { ReviewTestPdfService } from '@/services/reviewTests/reviewTestPdfService';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ReviewTestDetail } from '@smart-exam/api-types';
@@ -97,7 +96,6 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
     } as unknown as Repositories;
 
     const kanjiService = createKanjiService(repositories);
-    const kanjiQuestionsService = createKanjiQuestionsService(repositories);
 
     const imported = await kanjiService.importKanji({
       subject: '1',
@@ -113,8 +111,7 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
     expect(w?.readingHiragana).toBe('けいせい');
     expect(w?.underlineSpec).toEqual({ type: 'promptSpan', start: 2, length: 4 });
 
-    // verify API は候補OPENを保証する（既に存在すれば作らない）
-    await kanjiQuestionsService.verify(String(id));
+    // import時点で候補が作成される
     expect(candidateParams.some((c) => c.status === 'OPEN')).toBe(true);
 
     const questionText = String(w?.question ?? '');

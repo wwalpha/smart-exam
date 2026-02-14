@@ -44,6 +44,19 @@ export const ReviewTestsRepository = {
     return (result.Attributes as ReviewTestTable) || null;
   },
 
+  updatePdfS3Key: async (testId: string, pdfS3Key: string): Promise<ReviewTestTable | null> => {
+    const result = await dbHelper.update({
+      TableName: TABLE_NAME,
+      Key: { testId },
+      UpdateExpression: 'SET #pdfS3Key = :pdfS3Key',
+      ExpressionAttributeNames: { '#pdfS3Key': 'pdfS3Key' },
+      ExpressionAttributeValues: { ':pdfS3Key': pdfS3Key },
+      ReturnValues: 'ALL_NEW',
+    });
+
+    return (result.Attributes as ReviewTestTable) || null;
+  },
+
   delete: async (testId: string): Promise<void> => {
     await dbHelper.delete({
       TableName: TABLE_NAME,

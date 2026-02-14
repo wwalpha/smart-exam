@@ -5,7 +5,7 @@ import { QuestionsRepository } from '@/repositories/QuestionsRepository';
 import { ReviewTestCandidatesRepository } from '@/repositories/ReviewTestCandidatesRepository';
 import { ReviewTestsRepository } from '@/repositories/ReviewTestsRepository';
 import { WordMasterRepository } from '@/repositories/WordMasterRepository';
-import { analyzeExamPaper, generateKanjiQuestionReading, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
+import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
 import { S3Repository } from '@/repositories/S3Repository';
 
 
@@ -19,7 +19,6 @@ export type Repositories = {
   s3: typeof S3Repository;
   bedrock: {
     analyzeExamPaper: typeof analyzeExamPaper;
-    generateKanjiQuestionReading: typeof generateKanjiQuestionReading;
     generateKanjiQuestionReadingsBulk: typeof generateKanjiQuestionReadingsBulk;
   };
 };
@@ -33,6 +32,6 @@ export const createRepositories = (): Repositories => {
     reviewTests: ReviewTestsRepository,
     wordMaster: WordMasterRepository,
     s3: S3Repository,
-    bedrock: { analyzeExamPaper, generateKanjiQuestionReading, generateKanjiQuestionReadingsBulk },
+    bedrock: { analyzeExamPaper, generateKanjiQuestionReadingsBulk },
   };
 };
