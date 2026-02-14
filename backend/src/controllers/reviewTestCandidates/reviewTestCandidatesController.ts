@@ -7,7 +7,7 @@ import type { ParsedQs } from 'qs';
 import type { ListReviewTestCandidatesResponse, ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { ListReviewTestCandidatesQuerySchema } from './createReviewTestCandidatesController.schema';
+import { ListReviewTestCandidatesQuerySchema } from './reviewTestCandidatesController.schema';
 
 /** Creates review test candidates controller. */
 export const reviewTestCandidatesController = (services: Services) => {

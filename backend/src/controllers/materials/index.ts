@@ -1,3 +1,7 @@
-export { CreateMaterialBodySchema, SearchMaterialsBodySchema, UpdateMaterialBodySchema } from './createMaterialsController.schema';
+export {
+  CreateMaterialBodySchema,
+  SearchMaterialsBodySchema,
+  UpdateMaterialBodySchema,
+} from './materialsController.schema';
 
-export { materialsController } from './createMaterialsController';
+export { materialsController } from './materialsController';

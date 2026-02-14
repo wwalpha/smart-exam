@@ -1,5 +1,7 @@
-export { PatchKanjiQuestionBodySchema } from './patchKanjiQuestionController.schema';
+export {
+	PatchKanjiQuestionBodySchema,
+	generateReadingController,
+	patchKanjiQuestionController,
+	verifyKanjiQuestionController,
+} from './kanjiQuestionsController';
 
-export { generateReadingController } from './generateReadingController';
-export { patchKanjiQuestionController } from './patchKanjiQuestionController';
-export { verifyKanjiQuestionController } from './verifyKanjiQuestionController';

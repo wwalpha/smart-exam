@@ -31,7 +31,7 @@ import {
   CreateQuestionBodySchema,
   SearchQuestionsBodySchema,
   UpdateQuestionBodySchema,
-} from './createQuestionsController.schema';
+} from './questionsController.schema';
 
 /** Creates questions controller. */
 export const questionsController = (services: Services) => {

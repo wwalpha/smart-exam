@@ -3,6 +3,7 @@ export {
   DeleteManyKanjiBodySchema,
   ImportKanjiBodySchema,
   SearchKanjiBodySchema,
-} from './createKanjiController.schema';
+} from './kanjiController.schema';
 
-export { kanjiController } from './createKanjiController';
+export { kanjiController } from './kanjiController';
+

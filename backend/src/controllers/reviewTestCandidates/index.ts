@@ -1,2 +1,2 @@
-export { ListReviewTestCandidatesQuerySchema } from './createReviewTestCandidatesController.schema';
-export { reviewTestCandidatesController } from './createReviewTestCandidatesController';
+export { ListReviewTestCandidatesQuerySchema } from './reviewTestCandidatesController.schema';
+export { reviewTestCandidatesController } from './reviewTestCandidatesController';

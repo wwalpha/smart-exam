@@ -29,7 +29,7 @@ import {
   CreateMaterialBodySchema,
   SearchMaterialsBodySchema,
   UpdateMaterialBodySchema,
-} from './createMaterialsController.schema';
+} from './materialsController.schema';
 
 type GetMaterialFileParams = {
   materialId: string;

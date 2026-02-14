@@ -7,6 +7,8 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ReviewTestCandidateTable, ReviewTestTable, WordMasterTable } from '@/types/db';
 
+import { computeKanjiQuestionFields } from '@/services/kanji/computeKanjiQuestionFields';
+
 import type { ReviewTestsService } from './createReviewTestsService';
 import { toApiReviewTest } from './internal';
 import { ReviewTestPdfService } from './reviewTestPdfService';
@@ -37,6 +39,14 @@ export const createCreateReviewTest = (deps: {
       Number.isInteger(w.underlineSpec.length) &&
       w.underlineSpec.start >= 0 &&
       w.underlineSpec.length > 0,
+    );
+  };
+
+  const printableWordIds = (byId: Map<string, WordMasterTable>): Set<string> => {
+    return new Set(
+      Array.from(byId.values())
+        .filter((w) => isPrintableKanjiWorksheetWord(w))
+        .map((w) => w.wordId),
     );
   };
 
@@ -90,11 +100,63 @@ export const createCreateReviewTest = (deps: {
       const words = await Promise.all(ids.map((id) => deps.repositories.wordMaster.get(id)));
       const byId = new Map(words.filter((w): w is WordMasterTable => w !== null).map((w) => [w.wordId, w] as const));
 
-      const printableIds = new Set(
-        Array.from(byId.values())
-          .filter((w) => isPrintableKanjiWorksheetWord(w))
-          .map((w) => w.wordId),
-      );
+      let printableIds = printableWordIds(byId);
+
+      // 既存データに不足フィールドがあると 0 件になりやすいので、全滅時のみ自動補完を試みる
+      if (printableIds.size === 0 && byId.size > 0) {
+        const toFill = Array.from(byId.values()).filter((w) => {
+          if (isPrintableKanjiWorksheetWord(w)) return false;
+          return Boolean(String(w.question ?? '').trim() && String(w.answer ?? '').trim());
+        });
+
+        if (toFill.length > 0) {
+          try {
+            const bulk = await deps.repositories.bedrock.generateKanjiQuestionReadingsBulk({
+              items: toFill.map((w) => ({
+                id: w.wordId,
+                question: String(w.question ?? ''),
+                answer: String(w.answer ?? ''),
+              })),
+            });
+            const generatedById = new Map(bulk.items.map((x) => [String(x.id ?? ''), x] as const));
+
+            await Promise.all(
+              toFill.map(async (w) => {
+                const generated = generatedById.get(w.wordId);
+                if (!generated) return;
+
+                const readingHiragana = String(generated.readingHiragana ?? '').trim();
+                if (!readingHiragana) return;
+
+                try {
+                  const computed = computeKanjiQuestionFields({
+                    question: w.question,
+                    readingHiragana,
+                  });
+
+                  await deps.repositories.wordMaster.updateKanjiQuestionFields(w.wordId, {
+                    readingHiragana: computed.readingHiragana,
+                    underlineSpec: computed.underlineSpec,
+                  });
+
+                  byId.set(w.wordId, {
+                    ...w,
+                    readingHiragana: computed.readingHiragana,
+                    underlineSpec: computed.underlineSpec,
+                  });
+                } catch {
+                  // Bedrock結果が本文の部分文字列にならない等は印刷対象外のままにする
+                  return;
+                }
+              }),
+            );
+
+            printableIds = printableWordIds(byId);
+          } catch {
+            // 自動補完に失敗しても、ここでは候補の絞り込みだけ行い、最終的に 0 件なら従来通り 400
+          }
+        }
+      }
 
       const filtered = candidates.filter((c) => printableIds.has(c.targetId));
       candidates.length = 0;
