@@ -1,3 +1,5 @@
+// 問題サービスの生成関数と型を再エクスポートする
 export { createQuestionsService, type QuestionsService } from './createQuestionsService';
 
+// 既存参照向けに別名のサービス生成関数を再エクスポートする
 export { createQuestionsService as questionsService } from './createQuestionsService';

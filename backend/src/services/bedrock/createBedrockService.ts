@@ -13,7 +13,9 @@ export type BedrockService = {
 
 /** Creates bedrock service. */
 export const createBedrockService = (repositories: Repositories): BedrockService => {
+  // 処理で使う値を準備する
   const analyzeExamPaper = createAnalyzeExamPaper(repositories);
 
+  // 処理結果を呼び出し元へ返す
   return { analyzeExamPaper };
 };

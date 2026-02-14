@@ -32,15 +32,24 @@ export type QuestionsService = {
 
 /** Creates questions service. */
 export const createQuestionsService = (repositories: Repositories): QuestionsService => {
+  // 処理で使う値を準備する
   const listQuestions = createListQuestions(repositories);
+  // 処理で使う値を準備する
   const createQuestion = createCreateQuestion(repositories);
+  // 処理で使う値を準備する
   const updateQuestion = createUpdateQuestion(repositories);
+  // 処理で使う値を準備する
   const deleteQuestion = createDeleteQuestion(repositories);
+  // 処理で使う値を準備する
   const searchQuestions = createSearchQuestions(repositories);
+  // 処理で使う値を準備する
   const markQuestionCorrect = createMarkQuestionCorrect(repositories);
+  // 処理で使う値を準備する
   const markQuestionIncorrect = createMarkQuestionIncorrect(repositories);
+  // 処理で使う値を準備する
   const recalculateCandidatesForMaterial = createRecalculateCandidatesForMaterial(repositories);
 
+  // 処理結果を呼び出し元へ返す
   return {
     listQuestions,
     createQuestion,

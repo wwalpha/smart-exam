@@ -36,16 +36,25 @@ export type MaterialsService = {
 
 /** Creates materials service. */
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {
+  // 処理で使う値を準備する
   const listMaterials = createListMaterials(repositories);
+  // 処理で使う値を準備する
   const searchMaterials = createSearchMaterials({ listMaterials });
+  // 処理で使う値を準備する
   const createMaterial = createCreateMaterial(repositories);
+  // 処理で使う値を準備する
   const getMaterial = createGetMaterial(repositories);
+  // 処理で使う値を準備する
   const updateMaterial = createUpdateMaterial(repositories);
+  // 処理で使う値を準備する
   const deleteMaterial = createDeleteMaterial(repositories);
 
+  // 処理で使う値を準備する
   const listMaterialFiles = createListMaterialFiles(repositories);
+  // 処理で使う値を準備する
   const getMaterialFile = createGetMaterialFile(repositories, { listMaterialFiles });
 
+  // 処理結果を呼び出し元へ返す
   return {
     listMaterials,
     searchMaterials,

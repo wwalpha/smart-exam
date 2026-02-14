@@ -7,33 +7,33 @@
 
 ## ルーティング登録済み（App.tsx の Routes）
 
-| 画面名（pageTitle/メニュー） | ルート                               | TSX                                          |
-| ---------------------------- | ------------------------------------ | -------------------------------------------- |
-| ダッシュボード               | `/`                                  | DashboardPage.tsx                            |
-| 教材セット一覧               | `/materials`                         | materials/MaterialSetListPage.tsx            |
-| 教材セット登録               | `/materials/new`                     | materials/MaterialSetCreatePage.tsx          |
-| 教材セット詳細               | `/materials/:id`                     | materials/MaterialSetDetailPage.tsx          |
-| 問題管理                     | `/materials/:id/questions`           | materials/QuestionManagementPage.tsx         |
-| 問題テスト履歴（一覧）       | `/materials/attempts`                | materials/QuestionAttemptHistoryListPage.tsx |
-| 問題テスト履歴（詳細）       | `/materials/:id/attempts`            | materials/QuestionAttemptHistoryPage.tsx     |
-| 問題復習テスト一覧           | `/reviewtests/questions`             | review/ReviewTestQuestionListPage.tsx        |
-| 問題復習テスト作成           | `/reviewtests/questions/new`         | review/ReviewTestQuestionCreatePage.tsx      |
-| 問題復習テスト詳細           | `/reviewtests/questions/:id`         | review/ReviewTestQuestionDetailPage.tsx      |
-| 問題復習テスト採点           | `/reviewtests/questions/:id/grading` | review/ReviewTestQuestionGradingPage.tsx     |
-| 問題復習テストPDF            | `/reviewtests/questions/:id/pdf`     | review/ReviewTestQuestionPdfPage.tsx         |
-| 漢字復習テスト一覧           | `/reviewtests/kanji`                 | review/ReviewTestKanjiListPage.tsx           |
-| 漢字復習テスト作成           | `/reviewtests/kanji/new`             | review/ReviewTestKanjiCreatePage.tsx         |
-| 漢字復習テスト詳細           | `/reviewtests/kanji/:id`             | review/ReviewTestKanjiDetailPage.tsx         |
-| 漢字復習テスト採点           | `/reviewtests/kanji/:id/grading`     | review/ReviewTestKanjiGradingPage.tsx        |
-| 漢字復習テストPDF            | `/reviewtests/kanji/:id/pdf`         | review/ReviewTestKanjiPdfPage.tsx            |
-| 漢字一覧                     | `/kanji`                             | kanji/KanjiListPage.tsx                      |
-| 漢字登録                     | `/kanji/new`                         | kanji/KanjiCreatePage.tsx                    |
-| 漢字編集                     | `/kanji/:id`                         | kanji/KanjiCreatePage.tsx                    |
-| 漢字一括登録                 | `/kanji/import`                      | kanji/KanjiImportPage.tsx                    |
-| 漢字テスト履歴（一覧）       | `/kanji/attempts`                    | kanji/KanjiAttemptHistoryListPage.tsx        |
-| 漢字テスト履歴（詳細）       | `/kanji/:id/attempts`                | kanji/KanjiAttemptHistoryPage.tsx            |
-| 問題検索                     | `/search/questions`                  | search/QuestionSearchPage.tsx                |
-| PDF設定                      | `/settings/pdf`                      | settings/PdfSettingsPage.tsx                 |
+| 画面名（pageTitle/メニュー） | ルート                        | TSX                                          |
+| ---------------------------- | ----------------------------- | -------------------------------------------- |
+| ダッシュボード               | `/`                           | DashboardPage.tsx                            |
+| 教材セット一覧               | `/materials`                  | materials/MaterialSetListPage.tsx            |
+| 教材セット登録               | `/materials/new`              | materials/MaterialSetCreatePage.tsx          |
+| 教材セット詳細               | `/materials/:id`              | materials/MaterialSetDetailPage.tsx          |
+| 問題管理                     | `/materials/:id/questions`    | materials/QuestionManagementPage.tsx         |
+| 問題テスト履歴（一覧）       | `/materials/attempts`         | materials/QuestionAttemptHistoryListPage.tsx |
+| 問題テスト履歴（詳細）       | `/materials/:id/attempts`     | materials/QuestionAttemptHistoryPage.tsx     |
+| 問題復習テスト一覧           | `/exam/questions`             | review/ExamQuestionListPage.tsx              |
+| 問題復習テスト作成           | `/exam/questions/new`         | review/ExamQuestionCreatePage.tsx            |
+| 問題復習テスト詳細           | `/exam/questions/:id`         | review/ExamQuestionDetailPage.tsx            |
+| 問題復習テスト採点           | `/exam/questions/:id/grading` | review/ExamQuestionGradingPage.tsx           |
+| 問題復習テストPDF            | `/exam/questions/:id/pdf`     | review/ExamQuestionPdfPage.tsx               |
+| 漢字復習テスト一覧           | `/exam/kanji`                 | review/ExamKanjiListPage.tsx                 |
+| 漢字復習テスト作成           | `/exam/kanji/new`             | review/ExamKanjiCreatePage.tsx               |
+| 漢字復習テスト詳細           | `/exam/kanji/:id`             | review/ExamKanjiDetailPage.tsx               |
+| 漢字復習テスト採点           | `/exam/kanji/:id/grading`     | review/ExamKanjiGradingPage.tsx              |
+| 漢字復習テストPDF            | `/exam/kanji/:id/pdf`         | review/ExamKanjiPdfPage.tsx                  |
+| 漢字一覧                     | `/kanji`                      | kanji/KanjiListPage.tsx                      |
+| 漢字登録                     | `/kanji/new`                  | kanji/KanjiCreatePage.tsx                    |
+| 漢字編集                     | `/kanji/:id`                  | kanji/KanjiCreatePage.tsx                    |
+| 漢字一括登録                 | `/kanji/import`               | kanji/KanjiImportPage.tsx                    |
+| 漢字テスト履歴（一覧）       | `/kanji/attempts`             | kanji/KanjiAttemptHistoryListPage.tsx        |
+| 漢字テスト履歴（詳細）       | `/kanji/:id/attempts`         | kanji/KanjiAttemptHistoryPage.tsx            |
+| 問題検索                     | `/search/questions`           | search/QuestionSearchPage.tsx                |
+| PDF設定                      | `/settings/pdf`               | settings/PdfSettingsPage.tsx                 |
 
 ## ルーティング未登録（pages 配下だが App.tsx から直接参照されない）
 

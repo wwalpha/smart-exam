@@ -34,13 +34,17 @@ export const targetKeyOf = (targetType: ReviewTargetType, targetId: string): str
 
 /** Converts data with to iso at start of day. */
 export const toIsoAtStartOfDay = (ymd: string): string => {
+  // 処理結果を呼び出し元へ返す
   return DateUtils.format(`${ymd}T00:00:00`);
 };
 
 /** isWithinRange. */
 export const isWithinRange = (ymd: string, range: { fromYmd?: string; toYmd?: string }): boolean => {
+  // 条件に応じて処理を分岐する
   if (range.fromYmd && ymd < range.fromYmd) return false;
+  // 条件に応じて処理を分岐する
   if (range.toYmd && ymd > range.toYmd) return false;
+  // 処理結果を呼び出し元へ返す
   return true;
 };
 
@@ -52,12 +56,14 @@ export const computeDueDate = (params: {
   // ReviewLockTable / ReviewAttemptTable を廃止するため、履歴に依存したスケジューリングは行わない。
   // 初回相当のデフォルトのみ適用する。
   if (params.targetType === 'KANJI') {
+    // 処理結果を呼び出し元へ返す
     return {
       dueDate: DateUtils.addDaysYmd(params.registeredDate, 7),
       lastAttemptDate: params.registeredDate,
     };
   }
 
+  // 処理結果を呼び出し元へ返す
   return { dueDate: params.registeredDate, lastAttemptDate: params.registeredDate };
 };
 
@@ -84,17 +90,26 @@ export const toReviewTargetKey = (subject: SubjectId, targetId: string): string 
 
 /** sortTargets. */
 export const sortTargets = (items: ExamTarget[]): ExamTarget[] => {
+  // 処理で使う値を準備する
   const next = [...items];
   next.sort((a, b) => {
+    // 条件に応じて処理を分岐する
     if (a.lastTestCreatedDate !== b.lastTestCreatedDate) {
+      // 処理結果を呼び出し元へ返す
       return a.lastTestCreatedDate < b.lastTestCreatedDate ? 1 : -1;
     }
+    // 条件に応じて処理を分岐する
     if (a.subject !== b.subject) return String(a.subject) < String(b.subject) ? -1 : 1;
 
+    // 処理で使う値を準備する
     const aKey = a.canonicalKey ?? a.kanji ?? a.targetId;
+    // 処理で使う値を準備する
     const bKey = b.canonicalKey ?? b.kanji ?? b.targetId;
+    // 条件に応じて処理を分岐する
     if (aKey !== bKey) return aKey < bKey ? -1 : 1;
+    // 処理結果を呼び出し元へ返す
     return a.targetId < b.targetId ? -1 : a.targetId > b.targetId ? 1 : 0;
   });
+  // 処理結果を呼び出し元へ返す
   return next;
 };

@@ -60,7 +60,7 @@ erDiagram
   SUBJECT ||--o{ REVIEW_TEST : subject
   REVIEW_TEST ||--o{ REVIEW_TEST_ITEM : testId
   REVIEW_TEST ||--o{ REVIEW_LOCK : testId
-  REVIEW_TEST ||--o{ REVIEW_ATTEMPT : reviewTestId
+  REVIEW_TEST ||--o{ REVIEW_ATTEMPT : examId
   QUESTION ||--o{ REVIEW_TEST_ITEM : targetId
   WORD ||--o{ REVIEW_TEST_ITEM : targetId
   QUESTION ||--o{ REVIEW_LOCK : targetId
@@ -192,15 +192,19 @@ erDiagram
 ## 3.1 subjects
 
 ### 目的
+
 - 科目一覧（科目別フィルタ）
 
 ### キー
+
 - PK: `subject_id` (S)
 
 ### 属性
+
 - `name` (S)
 
 ### 主なアクセス
+
 - 一覧: Scan（データ量が増える場合は別途設計）
 - 単体参照: GetItem(subject_id)
 
@@ -209,23 +213,28 @@ erDiagram
 ## 3.2 tests
 
 ### 目的
+
 - 科目別のテスト一覧
 
 ### キー
+
 - PK: `test_id` (S)
 
 ### 属性
+
 - `subject_id` (S)
 - `title` (S)
 - `description` (S, nullable)
 - `question_count` (N)
 
 ### GSI
+
 - GSI1: `gsi_subject_id`
   - PK: `subject_id` (S)
   - SK: `test_id` (S)
 
 ### 主なアクセス
+
 - テスト一覧（科目別）: Query(GSI1 PK=subject_id)
 - 単体参照: GetItem(test_id)
 
@@ -234,24 +243,29 @@ erDiagram
 ## 3.3 questions
 
 ### 目的
+
 - テスト内の問題一覧取得
 - （任意）問題用紙PDFの S3 キーの管理
 
 ### キー
+
 - PK: `question_id` (S)
 
 ### 属性
+
 - `test_id` (S)
 - `subject_id` (S)
-- `number` (N)  ※テスト内の問題番号
+- `number` (N) ※テスト内の問題番号
 - `prompt_s3_key` (S, nullable)
 
 ### GSI
+
 - GSI1: `gsi_test_id_number`
   - PK: `test_id` (S)
   - SK: `number` (N)
 
 ### 主なアクセス
+
 - 問題一覧: Query(GSI1 PK=test_id, 昇順で number)
 - 単体参照: GetItem(question_id)
 
@@ -260,27 +274,32 @@ erDiagram
 ## 3.4 attempts
 
 ### 目的
+
 - 実施開始/提出
 - 正誤結果の保管
 - 直近 attempt の取得（`GET /v1/tests/{testid}/results`）
 
 ### キー
+
 - PK: `attempt_id` (S)
 
 ### 属性
+
 - `test_id` (S)
 - `subject_id` (S)
 - `status` (S: `IN_PROGRESS` | `SUBMITTED`)
 - `started_at` (S, ISO)
 - `submitted_at` (S, ISO, nullable)
-- `results` (L)  ※ `[{question_id, number, is_correct}]`
+- `results` (L) ※ `[{question_id, number, is_correct}]`
 
 ### GSI
+
 - GSI1: `gsi_test_id_started_at`
   - PK: `test_id` (S)
   - SK: `started_at` (S)
 
 ### 主なアクセス
+
 - 実施開始: PutItem(attempt)
 - 提出: UpdateItem(attempt_id) で `status`, `submitted_at`, `results` を更新
 - テスト結果（最新）:
@@ -293,19 +312,23 @@ erDiagram
 ## 3.5 answer_sheets
 
 ### 目的
+
 - 問題を手動選択して解答用紙を作成し、印刷できるようにする
 - 生成した PDF の S3 キーを保持
 
 ### キー
+
 - PK: `answer_sheet_id` (S)
 
 ### 属性
+
 - `test_id` (S)
 - `subject_id` (S)
 - `question_ids` (L of S)
 - `pdf_s3_key` (S)
 
 ### 主なアクセス
+
 - 作成: PutItem(answer_sheet)
 - ダウンロード: `pdf_s3_key` を使って署名URL発行（APIは別）
 
@@ -314,21 +337,25 @@ erDiagram
 ## 3.6 graded_sheets
 
 ### 目的
+
 - 採点済み回答用紙のアップロード情報、AI解析状態、正誤結果の保持
 
 ### キー
+
 - PK: `graded_sheet_id` (S)
 
 ### 属性
+
 - `test_id` (S)
 - `subject_id` (S)
 - `image_s3_key` (S)
 - `status` (S: `UPLOADED` | `ANALYZING` | `DONE` | `FAILED`)
 - `ai_provider` (S: `BEDROCK` | `OPENAI` | `GOOGLE`)
-- `results` (L, nullable)  ※ `[{question_id, number, is_correct}]`
+- `results` (L, nullable) ※ `[{question_id, number, is_correct}]`
 - `error_message` (S, nullable)
 
 ### 主なアクセス
+
 - 登録: PutItem(graded_sheet, status=ANALYZING)
 - 解析完了: UpdateItem(graded_sheet_id) で `status=DONE`, `results` を更新
 - 取得: GetItem(graded_sheet_id)
@@ -338,24 +365,29 @@ erDiagram
 ## 3.7 words
 
 ### 目的
+
 - 単語テスト（漢字テスト）用の単語（Q/A）を保管する
 
 ### キー
+
 - PK: `word_id` (S)
 
 ### 属性
-- `question` (S)  ※例: 「肺は呼吸きかんの一部である。」
-- `answer` (S)  ※例: 「器官」
-- `answer_hiragana` (S)  ※PDF出力時に太字（bold）にする対象
+
+- `question` (S) ※例: 「肺は呼吸きかんの一部である。」
+- `answer` (S) ※例: 「器官」
+- `answer_hiragana` (S) ※PDF出力時に太字（bold）にする対象
 - `word_type` (S: `KANJI`)
 
 ### GSI（任意）
+
 - 漢字テスト作成時に `KANJI` のみ抽出したい場合
   - GSI1: `gsi_word_type`
     - PK: `word_type` (S)
     - SK: `word_id` (S)
 
 ### 主なアクセス
+
 - 登録: PutItem(word)
 - 一覧: Scan（データ量が増える場合は別途設計）
 - 削除: DeleteItem(word_id)
@@ -366,18 +398,22 @@ erDiagram
 ## 3.8 word_tests
 
 ### 目的
+
 - 指定数の単語テスト（漢字テスト）を作成し、一覧表示/削除/PDFダウンロードを可能にする
 
 ### キー
+
 - PK: `word_test_id` (S)
 
 ### 属性
+
 - `word_type` (S: `KANJI`)
 - `count` (N)
 - `word_ids` (L of S)
 - `pdf_s3_key` (S, nullable)
 
 ### 主なアクセス
+
 - 作成: PutItem(word_test)
 - 一覧: Scan（データ量が増える場合は別途設計）
 - 削除: DeleteItem(word_test_id)
@@ -388,12 +424,15 @@ erDiagram
 ## 3.9 word_test_attempts
 
 ### 目的
+
 - 作成済み単語テストに対する正誤登録（提出）を保管する
 
 ### キー
+
 - PK: `word_test_attempt_id` (S)
 
 ### 属性
+
 - `word_test_id` (S)
 - `status` (S: `IN_PROGRESS` | `SUBMITTED`)
 - `started_at` (S, ISO)
@@ -402,11 +441,13 @@ erDiagram
   - `[{word_id, is_correct}]`
 
 ### GSI
+
 - GSI1: `gsi_word_test_id_started_at`
   - PK: `word_test_id` (S)
   - SK: `started_at` (S)
 
 ### 主なアクセス
+
 - 実施開始: PutItem(word_test_attempt)
 - 提出: UpdateItem(word_test_attempt_id) で `status`, `submitted_at`, `results` を更新
 - 最新の正誤取得（任意）:

@@ -5,26 +5,40 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { QuestionsService } from './createQuestionsService';
 import { toSortNumber } from './toSortNumber';
 
-export const createUpdateQuestion = (repositories: Repositories): QuestionsService['updateQuestion'] => {
-  return async (questionId, updates): Promise<Question | null> => {
-    const existing = await repositories.questions.get(questionId);
-    if (!existing) return null;
+// 内部で利用する補助処理を定義する
+const updateQuestionImpl = async (
+  repositories: Repositories,
+  questionId: string,
+  updates: Partial<Parameters<QuestionsService['createQuestion']>[0]>,
+): Promise<Question | null> => {
+  // 非同期で必要な値を取得する
+  const existing = await repositories.questions.get(questionId);
+  // 条件に応じて処理を分岐する
+  if (!existing) return null;
 
-    const next = await repositories.questions.update(questionId, {
-      ...(typeof updates.subject === 'string' ? { subjectId: updates.subject } : {}),
-      ...(typeof updates.canonicalKey === 'string'
-        ? { canonicalKey: updates.canonicalKey, number: toSortNumber(updates.canonicalKey) }
-        : {}),
-    });
+  // 非同期で必要な値を取得する
+  const next = await repositories.questions.update(questionId, {
+    ...(typeof updates.subject === 'string' ? { subjectId: updates.subject } : {}),
+    ...(typeof updates.canonicalKey === 'string'
+      ? { canonicalKey: updates.canonicalKey, number: toSortNumber(updates.canonicalKey) }
+      : {}),
+  });
 
-    if (!next) return null;
+  // 条件に応じて処理を分岐する
+  if (!next) return null;
 
-    return {
-      id: next.questionId,
-      canonicalKey: next.canonicalKey,
-      subject: next.subjectId,
-      materialId: next.materialId,
-      tags: updates.tags ?? [],
-    };
+  // 処理結果を呼び出し元へ返す
+  return {
+    id: next.questionId,
+    canonicalKey: next.canonicalKey,
+    subject: next.subjectId,
+    materialId: next.materialId,
+    tags: updates.tags ?? [],
   };
+};
+
+// 公開するサービス処理を定義する
+export const createUpdateQuestion = (repositories: Repositories): QuestionsService['updateQuestion'] => {
+  // 処理結果を呼び出し元へ返す
+  return updateQuestionImpl.bind(null, repositories);
 };

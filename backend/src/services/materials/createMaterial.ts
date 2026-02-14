@@ -6,26 +6,31 @@ import type { MaterialTable } from '@/types/db';
 
 import type { MaterialsService } from './createMaterialsService';
 
-export const createCreateMaterial = (repositories: Repositories): MaterialsService['createMaterial'] => {
-  return async (data): Promise<Material> => {
-    const id = createUuid();
+const createMaterialImpl = async (
+  repositories: Repositories,
+  data: Parameters<MaterialsService['createMaterial']>[0],
+): Promise<Material> => {
+  const id = createUuid();
 
-    const dbItem: MaterialTable = {
-      materialId: id,
-      subjectId: data.subject,
-      title: data.name,
-      questionCount: 0,
-      grade: data.grade,
-      provider: data.provider,
-      materialDate: data.materialDate,
-      registeredDate: data.registeredDate,
-    };
-
-    await repositories.materials.create(dbItem);
-
-    return {
-      id,
-      ...data,
-    };
+  const dbItem: MaterialTable = {
+    materialId: id,
+    subjectId: data.subject,
+    title: data.name,
+    questionCount: 0,
+    grade: data.grade,
+    provider: data.provider,
+    materialDate: data.materialDate,
+    registeredDate: data.registeredDate,
   };
+
+  await repositories.materials.create(dbItem);
+
+  return {
+    id,
+    ...data,
+  };
+};
+
+export const createCreateMaterial = (repositories: Repositories): MaterialsService['createMaterial'] => {
+  return createMaterialImpl.bind(null, repositories);
 };

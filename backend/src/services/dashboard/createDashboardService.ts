@@ -11,7 +11,9 @@ export type DashboardService = {
 
 /** Creates dashboard service. */
 export const createDashboardService = (): DashboardService => {
+  // 処理で使う値を準備する
   const getDashboardData = createGetDashboardData();
 
+  // 処理結果を呼び出し元へ返す
   return { getDashboardData };
 };

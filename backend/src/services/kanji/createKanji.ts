@@ -7,8 +7,11 @@ import type { WordMasterTable } from '@/types/db';
 
 import type { KanjiService } from './createKanjiService';
 
+// 公開するサービス処理を定義する
 export const createCreateKanji = (repositories: Repositories): KanjiService['createKanji'] => {
+  // 処理結果を呼び出し元へ返す
   return async (data): Promise<Kanji> => {
+    // 処理で使う値を準備する
     const id = createUuid();
 
     const item: Kanji = { id, ...data };
@@ -20,6 +23,7 @@ export const createCreateKanji = (repositories: Repositories): KanjiService['cre
       subject: data.subject,
     };
 
+    // 非同期処理の完了を待つ
     await repositories.wordMaster.create(dbItem);
 
     // 候補を作成（新規作成時はOPEN）
@@ -33,6 +37,7 @@ export const createCreateKanji = (repositories: Repositories): KanjiService['cre
       createdAtIso: DateUtils.now(),
     });
 
+    // 処理結果を呼び出し元へ返す
     return item;
   };
 };

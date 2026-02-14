@@ -3,11 +3,12 @@
 このドキュメントは、既存 DynamoDB データを新しいスキーマに合わせるための **AWS CLI ベースの移行手順**です。
 
 対象変更:
+
 - Materials: `executionDate` → `materialDate`（必須）にリネーム
 - Materials: `category` 属性を削除
 - Materials: `grade` / `provider` を必須化
-- ReviewTests: 埋め込み items の `materialExecutionDate` → `materialDate` にリネーム
-- ReviewTestCandidates: `questionKey` 属性を削除（GSI も差し替え）
+- Exams: 埋め込み items の `materialExecutionDate` → `materialDate` にリネーム
+- ExamCandidates: `questionKey` 属性を削除（GSI も差し替え）
 
 > 重要: 大量データの場合、`scan` + 逐次 `update-item/put-item` は時間がかかり、RCU/WCU も消費します。必要なら一時的にスループットを上げる、夜間に止めて実施する、など運用設計をしてください。
 
@@ -25,8 +26,8 @@ backend の既定値（[backend/src/lib/env.ts](../backend/src/lib/env.ts)）:
 ```bash
 export AWS_REGION=ap-northeast-1
 export TABLE_MATERIALS=materials
-export TABLE_REVIEW_TESTS=review_tests
-export TABLE_REVIEW_TEST_CANDIDATES=review_test_candidates
+export TABLE_EXAMS=exam
+export TABLE_EXAM_CANDIDATES=exam_candidates
 ```
 
 必要に応じて実環境に合わせて上書きしてください。
@@ -42,13 +43,13 @@ aws dynamodb scan --no-cli-pager \
   --output json > materials.backup.json
 ```
 
-### ReviewTests
+### Exams
 
 ```bash
 aws dynamodb scan --no-cli-pager \
   --region "$AWS_REGION" \
-  --table-name "$TABLE_REVIEW_TESTS" \
-  --output json > review_tests.backup.json
+  --table-name "$TABLE_EXAMS" \
+  --output json > exam.backup.json
 ```
 
 ## 2) Materials: `executionDate` → `materialDate`、`category` 削除
@@ -123,9 +124,9 @@ aws dynamodb scan --no-cli-pager \
 
 上で出た `materialId` は、業務上妥当な「教材年月日(YYYY-MM-DD)」を決めて `update-item` で投入してください。
 
-## 3) ReviewTests: items の `materialExecutionDate` → `materialDate`
+## 3) Exams: items の `materialExecutionDate` → `materialDate`
 
-ReviewTests テーブルは `items` がネスト配列のため、`update-item` の式だけで安全に一括リネームするのが難しいです。
+Exams テーブルは `items` がネスト配列のため、`update-item` の式だけで安全に一括リネームするのが難しいです。
 この手順は **バックアップ済みであること** と、可能なら **書き込み停止（または低頻度時間帯）** を前提に、`scan` → 変換 → `put-item` で上書きします。
 
 ### 3-1. 変換して上書きする（`materialExecutionDate` を `materialDate` にコピーし、旧属性削除）
@@ -133,7 +134,7 @@ ReviewTests テーブルは `items` がネスト配列のため、`update-item` 
 ```bash
 aws dynamodb scan --no-cli-pager \
   --region "$AWS_REGION" \
-  --table-name "$TABLE_REVIEW_TESTS" \
+  --table-name "$TABLE_EXAMS" \
   --output json \
 | jq -c '.Items[]' \
 | while read -r item; do
@@ -154,7 +155,7 @@ aws dynamodb scan --no-cli-pager \
 
     aws dynamodb put-item --no-cli-pager \
       --region "$AWS_REGION" \
-      --table-name "$TABLE_REVIEW_TESTS" \
+      --table-name "$TABLE_EXAMS" \
       --item "$fixed" \
     >/dev/null
   done
@@ -164,10 +165,10 @@ aws dynamodb scan --no-cli-pager \
 
 `materialExecutionDate` が残っていないことを確認します。
 
-```bash
+````bash
 aws dynamodb scan --no-cli-pager \
   --region "$AWS_REGION" \
-  --table-name "$TABLE_REVIEW_TESTS" \
+  --table-name "$TABLE_EXAMS" \
   --output json \
 | jq -e '.. | objects | has("materialExecutionDate") | select(. == true)' \
 && echo "NG: materialExecutionDate が残っています" \
@@ -186,7 +187,7 @@ aws dynamodb scan --no-cli-pager \
   --projection-expression "materialId, grade, provider" \
   --output json \
 | jq -c '.Items[] | {materialId: .materialId.S, grade: (.grade.S // null), provider: (.provider.S // null)} | select(.grade == null or .provider == null)'
-```
+````
 
 ### 4-2. 欠損行を update-item で補完（例）
 
@@ -203,7 +204,7 @@ aws dynamodb update-item --no-cli-pager \
   --expression-attribute-values "{\":g\":{\"S\":\"$grade\"},\":p\":{\"S\":\"$provider\"}}"
 ```
 
-## 5) ReviewTestCandidates: `questionKey` 削除 + `createdAt` 欠損チェック
+## 5) ExamCandidates: `questionKey` 削除 + `createdAt` 欠損チェック
 
 Terraform の変更（GSI差し替え）を適用後、既存データの `questionKey` を削除します。
 
@@ -212,7 +213,7 @@ Terraform の変更（GSI差し替え）を適用後、既存データの `quest
 ```bash
 aws dynamodb scan --no-cli-pager \
   --region "$AWS_REGION" \
-  --table-name "$TABLE_REVIEW_TEST_CANDIDATES" \
+  --table-name "$TABLE_EXAM_CANDIDATES" \
   --projection-expression "subject, candidateKey, questionKey" \
   --output json \
 | jq -c '.Items[] | select(.questionKey != null) | {subject: .subject.S, candidateKey: .candidateKey.S}' \
@@ -222,7 +223,7 @@ aws dynamodb scan --no-cli-pager \
 
     aws dynamodb update-item --no-cli-pager \
       --region "$AWS_REGION" \
-      --table-name "$TABLE_REVIEW_TEST_CANDIDATES" \
+      --table-name "$TABLE_EXAM_CANDIDATES" \
       --key "{\"subject\":{\"S\":\"$subject\"},\"candidateKey\":{\"S\":\"$candidate_key\"}}" \
       --update-expression "REMOVE questionKey" \
     >/dev/null
@@ -234,7 +235,7 @@ aws dynamodb scan --no-cli-pager \
 ```bash
 aws dynamodb scan --no-cli-pager \
   --region "$AWS_REGION" \
-  --table-name "$TABLE_REVIEW_TEST_CANDIDATES" \
+  --table-name "$TABLE_EXAM_CANDIDATES" \
   --projection-expression "subject, candidateKey, questionId, createdAt" \
   --output json \
 | jq -c '.Items[] | {subject: .subject.S, candidateKey: .candidateKey.S, questionId: (.questionId.S // null), createdAt: (.createdAt.S // null)} | select(.questionId == null or .createdAt == null)'
@@ -243,7 +244,9 @@ aws dynamodb scan --no-cli-pager \
 `createdAt` が欠損している場合は、暫定的に `candidateKey` の先頭日付（`nextTime`）から `YYYY-MM-DDT00:00:00.000+09:00` を作って投入してください。
 
 ## 6) ロールバック
+
 ```
 
 問題が起きた場合は、バックアップ JSON を元に `put-item` で復元できます（ただし復元時も同様にテーブル全体を書き戻すため慎重に）。
 
+```

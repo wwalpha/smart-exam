@@ -1,3 +1,4 @@
+// スキーマ定義の再エクスポート
 export { CreateExamBodySchema } from './createExamController.schema';
 export { DeleteExamParamsSchema } from './deleteExamController.schema';
 export { GetExamParamsSchema } from './getExamController.schema';
@@ -8,6 +9,7 @@ export { SearchExamsBodySchema } from './searchExamsController.schema';
 export { SubmitExamResultsParamsSchema, SubmitExamResultsBodySchema } from './submitExamResultsController.schema';
 export { UpdateExamStatusParamsSchema, UpdateExamStatusBodySchema } from './updateExamStatusController.schema';
 
+// コントローラ本体の再エクスポート
 export { createExamController } from './createExamController';
 export { deleteExamController } from './deleteExamController';
 export { getExamController } from './getExamController';

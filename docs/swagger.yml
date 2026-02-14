@@ -21,7 +21,7 @@ tags:
   - name: Questions
   - name: Kanji
   - name: Attempts
-  - name: ReviewTests
+  - name: Exams
 
 paths:
   /api/health:
@@ -640,15 +640,15 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /api/review-tests:
+  /api/exam:
     get:
-      tags: [ReviewTests]
+      tags: [Exams]
       summary: List review tests
       parameters:
         - name: status
           in: query
           schema:
-            $ref: "#/components/schemas/ReviewTestStatus"
+            $ref: "#/components/schemas/ExamStatus"
         - $ref: "#/components/parameters/SubjectQuery"
         - $ref: "#/components/parameters/LimitQuery"
         - $ref: "#/components/parameters/CursorQuery"
@@ -658,26 +658,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReviewTestListResponse"
+                $ref: "#/components/schemas/ExamListResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
 
     post:
-      tags: [ReviewTests]
+      tags: [Exams]
       summary: Generate a new review test (deterministic selection + locks)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReviewTestCreateRequest"
+              $ref: "#/components/schemas/ExamCreateRequest"
       responses:
         "201":
           description: Generated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReviewTestCreateResponse"
+                $ref: "#/components/schemas/ExamCreateResponse"
         "400":
           $ref: "#/components/responses/ValidationError"
         "401":
@@ -685,9 +685,9 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
 
-  /api/review-tests/{testId}:
+  /api/exam/{testId}:
     get:
-      tags: [ReviewTests]
+      tags: [Exams]
       summary: Get review test detail (items + referenced metadata)
       parameters:
         - $ref: "#/components/parameters/TestIdPath"
@@ -697,14 +697,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReviewTestDetailResponse"
+                $ref: "#/components/schemas/ExamDetailResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
 
     patch:
-      tags: [ReviewTests]
+      tags: [Exams]
       summary: Update review test status
       parameters:
         - $ref: "#/components/parameters/TestIdPath"
@@ -713,14 +713,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReviewTestPatchRequest"
+              $ref: "#/components/schemas/ExamPatchRequest"
       responses:
         "200":
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReviewTestResponse"
+                $ref: "#/components/schemas/ExamResponse"
         "400":
           $ref: "#/components/responses/ValidationError"
         "401":
@@ -731,7 +731,7 @@ paths:
           $ref: "#/components/responses/Conflict"
 
     delete:
-      tags: [ReviewTests]
+      tags: [Exams]
       summary: Delete a review test (must release locks)
       parameters:
         - $ref: "#/components/parameters/TestIdPath"
@@ -743,9 +743,9 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /api/review-tests/{testId}/results:
+  /api/exam/{testId}/results:
     post:
-      tags: [ReviewTests]
+      tags: [Exams]
       summary: Submit results for a review test (bulk entry; unlock targets)
       parameters:
         - $ref: "#/components/parameters/TestIdPath"
@@ -754,14 +754,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReviewTestResultsRequest"
+              $ref: "#/components/schemas/ExamResultsRequest"
       responses:
         "200":
           description: Results applied
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReviewTestResultsResponse"
+                $ref: "#/components/schemas/ExamResultsResponse"
         "400":
           $ref: "#/components/responses/ValidationError"
         "401":
@@ -901,7 +901,7 @@ components:
     Provider:
       type: string
       enum: [SAPIX, YOTSUYA, OTHER]
-    ReviewTestStatus:
+    ExamStatus:
       type: string
       enum: [IN_PROGRESS, COMPLETED, PAUSED, CANCELED]
     TargetType:
@@ -1269,8 +1269,8 @@ components:
             derived:
               $ref: "#/components/schemas/DerivedStatus"
 
-    # --- Review tests ---
-    ReviewTest:
+    # --- Exams ---
+    Exam:
       type: object
       required: [id, subject, targetType, requestedCount, generatedCount, status, createdAt, updatedAt]
       properties:
@@ -1279,11 +1279,11 @@ components:
         targetType: { $ref: "#/components/schemas/TargetType" }
         requestedCount: { type: integer, minimum: 1 }
         generatedCount: { type: integer, minimum: 0 }
-        status: { $ref: "#/components/schemas/ReviewTestStatus" }
+        status: { $ref: "#/components/schemas/ExamStatus" }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
 
-    ReviewTestItem:
+    ExamItem:
       type: object
       required: [id, testId, targetType, targetId, createdAt]
       properties:
@@ -1295,7 +1295,7 @@ components:
         lastAttemptDate: { type: string, format: date, nullable: true }
         createdAt: { type: string, format: date-time }
 
-    ReviewTestCreateRequest:
+    ExamCreateRequest:
       type: object
       required: [subject, targetType, count]
       properties:
@@ -1315,16 +1315,16 @@ components:
               minimum: 1
               nullable: true
 
-    ReviewTestCreateResponse:
+    ExamCreateResponse:
       type: object
       properties:
         data:
           type: object
           properties:
-            test: { $ref: "#/components/schemas/ReviewTest" }
+            test: { $ref: "#/components/schemas/Exam" }
             items:
               type: array
-              items: { $ref: "#/components/schemas/ReviewTestItem" }
+              items: { $ref: "#/components/schemas/ExamItem" }
             shortage:
               type: object
               properties:
@@ -1332,13 +1332,13 @@ components:
                 generated: { type: integer }
                 missing: { type: integer }
 
-    ReviewTestResponse:
+    ExamResponse:
       type: object
       properties:
         data:
-          $ref: "#/components/schemas/ReviewTest"
+          $ref: "#/components/schemas/Exam"
 
-    ReviewTestListResponse:
+    ExamListResponse:
       type: object
       properties:
         data:
@@ -1346,32 +1346,32 @@ components:
           properties:
             items:
               type: array
-              items: { $ref: "#/components/schemas/ReviewTest" }
+              items: { $ref: "#/components/schemas/Exam" }
             nextCursor: { type: string, nullable: true }
 
-    ReviewTestDetailResponse:
+    ExamDetailResponse:
       type: object
       properties:
         data:
           type: object
           properties:
-            test: { $ref: "#/components/schemas/ReviewTest" }
+            test: { $ref: "#/components/schemas/Exam" }
             items:
               type: array
-              items: { $ref: "#/components/schemas/ReviewTestItem" }
+              items: { $ref: "#/components/schemas/ExamItem" }
             referenced:
               type: object
               nullable: true
               description: Optional referenced metadata to render the test quickly.
               additionalProperties: true
 
-    ReviewTestPatchRequest:
+    ExamPatchRequest:
       type: object
       required: [status]
       properties:
-        status: { $ref: "#/components/schemas/ReviewTestStatus" }
+        status: { $ref: "#/components/schemas/ExamStatus" }
 
-    ReviewTestResultsRequest:
+    ExamResultsRequest:
       type: object
       description: |
         Bulk result entry. You may provide either:
@@ -1401,7 +1401,7 @@ components:
               memo: { type: string, nullable: true }
               attemptDate: { type: string, format: date, nullable: true }
 
-    ReviewTestResultsResponse:
+    ExamResultsResponse:
       type: object
       properties:
         data:

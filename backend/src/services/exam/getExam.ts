@@ -5,77 +5,102 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamsService } from './createExamsService';
 import { toApiExam } from './internal';
 
-export const createGetExam = (repositories: Repositories): ExamsService['getExam'] => {
-  return async (testId): Promise<ExamDetail | null> => {
-    const test = await repositories.exams.get(testId);
-    if (!test) return null;
+// 内部で利用する補助処理を定義する
+const getExamImpl = async (repositories: Repositories, testId: string): Promise<ExamDetail | null> => {
+  // 非同期で必要な値を取得する
+  const test = await repositories.exams.get(testId);
+  // 条件に応じて処理を分岐する
+  if (!test) return null;
 
-    const resultByTargetId = new Map((test.results ?? []).map((r) => [r.id, r.isCorrect] as const));
+  // 処理で使う値を準備する
+  const resultByTargetId = new Map((test.results ?? []).map((r) => [r.id, r.isCorrect] as const));
 
-    if (test.mode === 'KANJI') {
-      const words = await Promise.all(test.questions.map((id) => repositories.wordMaster.get(id)));
-      const byId = new Map(
-        words.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w.wordId, w] as const),
-      );
-
-      return {
-        ...toApiExam(test),
-        items: test.questions.map((targetId) => {
-          const w = byId.get(targetId);
-          const isCorrect = resultByTargetId.get(targetId);
-          return {
-            id: targetId,
-            itemId: targetId,
-            testId,
-            targetType: 'KANJI',
-            targetId,
-            kanji: w?.answer,
-            reading: w?.readingHiragana,
-            questionText: w?.question,
-            answerText: w?.answer,
-            readingHiragana: w?.readingHiragana,
-            underlineSpec: w?.underlineSpec,
-            ...(typeof isCorrect === 'boolean' ? { isCorrect } : {}),
-          };
-        }),
-      };
-    }
-
-    const questionRows = await Promise.all(test.questions.map((qid) => repositories.questions.get(qid)));
-    const qById = new Map(
-      questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const),
+  // 条件に応じて処理を分岐する
+  if (test.mode === 'KANJI') {
+    // 非同期で必要な値を取得する
+    const words = await Promise.all(test.questions.map((id) => repositories.wordMaster.get(id)));
+    // 処理で使う値を準備する
+    const byId = new Map(
+      words.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w.wordId, w] as const),
     );
 
-    const materialIds = Array.from(new Set(Array.from(qById.values()).map((q) => q.materialId)));
-    const materialRows = await Promise.all(materialIds.map((mid) => repositories.materials.get(mid)));
-    const mById = new Map(
-      materialRows.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m.materialId, m] as const),
-    );
-
+    // 処理結果を呼び出し元へ返す
     return {
       ...toApiExam(test),
       items: test.questions.map((targetId) => {
-        const q = qById.get(targetId);
-        const m = q ? mById.get(q.materialId) : undefined;
+        // 処理で使う値を準備する
+        const w = byId.get(targetId);
+        // 処理で使う値を準備する
         const isCorrect = resultByTargetId.get(targetId);
-
+        // 処理結果を呼び出し元へ返す
         return {
           id: targetId,
           itemId: targetId,
           testId,
-          targetType: 'QUESTION',
+          targetType: 'KANJI',
           targetId,
-          displayLabel: q?.canonicalKey,
-          canonicalKey: q?.canonicalKey,
-          materialId: q?.materialId,
-          grade: m?.grade,
-          provider: m?.provider,
-          materialName: m?.title,
-          materialDate: m?.materialDate,
-          questionText: q?.canonicalKey,
+          kanji: w?.answer,
+          reading: w?.readingHiragana,
+          questionText: w?.question,
+          answerText: w?.answer,
+          readingHiragana: w?.readingHiragana,
+          underlineSpec: w?.underlineSpec,
           ...(typeof isCorrect === 'boolean' ? { isCorrect } : {}),
         };
       }),
     };
+  }
+
+  // 非同期で必要な値を取得する
+  const questionRows = await Promise.all(test.questions.map((qid) => repositories.questions.get(qid)));
+  // 処理で使う値を準備する
+  const qById = new Map(
+    questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const),
+  );
+
+  // 処理で使う値を準備する
+  const materialIds = Array.from(new Set(Array.from(qById.values()).map((q) => q.materialId)));
+  // 非同期で必要な値を取得する
+  const materialRows = await Promise.all(materialIds.map((mid) => repositories.materials.get(mid)));
+  // 処理で使う値を準備する
+  const mById = new Map(
+    materialRows.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m.materialId, m] as const),
+  );
+
+  // 処理結果を呼び出し元へ返す
+  return {
+    ...toApiExam(test),
+    items: test.questions.map((targetId) => {
+      // 処理で使う値を準備する
+      const q = qById.get(targetId);
+      // 処理で使う値を準備する
+      const m = q ? mById.get(q.materialId) : undefined;
+      // 処理で使う値を準備する
+      const isCorrect = resultByTargetId.get(targetId);
+
+      // 処理結果を呼び出し元へ返す
+      return {
+        id: targetId,
+        itemId: targetId,
+        testId,
+        targetType: 'QUESTION',
+        targetId,
+        displayLabel: q?.canonicalKey,
+        canonicalKey: q?.canonicalKey,
+        materialId: q?.materialId,
+        grade: m?.grade,
+        provider: m?.provider,
+        materialName: m?.title,
+        materialDate: m?.materialDate,
+        questionText: q?.canonicalKey,
+        ...(typeof isCorrect === 'boolean' ? { isCorrect } : {}),
+      };
+    }),
   };
+};
+
+// 公開するサービス処理を定義する
+export const createGetExam = (repositories: Repositories): ExamsService['getExam'] => {
+  // 処理結果を呼び出し元へ返す
+  return getExamImpl.bind(null, repositories);
 };

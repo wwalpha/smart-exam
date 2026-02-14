@@ -67,7 +67,7 @@ CMD1.md〜CMD3.md の新しいタスクに従って、差分（設計・実装�
 
 - 取り込み（履歴あり）
 - `generate-reading` → `verify` を通し、verify時に OPEN 候補が作られることを確認
-- VERIFIED を60件相当で `ReviewTestPdfService.generatePdfBuffer()` が成功し、PDFページ数が1であることを確認
+- VERIFIED を60件相当で `ExamPdfService.generatePdfBuffer()` が成功し、PDFページ数が1であることを確認
 
 ### 変更ファイル（CMD3）
 

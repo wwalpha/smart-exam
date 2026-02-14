@@ -19,7 +19,9 @@ export type Services = {
   s3: S3Service;
 };
 
+// 公開するサービス処理を定義する
 export const createServices = (repositories: Repositories): Services => {
+  // 処理結果を呼び出し元へ返す
   return {
     bedrock: bedrockService(repositories),
     dashboard: dashboardService(),

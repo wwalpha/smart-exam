@@ -16,9 +16,12 @@ export const listExamsController = (services: Services) => {
     Record<string, never>,
     ParsedQs
   > = async (_req, res) => {
+    // 復習テスト一覧を取得する
     const items = await services.exams.listExams();
+    // 件数付きで一覧を返す
     res.json({ items, total: items.length });
   };
 
+  // ルート登録で使うスキーマとハンドラを返す
   return { ListExamsQuerySchema, listExams };
 };

@@ -17,10 +17,14 @@ export const searchExamsController = (services: Services) => {
     SearchExamsRequest,
     ParsedQs
   > = async (req, res) => {
+    // バリデーション済みの検索条件を取得する
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchExamsBodySchema>;
+    // 条件に一致する復習テストを検索する
     const result = await services.exams.searchExams(body);
+    // 検索結果を返す
     res.json(result);
   };
 
+  // ルート登録で使うスキーマとハンドラを返す
   return { SearchExamsBodySchema, searchExams };
 };
