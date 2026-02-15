@@ -7,15 +7,39 @@ import type { WordMasterTable } from '@/types/db';
 
 import type { KanjiService } from './index';
 
-// 内部で利用する処理を定義する
-const createKanjiImpl = async (
+const resolveReadingHiragana = async (params: {
+  repositories: Repositories;
+  wordId: string;
+  question: string;
+  answer: string;
+}): Promise<string> => {
+  const bulk = await params.repositories.bedrock.generateKanjiQuestionReadingsBulk({
+    items: [{ id: params.wordId, question: params.question, answer: params.answer }],
+  });
+
+  const generated = bulk.items.find((item) => item.id === params.wordId)?.readingHiragana?.trim() ?? '';
+  if (!generated) {
+    throw new Error('readingHiragana の生成に失敗しました');
+  }
+  return generated;
+};
+
+// 公開するサービス処理を定義する
+export const registKanji = async (
   repositories: Repositories,
   data: Parameters<KanjiService['registKanji']>[0],
 ): Promise<Kanji> => {
-  // 内部で利用する処理を定義する
   const id = createUuid();
 
   const item: Kanji = { id, ...data };
+
+  // import と同じ生成経路に揃えるため、読みは Bedrock から取得する。
+  const readingHiragana = await resolveReadingHiragana({
+    repositories,
+    wordId: id,
+    question: data.kanji,
+    answer: data.reading,
+  });
 
   // 単語登録時は問題文全体を下線対象として扱い、読み/下線情報を必ず同時保存する。
   const underlineLength = data.kanji.length;
@@ -25,7 +49,7 @@ const createKanjiImpl = async (
     question: data.kanji,
     answer: data.reading,
     subject: data.subject,
-    readingHiragana: data.reading,
+    readingHiragana,
     underlineSpec: {
       type: 'promptSpan',
       start: 0,
@@ -49,10 +73,4 @@ const createKanjiImpl = async (
 
   // 処理結果を呼び出し元へ返す
   return item;
-};
-
-// 公開する処理を定義する
-export const createCreateKanji = (repositories: Repositories): KanjiService['registKanji'] => {
-  // 処理結果を呼び出し元へ返す
-  return createKanjiImpl.bind(null, repositories);
 };

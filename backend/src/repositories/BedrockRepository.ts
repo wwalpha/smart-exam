@@ -3,6 +3,7 @@
 import { ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { AwsUtils } from '@/lib/awsUtils';
 import { bedrockClient } from '@/lib/aws';
+import { BEDROCK_MODEL_ID } from '@/lib/consts';
 import { ENV } from '@/lib/env';
 
 
@@ -34,7 +35,7 @@ export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'):
 
   // 2. Call Bedrock
   // Using Claude 4.5 Sonnet
-  const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+  const modelId = BEDROCK_MODEL_ID;
 
   let prompt = '';
 
@@ -208,10 +209,9 @@ export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'):
 /** generateKanjiQuestionReadingsBulk. */
 export const generateKanjiQuestionReadingsBulk = async (params: {
   items: KanjiQuestionReadingBulkInput[];
-  modelId?: string;
   hint?: string;
 }): Promise<{ items: KanjiQuestionReadingBulkResult[] }> => {
-  const modelId = params.modelId ?? 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+  const modelId = BEDROCK_MODEL_ID;
 
   const prompt = `
 You are an AI assistant for Japanese kanji worksheet generation.

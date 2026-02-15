@@ -218,7 +218,6 @@ const buildItemsByBatch = async (params: {
   repositories: Repositories;
   rows: ParsedImportRow[];
   subject: SubjectId;
-  modelId: string;
 }): Promise<BatchBuildResult> => {
   const wordMasterItems: WordMasterTable[] = [];
   const candidatesToCreate: ExamCandidateTable[] = [];
@@ -236,7 +235,6 @@ const buildItemsByBatch = async (params: {
     try {
       bulkGenerated = await params.repositories.bedrock.generateKanjiQuestionReadingsBulk({
         items: batch.map((r) => ({ id: r.wordId, question: r.question, answer: r.answer })),
-        modelId: params.modelId,
       });
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Unknown error';
@@ -358,12 +356,10 @@ const importKanjiImpl = async (
   );
   const parsedResult = parseValidRows({ lines, existingKey, formatErrorReason });
 
-  const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
   const buildResult = await buildItemsByBatch({
     repositories,
     rows: parsedResult.rows,
     subject,
-    modelId,
   });
 
   await persistImportedRows({
