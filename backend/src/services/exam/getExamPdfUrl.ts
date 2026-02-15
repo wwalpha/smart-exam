@@ -53,7 +53,7 @@ const getExamPdfUrlImpl = async (
   // 非同期で必要な値を取得する
   const pdfBuffer = await ExamPdfService.generatePdfBuffer(review, { includeGenerated: false });
   // 処理で使う値を準備する
-  const key = testRow.pdfS3Key ?? `review-tests/${testId}.pdf`;
+  const key = testRow.pdfS3Key ?? `exams/${testId}.pdf`;
 
   // 非同期処理の完了を待つ
   await deps.repositories.s3.putObject({

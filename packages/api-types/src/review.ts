@@ -9,22 +9,22 @@ export type ReviewMode = (typeof REVIEW_MODE)[keyof typeof REVIEW_MODE];
 
 export type ReviewTargetType = ReviewMode;
 
-/** `GET /review-tests/:testId` */
+/** `GET /exams/:testId` */
 export type GetExamParams = {
   testId: string;
 };
 
-/** `PATCH /review-tests/:testId` */
+/** `PATCH /exams/:testId` */
 export type UpdateExamStatusParams = {
   testId: string;
 };
 
-/** `DELETE /review-tests/:testId` */
+/** `DELETE /exams/:testId` */
 export type DeleteExamParams = {
   testId: string;
 };
 
-/** `POST /review-tests/:testId/results` */
+/** `POST /exams/:testId/results` */
 export type SubmitExamResultsParams = {
   testId: string;
 };
@@ -55,7 +55,7 @@ export type ExamListResponse = {
   cursor?: string;
 };
 
-/** `POST /review-tests/search` */
+/** `POST /exams/search` */
 export type SearchExamsRequest = {
   subject: 'ALL' | SubjectId;
   mode: ReviewMode;
@@ -64,7 +64,7 @@ export type SearchExamsRequest = {
   cursor?: string;
 };
 
-/** `POST /review-tests/search` */
+/** `POST /exams/search` */
 export type SearchExamsResponse = ExamListResponse;
 
 /**
@@ -259,7 +259,7 @@ export type ExamTarget = {
   includedCount: number;
 };
 
-/** `GET /review-tests/targets?mode=...&from=YYYY-MM-DD&to=YYYY-MM-DD` */
+/** `GET /exams/targets?mode=...&from=YYYY-MM-DD&to=YYYY-MM-DD` */
 export type ListExamTargetsResponse = {
   items: ExamTarget[];
 };

@@ -26,7 +26,7 @@ describe('KanjiService.deleteKanji', () => {
             count: 3,
             questions: ['w1', 'w2', 'w3'],
             createdDate: '2026-02-14',
-            pdfS3Key: 'review-tests/t1.pdf',
+            pdfS3Key: 'exams/t1.pdf',
             results: [
               { id: 'w1', isCorrect: true },
               { id: 'w3', isCorrect: false },
@@ -40,7 +40,7 @@ describe('KanjiService.deleteKanji', () => {
             count: 1,
             questions: ['w9'],
             createdDate: '2026-02-14',
-            pdfS3Key: 'review-tests/t2.pdf',
+            pdfS3Key: 'exams/t2.pdf',
             results: [{ id: 'w9', isCorrect: true }],
           },
           {
@@ -63,7 +63,10 @@ describe('KanjiService.deleteKanji', () => {
     const ok = await deleteKanji('w1');
     expect(ok).toBe(true);
 
-    expect(repositories.examCandidates.deleteCandidatesByTargetId).toHaveBeenCalledWith({ subject: '1', targetId: 'w1' });
+    expect(repositories.examCandidates.deleteCandidatesByTargetId).toHaveBeenCalledWith({
+      subject: '1',
+      targetId: 'w1',
+    });
     expect(repositories.exams.scanAll).toHaveBeenCalledTimes(1);
 
     // only t1 is affected

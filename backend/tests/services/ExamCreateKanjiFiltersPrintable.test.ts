@@ -52,7 +52,7 @@ describe('ExamsService.createExam (KANJI)', () => {
             count: 1,
             questions: ['w-verified'],
             createdDate: '2026-02-14',
-            pdfS3Key: `review-tests/${testId}.pdf`,
+            pdfS3Key: `exams/${testId}.pdf`,
             results: [],
           } as unknown;
         }),

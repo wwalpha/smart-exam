@@ -41,10 +41,7 @@ const printableWordIds = (byId: Map<string, WordMasterTable>): Set<string> => {
 };
 
 // 内部で利用する補助処理を定義する
-const listDueCandidates = async (
-  deps: CreateExamDeps,
-  params: CandidateListParams,
-): Promise<ExamCandidateTable[]> => {
+const listDueCandidates = async (deps: CreateExamDeps, params: CandidateListParams): Promise<ExamCandidateTable[]> => {
   // 処理で使う値を準備する
   const today = params.todayYmd ?? DateUtils.todayYmd();
 
@@ -57,10 +54,7 @@ const listDueCandidates = async (
 };
 
 // 内部で利用する補助処理を定義する
-const listOpenCandidates = async (
-  deps: CreateExamDeps,
-  params: CandidateListParams,
-): Promise<ExamCandidateTable[]> => {
+const listOpenCandidates = async (deps: CreateExamDeps, params: CandidateListParams): Promise<ExamCandidateTable[]> => {
   // 処理結果を呼び出し元へ返す
   return deps.repositories.examCandidates.listCandidates({
     subject: params.subject,
@@ -248,7 +242,7 @@ const createExamImpl = async (deps: CreateExamDeps, req: Parameters<ExamsService
   // 処理で使う値を準備する
   const hasKanjiTargets = req.mode === 'KANJI' && targetIds.length > 0;
   // 処理で使う値を準備する
-  const pdfS3Key = hasKanjiTargets ? `review-tests/${testId}.pdf` : undefined;
+  const pdfS3Key = hasKanjiTargets ? `exams/${testId}.pdf` : undefined;
 
   const testRow: ExamTable = {
     testId,

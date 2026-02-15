@@ -1,5 +1,5 @@
 Request URL
-http://localhost:3001/api/review-tests
+http://localhost:3001/api/exams
 Request Method
 POST
 Status Code
