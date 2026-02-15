@@ -131,3 +131,29 @@ export interface ExamCandidateTable {
   /** クローズ日時 */
   closedAt?: string;
 }
+
+/**
+ * 復習テスト履歴テーブル
+ */
+export interface ExamHistoryTable {
+  /** 科目 (PK) */
+  subject: SubjectId;
+  /** 候補キー (SK): nextTime#candidateId */
+  candidateKey: string;
+  /** 候補ID */
+  id: string;
+  /** 対象ID（QUESTION: questionId / KANJI: wordId） */
+  questionId: string;
+  /** モード */
+  mode: ReviewMode;
+  /** 状態 */
+  status: 'CLOSED';
+  /** 連続正解回数 */
+  correctCount: number;
+  /** 次回日付 (YYYY-MM-DD) */
+  nextTime: string;
+  /** 作成日時 */
+  createdAt: string;
+  /** クローズ日時 */
+  closedAt: string;
+}

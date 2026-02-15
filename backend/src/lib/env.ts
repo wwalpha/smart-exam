@@ -9,5 +9,6 @@ export const ENV = {
   TABLE_EXAMS: process.env.TABLE_EXAMS || 'exams',
   TABLE_EXAM_DETAILS: process.env.TABLE_EXAM_DETAILS || 'exam_details',
   TABLE_EXAM_CANDIDATES: process.env.TABLE_EXAM_CANDIDATES || 'test_candidates',
+  TABLE_EXAM_HISTORIES: process.env.TABLE_EXAM_HISTORIES || 'exam_histories',
   TABLE_WORD_MASTER: process.env.TABLE_WORD_MASTER || 'word_master',
 };

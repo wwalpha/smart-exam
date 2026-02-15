@@ -4,6 +4,7 @@ import { MaterialsRepository } from '@/repositories/materials';
 import { QuestionsRepository } from '@/repositories/questions';
 import { ExamCandidatesRepository } from '@/repositories/examCandidates';
 import { ExamDetailsRepository } from '@/repositories/examDetails';
+import { ExamHistoriesRepository } from '@/repositories/examHistories';
 import { ExamsRepository } from '@/repositories/exams';
 import { WordMasterRepository } from '@/repositories/wordMaster';
 import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
@@ -15,6 +16,7 @@ export type Repositories = {
   questions: typeof QuestionsRepository;
   examCandidates: typeof ExamCandidatesRepository;
   examDetails: typeof ExamDetailsRepository;
+  examHistories: typeof ExamHistoriesRepository;
   exams: typeof ExamsRepository;
   wordMaster: typeof WordMasterRepository;
   s3: typeof S3Repository;
@@ -31,6 +33,7 @@ export const createRepositories = (): Repositories => {
     questions: QuestionsRepository,
     examCandidates: ExamCandidatesRepository,
     examDetails: ExamDetailsRepository,
+    examHistories: ExamHistoriesRepository,
     exams: ExamsRepository,
     wordMaster: WordMasterRepository,
     s3: S3Repository,

@@ -2,37 +2,83 @@ import type { SubjectId } from '@smart-exam/api-types';
 
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
+import type { ExamCandidateTableRaw } from '@/repositories/examCandidates/normalizeCandidate';
+import { normalizeCandidate } from '@/repositories/examCandidates/normalizeCandidate';
+import type { ExamHistoryTable } from '@/types/db';
 
 import { nowIso } from './nowIso';
 
-const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
+const CANDIDATES_TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
+const HISTORIES_TABLE_NAME = ENV.TABLE_EXAM_HISTORIES;
 
 export const closeCandidateIfMatch = async (params: {
   subject: SubjectId;
   candidateKey: string;
   expectedExamId?: string;
 }): Promise<void> => {
-  const expNames: Record<string, string> = {
-    '#status': 'status',
-    '#closedAt': 'closedAt',
-    '#examId': 'examId',
-  };
-  const expValues: Record<string, unknown> = {
-    ':closed': 'CLOSED',
-    ':closedAt': nowIso(),
-  };
+  const current = await dbHelper.get<ExamCandidateTableRaw>({
+    TableName: CANDIDATES_TABLE_NAME,
+    Key: { subject: params.subject, candidateKey: params.candidateKey },
+  });
 
-  const condition = params.expectedExamId ? '#examId = :examId' : undefined;
-  if (params.expectedExamId) {
-    expValues[':examId'] = params.expectedExamId;
+  if (!current?.Item) {
+    return;
   }
 
-  await dbHelper.update({
-    TableName: TABLE_NAME,
-    Key: { subject: params.subject, candidateKey: params.candidateKey },
-    ...(condition ? { ConditionExpression: condition } : {}),
-    UpdateExpression: 'SET #status = :closed, #closedAt = :closedAt REMOVE #examId',
-    ExpressionAttributeNames: expNames,
-    ExpressionAttributeValues: expValues,
-  });
+  const candidate = normalizeCandidate(current.Item);
+  if (params.expectedExamId && candidate.examId !== params.expectedExamId) {
+    const error = new Error('examId does not match expectedExamId');
+    (error as Error & { name: string }).name = 'ConditionalCheckFailedException';
+    throw error;
+  }
+
+  const closedAt = nowIso();
+  const historyItem: ExamHistoryTable = {
+    subject: candidate.subject,
+    candidateKey: candidate.candidateKey,
+    id: candidate.id,
+    questionId: candidate.questionId,
+    mode: candidate.mode,
+    status: 'CLOSED',
+    correctCount: candidate.correctCount,
+    nextTime: candidate.nextTime,
+    createdAt: candidate.createdAt,
+    closedAt,
+  };
+
+  try {
+    await dbHelper.put({
+      TableName: HISTORIES_TABLE_NAME,
+      Item: historyItem,
+      ConditionExpression: 'attribute_not_exists(#subject) AND attribute_not_exists(#candidateKey)',
+      ExpressionAttributeNames: {
+        '#subject': 'subject',
+        '#candidateKey': 'candidateKey',
+      },
+    });
+  } catch (e: unknown) {
+    const name = (e as { name?: string } | null)?.name;
+    if (name !== 'ConditionalCheckFailedException') {
+      throw e;
+    }
+  }
+
+  try {
+    await dbHelper.delete({
+      TableName: CANDIDATES_TABLE_NAME,
+      Key: { subject: params.subject, candidateKey: params.candidateKey },
+      ...(params.expectedExamId
+        ? {
+            ConditionExpression: '#examId = :examId',
+            ExpressionAttributeNames: { '#examId': 'examId' },
+            ExpressionAttributeValues: { ':examId': params.expectedExamId },
+          }
+        : {}),
+    });
+  } catch (e: unknown) {
+    const name = (e as { name?: string } | null)?.name;
+    if (name !== 'ConditionalCheckFailedException') {
+      throw e;
+    }
+  }
 };

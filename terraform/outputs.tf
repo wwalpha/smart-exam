@@ -24,6 +24,7 @@ output "dynamodb_table_names" {
     material_questions     = aws_dynamodb_table.material_questions.name
     word_master            = aws_dynamodb_table.word_master.name
     review_test_candidates = aws_dynamodb_table.exam_candidates.name
+    exam_histories         = aws_dynamodb_table.exam_histories.name
     review_tests           = aws_dynamodb_table.exam.name
     exam_details           = aws_dynamodb_table.exam_details.name
   }

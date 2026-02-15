@@ -162,3 +162,40 @@ resource "aws_dynamodb_table" "exam_details" {
     type = "N"
   }
 }
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for exam histories.
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "exam_histories" {
+  name         = "${var.project_name}_exam_histories"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "subject"
+  range_key    = "candidateKey"
+
+  attribute {
+    name = "subject"
+    type = "S"
+  }
+
+  attribute {
+    name = "candidateKey"
+    type = "S"
+  }
+
+  attribute {
+    name = "questionId"
+    type = "S"
+  }
+
+  attribute {
+    name = "createdAt"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "gsi_question_id_created_at"
+    hash_key        = "questionId"
+    range_key       = "createdAt"
+    projection_type = "ALL"
+  }
+}
