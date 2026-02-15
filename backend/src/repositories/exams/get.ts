@@ -9,7 +9,9 @@ const TABLE_NAME = ENV.TABLE_EXAMS;
 export const get = async (testId: string): Promise<ExamTable | null> => {
   // 主キー testId で対象レコードを取得する
   const result = await dbHelper.get<ExamTable>({
+    // 取得対象テーブル
     TableName: TABLE_NAME,
+    // 取得対象レコードの主キー
     Key: { testId },
   });
   // 見つからない場合は null を返す

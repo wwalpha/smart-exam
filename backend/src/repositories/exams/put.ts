@@ -9,7 +9,9 @@ const TABLE_NAME = ENV.TABLE_EXAMS;
 export const put = async (item: ExamTable): Promise<void> => {
   // 指定テーブルへレコードを書き込む
   await dbHelper.put({
+    // 書き込み先テーブル
     TableName: TABLE_NAME,
+    // 保存する試験レコード本体
     Item: item,
   });
 };

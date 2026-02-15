@@ -10,10 +10,16 @@ export { get, put, scanAll, updateStatus, updatePdfS3Key, remove };
 
 // exams リポジトリの公開APIを1オブジェクトに集約する
 export const ExamsRepository = {
+  // testId で単一試験を取得する
   get,
+  // 試験レコードを保存する
   put,
+  // 試験レコードを全件取得する
   scanAll,
+  // 試験ステータスを更新する
   updateStatus,
+  // PDF保存キーを更新する
   updatePdfS3Key,
+  // 既存利用箇所向けに delete 名で削除関数を公開する
   delete: remove,
 };

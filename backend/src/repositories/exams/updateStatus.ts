@@ -9,11 +9,17 @@ const TABLE_NAME = ENV.TABLE_EXAMS;
 export const updateStatus = async (testId: string, status: ExamTable['status']): Promise<ExamTable | null> => {
   // 主キー testId を条件に status 属性を書き換える
   const result = await dbHelper.update({
+    // 更新対象テーブル
     TableName: TABLE_NAME,
+    // 更新対象レコードの主キー
     Key: { testId },
+    // status 属性を新しい値へ更新する
     UpdateExpression: 'SET #status = :status',
+    // 更新式で使う属性名のプレースホルダ
     ExpressionAttributeNames: { '#status': 'status' },
+    // 更新式で使う属性値のプレースホルダ
     ExpressionAttributeValues: { ':status': status },
+    // 更新後のレコードを返却させる
     ReturnValues: 'ALL_NEW',
   });
 

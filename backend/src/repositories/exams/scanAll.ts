@@ -9,6 +9,7 @@ const TABLE_NAME = ENV.TABLE_EXAMS;
 export const scanAll = async (): Promise<ExamTable[]> => {
   // テーブル全体をスキャンする
   const result = await dbHelper.scan<ExamTable>({
+    // スキャン対象テーブル
     TableName: TABLE_NAME,
   });
   // 結果が空の場合は空配列を返す
