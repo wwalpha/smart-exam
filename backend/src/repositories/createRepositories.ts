@@ -1,12 +1,12 @@
 // Module: createRepositories responsibilities.
 
-import { MaterialsRepository } from '@/repositories/MaterialsRepository';
-import { QuestionsRepository } from '@/repositories/QuestionsRepository';
-import { ExamCandidatesRepository } from '@/repositories/ExamCandidatesRepository';
+import { MaterialsRepository } from '@/repositories/materials';
+import { QuestionsRepository } from '@/repositories/questions';
+import { ExamCandidatesRepository } from '@/repositories/examCandidates';
 import { ExamsRepository } from '@/repositories/exams';
-import { WordMasterRepository } from '@/repositories/WordMasterRepository';
+import { WordMasterRepository } from '@/repositories/wordMaster';
 import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
-import { S3Repository } from '@/repositories/S3Repository';
+import { S3Repository } from '@/repositories/s3';
 
 /** Type definition for Repositories. */
 export type Repositories = {
