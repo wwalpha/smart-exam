@@ -1,11 +1,11 @@
 import type { SubjectId } from './subject';
 
-export const REVIEW_MODE = {
+export const EXAM_MODE = {
   QUESTION: 'QUESTION',
   KANJI: 'KANJI',
 } as const;
 
-export type ReviewMode = (typeof REVIEW_MODE)[keyof typeof REVIEW_MODE];
+export type ReviewMode = (typeof EXAM_MODE)[keyof typeof EXAM_MODE];
 
 export type ReviewTargetType = ReviewMode;
 

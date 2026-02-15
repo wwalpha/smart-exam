@@ -1,6 +1,6 @@
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { ExamsService } from './createExamsService';
+import type { ExamsService } from './index';
 
 // 内部で利用する補助処理を定義する
 const deleteExamImpl = async (repositories: Repositories, testId: string): Promise<boolean> => {

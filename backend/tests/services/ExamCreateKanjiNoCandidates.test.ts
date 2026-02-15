@@ -4,7 +4,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 
 describe('createExam (KANJI) with no candidates', () => {
   it('returns an empty exam instead of throwing 400', async () => {
-    const { createCreateExam } = await import('@/services/exam/createExam');
+    const { createCreateExam } = await import('@/services/exam');
 
     const repositories = {
       examCandidates: {

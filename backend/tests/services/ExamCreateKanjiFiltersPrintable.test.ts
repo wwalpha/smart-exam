@@ -8,7 +8,7 @@ describe('ExamsService.createExam (KANJI)', () => {
   it('filters out non-printable candidates before selecting', async () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
-    const { createExamsService } = await import('@/services/exam/createExamsService');
+    const { createExamsService } = await import('@/services/exam');
 
     const repositories = {
       examCandidates: {

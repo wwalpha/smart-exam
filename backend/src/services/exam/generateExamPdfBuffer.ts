@@ -1,4 +1,4 @@
-import type { ExamsService } from './createExamsService';
+import type { ExamsService } from './index';
 import { ExamPdfService } from './examPdfService';
 
 // 内部で利用する補助処理を定義する

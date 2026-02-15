@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { ExamPdfService } from '../src/services/exam/examPdfService.ts';
 import type { ExamDetail } from '@smart-exam/api-types';
 
-const REVIEW_MODE = {
+const EXAM_MODE = {
   QUESTION: 'QUESTION',
   KANJI: 'KANJI',
 } as const;
@@ -35,7 +35,7 @@ async function main(): Promise<void> {
     id: testId,
     testId,
     subject: '1',
-    mode: REVIEW_MODE.QUESTION,
+    mode: EXAM_MODE.QUESTION,
     createdDate: ymd,
     status: 'IN_PROGRESS' as const,
     pdf: {
@@ -49,7 +49,7 @@ async function main(): Promise<void> {
       id: `item-${i + 1}`,
       itemId: `item-${i + 1}`,
       testId,
-      targetType: REVIEW_MODE.QUESTION,
+      targetType: EXAM_MODE.QUESTION,
       targetId: `q-${i + 1}`,
       questionText: text,
     })),

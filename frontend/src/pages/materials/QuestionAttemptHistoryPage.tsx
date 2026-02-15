@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useQuestionAttemptHistory } from '@/hooks/materials';
 import { useQuestionAttemptHistoryPage } from '@/hooks/materials';
 import { useReviewCandidateForTarget } from '@/hooks/review';
-import { REVIEW_MODE } from '@smart-exam/api-types';
+import { EXAM_MODE } from '@smart-exam/api-types';
 
 export const QuestionAttemptHistoryPage = () => {
   const { materialId, material, sortedQuestions, status, initialQuestionId } = useQuestionAttemptHistoryPage();
@@ -25,7 +25,7 @@ export const QuestionAttemptHistoryPage = () => {
   }, [initialQuestionId, history]);
 
   const candidateState = useReviewCandidateForTarget({
-    mode: REVIEW_MODE.QUESTION,
+    mode: EXAM_MODE.QUESTION,
     targetId: history.selectedQuestion?.id ?? null,
     subject: material?.subject ?? null,
     enabled: history.isOpen,

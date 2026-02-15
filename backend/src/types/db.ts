@@ -2,7 +2,6 @@
 
 import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 
-
 /**
  * 教材テーブル
  */
@@ -115,7 +114,7 @@ export interface ExamCandidateTable {
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
-  /** ロック: 紐付けられた復習テストID */
+  /** ロック: 紐付けられたテストID */
   testId?: string;
   /** 作成日時 */
   createdAt: string;

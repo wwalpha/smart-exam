@@ -8,7 +8,7 @@ describe('createExam (KANJI) autofill printable fields', () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
 
-    const { createCreateExam } = await import('@/services/exam/createExam');
+    const { createCreateExam } = await import('@/services/exam');
 
     const wordId = 'w-draft';
     const question = '彼はけいせいを説明した。';

@@ -1,6 +1,6 @@
 import type { SearchExamsResponse } from '@smart-exam/api-types';
 
-import type { ExamsService } from './createExamsService';
+import type { ExamsService } from './index';
 
 // 内部で利用する補助処理を定義する
 const searchExamsImpl = async (

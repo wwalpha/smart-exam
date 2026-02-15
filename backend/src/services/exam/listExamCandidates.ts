@@ -3,7 +3,7 @@ import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable } from '@/types/db';
 
-import type { ExamsService } from './createExamsService';
+import type { ExamsService } from './index';
 
 // 内部で利用する補助処理を定義する
 const listExamCandidatesImpl = async (

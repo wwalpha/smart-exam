@@ -2,7 +2,7 @@ import type { ExamDetail } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { ExamsService } from './createExamsService';
+import type { ExamsService } from './index';
 import { toApiExam } from './internal';
 
 // 内部で利用する補助処理を定義する

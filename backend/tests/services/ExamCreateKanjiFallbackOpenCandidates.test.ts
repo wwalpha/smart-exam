@@ -8,7 +8,7 @@ describe('createExam (KANJI) fallback open candidates', () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
 
-    const { createCreateExam } = await import('@/services/exam/createExam');
+    const { createCreateExam } = await import('@/services/exam');
 
     const wordId = 'w-fallback';
     const repositories = {

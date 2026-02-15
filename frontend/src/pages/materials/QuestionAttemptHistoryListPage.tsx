@@ -8,23 +8,23 @@ import { Label } from '@/components/ui/label';
 import { useReviewAttemptHistoryDialog, useReviewTargets, useReviewCandidateForTarget } from '@/hooks/review';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
-import { REVIEW_MODE } from '@smart-exam/api-types';
+import { EXAM_MODE } from '@smart-exam/api-types';
 
 export const QuestionAttemptHistoryListPage = () => {
-  const { items, isLoading, error, form, submit } = useReviewTargets({ mode: REVIEW_MODE.QUESTION });
+  const { items, isLoading, error, form, submit } = useReviewTargets({ mode: EXAM_MODE.QUESTION });
   const {
     register,
     formState: { errors },
   } = form;
 
   const targets = useMemo(() => {
-    return items.filter((x) => x.targetType === REVIEW_MODE.QUESTION);
+    return items.filter((x) => x.targetType === EXAM_MODE.QUESTION);
   }, [items]);
 
   const dialog = useReviewAttemptHistoryDialog();
 
   const candidateState = useReviewCandidateForTarget({
-    mode: REVIEW_MODE.QUESTION,
+    mode: EXAM_MODE.QUESTION,
     targetId: dialog.selected?.targetId ?? null,
     subject: dialog.selected?.subject ?? null,
     enabled: dialog.isOpen,
@@ -97,7 +97,7 @@ export const QuestionAttemptHistoryListPage = () => {
                     className="h-8"
                     onClick={() => {
                       const title = t.canonicalKey ?? t.questionText ?? t.displayLabel ?? t.targetId;
-                        void dialog.open({ targetId: t.targetId, subject: t.subject, title });
+                      void dialog.open({ targetId: t.targetId, subject: t.subject, title });
                     }}>
                     履歴
                   </Button>
@@ -108,9 +108,7 @@ export const QuestionAttemptHistoryListPage = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div
-                    className="truncate"
-                    title={`${t.materialName ?? ''} ${t.materialDate ?? ''}`.trim()}>
+                  <div className="truncate" title={`${t.materialName ?? ''} ${t.materialDate ?? ''}`.trim()}>
                     {[t.materialName, t.materialDate].filter(Boolean).join(' ')}
                   </div>
                 </TableCell>

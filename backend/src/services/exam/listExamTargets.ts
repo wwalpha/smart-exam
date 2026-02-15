@@ -3,7 +3,7 @@ import type { ExamTarget } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamTable, WordMasterTable } from '@/types/db';
 
-import type { ExamsService } from './createExamsService';
+import type { ExamsService } from './index';
 import { sortTargets, toReviewTargetKey } from './internal';
 
 const listExamTargetsImpl: ExamsService['listExamTargets'] = async function listExamTargetsImpl(

@@ -1,6 +1,114 @@
-// 試験サービスの生成関数と型を再エクスポートする
-export { createExamsService } from './createExamsService';
-export type { ExamsService } from './createExamsService.types';
+import type {
+  CreateExamRequest,
+  ReviewMode,
+  Exam,
+  ExamDetail,
+  ExamTarget,
+  SearchExamsRequest,
+  SearchExamsResponse,
+  SubjectId,
+  SubmitExamResultsRequest,
+  UpdateExamStatusRequest,
+} from '@smart-exam/api-types';
 
-// 既存参照向けに別名のサービス生成関数を再エクスポートする
-export { createExamsService as examsService } from './createExamsService';
+import type { Repositories } from '@/repositories/createRepositories';
+import type { ExamCandidateTable } from '@/types/db';
+
+import type { CreateExamDeps } from './createExam.types';
+import { createKanjiExam } from './createExamKanji';
+import { createQuestionExam } from './createExamQuestion';
+import { createDeleteExam } from './deleteExam';
+import { createGenerateExamPdfBuffer } from './generateExamPdfBuffer';
+import { createGetExam } from './getExam';
+import { createGetExamPdfUrl } from './getExamPdfUrl';
+import { createListExamCandidates } from './listExamCandidates';
+import { createListExamTargets } from './listExamTargets';
+import { createListExams } from './listExams';
+import { createSearchExams } from './searchExams';
+import { createSubmitExamResults } from './submitExamResults';
+import { createUpdateExamStatus } from './updateExamStatus';
+
+export type ExamsService = {
+  listExams: () => Promise<Exam[]>;
+  searchExams: (params: SearchExamsRequest) => Promise<SearchExamsResponse>;
+  createExam: (req: CreateExamRequest) => Promise<Exam>;
+  getExam: (testId: string) => Promise<ExamDetail | null>;
+  getExamPdfUrl: (testId: string, params?: { download?: boolean }) => Promise<{ url: string } | null>;
+  generateExamPdfBuffer: (testId: string, options?: { includeGenerated?: boolean }) => Promise<Buffer | null>;
+  updateExamStatus: (testId: string, req: UpdateExamStatusRequest) => Promise<Exam | null>;
+  submitExamResults: (testId: string, req: SubmitExamResultsRequest) => Promise<boolean>;
+  deleteExam: (testId: string) => Promise<boolean>;
+  listExamTargets: (params: {
+    mode: ReviewMode;
+    fromYmd: string;
+    toYmd: string;
+    subject?: SubjectId;
+  }) => Promise<ExamTarget[]>;
+  listExamCandidates: (params: { subject?: SubjectId; mode?: ReviewMode }) => Promise<ExamCandidateTable[]>;
+};
+
+// 内部で利用する処理を定義する
+const createExamDispatcher = async (deps: CreateExamDeps, req: CreateExamRequest): Promise<Exam> => {
+  // 条件に応じて処理を分岐する
+  if (req.mode === 'KANJI') {
+    // 処理結果を呼び出し元へ返す
+    return createKanjiExam(deps, req);
+  }
+
+  // 処理結果を呼び出し元へ返す
+  return createQuestionExam(deps, req);
+};
+
+// 公開する処理を定義する
+export const createCreateExam = (deps: CreateExamDeps): ExamsService['createExam'] => {
+  // 処理結果を呼び出し元へ返す
+  return createExamDispatcher.bind(null, deps);
+};
+
+// 公開する処理を定義する
+export const createExamsService = (repositories: Repositories): ExamsService => {
+  // 内部で利用する処理を定義する
+  const listExams = createListExams(repositories);
+  // 内部で利用する処理を定義する
+  const searchExams = createSearchExams({ listExams });
+
+  // 内部で利用する処理を定義する
+  const deleteExam = createDeleteExam(repositories);
+  // 内部で利用する処理を定義する
+  const getExam = createGetExam(repositories);
+
+  // 内部で利用する処理を定義する
+  const createExam = createCreateExam({ repositories, getExam, deleteExam });
+
+  // 内部で利用する処理を定義する
+  const listExamTargets = createListExamTargets(repositories);
+  // 内部で利用する処理を定義する
+  const listExamCandidates = createListExamCandidates(repositories);
+  // 内部で利用する処理を定義する
+  const updateExamStatus = createUpdateExamStatus(repositories);
+  // 内部で利用する処理を定義する
+  const submitExamResults = createSubmitExamResults(repositories);
+
+  // 内部で利用する処理を定義する
+  const getExamPdfUrl = createGetExamPdfUrl({ repositories, getExam });
+  // 内部で利用する処理を定義する
+  const generateExamPdfBuffer = createGenerateExamPdfBuffer({ getExam });
+
+  // 処理結果を呼び出し元へ返す
+  return {
+    listExams,
+    searchExams,
+    createExam,
+    getExam,
+    getExamPdfUrl,
+    generateExamPdfBuffer,
+    updateExamStatus,
+    submitExamResults,
+    deleteExam,
+    listExamTargets,
+    listExamCandidates,
+  };
+};
+
+// 公開する処理を定義する
+export const examsService = createExamsService;
