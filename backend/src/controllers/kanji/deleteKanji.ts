@@ -4,7 +4,7 @@ import type { ParsedQs } from 'qs';
 import type { DeleteKanjiParams, DeleteKanjiResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-export const deleteKanjiController = (
+export const deleteKanji = (
   services: Services,
 ): AsyncHandler<DeleteKanjiParams, DeleteKanjiResponse | { error: string }, Record<string, never>, ParsedQs> => {
   return async (req, res) => {

@@ -29,8 +29,8 @@ import { ExamKanjiPdfPage } from '@/pages/review/ExamKanjiPdfPage';
 import { KanjiListPage } from '@/pages/kanji/KanjiListPage';
 import { KanjiCreatePage } from '@/pages/kanji/KanjiCreatePage';
 import { KanjiImportPage } from '@/pages/kanji/KanjiImportPage';
-import { KanjiAttemptHistoryListPage } from '@/pages/kanji/KanjiAttemptHistoryListPage';
-import { KanjiAttemptHistoryPage } from '@/pages/kanji/KanjiAttemptHistoryPage';
+// import { KanjiAttemptHistoryListPage } from '@/pages/kanji/KanjiAttemptHistoryListPage';
+// import { KanjiAttemptHistoryPage } from '@/pages/kanji/KanjiAttemptHistoryPage';
 
 // Search
 import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
@@ -122,8 +122,8 @@ export const App = () => {
         <Route path="/kanji" element={<KanjiListPage />} />
         <Route path="/kanji/new" element={<KanjiCreatePage />} />
         <Route path="/kanji/import" element={<KanjiImportPage />} />
-        <Route path="/kanji/attempts" element={<KanjiAttemptHistoryListPage />} />
-        <Route path="/kanji/:id/attempts" element={<KanjiAttemptHistoryPage />} />
+        {/* <Route path="/kanji/attempts" element={<KanjiAttemptHistoryListPage />} />
+        <Route path="/kanji/:id/attempts" element={<KanjiAttemptHistoryPage />} /> */}
         <Route path="/kanji/:id" element={<KanjiCreatePage />} />
 
         {/* Search */}

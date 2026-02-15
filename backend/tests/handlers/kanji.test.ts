@@ -6,30 +6,7 @@ import { Request, Response } from 'express';
 // repository methods are spied per-test
 
 describe('kanji handler', () => {
-  it('listKanji returns items', async () => {
-    const mockItems = [{ id: '1', kanji: '漢' }];
-
-    const services = {
-      kanji: {
-        listKanji: vi.fn().mockResolvedValue(mockItems as unknown),
-      },
-    } as unknown as Services;
-
-    const controller = kanjiController(services);
-
-    const req = {} as Request;
-    const res = {
-      json: vi.fn(),
-      status: vi.fn().mockReturnThis(),
-    } as unknown as Response;
-    const next = vi.fn();
-
-    await controller.listKanji(req, res, next);
-
-    expect(res.json).toHaveBeenCalledWith({ items: mockItems, total: 1 });
-  });
-
-  it('createKanji creates item', async () => {
+  it('registKanji creates item', async () => {
     const mockItem = { id: '1', kanji: '漢' };
 
     const services = {
@@ -49,7 +26,7 @@ describe('kanji handler', () => {
     } as unknown as Response;
     const next = vi.fn();
 
-    await controller.createKanji(req, res, next);
+    await controller.registKanji(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(mockItem);

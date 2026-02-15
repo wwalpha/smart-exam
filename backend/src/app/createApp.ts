@@ -94,8 +94,6 @@ export const createApp = (): express.Express => {
     handleRequest(controllers.materials.getMaterialFile),
   );
 
-  // 漢字データの一覧を取得するAPI
-  app.get('/api/kanji', handleRequest(controllers.kanji.listKanji));
   // 条件を指定して漢字データを検索するAPI
   app.post(
     '/api/kanji/search',
@@ -105,8 +103,8 @@ export const createApp = (): express.Express => {
   // 漢字データを新規作成するAPI
   app.post(
     '/api/kanji',
-    validateBody(controllers.kanji.CreateKanjiBodySchema),
-    handleRequest(controllers.kanji.createKanji),
+    validateBody(controllers.kanji.RegistKanjiBodySchema),
+    handleRequest(controllers.kanji.registKanji),
   );
   // 指定した漢字データの詳細を取得するAPI
   app.get('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(controllers.kanji.getKanji));

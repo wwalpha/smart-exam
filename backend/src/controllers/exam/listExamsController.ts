@@ -1,5 +1,3 @@
-// Module: listExamsController responsibilities.
-
 import type { AsyncHandler } from '@/lib/handler';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
