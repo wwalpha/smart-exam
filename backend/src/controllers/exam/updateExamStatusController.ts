@@ -17,12 +17,12 @@ export const updateExamStatusController = (services: Services) => {
     UpdateExamStatusRequest,
     ParsedQs
   > = async (req, res) => {
-    // パスパラメータから対象テストIDを取得する
-    const { testId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof UpdateExamStatusParamsSchema>;
+    // パスパラメータから対象試験IDを取得する
+    const { examId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof UpdateExamStatusParamsSchema>;
     // バリデーション済みの更新内容を取得する
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateExamStatusBodySchema>;
     // 復習テストのステータスを更新する
-    const item = await services.exams.updateExamStatus(testId, body);
+    const item = await services.exams.updateExamStatus(examId, body);
     // 対象が存在しない場合は404を返す
     if (!item) {
       res.status(404).json({ error: 'Not Found' });

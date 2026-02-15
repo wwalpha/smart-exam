@@ -135,10 +135,30 @@ resource "aws_dynamodb_table" "exam_candidates" {
 resource "aws_dynamodb_table" "exam" {
   name         = "${var.project_name}_exams"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "testId"
+  hash_key     = "examId"
 
   attribute {
-    name = "testId"
+    name = "examId"
     type = "S"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# DynamoDB table for exam details.
+# ----------------------------------------------------------------------------------------------
+resource "aws_dynamodb_table" "exam_details" {
+  name         = "${var.project_name}_exam_details"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "examId"
+  range_key    = "seq"
+
+  attribute {
+    name = "examId"
+    type = "S"
+  }
+
+  attribute {
+    name = "seq"
+    type = "N"
   }
 }

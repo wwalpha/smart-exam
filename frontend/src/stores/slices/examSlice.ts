@@ -236,13 +236,13 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
           const response = await REVIEW_API.updateExamStatusByMode(id, request, mode);
           const currentDetail = getReview().detail;
           const currentList = getReview().list;
-          if (currentDetail && currentDetail.id === id) {
+          if (currentDetail && currentDetail.examId === id) {
             updateReview({ detail: { ...currentDetail, status: response.status } });
           }
 
           if (currentList.length > 0) {
             updateReview({
-              list: currentList.map((item) => (item.id === id ? { ...item, status: response.status } : item)),
+              list: currentList.map((item) => (item.examId === id ? { ...item, status: response.status } : item)),
             });
           }
         },
@@ -258,9 +258,9 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
           await REVIEW_API.deleteExamByMode(id, mode);
 
           const current = getReview();
-          const nextList = current.list.filter((x) => x.id !== id);
+          const nextList = current.list.filter((x) => x.examId !== id);
           const nextTotal = current.total > 0 ? Math.max(0, current.total - 1) : current.total;
-          const nextDetail = current.detail && current.detail.id === id ? null : current.detail;
+          const nextDetail = current.detail && current.detail.examId === id ? null : current.detail;
           updateReview({ list: nextList, total: nextTotal, detail: nextDetail });
         },
         '復習テストの削除に失敗しました。',

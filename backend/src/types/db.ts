@@ -72,8 +72,8 @@ export interface WordMasterTable {
  * 復習テストテーブル
  */
 export interface ExamTable {
-  /** テストID (PK) */
-  testId: string;
+  /** 試験ID (PK) */
+  examId: string;
   /** 科目 */
   subject: SubjectId;
   /** モード */
@@ -82,8 +82,6 @@ export interface ExamTable {
   status: 'IN_PROGRESS' | 'COMPLETED';
   /** 出題数 */
   count: number;
-  /** 出題IDリスト（mode に応じて questionId / wordId を格納） */
-  questions: string[];
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
   /** 提出日 (YYYY-MM-DD) */
@@ -92,6 +90,18 @@ export interface ExamTable {
   pdfS3Key?: string;
   /** 採点結果 */
   results?: { id: string; isCorrect: boolean }[];
+}
+
+/**
+ * 復習テスト詳細テーブル
+ */
+export interface ExamDetailTable {
+  /** 試験ID (PK) */
+  examId: string;
+  /** 明細順序 (SK) */
+  seq: number;
+  /** 対象ID */
+  targetId: string;
 }
 
 /**
@@ -114,8 +124,8 @@ export interface ExamCandidateTable {
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
-  /** ロック: 紐付けられたテストID */
-  testId?: string;
+  /** ロック: 紐付けられた試験ID */
+  examId?: string;
   /** 作成日時 */
   createdAt: string;
   /** クローズ日時 */

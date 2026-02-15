@@ -17,10 +17,10 @@ export const getExamController = (services: Services) => {
     Record<string, never>,
     ParsedQs
   > = async (req, res) => {
-    // パスパラメータから対象テストIDを取得する
-    const { testId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof GetExamParamsSchema>;
+    // パスパラメータから対象試験IDを取得する
+    const { examId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof GetExamParamsSchema>;
     // 指定した復習テストを取得する
-    const item = await services.exams.getExam(testId);
+    const item = await services.exams.getExam(examId);
     // 対象が存在しない場合は404を返す
     if (!item) {
       res.status(404).json({ error: 'Not Found' });

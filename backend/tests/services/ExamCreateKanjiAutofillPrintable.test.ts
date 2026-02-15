@@ -55,27 +55,28 @@ describe('createExam (KANJI) autofill printable fields', () => {
       exams: {
         put: vi.fn().mockResolvedValue(undefined),
       },
+      examDetails: {
+        putMany: vi.fn().mockResolvedValue(undefined),
+      },
       s3: {
         putObject: vi.fn().mockResolvedValue(undefined),
       },
     } as unknown as Repositories;
 
     const getExam = vi.fn().mockResolvedValue({
-      id: 't1',
-      testId: 't1',
+      examId: 't1',
       subject: '1',
       mode: 'KANJI',
       createdDate: '2026-02-14',
       status: 'IN_PROGRESS',
       pdf: { url: '/api/exam/kanji/t1/pdf', downloadUrl: '/api/exam/kanji/t1/pdf?download=1' },
       count: 1,
-      questions: [wordId],
       results: [],
       items: [
         {
           id: 'item-1',
           itemId: 'item-1',
-          testId: 't1',
+          examId: 't1',
           targetType: 'KANJI',
           targetId: wordId,
           questionText: question,

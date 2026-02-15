@@ -20,7 +20,7 @@ export const createApp = (): express.Express => {
   const MaterialFileParamsSchema = z.object({ materialId: z.string().min(1), fileId: z.string().min(1) });
   const KanjiIdParamsSchema = z.object({ kanjiId: z.string().min(1) });
   const QuestionIdParamsSchema = z.object({ questionId: z.string().min(1) });
-  const TestIdParamsSchema = z.object({ testId: z.string().min(1) });
+  const ExamIdParamsSchema = z.object({ examId: z.string().min(1) });
 
   const app = express();
   app.use(cors());
@@ -227,66 +227,66 @@ export const createApp = (): express.Express => {
 
   // 指定した漢字テストの詳細を取得するAPI
   app.get(
-    '/api/exam/kanji/:testId',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/kanji/:examId',
+    validateParams(ExamIdParamsSchema),
     handleRequest(controllers.exams.kanji.getTest),
   );
   // 指定した漢字テストのPDF情報を取得するAPI
   app.get(
-    '/api/exam/kanji/:testId/pdf',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/kanji/:examId/pdf',
+    validateParams(ExamIdParamsSchema),
     handleRequest(controllers.exams.kanji.getTestPdf),
   );
   // 指定した漢字テストのステータスを更新するAPI
   app.patch(
-    '/api/exam/kanji/:testId',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/kanji/:examId',
+    validateParams(ExamIdParamsSchema),
     validateBody(controllers.exams.kanji.UpdateExamStatusBodySchema),
     handleRequest(controllers.exams.kanji.updateTestStatus),
   );
   // 指定した漢字テストを削除するAPI
   app.delete(
-    '/api/exam/kanji/:testId',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/kanji/:examId',
+    validateParams(ExamIdParamsSchema),
     handleRequest(controllers.exams.kanji.deleteTest),
   );
   // 指定した漢字テストの結果を登録するAPI
   app.post(
-    '/api/exam/kanji/:testId/results',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/kanji/:examId/results',
+    validateParams(ExamIdParamsSchema),
     validateBody(controllers.exams.kanji.SubmitExamResultsBodySchema),
     handleRequest(controllers.exams.kanji.submitTestResults),
   );
 
   // 指定した問題テストの詳細を取得するAPI
   app.get(
-    '/api/exam/question/:testId',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/question/:examId',
+    validateParams(ExamIdParamsSchema),
     handleRequest(controllers.exams.question.getTest),
   );
   // 指定した問題テストのPDF情報を取得するAPI
   app.get(
-    '/api/exam/question/:testId/pdf',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/question/:examId/pdf',
+    validateParams(ExamIdParamsSchema),
     handleRequest(controllers.exams.question.getTestPdf),
   );
   // 指定した問題テストのステータスを更新するAPI
   app.patch(
-    '/api/exam/question/:testId',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/question/:examId',
+    validateParams(ExamIdParamsSchema),
     validateBody(controllers.exams.question.UpdateExamStatusBodySchema),
     handleRequest(controllers.exams.question.updateTestStatus),
   );
   // 指定した問題テストを削除するAPI
   app.delete(
-    '/api/exam/question/:testId',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/question/:examId',
+    validateParams(ExamIdParamsSchema),
     handleRequest(controllers.exams.question.deleteTest),
   );
   // 指定した問題テストの結果を登録するAPI
   app.post(
-    '/api/exam/question/:testId/results',
-    validateParams(TestIdParamsSchema),
+    '/api/exam/question/:examId/results',
+    validateParams(ExamIdParamsSchema),
     validateBody(controllers.exams.question.SubmitExamResultsBodySchema),
     handleRequest(controllers.exams.question.submitTestResults),
   );

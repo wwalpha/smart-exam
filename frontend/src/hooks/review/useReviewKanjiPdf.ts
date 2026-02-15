@@ -14,9 +14,9 @@ export const useReviewKanjiPdf = () => {
 
   useEffect(() => {
     if (!id) return;
-    if (currentTest?.id === id || currentTest?.testId === id) return;
+    if (currentTest?.examId === id) return;
     fetchExam(id, 'KANJI');
-  }, [id, fetchExam, currentTest?.id, currentTest?.testId]);
+  }, [id, fetchExam, currentTest?.examId]);
 
   const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/kanji/${id}/pdf` : '');
 

@@ -31,6 +31,17 @@ const deleteMaterialImpl = async (repositories: Repositories, materialId: string
     // 内部で利用する処理を定義する
     const tests = await repositories.exams.scanAll();
 
+    const detailsByExamId = new Map<string, string[]>();
+    await Promise.all(
+      tests.map(async (test) => {
+        const details = await repositories.examDetails.listByExamId(test.examId);
+        detailsByExamId.set(
+          test.examId,
+          details.map((detail) => detail.targetId),
+        );
+      }),
+    );
+
     // 対象データを順番に処理する
     for (const test of tests) {
       // 条件に応じて処理を分岐する
@@ -38,20 +49,22 @@ const deleteMaterialImpl = async (repositories: Repositories, materialId: string
 
       // 内部で利用する処理を定義する
       const hasAny =
-        test.questions?.some((qid) => deletedQuestionIds.has(qid)) ||
+        (detailsByExamId.get(test.examId) ?? []).some((targetId) => deletedQuestionIds.has(targetId)) ||
         test.results?.some((r) => deletedQuestionIds.has(r.id));
       // 条件に応じて処理を分岐する
       if (!hasAny) continue;
 
       // 内部で利用する処理を定義する
-      const nextQuestions = (test.questions ?? []).filter((qid) => !deletedQuestionIds.has(qid));
+      const nextQuestions = (detailsByExamId.get(test.examId) ?? []).filter((qid) => !deletedQuestionIds.has(qid));
       // 内部で利用する処理を定義する
       const nextResults = test.results ? test.results.filter((r) => !deletedQuestionIds.has(r.id)) : undefined;
+
+      await repositories.examDetails.deleteByExamId(test.examId);
+      await repositories.examDetails.putMany(test.examId, nextQuestions);
 
       // 非同期処理の完了を待つ
       await repositories.exams.put({
         ...test,
-        questions: nextQuestions,
         count: nextQuestions.length,
         results: nextResults,
       });

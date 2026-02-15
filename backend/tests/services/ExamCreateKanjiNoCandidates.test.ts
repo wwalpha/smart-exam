@@ -21,6 +21,9 @@ describe('createExam (KANJI) with no candidates', () => {
       exams: {
         put: vi.fn().mockResolvedValue(undefined),
       },
+      examDetails: {
+        putMany: vi.fn().mockResolvedValue(undefined),
+      },
       s3: {
         putObject: vi.fn().mockResolvedValue(undefined),
       },
@@ -34,7 +37,6 @@ describe('createExam (KANJI) with no candidates', () => {
 
     expect(result.mode).toBe('KANJI');
     expect(result.count).toBe(0);
-    expect(result.questions).toEqual([]);
     expect(result.status).toBe('IN_PROGRESS');
 
     expect(repositories.examCandidates.listDueCandidates).toHaveBeenCalledTimes(1);

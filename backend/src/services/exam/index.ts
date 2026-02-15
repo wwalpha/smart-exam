@@ -32,12 +32,12 @@ export type ExamsService = {
   listExams: () => Promise<Exam[]>;
   searchExams: (params: SearchExamsRequest) => Promise<SearchExamsResponse>;
   createExam: (req: CreateExamRequest) => Promise<Exam>;
-  getExam: (testId: string) => Promise<ExamDetail | null>;
-  getExamPdfUrl: (testId: string, params?: { download?: boolean }) => Promise<{ url: string } | null>;
-  generateExamPdfBuffer: (testId: string, options?: { includeGenerated?: boolean }) => Promise<Buffer | null>;
-  updateExamStatus: (testId: string, req: UpdateExamStatusRequest) => Promise<Exam | null>;
-  submitExamResults: (testId: string, req: SubmitExamResultsRequest) => Promise<boolean>;
-  deleteExam: (testId: string) => Promise<boolean>;
+  getExam: (examId: string) => Promise<ExamDetail | null>;
+  getExamPdfUrl: (examId: string, params?: { download?: boolean }) => Promise<{ url: string } | null>;
+  generateExamPdfBuffer: (examId: string, options?: { includeGenerated?: boolean }) => Promise<Buffer | null>;
+  updateExamStatus: (examId: string, req: UpdateExamStatusRequest) => Promise<Exam | null>;
+  submitExamResults: (examId: string, req: SubmitExamResultsRequest) => Promise<boolean>;
+  deleteExam: (examId: string) => Promise<boolean>;
   listExamTargets: (params: {
     mode: ReviewMode;
     fromYmd: string;

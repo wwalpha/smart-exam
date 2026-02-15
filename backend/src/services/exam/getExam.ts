@@ -6,11 +6,14 @@ import type { ExamsService } from './index';
 import { toApiExam } from './internal';
 
 // 内部で利用する補助処理を定義する
-const getExamImpl = async (repositories: Repositories, testId: string): Promise<ExamDetail | null> => {
+const getExamImpl = async (repositories: Repositories, examId: string): Promise<ExamDetail | null> => {
   // 非同期で必要な値を取得する
-  const test = await repositories.exams.get(testId);
+  const test = await repositories.exams.get(examId);
   // 条件に応じて処理を分岐する
   if (!test) return null;
+
+  const details = await repositories.examDetails.listByExamId(examId);
+  const targetIds = details.map((detail) => detail.targetId);
 
   // 処理で使う値を準備する
   const resultByTargetId = new Map((test.results ?? []).map((r) => [r.id, r.isCorrect] as const));
@@ -18,7 +21,7 @@ const getExamImpl = async (repositories: Repositories, testId: string): Promise<
   // 条件に応じて処理を分岐する
   if (test.mode === 'KANJI') {
     // 非同期で必要な値を取得する
-    const words = await Promise.all(test.questions.map((id) => repositories.wordMaster.get(id)));
+    const words = await Promise.all(targetIds.map((id) => repositories.wordMaster.get(id)));
     // 処理で使う値を準備する
     const byId = new Map(
       words.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w.wordId, w] as const),
@@ -27,7 +30,7 @@ const getExamImpl = async (repositories: Repositories, testId: string): Promise<
     // 処理結果を呼び出し元へ返す
     return {
       ...toApiExam(test),
-      items: test.questions.map((targetId) => {
+      items: targetIds.map((targetId) => {
         // 処理で使う値を準備する
         const w = byId.get(targetId);
         // 処理で使う値を準備する
@@ -36,7 +39,7 @@ const getExamImpl = async (repositories: Repositories, testId: string): Promise<
         return {
           id: targetId,
           itemId: targetId,
-          testId,
+          examId,
           targetType: 'KANJI',
           targetId,
           kanji: w?.answer,
@@ -52,7 +55,7 @@ const getExamImpl = async (repositories: Repositories, testId: string): Promise<
   }
 
   // 非同期で必要な値を取得する
-  const questionRows = await Promise.all(test.questions.map((qid) => repositories.questions.get(qid)));
+  const questionRows = await Promise.all(targetIds.map((qid) => repositories.questions.get(qid)));
   // 処理で使う値を準備する
   const qById = new Map(
     questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const),
@@ -70,7 +73,7 @@ const getExamImpl = async (repositories: Repositories, testId: string): Promise<
   // 処理結果を呼び出し元へ返す
   return {
     ...toApiExam(test),
-    items: test.questions.map((targetId) => {
+    items: targetIds.map((targetId) => {
       // 処理で使う値を準備する
       const q = qById.get(targetId);
       // 処理で使う値を準備する
@@ -82,7 +85,7 @@ const getExamImpl = async (repositories: Repositories, testId: string): Promise<
       return {
         id: targetId,
         itemId: targetId,
-        testId,
+        examId,
         targetType: 'QUESTION',
         targetId,
         displayLabel: q?.canonicalKey,

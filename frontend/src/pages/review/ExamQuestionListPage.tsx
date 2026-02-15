@@ -86,11 +86,11 @@ export const ExamQuestionListPage = () => {
           </TableHeader>
           <TableBody>
             {reviews.map((test) => (
-              <TableRow key={test.id}>
+              <TableRow key={test.examId}>
                 <TableCell>
                   <div className="flex gap-2">
                     <Button asChild variant="ghost" size="icon" aria-label="詳細">
-                      <Link to={`${basePath}/${test.id}`}>
+                      <Link to={`${basePath}/${test.examId}`}>
                         <FileText className="h-4 w-4" />
                       </Link>
                     </Button>
@@ -100,7 +100,7 @@ export const ExamQuestionListPage = () => {
                       size="icon"
                       aria-label="削除"
                       className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => remove(test.id)}>
+                      onClick={() => remove(test.examId)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -109,7 +109,7 @@ export const ExamQuestionListPage = () => {
                   <Badge variant="outline">{SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                 </TableCell>
                 <TableCell>
-                  <Link to={`${basePath}/${test.id}`} className="font-medium hover:underline">
+                  <Link to={`${basePath}/${test.examId}`} className="font-medium hover:underline">
                     {formatYmdSlash(test.createdDate)}
                   </Link>
                 </TableCell>

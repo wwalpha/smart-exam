@@ -34,17 +34,17 @@ export type CreateQuestionParams = {
   materialId: string;
 };
 
-/** `GET /exams/:testId` */
+/** `GET /api/exam/:examId` */
 export type GetExamParams = {
-  testId: string;
+  examId: string;
 };
 
-/** `PATCH /exams/:testId` */
+/** `PATCH /api/exam/:examId` */
 export type UpdateExamStatusParams = {
-  testId: string;
+  examId: string;
 };
 
-/** `DELETE /exams/:testId` */
+/** `DELETE /api/exam/:examId` */
 export type DeleteExamParams = {
-  testId: string;
+  examId: string;
 };

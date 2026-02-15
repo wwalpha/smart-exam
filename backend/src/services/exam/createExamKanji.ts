@@ -38,13 +38,13 @@ const listOpenCandidates = async (deps: CreateExamDeps, params: CandidateListPar
 // 内部で利用する処理を定義する
 const lockCandidate = async (
   deps: CreateExamDeps,
-  params: { subject: SubjectId; candidateKey: string; testId: string },
+  params: { subject: SubjectId; candidateKey: string; examId: string },
 ): Promise<void> => {
   // 非同期処理の完了を待つ
   await deps.repositories.examCandidates.lockCandidateIfUnlocked({
     subject: params.subject,
     candidateKey: params.candidateKey,
-    testId: params.testId,
+    examId: params.examId,
     status: 'LOCKED',
   });
 };
@@ -193,7 +193,7 @@ export const buildKanjiCandidates = async (
 // 公開する処理を定義する
 export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamRequest): Promise<Exam> => {
   // 内部で利用する処理を定義する
-  const testId = createUuid();
+  const examId = createUuid();
   // 内部で利用する処理を定義する
   const createdDate = DateUtils.todayYmd();
 
@@ -235,7 +235,7 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
         await lockCandidate(deps, {
           subject: candidate.subject,
           candidateKey: candidate.candidateKey,
-          testId,
+          examId,
         });
       }
       selected.push(candidate);
@@ -251,15 +251,14 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
   // 内部で利用する処理を定義する
   const targetIds = selected.map((candidate) => candidate.targetId);
   // 内部で利用する処理を定義する
-  const pdfS3Key = targetIds.length > 0 ? `exams/${testId}.pdf` : undefined;
+  const pdfS3Key = targetIds.length > 0 ? `exams/${examId}.pdf` : undefined;
 
   const testRow: ExamTable = {
-    testId,
+    examId,
     subject: req.subject,
     mode: req.mode,
     status: 'IN_PROGRESS',
     count: selected.length,
-    questions: targetIds,
     createdDate,
     ...(pdfS3Key ? { pdfS3Key } : {}),
     results: [],
@@ -267,6 +266,7 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
 
   // 非同期処理の完了を待つ
   await deps.repositories.exams.put(testRow);
+  await deps.repositories.examDetails.putMany(examId, targetIds);
 
   // 条件に応じて処理を分岐する
   if (pdfS3Key) {
@@ -283,7 +283,7 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
       }
 
       // 内部で利用する処理を定義する
-      const detail = await deps.getExam(testId);
+      const detail = await deps.getExam(examId);
       // 条件に応じて処理を分岐する
       if (!detail) {
         throw new Error('Review test detail not found after creation');
@@ -300,7 +300,7 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
       });
     } catch (error) {
       // 非同期処理の完了を待つ
-      await deps.deleteExam(testId);
+      await deps.deleteExam(examId);
       throw error;
     }
   }

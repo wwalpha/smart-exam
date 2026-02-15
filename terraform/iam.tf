@@ -53,6 +53,7 @@ data "aws_iam_policy_document" "lambda" {
       aws_dynamodb_table.word_master.arn,
       aws_dynamodb_table.exam_candidates.arn,
       aws_dynamodb_table.exam.arn,
+      aws_dynamodb_table.exam_details.arn,
       "${aws_dynamodb_table.materials.arn}/index/*",
       "${aws_dynamodb_table.material_questions.arn}/index/*",
       "${aws_dynamodb_table.word_master.arn}/index/*",

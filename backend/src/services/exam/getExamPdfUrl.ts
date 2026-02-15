@@ -11,11 +11,11 @@ const getExamPdfUrlImpl = async (
     repositories: Repositories;
     getExam: ExamsService['getExam'];
   },
-  testId: string,
+  examId: string,
   params?: { download?: boolean },
 ): Promise<{ url: string } | null> => {
   // 非同期で必要な値を取得する
-  const testRow = await deps.repositories.exams.get(testId);
+  const testRow = await deps.repositories.exams.get(examId);
   // 条件に応じて処理を分岐する
   if (!testRow) return null;
 
@@ -46,14 +46,14 @@ const getExamPdfUrlImpl = async (
   }
 
   // QUESTION 等は生成（後方互換: pdfS3Key が無いKANJIもここで生成して復旧）
-  const review = await deps.getExam(testId);
+  const review = await deps.getExam(examId);
   // 条件に応じて処理を分岐する
   if (!review) return null;
 
   // 非同期で必要な値を取得する
   const pdfBuffer = await ExamPdfService.generatePdfBuffer(review, { includeGenerated: false });
   // 処理で使う値を準備する
-  const key = testRow.pdfS3Key ?? `exams/${testId}.pdf`;
+  const key = testRow.pdfS3Key ?? `exams/${examId}.pdf`;
 
   // 非同期処理の完了を待つ
   await deps.repositories.s3.putObject({
@@ -66,7 +66,7 @@ const getExamPdfUrlImpl = async (
   // 条件に応じて処理を分岐する
   if (testRow.pdfS3Key !== key) {
     // 非同期処理の完了を待つ
-    await deps.repositories.exams.updatePdfS3Key(testId, key);
+    await deps.repositories.exams.updatePdfS3Key(examId, key);
   }
 
   // 非同期で必要な値を取得する

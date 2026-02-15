@@ -11,14 +11,15 @@ const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
 // 内部で利用する補助処理を定義する
 const getAttemptFromTest = (params: {
   test: ExamTable;
+  targetIds: string[];
   targetType: ReviewTargetType;
   targetId: string;
 }): ReviewAttempt | null => {
-  const { test, targetType, targetId } = params;
+  const { test, targetIds, targetType, targetId } = params;
   // 条件に応じて処理を分岐する
   if (test.mode !== targetType) return null;
   // 条件に応じて処理を分岐する
-  if (!Array.isArray(test.questions) || !test.questions.includes(targetId)) return null;
+  if (!targetIds.includes(targetId)) return null;
 
   // 処理で使う値を準備する
   const dateYmd = test.submittedDate ?? test.createdDate;
@@ -35,7 +36,7 @@ const getAttemptFromTest = (params: {
     dateYmd,
     attemptedAt: toAttemptedAt(dateYmd),
     isCorrect,
-    examId: test.testId,
+    examId: test.examId,
   };
 };
 
@@ -45,12 +46,30 @@ const listReviewAttemptsImpl = async (
 ): Promise<ReviewAttempt[]> => {
   const items: ExamTable[] = await repositories.exams.scanAll();
 
+  const detailsByExamId = new Map<string, string[]>();
+  await Promise.all(
+    items.map(async (test) => {
+      const details = await repositories.examDetails.listByExamId(test.examId);
+      detailsByExamId.set(
+        test.examId,
+        details.map((detail) => detail.targetId),
+      );
+    }),
+  );
+
   const filtered = items
     .filter((t) => {
       if (params.subject && t.subject !== params.subject) return false;
       return true;
     })
-    .map((test) => getAttemptFromTest({ test, targetType: params.targetType, targetId: params.targetId }))
+    .map((test) =>
+      getAttemptFromTest({
+        test,
+        targetIds: detailsByExamId.get(test.examId) ?? [],
+        targetType: params.targetType,
+        targetId: params.targetId,
+      }),
+    )
     .filter((x): x is ReviewAttempt => Boolean(x));
 
   filtered.sort((a, b) => {

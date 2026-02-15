@@ -7,8 +7,18 @@ import { SUBJECT_LABEL } from '@/lib/Consts';
 import { formatYmdSlash } from '@/utils/date';
 
 export const ExamQuestionDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, ConfirmDialog, blocks, pdfAvailability, previewMaterialPdf, complete } =
-    useReviewQuestionDetailPage();
+  const {
+    review,
+    isLoading,
+    error,
+    basePath,
+    remove,
+    ConfirmDialog,
+    blocks,
+    pdfAvailability,
+    previewMaterialPdf,
+    complete,
+  } = useReviewQuestionDetailPage();
 
   const infoBadgeClass = 'px-4 py-2 text-sm';
 
@@ -26,10 +36,10 @@ export const ExamQuestionDetailPage = () => {
             <Link to={basePath}>戻る</Link>
           </Button>
           <Button asChild className="w-[100px]">
-            <Link to={`${basePath}/${review.id}/grading`}>結果入力</Link>
+            <Link to={`${basePath}/${review.examId}/grading`}>結果入力</Link>
           </Button>
           <Button asChild className="w-[100px]">
-            <Link to={`${basePath}/${review.id}/pdf`}>印刷</Link>
+            <Link to={`${basePath}/${review.examId}/pdf`}>印刷</Link>
           </Button>
           {review.status !== 'COMPLETED' ? (
             <Button type="button" variant="default" className="w-[100px]" onClick={complete}>

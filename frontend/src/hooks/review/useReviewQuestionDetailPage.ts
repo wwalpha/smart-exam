@@ -108,7 +108,7 @@ export const useReviewQuestionDetailPage = () => {
 
   const complete = useCallback(async () => {
     if (!review) return;
-    await updateExamStatus(review.id, { status: 'COMPLETED' }, 'QUESTION');
+    await updateExamStatus(review.examId, { status: 'COMPLETED' }, 'QUESTION');
     navigate(basePath);
   }, [review, updateExamStatus, navigate, basePath]);
 

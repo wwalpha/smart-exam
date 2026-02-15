@@ -7,15 +7,15 @@ import { toApiExam } from './internal';
 // 内部で利用する補助処理を定義する
 const updateExamStatusImpl = async (
   repositories: Repositories,
-  testId: string,
+  examId: string,
   req: Parameters<ExamsService['updateExamStatus']>[1],
 ): ReturnType<ExamsService['updateExamStatus']> => {
   // 非同期で必要な値を取得する
-  const existing = await repositories.exams.get(testId);
+  const existing = await repositories.exams.get(examId);
   // 条件に応じて処理を分岐する
   if (!existing) return null;
 
-  const updated: ExamTable | null = await repositories.exams.updateStatus(testId, req.status);
+  const updated: ExamTable | null = await repositories.exams.updateStatus(examId, req.status);
   // 処理結果を呼び出し元へ返す
   return updated ? toApiExam(updated) : null;
 };

@@ -8,14 +8,14 @@ const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 export const releaseLockIfMatch = async (params: {
   subject: SubjectId;
   candidateKey: string;
-  testId: string;
+  examId: string;
 }): Promise<void> => {
   await dbHelper.update({
     TableName: TABLE_NAME,
     Key: { subject: params.subject, candidateKey: params.candidateKey },
-    ConditionExpression: '#testId = :testId',
-    UpdateExpression: 'REMOVE #testId SET #status = :open',
-    ExpressionAttributeNames: { '#testId': 'testId', '#status': 'status' },
-    ExpressionAttributeValues: { ':testId': params.testId, ':open': 'OPEN' },
+    ConditionExpression: '#examId = :examId',
+    UpdateExpression: 'REMOVE #examId SET #status = :open',
+    ExpressionAttributeNames: { '#examId': 'examId', '#status': 'status' },
+    ExpressionAttributeValues: { ':examId': params.examId, ':open': 'OPEN' },
   });
 };

@@ -34,62 +34,62 @@ export const createExam = async (request: CreateExamRequest): Promise<Exam> => {
   });
 };
 
-export const getExam = async (testId: string): Promise<ExamDetail> => {
-  return getExamByMode(testId, 'QUESTION');
+export const getExam = async (examId: string): Promise<ExamDetail> => {
+  return getExamByMode(examId, 'QUESTION');
 };
 
-export const getExamByMode = async (testId: string, mode: ReviewMode): Promise<ExamDetail> => {
+export const getExamByMode = async (examId: string, mode: ReviewMode): Promise<ExamDetail> => {
   return apiRequest<ExamDetail>({
     method: 'GET',
-    path: `/api/exam/${toModeSegment(mode)}/${testId}`,
+    path: `/api/exam/${toModeSegment(mode)}/${examId}`,
   });
 };
 
 export const updateExamStatus = async (
-  testId: string,
+  examId: string,
   request: UpdateExamStatusRequest
 ): Promise<Exam> => {
-  return updateExamStatusByMode(testId, request, 'QUESTION');
+  return updateExamStatusByMode(examId, request, 'QUESTION');
 };
 
 export const updateExamStatusByMode = async (
-  testId: string,
+  examId: string,
   request: UpdateExamStatusRequest,
   mode: ReviewMode
 ): Promise<Exam> => {
   return apiRequest<Exam, UpdateExamStatusRequest>({
     method: 'PATCH',
-    path: `/api/exam/${toModeSegment(mode)}/${testId}`,
+    path: `/api/exam/${toModeSegment(mode)}/${examId}`,
     body: request,
   });
 };
 
-export const deleteExam = async (testId: string): Promise<void> => {
-  return deleteExamByMode(testId, 'QUESTION');
+export const deleteExam = async (examId: string): Promise<void> => {
+  return deleteExamByMode(examId, 'QUESTION');
 };
 
-export const deleteExamByMode = async (testId: string, mode: ReviewMode): Promise<void> => {
+export const deleteExamByMode = async (examId: string, mode: ReviewMode): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
-    path: `/api/exam/${toModeSegment(mode)}/${testId}`,
+    path: `/api/exam/${toModeSegment(mode)}/${examId}`,
   });
 };
 
 export const submitExamResults = async (
-  testId: string,
+  examId: string,
   request: SubmitExamResultsRequest
 ): Promise<void> => {
-  return submitExamResultsByMode(testId, request, 'QUESTION');
+  return submitExamResultsByMode(examId, request, 'QUESTION');
 };
 
 export const submitExamResultsByMode = async (
-  testId: string,
+  examId: string,
   request: SubmitExamResultsRequest,
   mode: ReviewMode
 ): Promise<void> => {
   return apiRequest<void, SubmitExamResultsRequest>({
     method: 'POST',
-    path: `/api/exam/${toModeSegment(mode)}/${testId}/results`,
+    path: `/api/exam/${toModeSegment(mode)}/${examId}/results`,
     body: request,
   });
 };

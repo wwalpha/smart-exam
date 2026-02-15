@@ -43,6 +43,7 @@ resource "aws_lambda_function" "api" {
       TABLE_WORD_MASTER        = aws_dynamodb_table.word_master.name
       TABLE_EXAM_CANDIDATES    = aws_dynamodb_table.exam_candidates.name
       TABLE_EXAMS              = aws_dynamodb_table.exam.name
+      TABLE_EXAM_DETAILS       = aws_dynamodb_table.exam_details.name
       BEDROCK_REGION           = "us-east-1"
     }
   }

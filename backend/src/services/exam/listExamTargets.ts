@@ -36,12 +36,23 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
   // 処理で使う値を準備する
   const byKey = new Map<string, ExamTarget>();
 
+  const detailByExamId = new Map<string, string[]>();
+  await Promise.all(
+    filteredRows.map(async (test) => {
+      const details = await repositories.examDetails.listByExamId(test.examId);
+      detailByExamId.set(
+        test.examId,
+        details.map((detail) => detail.targetId),
+      );
+    }),
+  );
+
   // 処理で使う値を準備する
   const allTargetIds = new Set<string>();
   // 対象データを順番に処理する
   for (const t of filteredRows) {
     // 対象データを順番に処理する
-    for (const id of t.questions ?? []) allTargetIds.add(id);
+    for (const id of detailByExamId.get(t.examId) ?? []) allTargetIds.add(id);
   }
 
   // 処理で使う値を準備する
@@ -92,7 +103,7 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
   // 対象データを順番に処理する
   for (const t of filteredRows) {
     // 対象データを順番に処理する
-    for (const targetId of t.questions ?? []) {
+    for (const targetId of detailByExamId.get(t.examId) ?? []) {
       // 処理で使う値を準備する
       const key = toReviewTargetKey(t.subject, targetId);
       // 処理で使う値を準備する

@@ -40,7 +40,7 @@ export const useReviewKanjiCreate = () => {
       });
 
       if (newTest) {
-        navigate(`${BASE_PATH}/${newTest.id}`);
+        navigate(`${BASE_PATH}/${newTest.examId}`);
       }
     } catch (error) {
       const apiErrors = getApiErrorCodes(error);

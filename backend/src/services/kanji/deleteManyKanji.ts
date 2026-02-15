@@ -61,24 +61,38 @@ const deleteManyKanjiImpl = async (repositories: Repositories, ids: string[]): P
     return;
   }
 
+  const detailsByExamId = new Map<string, string[]>();
+  await Promise.all(
+    tests.map(async (test) => {
+      const details = await repositories.examDetails.listByExamId(test.examId);
+      detailsByExamId.set(
+        test.examId,
+        details.map((detail) => detail.targetId),
+      );
+    }),
+  );
+
   // 内部で利用する処理を定義する
   const affected = tests.filter(
-    (t) => t.mode === 'KANJI' && Array.isArray(t.questions) && t.questions.some((q) => deletedIdSet.has(q)),
+    (test) =>
+      test.mode === 'KANJI' && (detailsByExamId.get(test.examId) ?? []).some((targetId) => deletedIdSet.has(targetId)),
   );
 
   // 内部で利用する処理を定義する
   const results = await Promise.allSettled(
     affected.map(async (t) => {
       // 内部で利用する処理を定義する
-      const nextQuestions = (t.questions ?? []).filter((x) => !deletedIdSet.has(x));
+      const nextQuestions = (detailsByExamId.get(t.examId) ?? []).filter((x) => !deletedIdSet.has(x));
       // 内部で利用する処理を定義する
       const nextResults = (t.results ?? []).filter((r) => !deletedIdSet.has(r.id));
+
+      await repositories.examDetails.deleteByExamId(t.examId);
+      await repositories.examDetails.putMany(t.examId, nextQuestions);
 
       const { pdfS3Key: _pdfS3Key, ...rest } = t;
       // 非同期処理の完了を待つ
       await repositories.exams.put({
         ...rest,
-        questions: nextQuestions,
         count: nextQuestions.length,
         results: nextResults,
       });
@@ -89,8 +103,8 @@ const deleteManyKanjiImpl = async (repositories: Repositories, ids: string[]): P
     // 条件に応じて処理を分岐する
     if (result.status === 'rejected') {
       // 内部で利用する処理を定義する
-      const failedTestId = affected[index]?.testId ?? 'unknown';
-      logger.warn(`[kanji.deleteManyKanji] failed to sync exam testId=${failedTestId}`, result.reason);
+      const failedExamId = affected[index]?.examId ?? 'unknown';
+      logger.warn(`[kanji.deleteManyKanji] failed to sync exam examId=${failedExamId}`, result.reason);
     }
   });
 };

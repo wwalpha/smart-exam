@@ -6,9 +6,7 @@ import type {
   SearchExamsRequest,
   SearchExamsResponse,
   SubjectId,
-  SubmitExamResultsParams,
   SubmitExamResultsRequest,
-  UpdateExamStatusParams,
   UpdateExamStatusRequest,
   UpdateExamStatusResponse,
 } from '@smart-exam/api-types';
@@ -19,34 +17,32 @@ import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody, ValidatedQuery } from '@/types/express';
 import type { Services } from '@/services/createServices';
 
-import {
-  CreateTestBodySchema,
-  ListTestTargetsQuerySchema,
-  SearchTestsBodySchema,
-} from './testController.schema';
+import { CreateTestBodySchema, ListTestTargetsQuerySchema, SearchTestsBodySchema } from './testController.schema';
 import { SubmitExamResultsBodySchema } from '@/controllers/exam/submitExamResultsController.schema';
 import { UpdateExamStatusBodySchema } from '@/controllers/exam/updateExamStatusController.schema';
 
 export const createModeScopedTestsController = (services: Services, mode: ReviewMode) => {
-  const ensureModeMatched = async (testId: string): Promise<boolean> => {
-    const item = await services.exams.getExam(testId);
+  const ensureModeMatched = async (examId: string): Promise<boolean> => {
+    const item = await services.exams.getExam(examId);
     if (!item) return false;
     return item.mode === mode;
   };
 
-  const listTests: AsyncHandler<ParamsDictionary, { items: unknown[]; total: number }, Record<string, never>, ParsedQs> =
-    async (_req, res) => {
-      const items = await services.exams.listExams();
-      const filtered = items.filter((item) => item.mode === mode);
-      res.json({ items: filtered, total: filtered.length });
-    };
-
-  const searchTests: AsyncHandler<
+  const listTests: AsyncHandler<
     ParamsDictionary,
-    SearchExamsResponse,
-    SearchExamsRequest,
+    { items: unknown[]; total: number },
+    Record<string, never>,
     ParsedQs
-  > = async (req, res) => {
+  > = async (_req, res) => {
+    const items = await services.exams.listExams();
+    const filtered = items.filter((item) => item.mode === mode);
+    res.json({ items: filtered, total: filtered.length });
+  };
+
+  const searchTests: AsyncHandler<ParamsDictionary, SearchExamsResponse, SearchExamsRequest, ParsedQs> = async (
+    req,
+    res,
+  ) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchTestsBodySchema>;
 
     const result = await services.exams.searchExams({
@@ -87,12 +83,14 @@ export const createModeScopedTestsController = (services: Services, mode: Review
     res.json({ items });
   };
 
-  const getTest: AsyncHandler<{ testId: string }, { error: string } | unknown, Record<string, never>, ParsedQs> = async (
-    req,
-    res,
-  ) => {
-    const { testId } = req.params;
-    const item = await services.exams.getExam(testId);
+  const getTest: AsyncHandler<
+    { examId: string },
+    { error: string } | unknown,
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
+    const { examId } = req.params;
+    const item = await services.exams.getExam(examId);
     if (!item || item.mode !== mode) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -100,57 +98,61 @@ export const createModeScopedTestsController = (services: Services, mode: Review
     res.json(item);
   };
 
-  const getTestPdf: AsyncHandler<{ testId: string }, { url: string } | { error: string }, Record<string, never>, ParsedQs> =
-    async (req, res) => {
-      const { testId } = req.params;
-      const matched = await ensureModeMatched(testId);
-      if (!matched) {
+  const getTestPdf: AsyncHandler<
+    { examId: string },
+    { url: string } | { error: string },
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
+    const { examId } = req.params;
+    const matched = await ensureModeMatched(examId);
+    if (!matched) {
+      res.status(404).json({ error: 'Not Found' });
+      return;
+    }
+
+    const direct = String(req.query.direct ?? '') === '1' || String(req.query.direct ?? '') === 'true';
+    const download = String(req.query.download ?? '') === '1' || String(req.query.download ?? '') === 'true';
+    const includeGenerated =
+      String(req.query.includeGenerated ?? '') === '1' || String(req.query.includeGenerated ?? '') === 'true';
+
+    if (direct) {
+      const pdf = await services.exams.generateExamPdfBuffer(examId, { includeGenerated });
+      if (!pdf) {
         res.status(404).json({ error: 'Not Found' });
         return;
       }
 
-      const direct = String(req.query.direct ?? '') === '1' || String(req.query.direct ?? '') === 'true';
-      const download = String(req.query.download ?? '') === '1' || String(req.query.download ?? '') === 'true';
-      const includeGenerated =
-        String(req.query.includeGenerated ?? '') === '1' || String(req.query.includeGenerated ?? '') === 'true';
+      const filename = `test-${examId}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `${download ? 'attachment' : 'inline'}; filename="${filename}"`);
+      res.status(200).end(pdf);
+      return;
+    }
 
-      if (direct) {
-        const pdf = await services.exams.generateExamPdfBuffer(testId, { includeGenerated });
-        if (!pdf) {
-          res.status(404).json({ error: 'Not Found' });
-          return;
-        }
-
-        const filename = `test-${testId}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `${download ? 'attachment' : 'inline'}; filename="${filename}"`);
-        res.status(200).end(pdf);
-        return;
-      }
-
-      const result = await services.exams.getExamPdfUrl(testId, { download });
-      if (!result) {
-        res.status(404).json({ error: 'Not Found' });
-        return;
-      }
-      res.json(result);
-    };
+    const result = await services.exams.getExamPdfUrl(examId, { download });
+    if (!result) {
+      res.status(404).json({ error: 'Not Found' });
+      return;
+    }
+    res.json(result);
+  };
 
   const updateTestStatus: AsyncHandler<
-    UpdateExamStatusParams,
+    { examId: string },
     UpdateExamStatusResponse | { error: string },
     UpdateExamStatusRequest,
     ParsedQs
   > = async (req, res) => {
-    const { testId } = req.params;
-    const matched = await ensureModeMatched(testId);
+    const { examId } = req.params;
+    const matched = await ensureModeMatched(examId);
     if (!matched) {
       res.status(404).json({ error: 'Not Found' });
       return;
     }
 
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateExamStatusBodySchema>;
-    const item = await services.exams.updateExamStatus(testId, body);
+    const item = await services.exams.updateExamStatus(examId, body);
     if (!item) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -158,35 +160,37 @@ export const createModeScopedTestsController = (services: Services, mode: Review
     res.json(item);
   };
 
-  const deleteTest: AsyncHandler<{ testId: string }, void | { error: string }, Record<string, never>, ParsedQs> = async (
-    req,
-    res,
-  ) => {
-    const { testId } = req.params;
-    const matched = await ensureModeMatched(testId);
+  const deleteTest: AsyncHandler<
+    { examId: string },
+    void | { error: string },
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
+    const { examId } = req.params;
+    const matched = await ensureModeMatched(examId);
     if (!matched) {
       res.status(404).json({ error: 'Not Found' });
       return;
     }
-    await services.exams.deleteExam(testId);
+    await services.exams.deleteExam(examId);
     res.status(204).send();
   };
 
   const submitTestResults: AsyncHandler<
-    SubmitExamResultsParams,
+    { examId: string },
     void | { error: string },
     SubmitExamResultsRequest,
     ParsedQs
   > = async (req, res) => {
-    const { testId } = req.params;
-    const matched = await ensureModeMatched(testId);
+    const { examId } = req.params;
+    const matched = await ensureModeMatched(examId);
     if (!matched) {
       res.status(404).json({ error: 'Not Found' });
       return;
     }
 
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SubmitExamResultsBodySchema>;
-    const ok = await services.exams.submitExamResults(testId, body);
+    const ok = await services.exams.submitExamResults(examId, body);
     if (!ok) {
       res.status(404).json({ error: 'Not Found' });
       return;

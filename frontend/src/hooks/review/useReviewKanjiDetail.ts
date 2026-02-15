@@ -21,7 +21,7 @@ export const useReviewKanjiDetail = () => {
 
   const remove = async () => {
     if (detail && (await confirm('本当に削除しますか？', { variant: 'destructive' }))) {
-      await deleteExam(detail.id, 'KANJI');
+      await deleteExam(detail.examId, 'KANJI');
       navigate(BASE_PATH);
     }
   };

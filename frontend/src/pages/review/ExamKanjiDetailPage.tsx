@@ -20,7 +20,7 @@ export const ExamKanjiDetailPage = () => {
 
   const complete = useCallback(async () => {
     if (!review) return;
-    await updateExamStatus(review.id, { status: 'COMPLETED' }, 'KANJI');
+    await updateExamStatus(review.examId, { status: 'COMPLETED' }, 'KANJI');
     navigate(basePath);
   }, [review, updateExamStatus, navigate, basePath]);
 
@@ -37,10 +37,10 @@ export const ExamKanjiDetailPage = () => {
             <Link to={basePath}>戻る</Link>
           </Button>
           <Button asChild className="w-[100px]">
-            <Link to={`${basePath}/${review.id}/grading`}>結果入力</Link>
+            <Link to={`${basePath}/${review.examId}/grading`}>結果入力</Link>
           </Button>
           <Button asChild className="w-[100px]">
-            <Link to={`${basePath}/${review.id}/pdf`}>印刷</Link>
+            <Link to={`${basePath}/${review.examId}/pdf`}>印刷</Link>
           </Button>
           {review.status !== 'COMPLETED' ? (
             <Button type="button" variant="default" className="w-[100px]" onClick={complete} disabled={!isAllAnswered}>

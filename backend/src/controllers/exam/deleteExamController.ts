@@ -10,10 +10,10 @@ import { DeleteExamParamsSchema } from './deleteExamController.schema';
 /** Creates delete review test controller. */
 export const deleteExamController = (services: Services) => {
   const deleteExam: AsyncHandler<DeleteExamParams, void, Record<string, never>, ParsedQs> = async (req, res) => {
-    // パスパラメータから対象テストIDを取得する
-    const { testId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof DeleteExamParamsSchema>;
+    // パスパラメータから対象試験IDを取得する
+    const { examId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof DeleteExamParamsSchema>;
     // 指定した復習テストを削除する
-    await services.exams.deleteExam(testId);
+    await services.exams.deleteExam(examId);
     // 削除成功時は本文なしで204を返す
     res.status(204).send();
   };

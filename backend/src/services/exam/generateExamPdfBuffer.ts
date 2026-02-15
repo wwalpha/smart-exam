@@ -4,11 +4,11 @@ import { ExamPdfService } from './examPdfService';
 // 内部で利用する補助処理を定義する
 const generateExamPdfBufferImpl = async (
   deps: { getExam: ExamsService['getExam'] },
-  testId: string,
+  examId: string,
   options?: { includeGenerated?: boolean },
 ): ReturnType<ExamsService['generateExamPdfBuffer']> => {
   // 非同期で必要な値を取得する
-  const review = await deps.getExam(testId);
+  const review = await deps.getExam(examId);
   // 条件に応じて処理を分岐する
   if (!review) return null;
   // 処理結果を呼び出し元へ返す

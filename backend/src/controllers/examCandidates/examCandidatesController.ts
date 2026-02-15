@@ -32,7 +32,7 @@ export const examCandidatesController = (services: Services) => {
         mode: x.mode,
         correctCount: typeof x.correctCount === 'number' ? x.correctCount : 0,
         nextTime: x.nextTime,
-        ...(x.testId ? { testId: x.testId } : {}),
+        ...(x.examId ? { examId: x.examId } : {}),
       })),
     });
   };

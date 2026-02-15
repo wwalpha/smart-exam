@@ -7,8 +7,8 @@ const queryValue = (schema: z.ZodTypeAny) => z.preprocess((v) => (Array.isArray(
 
 /** GetExamPdfParamsSchema validates path params. */
 export const GetExamPdfParamsSchema = z.object({
-  // PDF取得対象のテストID
-  testId: z.string().min(1),
+  // PDF取得対象の試験ID
+  examId: z.string().min(1),
 });
 
 /** GetExamPdfQuerySchema validates query string. */

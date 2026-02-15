@@ -9,24 +9,24 @@ export type ReviewMode = (typeof EXAM_MODE)[keyof typeof EXAM_MODE];
 
 export type ReviewTargetType = ReviewMode;
 
-/** `GET /exams/:testId` */
+/** `GET /api/exam/:examId` */
 export type GetExamParams = {
-  testId: string;
+  examId: string;
 };
 
-/** `PATCH /exams/:testId` */
+/** `PATCH /api/exam/:examId` */
 export type UpdateExamStatusParams = {
-  testId: string;
+  examId: string;
 };
 
-/** `DELETE /exams/:testId` */
+/** `DELETE /api/exam/:examId` */
 export type DeleteExamParams = {
-  testId: string;
+  examId: string;
 };
 
-/** `POST /exams/:testId/results` */
+/** `POST /api/exam/:examId/results` */
 export type SubmitExamResultsParams = {
-  testId: string;
+  examId: string;
 };
 
 /** 復習テスト作成リクエスト */
@@ -73,8 +73,8 @@ export type SearchExamsResponse = ExamListResponse;
 export type ExamItem = {
   /** アイテムID */
   id: string;
-  /** テストID */
-  testId: string;
+  /** 試験ID */
+  examId: string;
   /** 対象種別 */
   targetType: ReviewTargetType;
   /** 対象ID */
@@ -127,10 +127,8 @@ export type UpdateExamStatusResponse = Exam;
  * 復習テスト
  */
 export type Exam = {
-  /** ID */
-  id: string;
-  /** 表示用ID */
-  testId: string;
+  /** 試験ID */
+  examId: string;
   /** 科目 */
   subject: SubjectId;
   /** モード */
@@ -150,8 +148,6 @@ export type Exam = {
   };
   /** 出題数 */
   count: number;
-  /** 出題IDリスト（mode に応じて questionId / wordId を格納） */
-  questions: string[];
   /** 採点結果 */
   results: { id: string; isCorrect: boolean }[];
 };
@@ -281,7 +277,7 @@ export type ExamCandidate = {
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
   /** ロック: 紐付けられた復習テストID */
-  testId?: string;
+  examId?: string;
 };
 
 /** `GET /review-test-candidates?subject=...&mode=...` */

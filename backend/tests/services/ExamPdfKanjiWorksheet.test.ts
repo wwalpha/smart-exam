@@ -8,20 +8,18 @@ describe('ExamPdfService (KANJI worksheet) smoke', () => {
   it('generates a 1-page PDF for 60 printable items without throwing', async () => {
     const promptText = 'チームのけいせいが不利なまま試合が進む。';
     const review: ExamDetail = {
-      id: 't1',
-      testId: 't1',
+      examId: 't1',
       subject: '1',
       mode: 'KANJI',
       createdDate: '2026-02-14',
       status: 'IN_PROGRESS',
       pdf: { url: '/api/exam/kanji/t1/pdf', downloadUrl: '/api/exam/kanji/t1/pdf?download=1' },
       count: 60,
-      questions: Array.from({ length: 60 }, (_v, i) => `w-${i + 1}`),
       results: [],
       items: Array.from({ length: 60 }, (_v, i) => ({
         id: `item-${i + 1}`,
         itemId: `item-${i + 1}`,
-        testId: 't1',
+        examId: 't1',
         targetType: 'KANJI',
         targetId: `w-${i + 1}`,
         questionText: promptText,

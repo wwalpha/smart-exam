@@ -47,18 +47,16 @@ export const computeDueDate = (params: {
 
 /** Converts data with to api review test. */
 export const toApiExam = (row: ExamTable): Exam => ({
-  id: row.testId,
-  testId: row.testId,
+  examId: row.examId,
   subject: row.subject,
   mode: row.mode,
   createdDate: row.createdDate,
   status: row.status,
   pdf: {
-    url: `/api/exam/${row.mode === 'KANJI' ? 'kanji' : 'question'}/${row.testId}/pdf`,
-    downloadUrl: `/api/exam/${row.mode === 'KANJI' ? 'kanji' : 'question'}/${row.testId}/pdf?download=1`,
+    url: `/api/exam/${row.mode === 'KANJI' ? 'kanji' : 'question'}/${row.examId}/pdf`,
+    downloadUrl: `/api/exam/${row.mode === 'KANJI' ? 'kanji' : 'question'}/${row.examId}/pdf?download=1`,
   },
   count: row.count,
-  questions: row.questions,
   submittedDate: row.submittedDate,
   results: row.results ?? [],
 });

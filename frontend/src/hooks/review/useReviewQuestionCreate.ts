@@ -36,7 +36,7 @@ export const useReviewQuestionCreate = () => {
     });
 
     if (newTest) {
-      navigate(`${BASE_PATH}/${newTest.id}`);
+      navigate(`${BASE_PATH}/${newTest.examId}`);
     }
   };
 

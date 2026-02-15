@@ -10,28 +10,28 @@ const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 export const closeCandidateIfMatch = async (params: {
   subject: SubjectId;
   candidateKey: string;
-  expectedTestId?: string;
+  expectedExamId?: string;
 }): Promise<void> => {
   const expNames: Record<string, string> = {
     '#status': 'status',
     '#closedAt': 'closedAt',
-    '#testId': 'testId',
+    '#examId': 'examId',
   };
   const expValues: Record<string, unknown> = {
     ':closed': 'CLOSED',
     ':closedAt': nowIso(),
   };
 
-  const condition = params.expectedTestId ? '#testId = :testId' : undefined;
-  if (params.expectedTestId) {
-    expValues[':testId'] = params.expectedTestId;
+  const condition = params.expectedExamId ? '#examId = :examId' : undefined;
+  if (params.expectedExamId) {
+    expValues[':examId'] = params.expectedExamId;
   }
 
   await dbHelper.update({
     TableName: TABLE_NAME,
     Key: { subject: params.subject, candidateKey: params.candidateKey },
     ...(condition ? { ConditionExpression: condition } : {}),
-    UpdateExpression: 'SET #status = :closed, #closedAt = :closedAt REMOVE #testId',
+    UpdateExpression: 'SET #status = :closed, #closedAt = :closedAt REMOVE #examId',
     ExpressionAttributeNames: expNames,
     ExpressionAttributeValues: expValues,
   });

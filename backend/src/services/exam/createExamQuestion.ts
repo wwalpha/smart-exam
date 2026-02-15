@@ -32,13 +32,13 @@ const listOpenCandidates = async (deps: CreateExamDeps, params: CandidateListPar
 // 内部で利用する処理を定義する
 const lockCandidate = async (
   deps: CreateExamDeps,
-  params: { subject: SubjectId; candidateKey: string; testId: string },
+  params: { subject: SubjectId; candidateKey: string; examId: string },
 ): Promise<void> => {
   // 非同期処理の完了を待つ
   await deps.repositories.examCandidates.lockCandidateIfUnlocked({
     subject: params.subject,
     candidateKey: params.candidateKey,
-    testId: params.testId,
+    examId: params.examId,
     status: 'LOCKED',
   });
 };
@@ -65,7 +65,7 @@ export const buildQuestionCandidates = (
 // 公開する処理を定義する
 export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRequest): Promise<Exam> => {
   // 内部で利用する処理を定義する
-  const testId = createUuid();
+  const examId = createUuid();
   // 内部で利用する処理を定義する
   const createdDate = DateUtils.todayYmd();
 
@@ -105,7 +105,7 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
         await lockCandidate(deps, {
           subject: candidate.subject,
           candidateKey: candidate.candidateKey,
-          testId,
+          examId,
         });
       }
       selected.push(candidate);
@@ -121,18 +121,18 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
   // 内部で利用する処理を定義する
   const targetIds = selected.map((candidate) => candidate.targetId);
   const testRow: ExamTable = {
-    testId,
+    examId,
     subject: req.subject,
     mode: req.mode,
     status: 'IN_PROGRESS',
     count: selected.length,
-    questions: targetIds,
     createdDate,
     results: [],
   };
 
   // 非同期処理の完了を待つ
   await deps.repositories.exams.put(testRow);
+  await deps.repositories.examDetails.putMany(examId, targetIds);
 
   // 処理結果を呼び出し元へ返す
   return toApiExam(testRow) as Exam;

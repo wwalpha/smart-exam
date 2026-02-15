@@ -21,7 +21,7 @@ export const useReviewQuestionDetail = () => {
 
   const remove = async () => {
     if (detail && (await confirm('本当に削除しますか？', { variant: 'destructive' }))) {
-      await deleteExam(detail.id, 'QUESTION');
+      await deleteExam(detail.examId, 'QUESTION');
       navigate(BASE_PATH);
     }
   };

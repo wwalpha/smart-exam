@@ -14,22 +14,38 @@ const deleteKanjiImpl = async (repositories: Repositories, id: string): Promise<
 
   // 既存の復習テストを全件取得する
   const tests = await repositories.exams.scanAll();
+
+  const detailsByExamId = new Map<string, string[]>();
+  await Promise.all(
+    tests.map(async (test) => {
+      const details = await repositories.examDetails.listByExamId(test.examId);
+      detailsByExamId.set(
+        test.examId,
+        details.map((detail) => detail.targetId),
+      );
+    }),
+  );
+
   // 対象漢字を含むKANJIモードのテストだけを抽出する
-  const affected = tests.filter((t) => t.mode === 'KANJI' && Array.isArray(t.questions) && t.questions.includes(id));
+  const affected = tests.filter(
+    (test) => test.mode === 'KANJI' && (detailsByExamId.get(test.examId) ?? []).includes(id),
+  );
 
   // 影響のあるテストから対象漢字を取り除いて更新する
   await Promise.all(
     affected.map(async (t) => {
       // 問題一覧から対象漢字IDを除外する
-      const nextQuestions = (t.questions ?? []).filter((x) => x !== id);
+      const nextQuestions = (detailsByExamId.get(t.examId) ?? []).filter((x) => x !== id);
       // 結果一覧から対象漢字IDの結果を除外する
       const nextResults = (t.results ?? []).filter((r) => r.id !== id);
+
+      await repositories.examDetails.deleteByExamId(t.examId);
+      await repositories.examDetails.putMany(t.examId, nextQuestions);
 
       // 不整合を避けるため既存PDFキーは引き継がず更新する
       const { pdfS3Key: _pdfS3Key, ...rest } = t;
       await repositories.exams.put({
         ...rest,
-        questions: nextQuestions,
         count: nextQuestions.length,
         results: nextResults,
       });

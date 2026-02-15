@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 /** SubmitExamResultsParamsSchema validates path params. */
 export const SubmitExamResultsParamsSchema = z.object({
-  // 結果登録対象のテストID
-  testId: z.string().min(1),
+  // 結果登録対象の試験ID
+  examId: z.string().min(1),
 });
 
 /** SubmitExamResultsBodySchema validates input shape. */

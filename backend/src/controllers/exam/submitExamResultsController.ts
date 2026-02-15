@@ -17,13 +17,13 @@ export const submitExamResultsController = (services: Services) => {
     SubmitExamResultsRequest,
     ParsedQs
   > = async (req, res) => {
-    // パスパラメータから対象テストIDを取得する
-    const { testId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof SubmitExamResultsParamsSchema>;
+    // パスパラメータから対象試験IDを取得する
+    const { examId } = (req.validated?.params ?? req.params) as ValidatedParams<typeof SubmitExamResultsParamsSchema>;
     // バリデーション済みの回答結果を取得する
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SubmitExamResultsBodySchema>;
 
     // 復習テスト結果を保存する
-    const ok = await services.exams.submitExamResults(testId, body);
+    const ok = await services.exams.submitExamResults(examId, body);
     // 対象が存在しない場合は404を返す
     if (!ok) {
       res.status(404).json({ error: 'Not Found' });

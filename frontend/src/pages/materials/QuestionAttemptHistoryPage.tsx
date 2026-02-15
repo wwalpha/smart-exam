@@ -111,7 +111,7 @@ export const QuestionAttemptHistoryPage = () => {
                 次回日付: <span className="font-medium">{candidateState.candidate?.nextTime ?? '-'}</span>
               </div>
               <div>
-                ロック: <span className="font-medium">{candidateState.candidate?.testId ?? '-'}</span>
+                ロック: <span className="font-medium">{candidateState.candidate?.examId ?? '-'}</span>
               </div>
             </div>
 

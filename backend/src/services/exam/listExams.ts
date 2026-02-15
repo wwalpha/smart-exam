@@ -10,12 +10,12 @@ import { toApiExam } from './internal';
 const listExamsImpl = async (repositories: Repositories): Promise<Exam[]> => {
   const items: ExamTable[] = await repositories.exams.scanAll();
 
-  // stable ordering: createdDate desc then testId desc
+  // stable ordering: createdDate desc then examId desc
   items.sort((a, b) => {
     // 条件に応じて処理を分岐する
     if (a.createdDate !== b.createdDate) return a.createdDate < b.createdDate ? 1 : -1;
     // 処理結果を呼び出し元へ返す
-    return a.testId < b.testId ? 1 : -1;
+    return a.examId < b.examId ? 1 : -1;
   });
 
   // 処理結果を呼び出し元へ返す

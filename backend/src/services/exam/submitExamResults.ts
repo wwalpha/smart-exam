@@ -7,13 +7,16 @@ import type { ExamsService } from './index';
 // 内部で利用する補助処理を定義する
 const submitExamResultsImpl = async (
   repositories: Repositories,
-  testId: string,
+  examId: string,
   req: Parameters<ExamsService['submitExamResults']>[1],
 ): Promise<boolean> => {
   // 非同期で必要な値を取得する
-  const test = await repositories.exams.get(testId);
+  const test = await repositories.exams.get(examId);
   // 条件に応じて処理を分岐する
   if (!test) return false;
+
+  const details = await repositories.examDetails.listByExamId(examId);
+  const targetIds = details.map((detail) => detail.targetId);
 
   // 処理で使う値を準備する
   const dateYmd = req.date ? DateUtils.toYmd(req.date) : DateUtils.todayYmd();
@@ -33,7 +36,7 @@ const submitExamResultsImpl = async (
 
   // 非同期処理の完了を待つ
   await Promise.all(
-    test.questions.map(async (targetId) => {
+    targetIds.map(async (targetId) => {
       // 処理で使う値を準備する
       const isCorrect = resultByTargetId.get(targetId);
 
@@ -65,7 +68,7 @@ const submitExamResultsImpl = async (
             await repositories.examCandidates.closeCandidateIfMatch({
               subject: test.subject,
               candidateKey: open.candidateKey,
-              expectedTestId: testId,
+              expectedExamId: examId,
             });
           }
 
@@ -83,12 +86,12 @@ const submitExamResultsImpl = async (
         }
 
         // 条件に応じて処理を分岐する
-        if (open && open.testId === testId) {
+        if (open && open.examId === examId) {
           // 非同期処理の完了を待つ
           await repositories.examCandidates.releaseLockIfMatch({
             subject: test.subject,
             candidateKey: open.candidateKey,
-            testId,
+            examId,
           });
         }
       } catch (e: unknown) {
