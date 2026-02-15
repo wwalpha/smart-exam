@@ -9,24 +9,16 @@ const deleteExamImpl = async (repositories: Repositories, examId: string): Promi
   // 条件に応じて処理を分岐する
   if (!existing) return false;
 
-  const details = await repositories.examDetails.listByExamId(examId);
-  const targetIds = details.map((detail) => detail.targetId);
+  const lockedCandidates = await repositories.examCandidates.listLockedCandidatesByExamId({
+    subject: existing.subject,
+    examId,
+  });
 
   // 非同期処理の完了を待つ
   await Promise.all(
-    targetIds.map(async (targetId) => {
+    lockedCandidates.map(async (candidate) => {
       // 例外が発生しうる処理を実行する
       try {
-        // 非同期で必要な値を取得する
-        const candidate = await repositories.examCandidates.getLatestCandidateByTargetId({
-          subject: existing.subject,
-          targetId,
-        });
-        // 条件に応じて処理を分岐する
-        if (!candidate) return;
-        // 条件に応じて処理を分岐する
-        if (candidate.examId !== examId) return;
-
         // 非同期処理の完了を待つ
         await repositories.examCandidates.releaseLockIfMatch({
           subject: existing.subject,

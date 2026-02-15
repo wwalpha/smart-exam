@@ -10,6 +10,7 @@ import { getLatestOpenCandidateByTargetId } from './getLatestOpenCandidateByTarg
 import { listCandidates } from './listCandidates';
 import { listCandidatesByTargetId } from './listCandidatesByTargetId';
 import { listDueCandidates } from './listDueCandidates';
+import { listLockedCandidatesByExamId } from './listLockedCandidatesByExamId';
 import { lockCandidateIfUnlocked } from './lockCandidateIfUnlocked';
 import { releaseLockIfMatch } from './releaseLockIfMatch';
 
@@ -26,6 +27,7 @@ export {
   listCandidates,
   listCandidatesByTargetId,
   listDueCandidates,
+  listLockedCandidatesByExamId,
   lockCandidateIfUnlocked,
   releaseLockIfMatch,
 };
@@ -44,5 +46,6 @@ export const ExamCandidatesRepository = {
   closeCandidateIfMatch,
   listDueCandidates,
   listCandidates,
+  listLockedCandidatesByExamId,
   deleteOpenCandidatesByTargetId,
 };

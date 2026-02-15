@@ -51,7 +51,7 @@ export const KanjiCreatePage = () => {
                 {...register('kanji', { required: '必須です' })}
                 aria-invalid={!!errors.kanji}
                 className={errors.kanji ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                placeholder="例: 憂鬱"
+                placeholder="例: 友人にねんが状を書く"
               />
               {errors.kanji?.message ? (
                 <p className="text-sm text-destructive">{String(errors.kanji.message)}</p>
@@ -64,7 +64,7 @@ export const KanjiCreatePage = () => {
                 {...register('reading', { required: '必須です' })}
                 aria-invalid={!!errors.reading}
                 className={errors.reading ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                placeholder="例: ゆううつ"
+                placeholder="例: 年賀"
               />
               {errors.reading?.message ? (
                 <p className="text-sm text-destructive">{String(errors.reading.message)}</p>

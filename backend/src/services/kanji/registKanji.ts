@@ -5,23 +5,29 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { WordMasterTable } from '@/types/db';
 
+import { computeKanjiQuestionFields } from './computeKanjiQuestionFields';
 import type { KanjiService } from './index';
 
-const resolveReadingHiragana = async (params: {
+const resolveKanjiQuestionFields = async (params: {
   repositories: Repositories;
   wordId: string;
   question: string;
   answer: string;
-}): Promise<string> => {
+}): Promise<{ readingHiragana: string; underlineSpec: { type: 'promptSpan'; start: number; length: number } }> => {
   const bulk = await params.repositories.bedrock.generateKanjiQuestionReadingsBulk({
     items: [{ id: params.wordId, question: params.question, answer: params.answer }],
   });
+  console.log('Bedrock からの生成結果:', bulk);
 
   const generated = bulk.items.find((item) => item.id === params.wordId)?.readingHiragana?.trim() ?? '';
   if (!generated) {
     throw new Error('readingHiragana の生成に失敗しました');
   }
-  return generated;
+
+  return computeKanjiQuestionFields({
+    question: params.question,
+    readingHiragana: generated,
+  });
 };
 
 // 公開するサービス処理を定義する
@@ -33,28 +39,21 @@ export const registKanji = async (
 
   const item: Kanji = { id, ...data };
 
-  // import と同じ生成経路に揃えるため、読みは Bedrock から取得する。
-  const readingHiragana = await resolveReadingHiragana({
+  // import と同じ生成経路に揃えるため、読み/下線は Bedrock + 共通計算で生成する。
+  const kanjiQuestionFields = await resolveKanjiQuestionFields({
     repositories,
     wordId: id,
     question: data.kanji,
     answer: data.reading,
   });
 
-  // 単語登録時は問題文全体を下線対象として扱い、読み/下線情報を必ず同時保存する。
-  const underlineLength = data.kanji.length;
-
   const dbItem: WordMasterTable = {
     wordId: id,
     question: data.kanji,
     answer: data.reading,
     subject: data.subject,
-    readingHiragana,
-    underlineSpec: {
-      type: 'promptSpan',
-      start: 0,
-      length: underlineLength,
-    },
+    readingHiragana: kanjiQuestionFields.readingHiragana,
+    underlineSpec: kanjiQuestionFields.underlineSpec,
   };
 
   // 非同期処理の完了を待つ
