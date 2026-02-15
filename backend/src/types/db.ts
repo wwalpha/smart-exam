@@ -59,9 +59,9 @@ export interface WordMasterTable {
   /** 科目 */
   subject: SubjectId;
   /** 読み（ひらがな、本文中で下線対象） */
-  readingHiragana?: string;
+  readingHiragana: string;
   /** 下線指定（本文内の部分範囲） */
-  underlineSpec?: {
+  underlineSpec: {
     type: 'promptSpan';
     start: number;
     length: number;

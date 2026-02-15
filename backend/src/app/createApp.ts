@@ -109,7 +109,12 @@ export const createApp = (): express.Express => {
   // 指定した漢字データの詳細を取得するAPI
   app.get('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(controllers.kanji.getKanji));
   // 指定した漢字データを更新するAPI
-  app.patch('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(controllers.kanji.updateKanji));
+  app.patch(
+    '/api/kanji/:kanjiId',
+    validateParams(KanjiIdParamsSchema),
+    validateBody(controllers.kanji.UpdateKanjiBodySchema),
+    handleRequest(controllers.kanji.updateKanji),
+  );
   // 指定した漢字データを削除するAPI
   app.delete('/api/kanji/:kanjiId', validateParams(KanjiIdParamsSchema), handleRequest(controllers.kanji.deleteKanji));
   // 複数の漢字データを一括削除するAPI
@@ -170,8 +175,6 @@ export const createApp = (): express.Express => {
     handleRequest(controllers.questions.deleteQuestion),
   );
 
-  // 漢字テストの一覧を取得するAPI
-  app.get('/api/exam/kanji', handleRequest(controllers.exams.kanji.listTests));
   // 条件を指定して漢字テストを検索するAPI
   app.post(
     '/api/exam/kanji/search',
@@ -191,8 +194,6 @@ export const createApp = (): express.Express => {
     handleRequest(controllers.exams.kanji.listTestTargets),
   );
 
-  // 問題テストの一覧を取得するAPI
-  app.get('/api/exam/question', handleRequest(controllers.exams.question.listTests));
   // 条件を指定して問題テストを検索するAPI
   app.post(
     '/api/exam/question/search',

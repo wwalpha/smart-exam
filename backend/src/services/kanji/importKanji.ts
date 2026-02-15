@@ -7,9 +7,35 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable, WordMasterTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from './computeKanjiQuestionFields';
-import type { KanjiService } from './createKanjiService';
+import type { KanjiService } from './index';
 import type { BuildCandidateRowParams, BuildCandidatesFromHistoriesParams } from './importKanji.types';
 import { parsePipeQuestionLine } from './importUtils';
+
+type ParsedImportRow = {
+  lineNumber: number;
+  content: string;
+  question: string;
+  answer: string;
+  histories: { submittedDate: string; isCorrect: boolean }[];
+  wordId: string;
+};
+
+type ParseRowsResult = {
+  rows: ParsedImportRow[];
+  duplicateCount: number;
+  errorCount: number;
+  errors: ImportKanjiResponse['errors'];
+};
+
+type BatchBuildResult = {
+  wordMasterItems: WordMasterTable[];
+  candidatesToCreate: ExamCandidateTable[];
+  candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }>;
+  successCount: number;
+  errorCount: number;
+  errors: ImportKanjiResponse['errors'];
+  questionIds: string[];
+};
 
 const buildCandidateRow = (params: BuildCandidateRowParams): ExamCandidateTable => {
   const id = createUuid();
@@ -104,59 +130,31 @@ const buildCandidatesFromHistories = (params: BuildCandidatesFromHistoriesParams
   return candidates;
 };
 
-const importKanjiImpl = async (
-  repositories: Repositories,
-  data: Parameters<KanjiService['importKanji']>[0],
-): Promise<ImportKanjiResponse> => {
-  // 処理で使う値を準備する
-  const subject = data.subject;
-
-  // 処理で使う値を準備する
-  const lines = data.fileContent
+const normalizeImportLines = (fileContent: string): string[] => {
+  return fileContent
     .split(/\r?\n/)
     .map((x) => x.replaceAll('　', ' ').trim())
     .filter((x) => x.length > 0);
+};
 
-  const questionIds: string[] = [];
-
-  // 後続処理で更新する値を初期化する
-  let successCount = 0;
-  // 後続処理で更新する値を初期化する
+const parseValidRows = (params: {
+  lines: string[];
+  existingKey: Set<string>;
+  formatErrorReason: string;
+}): ParseRowsResult => {
+  const seenKey = new Set<string>();
+  const rows: ParsedImportRow[] = [];
   let duplicateCount = 0;
-  // 後続処理で更新する値を初期化する
   let errorCount = 0;
   const errors: ImportKanjiResponse['errors'] = [];
 
-  // 処理で使う値を準備する
-  const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
+  for (let index = 0; index < params.lines.length; index += 1) {
+    const line = params.lines[index];
+    const lineNumber = index + 1;
 
-  // 非同期で必要な値を取得する
-  const existing = (await repositories.wordMaster.listKanji(subject)).filter((x) => Boolean(x.underlineSpec));
-  // 処理で使う値を準備する
-  const existingKey = new Set(
-    existing.map((x) => `${String(x.question ?? '').trim()}|${String(x.answer ?? '').trim()}`).filter((x) => x !== '|'),
-  );
-  // 処理で使う値を準備する
-  const seenKey = new Set<string>();
-
-  const validRows: Array<{
-    lineNumber: number;
-    content: string;
-    question: string;
-    answer: string;
-    histories: { submittedDate: string; isCorrect: boolean }[];
-    wordId: string;
-  }> = [];
-
-  // 対象データを順番に処理する
-  for (let index = 0; index < lines.length; index += 1) {
-    // 処理で使う値を準備する
-    const line = lines[index];
-
-    // 条件に応じて処理を分岐する
     if (!line.includes('|')) {
       errorCount += 1;
-      errors.push({ line: index + 1, content: line, reason: formatErrorReason });
+      errors.push({ line: lineNumber, content: line, reason: params.formatErrorReason });
       continue;
     }
 
@@ -165,50 +163,41 @@ const importKanjiImpl = async (
       answer: string;
       histories: { submittedDate: string; isCorrect: boolean }[];
     };
-    // 例外が発生しうる処理を実行する
     try {
-      // 値を代入する
       parsed = parsePipeQuestionLine(line);
     } catch (e) {
-      // 処理で使う値を準備する
       const message = e instanceof Error ? e.message : 'Unknown error';
       errorCount += 1;
       errors.push({
-        line: index + 1,
+        line: lineNumber,
         content: line,
-        reason: message === 'フォーマットが不正です' ? formatErrorReason : message,
+        reason: message === 'フォーマットが不正です' ? params.formatErrorReason : message,
       });
       continue;
     }
 
-    // 処理で使う値を準備する
     const question = parsed.question.trim();
-    // 処理で使う値を準備する
     const answer = parsed.answer.trim();
-    // 条件に応じて処理を分岐する
     if (!question) {
       errorCount += 1;
-      errors.push({ line: index + 1, content: line, reason: '本文が空です' });
+      errors.push({ line: lineNumber, content: line, reason: '本文が空です' });
       continue;
     }
-    // 条件に応じて処理を分岐する
     if (!answer) {
       errorCount += 1;
-      errors.push({ line: index + 1, content: line, reason: '答え漢字が空です' });
+      errors.push({ line: lineNumber, content: line, reason: '答え漢字が空です' });
       continue;
     }
 
-    // 処理で使う値を準備する
     const key = `${question}|${answer}`;
-    // 条件に応じて処理を分岐する
-    if (existingKey.has(key) || seenKey.has(key)) {
+    if (params.existingKey.has(key) || seenKey.has(key)) {
       duplicateCount += 1;
       continue;
     }
     seenKey.add(key);
 
-    validRows.push({
-      lineNumber: index + 1,
+    rows.push({
+      lineNumber,
       content: line,
       question,
       answer,
@@ -217,31 +206,40 @@ const importKanjiImpl = async (
     });
   }
 
+  return {
+    rows,
+    duplicateCount,
+    errorCount,
+    errors,
+  };
+};
+
+const buildItemsByBatch = async (params: {
+  repositories: Repositories;
+  rows: ParsedImportRow[];
+  subject: SubjectId;
+  modelId: string;
+}): Promise<BatchBuildResult> => {
   const wordMasterItems: WordMasterTable[] = [];
   const candidatesToCreate: ExamCandidateTable[] = [];
   const candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }> = [];
-
-  // 処理で使う値を準備する
-  const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
-  // 処理で使う値を準備する
+  const questionIds: string[] = [];
+  const errors: ImportKanjiResponse['errors'] = [];
+  let successCount = 0;
+  let errorCount = 0;
   const batchSize = 100;
-  // 対象データを順番に処理する
-  for (let start = 0; start < validRows.length; start += batchSize) {
-    // 処理で使う値を準備する
-    const batch = validRows.slice(start, start + batchSize);
+
+  for (let start = 0; start < params.rows.length; start += batchSize) {
+    const batch = params.rows.slice(start, start + batchSize);
 
     let bulkGenerated: { items: Array<{ id: string; readingHiragana: string }> };
-    // 例外が発生しうる処理を実行する
     try {
-      // 値を代入する
-      bulkGenerated = await repositories.bedrock.generateKanjiQuestionReadingsBulk({
+      bulkGenerated = await params.repositories.bedrock.generateKanjiQuestionReadingsBulk({
         items: batch.map((r) => ({ id: r.wordId, question: r.question, answer: r.answer })),
-        modelId,
+        modelId: params.modelId,
       });
     } catch (e) {
-      // 処理で使う値を準備する
       const message = e instanceof Error ? e.message : 'Unknown error';
-      // 対象データを順番に処理する
       for (const row of batch) {
         errorCount += 1;
         errors.push({ line: row.lineNumber, content: row.content, reason: `読み生成に失敗しました: ${message}` });
@@ -249,13 +247,9 @@ const importKanjiImpl = async (
       continue;
     }
 
-    // 処理で使う値を準備する
     const byId = new Map(bulkGenerated.items.map((x) => [String(x.id ?? ''), x] as const));
-    // 対象データを順番に処理する
     for (const row of batch) {
-      // 処理で使う値を準備する
       const raw = byId.get(row.wordId);
-      // 条件に応じて処理を分岐する
       if (!raw) {
         errorCount += 1;
         errors.push({
@@ -266,9 +260,7 @@ const importKanjiImpl = async (
         continue;
       }
 
-      // 例外が発生しうる処理を実行する
       try {
-        // 処理で使う値を準備する
         const computed = computeKanjiQuestionFields({
           question: row.question,
           readingHiragana: String(raw.readingHiragana ?? '').trim(),
@@ -276,19 +268,19 @@ const importKanjiImpl = async (
 
         wordMasterItems.push({
           wordId: row.wordId,
-          subject,
+          subject: params.subject,
           question: row.question,
           answer: row.answer,
           readingHiragana: computed.readingHiragana,
           underlineSpec: computed.underlineSpec,
         });
 
-        // 条件に応じて処理を分岐する
+        // 履歴付き取り込みは既存候補と二重化しないよう、対象ID単位で一旦全削除してから再構築する。
         if (row.histories.length > 0) {
-          candidateTargetsToDelete.push({ subject, targetId: row.wordId });
+          candidateTargetsToDelete.push({ subject: params.subject, targetId: row.wordId });
           candidatesToCreate.push(
             ...buildCandidatesFromHistories({
-              subject,
+              subject: params.subject,
               targetWordId: row.wordId,
               histories: row.histories,
               finalStatus: 'AUTO',
@@ -297,7 +289,7 @@ const importKanjiImpl = async (
         } else {
           candidatesToCreate.push(
             buildCandidateRow({
-              subject,
+              subject: params.subject,
               questionId: row.wordId,
               mode: 'KANJI',
               nextTime: DateUtils.todayYmd(),
@@ -311,33 +303,82 @@ const importKanjiImpl = async (
         successCount += 1;
         questionIds.push(row.wordId);
       } catch (e) {
-        // 処理で使う値を準備する
         const message = e instanceof Error ? e.message : 'Unknown error';
         errorCount += 1;
         errors.push({ line: row.lineNumber, content: row.content, reason: `読み生成に失敗しました: ${message}` });
-        continue;
       }
     }
   }
 
-  // 非同期処理の完了を待つ
-  await repositories.wordMaster.bulkCreate(wordMasterItems);
+  return {
+    wordMasterItems,
+    candidatesToCreate,
+    candidateTargetsToDelete,
+    successCount,
+    errorCount,
+    errors,
+    questionIds,
+  };
+};
 
-  // 条件に応じて処理を分岐する
-  if (candidateTargetsToDelete.length > 0) {
-    // 非同期処理の完了を待つ
+const persistImportedRows = async (params: {
+  repositories: Repositories;
+  wordMasterItems: WordMasterTable[];
+  candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }>;
+  candidatesToCreate: ExamCandidateTable[];
+}): Promise<void> => {
+  await params.repositories.wordMaster.bulkCreate(params.wordMasterItems);
+
+  if (params.candidateTargetsToDelete.length > 0) {
     await Promise.all(
-      candidateTargetsToDelete.map(async (t) => {
-        // 非同期処理の完了を待つ
-        await repositories.examCandidates.deleteCandidatesByTargetId({
-          subject: t.subject,
-          targetId: t.targetId,
+      params.candidateTargetsToDelete.map((target) => {
+        return params.repositories.examCandidates.deleteCandidatesByTargetId({
+          subject: target.subject,
+          targetId: target.targetId,
         });
       }),
     );
   }
-  // 非同期処理の完了を待つ
-  await repositories.examCandidates.bulkCreateCandidates(candidatesToCreate);
+
+  await params.repositories.examCandidates.bulkCreateCandidates(params.candidatesToCreate);
+};
+
+const importKanjiImpl = async (
+  repositories: Repositories,
+  data: Parameters<KanjiService['importKanji']>[0],
+): Promise<ImportKanjiResponse> => {
+  const subject = data.subject;
+  const lines = normalizeImportLines(data.fileContent);
+  const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
+
+  // 既存データと同一キーの重複登録を避けるため、question+answer のキー集合を先に作成する。
+  const existing = (await repositories.wordMaster.listKanji(subject)).filter((x) => Boolean(x.underlineSpec));
+  const existingKey = new Set(
+    existing.map((x) => `${String(x.question ?? '').trim()}|${String(x.answer ?? '').trim()}`).filter((x) => x !== '|'),
+  );
+  const parsedResult = parseValidRows({ lines, existingKey, formatErrorReason });
+
+  const modelId = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+  const buildResult = await buildItemsByBatch({
+    repositories,
+    rows: parsedResult.rows,
+    subject,
+    modelId,
+  });
+
+  await persistImportedRows({
+    repositories,
+    wordMasterItems: buildResult.wordMasterItems,
+    candidateTargetsToDelete: buildResult.candidateTargetsToDelete,
+    candidatesToCreate: buildResult.candidatesToCreate,
+  });
+
+  // 複数フェーズの結果を最後に集約して返すことで、失敗行と成功行を同時に可視化する。
+  const errors = [...parsedResult.errors, ...buildResult.errors];
+  const errorCount = parsedResult.errorCount + buildResult.errorCount;
+  const successCount = buildResult.successCount;
+  const duplicateCount = parsedResult.duplicateCount;
+  const questionIds = buildResult.questionIds;
 
   // 処理結果を呼び出し元へ返す
   return {

@@ -2,7 +2,7 @@ import type { Kanji } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { KanjiService } from './createKanjiService';
+import type { KanjiService } from './index';
 
 const listKanjiImpl = async (repositories: Repositories): Promise<Kanji[]> => {
   const items = await repositories.wordMaster.listKanji();

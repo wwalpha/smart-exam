@@ -1,7 +1,7 @@
 import type { Repositories } from '@/repositories/createRepositories';
 import { logger } from '@/lib/logger';
 
-import type { KanjiService } from './createKanjiService';
+import type { KanjiService } from './index';
 
 // 内部で利用する処理を定義する
 const deleteManyKanjiImpl = async (repositories: Repositories, ids: string[]): Promise<void> => {

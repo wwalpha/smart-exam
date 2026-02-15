@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createKanjiService } from '@/services/kanji/createKanjiService';
+import { createKanjiService } from '@/services/kanji';
 import type { Repositories } from '@/repositories/createRepositories';
 
 describe('KanjiService.importKanji (QUESTIONS format)', () => {

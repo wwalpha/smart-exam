@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 
-import { createKanjiService } from '@/services/kanji/createKanjiService';
+import { createKanjiService } from '@/services/kanji';
 import { ExamPdfService } from '@/services/exam/examPdfService';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamDetail } from '@smart-exam/api-types';

@@ -23,7 +23,7 @@ import type {
   ReviewAttempt,
   ExamCandidate,
   Kanji,
-  CreateKanjiRequest,
+  RegistKanjiRequest,
   UpdateKanjiRequest,
   ImportKanjiRequest,
   ImportKanjiResponse,
@@ -180,7 +180,7 @@ export type MaterialSlice = {
 export type KanjiSlice = {
   kanji: KanjiState;
   fetchKanjiList: (params?: Record<string, unknown>) => Promise<void>;
-  createKanji: (request: CreateKanjiRequest) => Promise<void>;
+  createKanji: (request: RegistKanjiRequest) => Promise<void>;
   fetchKanji: (id: string) => Promise<void>;
   updateKanji: (id: string, request: UpdateKanjiRequest) => Promise<void>;
   deleteKanji: (id: string) => Promise<void>;

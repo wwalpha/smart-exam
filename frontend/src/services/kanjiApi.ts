@@ -3,7 +3,7 @@ import type {
   Kanji,
   KanjiListResponse,
   SearchKanjiRequest,
-  CreateKanjiRequest,
+  RegistKanjiRequest,
   UpdateKanjiRequest,
   DeleteManyKanjiRequest,
   ImportKanjiRequest,
@@ -18,8 +18,8 @@ export const listKanji = async (params?: SearchKanjiRequest): Promise<KanjiListR
   });
 };
 
-export const createKanji = async (request: CreateKanjiRequest): Promise<Kanji> => {
-  return apiRequest<Kanji, CreateKanjiRequest>({
+export const createKanji = async (request: RegistKanjiRequest): Promise<Kanji> => {
+  return apiRequest<Kanji, RegistKanjiRequest>({
     method: 'POST',
     path: '/api/kanji',
     body: request,

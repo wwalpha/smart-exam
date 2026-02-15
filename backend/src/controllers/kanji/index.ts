@@ -12,8 +12,8 @@ import { searchKanji } from './searchKanji';
 import { updateKanji } from './updateKanji';
 
 export const RegistKanjiBodySchema = z.object({
-  kanji: z.string().min(1),
-  reading: z.string().optional(),
+  kanji: z.string().trim().min(1),
+  reading: z.string().trim().min(1),
   subject: SubjectIdSchema,
 });
 
@@ -23,6 +23,12 @@ export const SearchKanjiBodySchema = z.object({
   subject: SubjectIdSchema.optional(),
   limit: z.number().int().positive().optional(),
   cursor: z.string().optional(),
+});
+
+export const UpdateKanjiBodySchema = z.object({
+  kanji: z.string().trim().min(1).optional(),
+  reading: z.string().trim().min(1).optional(),
+  subject: SubjectIdSchema.optional(),
 });
 
 export const ImportKanjiBodySchema = z.object({
@@ -38,6 +44,7 @@ export const kanjiController = (services: Services) => {
   return {
     RegistKanjiBodySchema,
     SearchKanjiBodySchema,
+    UpdateKanjiBodySchema,
     ImportKanjiBodySchema,
     DeleteManyKanjiBodySchema,
     searchKanji: searchKanji(services),

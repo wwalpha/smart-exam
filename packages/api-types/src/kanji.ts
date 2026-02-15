@@ -9,7 +9,7 @@ export type Kanji = {
   /** 漢字 */
   kanji: string;
   /** よみ */
-  reading?: string;
+  reading: string;
   /** 科目（コード値） */
   subject: SubjectId;
 };
@@ -45,20 +45,20 @@ export type GetKanjiParams = {
 export type GetKanjiResponse = Kanji;
 
 /** 漢字作成リクエスト */
-export type CreateKanjiRequest = {
+export type RegistKanjiRequest = {
   /** 漢字 */
   kanji: string;
   /** よみ */
-  reading?: string;
+  reading: string;
   /** 科目 */
   subject: SubjectId;
 };
 
 /** 漢字作成レスポンス */
-export type CreateKanjiResponse = Kanji;
+export type RegistKanjiResponse = Kanji;
 
 /** 漢字更新リクエスト */
-export type UpdateKanjiRequest = Partial<CreateKanjiRequest>;
+export type UpdateKanjiRequest = Partial<RegistKanjiRequest>;
 
 /** `PATCH /kanji/:kanjiId` */
 export type UpdateKanjiParams = {

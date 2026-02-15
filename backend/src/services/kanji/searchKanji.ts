@@ -2,7 +2,7 @@ import type { SearchKanjiResponse } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { KanjiService } from './createKanjiService';
+import type { KanjiService } from './index';
 
 // 内部で利用する処理を定義する
 const searchKanjiImpl = async (
