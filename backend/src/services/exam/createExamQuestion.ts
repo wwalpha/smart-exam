@@ -132,7 +132,7 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
 
   // 非同期処理の完了を待つ
   await deps.repositories.exams.put(testRow);
-  await deps.repositories.examDetails.putMany(examId, targetIds);
+  await deps.repositories.examDetails.putMany(examId, targetIds, req.mode);
 
   // 処理結果を呼び出し元へ返す
   return toApiExam(testRow) as Exam;

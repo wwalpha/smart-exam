@@ -18,8 +18,14 @@ describe('KanjiService.deleteManyKanji', () => {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
       },
       exams: {
-        scanAll: vi.fn().mockRejectedValue(new Error('scan failed')),
+        get: vi.fn().mockRejectedValue(new Error('exam get failed')),
         put: vi.fn().mockResolvedValue(undefined),
+      },
+      examDetails: {
+        listExamIdsByTargetId: vi.fn().mockResolvedValue(['e1']),
+        listByExamId: vi.fn().mockResolvedValue([]),
+        deleteByExamId: vi.fn().mockResolvedValue(undefined),
+        putMany: vi.fn().mockResolvedValue(undefined),
       },
     } as unknown as Repositories;
 
@@ -27,6 +33,7 @@ describe('KanjiService.deleteManyKanji', () => {
 
     await expect(deleteManyKanji(['w1', 'w2'])).resolves.toBeUndefined();
     expect(repositories.wordMaster.delete).toHaveBeenCalledTimes(2);
-    expect(repositories.exams.scanAll).toHaveBeenCalledTimes(1);
+    expect(repositories.examDetails.listExamIdsByTargetId).toHaveBeenCalledTimes(2);
+    expect(repositories.exams.get).toHaveBeenCalledTimes(1);
   });
 });

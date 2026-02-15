@@ -61,6 +61,7 @@ data "aws_iam_policy_document" "lambda" {
       "${aws_dynamodb_table.exam_candidates.arn}/index/*",
       "${aws_dynamodb_table.exam_histories.arn}/index/*",
       "${aws_dynamodb_table.exam.arn}/index/*",
+      "${aws_dynamodb_table.exam_details.arn}/index/*",
     ]
   }
 

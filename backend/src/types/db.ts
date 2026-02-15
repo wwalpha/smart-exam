@@ -100,6 +100,8 @@ export interface ExamDetailTable {
   examId: string;
   /** 明細順序 (SK) */
   seq: number;
+  /** 対象種別 */
+  targetType: ReviewMode;
   /** 対象ID */
   targetId: string;
 }

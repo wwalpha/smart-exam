@@ -266,7 +266,7 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
 
   // 非同期処理の完了を待つ
   await deps.repositories.exams.put(testRow);
-  await deps.repositories.examDetails.putMany(examId, targetIds);
+  await deps.repositories.examDetails.putMany(examId, targetIds, req.mode);
 
   // 条件に応じて処理を分岐する
   if (pdfS3Key) {

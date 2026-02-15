@@ -4,7 +4,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ExamCandidateTable, WordMasterTable } from '@/types/db';
+import type { ExamCandidateTable, ExamHistoryTable, WordMasterTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from './computeKanjiQuestionFields';
 import type { KanjiService } from './index';
@@ -30,11 +30,27 @@ type ParseRowsResult = {
 type BatchBuildResult = {
   wordMasterItems: WordMasterTable[];
   candidatesToCreate: ExamCandidateTable[];
+  historiesToCreate: ExamHistoryTable[];
   candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }>;
   successCount: number;
   errorCount: number;
   errors: ImportKanjiResponse['errors'];
   questionIds: string[];
+};
+
+const toHistoryItem = (candidate: ExamCandidateTable): ExamHistoryTable => {
+  return {
+    subject: candidate.subject,
+    candidateKey: candidate.candidateKey,
+    id: candidate.id,
+    questionId: candidate.questionId,
+    mode: candidate.mode,
+    status: 'CLOSED',
+    correctCount: candidate.correctCount,
+    nextTime: candidate.nextTime,
+    createdAt: candidate.createdAt,
+    closedAt: candidate.createdAt,
+  };
 };
 
 const buildCandidateRow = (params: BuildCandidateRowParams): ExamCandidateTable => {
@@ -221,6 +237,7 @@ const buildItemsByBatch = async (params: {
 }): Promise<BatchBuildResult> => {
   const wordMasterItems: WordMasterTable[] = [];
   const candidatesToCreate: ExamCandidateTable[] = [];
+  const historiesToCreate: ExamHistoryTable[] = [];
   const candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }> = [];
   const questionIds: string[] = [];
   const errors: ImportKanjiResponse['errors'] = [];
@@ -276,14 +293,14 @@ const buildItemsByBatch = async (params: {
         // 履歴付き取り込みは既存候補と二重化しないよう、対象ID単位で一旦全削除してから再構築する。
         if (row.histories.length > 0) {
           candidateTargetsToDelete.push({ subject: params.subject, targetId: row.wordId });
-          candidatesToCreate.push(
-            ...buildCandidatesFromHistories({
-              subject: params.subject,
-              targetWordId: row.wordId,
-              histories: row.histories,
-              finalStatus: 'AUTO',
-            }),
-          );
+          const rebuilt = buildCandidatesFromHistories({
+            subject: params.subject,
+            targetWordId: row.wordId,
+            histories: row.histories,
+            finalStatus: 'AUTO',
+          });
+          historiesToCreate.push(...rebuilt.filter((x) => x.status === 'CLOSED').map(toHistoryItem));
+          candidatesToCreate.push(...rebuilt.filter((x) => x.status !== 'CLOSED'));
         } else {
           candidatesToCreate.push(
             buildCandidateRow({
@@ -311,6 +328,7 @@ const buildItemsByBatch = async (params: {
   return {
     wordMasterItems,
     candidatesToCreate,
+    historiesToCreate,
     candidateTargetsToDelete,
     successCount,
     errorCount,
@@ -322,6 +340,7 @@ const buildItemsByBatch = async (params: {
 const persistImportedRows = async (params: {
   repositories: Repositories;
   wordMasterItems: WordMasterTable[];
+  historiesToCreate: ExamHistoryTable[];
   candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }>;
   candidatesToCreate: ExamCandidateTable[];
 }): Promise<void> => {
@@ -334,6 +353,21 @@ const persistImportedRows = async (params: {
           subject: target.subject,
           targetId: target.targetId,
         });
+      }),
+    );
+  }
+
+  if (params.historiesToCreate.length > 0) {
+    await Promise.all(
+      params.historiesToCreate.map(async (history) => {
+        try {
+          await params.repositories.examHistories.putHistory(history);
+        } catch (e) {
+          const name = (e as { name?: string } | null)?.name;
+          if (name !== 'ConditionalCheckFailedException') {
+            throw e;
+          }
+        }
       }),
     );
   }
@@ -365,6 +399,7 @@ const importKanjiImpl = async (
   await persistImportedRows({
     repositories,
     wordMasterItems: buildResult.wordMasterItems,
+    historiesToCreate: buildResult.historiesToCreate,
     candidateTargetsToDelete: buildResult.candidateTargetsToDelete,
     candidatesToCreate: buildResult.candidatesToCreate,
   });

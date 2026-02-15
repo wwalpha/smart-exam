@@ -40,7 +40,7 @@ const deleteKanjiImpl = async (repositories: Repositories, id: string): Promise<
       const nextResults = (t.results ?? []).filter((r) => r.id !== id);
 
       await repositories.examDetails.deleteByExamId(t.examId);
-      await repositories.examDetails.putMany(t.examId, nextQuestions);
+      await repositories.examDetails.putMany(t.examId, nextQuestions, t.mode);
 
       // 不整合を避けるため既存PDFキーは引き継がず更新する
       const { pdfS3Key: _pdfS3Key, ...rest } = t;

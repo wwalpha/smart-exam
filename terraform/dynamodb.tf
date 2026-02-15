@@ -161,6 +161,18 @@ resource "aws_dynamodb_table" "exam_details" {
     name = "seq"
     type = "N"
   }
+
+  attribute {
+    name = "targetId"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "gsi_target_id_exam_id"
+    hash_key        = "targetId"
+    range_key       = "examId"
+    projection_type = "ALL"
+  }
 }
 
 # ----------------------------------------------------------------------------------------------

@@ -60,7 +60,7 @@ const deleteMaterialImpl = async (repositories: Repositories, materialId: string
       const nextResults = test.results ? test.results.filter((r) => !deletedQuestionIds.has(r.id)) : undefined;
 
       await repositories.examDetails.deleteByExamId(test.examId);
-      await repositories.examDetails.putMany(test.examId, nextQuestions);
+      await repositories.examDetails.putMany(test.examId, nextQuestions, test.mode);
 
       // 非同期処理の完了を待つ
       await repositories.exams.put({

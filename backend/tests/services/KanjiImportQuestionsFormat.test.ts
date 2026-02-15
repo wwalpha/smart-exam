@@ -140,6 +140,9 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
         bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
+      examHistories: {
+        putHistory: vi.fn().mockResolvedValue(undefined),
+      },
       bedrock: {
         generateKanjiQuestionReadingsBulk: vi
           .fn()
@@ -176,6 +179,13 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     const createdCandidates = (
       repositories.examCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
     ).mock.calls[0][0] as Array<{ status: string }>;
+    const historyPutCalls = (
+      repositories.examHistories.putHistory as unknown as { mock: { calls: Array<[ { status: string } ]> } }
+    ).mock.calls;
+
+    expect(historyPutCalls.length).toBeGreaterThan(0);
+    expect(historyPutCalls.every((call) => call[0].status === 'CLOSED')).toBe(true);
     expect(createdCandidates.some((c) => c.status === 'OPEN' || c.status === 'EXCLUDED')).toBe(true);
+    expect(createdCandidates.every((c) => c.status !== 'CLOSED')).toBe(true);
   });
 });

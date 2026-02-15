@@ -1,112 +1,92 @@
 import type { Repositories } from '@/repositories/createRepositories';
 import { logger } from '@/lib/logger';
+import pLimit from 'p-limit';
 
 import type { KanjiService } from './index';
 
+const MAX_CONCURRENCY = 50;
+
+const deleteWordAndCandidates = async (repositories: Repositories, id: string): Promise<string | null> => {
+  let existing: Awaited<ReturnType<typeof repositories.wordMaster.get>>;
+  try {
+    existing = await repositories.wordMaster.get(id);
+  } catch (error) {
+    logger.error(`[kanji.deleteManyKanji] failed to load word id=${id}`, error);
+    return null;
+  }
+
+  if (!existing) return null;
+
+  try {
+    await repositories.examCandidates.deleteCandidatesByTargetId({
+      subject: existing.subject,
+      targetId: id,
+    });
+  } catch (error) {
+    logger.warn(`[kanji.deleteManyKanji] candidate cleanup failed id=${id}`, error);
+  }
+
+  try {
+    await repositories.wordMaster.delete(id);
+    return id;
+  } catch (error) {
+    logger.error(`[kanji.deleteManyKanji] failed to delete word id=${id}`, error);
+    return null;
+  }
+};
+
+const syncExamByDeletedTargets = async (
+  repositories: Repositories,
+  examId: string,
+  deletedIdSet: Set<string>,
+): Promise<void> => {
+  try {
+    const test = await repositories.exams.get(examId);
+    if (!test || test.mode !== 'KANJI') return;
+
+    const details = await repositories.examDetails.listByExamId(examId);
+    const currentTargetIds = details.map((detail) => detail.targetId);
+    const nextQuestions = currentTargetIds.filter((targetId) => !deletedIdSet.has(targetId));
+
+    if (nextQuestions.length === currentTargetIds.length) return;
+
+    const nextResults = (test.results ?? []).filter((result) => !deletedIdSet.has(result.id));
+
+    await repositories.examDetails.deleteByExamId(test.examId);
+    await repositories.examDetails.putMany(test.examId, nextQuestions, test.mode);
+
+    const { pdfS3Key: _pdfS3Key, ...rest } = test;
+    await repositories.exams.put({
+      ...rest,
+      count: nextQuestions.length,
+      results: nextResults,
+    });
+  } catch (error) {
+    logger.warn(`[kanji.deleteManyKanji] failed to sync exam examId=${examId}`, error);
+  }
+};
+
 // 内部で利用する処理を定義する
 const deleteManyKanjiImpl = async (repositories: Repositories, ids: string[]): Promise<void> => {
-  // 内部で利用する処理を定義する
   const uniqueIds = Array.from(new Set(ids.map((x) => x.trim()).filter((x) => x.length > 0)));
-  const deletedIds: string[] = [];
+  const limit = pLimit(MAX_CONCURRENCY);
 
-  // 対象データを順番に処理する
-  for (const id of uniqueIds) {
-    let existing: Awaited<ReturnType<typeof repositories.wordMaster.get>>;
-    // 例外が発生しうる処理を実行する
-    try {
-      // 値を代入する
-      existing = await repositories.wordMaster.get(id);
-    } catch (error) {
-      logger.error(`[kanji.deleteManyKanji] failed to load word id=${id}`, error);
-      continue;
-    }
+  const deletedIds = (
+    await Promise.all(uniqueIds.map((id) => limit(() => deleteWordAndCandidates(repositories, id))))
+  ).filter((id): id is string => Boolean(id));
 
-    // 条件に応じて処理を分岐する
-    if (!existing) continue;
-
-    // 例外が発生しうる処理を実行する
-    try {
-      // 非同期処理の完了を待つ
-      await repositories.examCandidates.deleteCandidatesByTargetId({
-        subject: existing.subject,
-        targetId: id,
-      });
-    } catch (error) {
-      logger.warn(`[kanji.deleteManyKanji] candidate cleanup failed id=${id}`, error);
-    }
-
-    // 例外が発生しうる処理を実行する
-    try {
-      // 非同期処理の完了を待つ
-      await repositories.wordMaster.delete(id);
-      deletedIds.push(id);
-    } catch (error) {
-      logger.error(`[kanji.deleteManyKanji] failed to delete word id=${id}`, error);
-    }
-  }
-
-  // 条件に応じて処理を分岐する
   if (deletedIds.length === 0) return;
 
-  // 内部で利用する処理を定義する
   const deletedIdSet = new Set(deletedIds);
-  let tests: Awaited<ReturnType<typeof repositories.exams.scanAll>>;
-  // 例外が発生しうる処理を実行する
-  try {
-    // 値を代入する
-    tests = await repositories.exams.scanAll();
-  } catch (error) {
-    logger.warn('[kanji.deleteManyKanji] failed to scan exams while syncing deleted ids', error);
-    // 処理結果を呼び出し元へ返す
-    return;
-  }
 
-  const detailsByExamId = new Map<string, string[]>();
+  const examIdsByTarget = await Promise.all(
+    deletedIds.map((targetId) => limit(() => repositories.examDetails.listExamIdsByTargetId(targetId))),
+  );
+  const affectedExamIds = Array.from(new Set(examIdsByTarget.flat()));
+
   await Promise.all(
-    tests.map(async (test) => {
-      const details = await repositories.examDetails.listByExamId(test.examId);
-      detailsByExamId.set(
-        test.examId,
-        details.map((detail) => detail.targetId),
-      );
-    }),
+    affectedExamIds.map((examId) => limit(() => syncExamByDeletedTargets(repositories, examId, deletedIdSet))),
   );
-
-  // 内部で利用する処理を定義する
-  const affected = tests.filter(
-    (test) =>
-      test.mode === 'KANJI' && (detailsByExamId.get(test.examId) ?? []).some((targetId) => deletedIdSet.has(targetId)),
-  );
-
-  // 内部で利用する処理を定義する
-  const results = await Promise.allSettled(
-    affected.map(async (t) => {
-      // 内部で利用する処理を定義する
-      const nextQuestions = (detailsByExamId.get(t.examId) ?? []).filter((x) => !deletedIdSet.has(x));
-      // 内部で利用する処理を定義する
-      const nextResults = (t.results ?? []).filter((r) => !deletedIdSet.has(r.id));
-
-      await repositories.examDetails.deleteByExamId(t.examId);
-      await repositories.examDetails.putMany(t.examId, nextQuestions);
-
-      const { pdfS3Key: _pdfS3Key, ...rest } = t;
-      // 非同期処理の完了を待つ
-      await repositories.exams.put({
-        ...rest,
-        count: nextQuestions.length,
-        results: nextResults,
-      });
-    }),
-  );
-
-  results.forEach((result, index) => {
-    // 条件に応じて処理を分岐する
-    if (result.status === 'rejected') {
-      // 内部で利用する処理を定義する
-      const failedExamId = affected[index]?.examId ?? 'unknown';
-      logger.warn(`[kanji.deleteManyKanji] failed to sync exam examId=${failedExamId}`, result.reason);
-    }
-  });
 };
 
 // 公開する処理を定義する
