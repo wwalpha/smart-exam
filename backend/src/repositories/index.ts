@@ -3,7 +3,7 @@
 export { MaterialsRepository } from './MaterialsRepository';
 export { QuestionsRepository } from './QuestionsRepository';
 export { ExamCandidatesRepository } from './ExamCandidatesRepository';
-export { ExamsRepository } from './ExamsRepository';
+export { ExamsRepository } from './exams';
 export { WordMasterRepository } from './WordMasterRepository';
 export { S3Repository } from './S3Repository';
 

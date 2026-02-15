@@ -3,11 +3,10 @@
 import { MaterialsRepository } from '@/repositories/MaterialsRepository';
 import { QuestionsRepository } from '@/repositories/QuestionsRepository';
 import { ExamCandidatesRepository } from '@/repositories/ExamCandidatesRepository';
-import { ExamsRepository } from '@/repositories/ExamsRepository';
+import { ExamsRepository } from '@/repositories/exams';
 import { WordMasterRepository } from '@/repositories/WordMasterRepository';
 import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
 import { S3Repository } from '@/repositories/S3Repository';
-
 
 /** Type definition for Repositories. */
 export type Repositories = {
