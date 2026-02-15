@@ -1,4 +1,4 @@
-import type { ReviewAttempt, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
+import type { ReviewAttempt, ReviewTargetType } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamTable } from '@/types/db';
@@ -39,36 +39,29 @@ const getAttemptFromTest = (params: {
   };
 };
 
-// 公開するサービス処理を定義する
+const listReviewAttemptsImpl = async (
+  repositories: Repositories,
+  params: Parameters<ReviewAttemptsService['listReviewAttempts']>[0],
+): Promise<ReviewAttempt[]> => {
+  const items: ExamTable[] = await repositories.exams.scanAll();
+
+  const filtered = items
+    .filter((t) => {
+      if (params.subject && t.subject !== params.subject) return false;
+      return true;
+    })
+    .map((test) => getAttemptFromTest({ test, targetType: params.targetType, targetId: params.targetId }))
+    .filter((x): x is ReviewAttempt => Boolean(x));
+
+  filtered.sort((a, b) => {
+    if (a.dateYmd !== b.dateYmd) return a.dateYmd < b.dateYmd ? 1 : -1;
+    if ((a.examId ?? '') !== (b.examId ?? '')) return (a.examId ?? '') < (b.examId ?? '') ? 1 : -1;
+    return a.attemptedAt < b.attemptedAt ? 1 : -1;
+  });
+
+  return filtered;
+};
+
 export const createListReviewAttempts = (repositories: Repositories): ReviewAttemptsService['listReviewAttempts'] => {
-  // 処理結果を呼び出し元へ返す
-  return async (params: { targetType: ReviewTargetType; targetId: string; subject?: SubjectId }) => {
-    const items: ExamTable[] = await repositories.exams.scanAll();
-
-    // 処理で使う値を準備する
-    const filtered = items
-      .filter((t) => {
-        // 条件に応じて処理を分岐する
-        if (params.subject && t.subject !== params.subject) return false;
-        // 処理結果を呼び出し元へ返す
-        return true;
-      })
-      .map((test) => getAttemptFromTest({ test, targetType: params.targetType, targetId: params.targetId }))
-      .filter((x): x is ReviewAttempt => Boolean(x));
-
-    // stable ordering: date desc then testId desc
-    filtered.sort((a, b) => {
-      // 条件に応じて処理を分岐する
-      if (a.dateYmd !== b.dateYmd) return a.dateYmd < b.dateYmd ? 1 : -1;
-      // 条件に応じて処理を分岐する
-      if ((a.examId ?? '') !== (b.examId ?? ''))
-        // 処理結果を呼び出し元へ返す
-        return (a.examId ?? '') < (b.examId ?? '') ? 1 : -1;
-      // 処理結果を呼び出し元へ返す
-      return a.attemptedAt < b.attemptedAt ? 1 : -1;
-    });
-
-    // 処理結果を呼び出し元へ返す
-    return filtered;
-  };
+  return listReviewAttemptsImpl.bind(null, repositories);
 };

@@ -1,4 +1,6 @@
-export type KanjiUnderlineSpec = { type: 'promptSpan'; start: number; length: number };
+import type { KanjiUnderlineSpec } from './computeKanjiQuestionFields.types';
+
+export type { KanjiUnderlineSpec } from './computeKanjiQuestionFields.types';
 
 // 内部で利用する補助処理を定義する
 const isHiraganaOnly = (s: string): boolean => {

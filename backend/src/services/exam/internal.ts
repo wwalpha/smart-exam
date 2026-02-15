@@ -3,31 +3,9 @@
 import { DateUtils } from '@/lib/dateUtils';
 import type { Exam, ExamTarget, SubjectId } from '@smart-exam/api-types';
 import type { ExamTable } from '@/types/db';
+import type { ReviewTargetType } from './internal.types';
 
-/** Type definition for ReviewTargetType. */
-export type ReviewTargetType = 'QUESTION' | 'KANJI';
-
-/** Type definition for ReviewCandidate. */
-export type ReviewCandidate =
-  | {
-      targetType: 'QUESTION';
-      targetId: string;
-      subject: SubjectId;
-      registeredDate: string;
-      dueDate: string | null;
-      lastAttemptDate: string;
-      candidateKey: string;
-    }
-  | {
-      targetType: 'KANJI';
-      targetId: string;
-      subject: SubjectId;
-      registeredDate: string;
-      dueDate: string | null;
-      lastAttemptDate: string;
-      // ロック判定用
-      candidateKey: string;
-    };
+export type { ReviewCandidate, ReviewTargetType } from './internal.types';
 
 /** targetKeyOf. */
 export const targetKeyOf = (targetType: ReviewTargetType, targetId: string): string => `${targetType}#${targetId}`;

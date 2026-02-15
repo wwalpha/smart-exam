@@ -1,12 +1,14 @@
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { BedrockService } from './createBedrockService';
+import type { BedrockService } from './index';
 
-// 公開するサービス処理を定義する
+const analyzeExamPaperImpl = async (
+  repositories: Repositories,
+  ...args: Parameters<BedrockService['analyzeExamPaper']>
+): Promise<ReturnType<BedrockService['analyzeExamPaper']> extends Promise<infer T> ? T : never> => {
+  return repositories.bedrock.analyzeExamPaper(...args);
+};
+
 export const createAnalyzeExamPaper = (repositories: Repositories): BedrockService['analyzeExamPaper'] => {
-  // 処理結果を呼び出し元へ返す
-  return async (s3Key, subject) => {
-    // 処理結果を呼び出し元へ返す
-    return await repositories.bedrock.analyzeExamPaper(s3Key, subject);
-  };
+  return analyzeExamPaperImpl.bind(null, repositories) as BedrockService['analyzeExamPaper'];
 };

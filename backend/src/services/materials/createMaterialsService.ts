@@ -1,14 +1,7 @@
 // Module: createMaterialsService responsibilities.
 
-import type {
-  CreateMaterialRequest,
-  Material,
-  MaterialFile,
-  SearchMaterialsRequest,
-  SearchMaterialsResponse,
-} from '@smart-exam/api-types';
-import type { MaterialTable } from '@/types/db';
 import type { Repositories } from '@/repositories/createRepositories';
+import type { MaterialsService } from './createMaterialsService.types';
 
 import { createCreateMaterial } from './createMaterial';
 import { createDeleteMaterial } from './deleteMaterial';
@@ -19,20 +12,7 @@ import { createListMaterials } from './listMaterials';
 import { createSearchMaterials } from './searchMaterials';
 import { createUpdateMaterial } from './updateMaterial';
 
-/** Type definition for MaterialsService. */
-export type MaterialsService = {
-  listMaterials: () => Promise<Material[]>;
-  searchMaterials: (params: SearchMaterialsRequest) => Promise<SearchMaterialsResponse>;
-  createMaterial: (data: CreateMaterialRequest) => Promise<Material>;
-  getMaterial: (materialId: string) => Promise<Material | null>;
-  updateMaterial: (materialId: string, updates: Partial<MaterialTable>) => Promise<Material | null>;
-  deleteMaterial: (materialId: string) => Promise<boolean>;
-  listMaterialFiles: (materialId: string) => Promise<MaterialFile[]>;
-  getMaterialFile: (
-    materialId: string,
-    fileId: string,
-  ) => Promise<{ body: Buffer; contentType: string; filename: string } | null>;
-};
+export type { MaterialsService } from './createMaterialsService.types';
 
 /** Creates materials service. */
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {

@@ -6,31 +6,7 @@ import fontkit from '@pdf-lib/fontkit';
 import type { ExamDetail } from '@smart-exam/api-types';
 
 import { ApiError } from '@/lib/apiError';
-
-type PdfRenderConfig = {
-  a4Width: number;
-  a4Height: number;
-  margin: number;
-  headerGap: number;
-  itemGap: number;
-  afterQuestionGap: number;
-  answerLineGap: number;
-  answerBoxHeight: number;
-  numberColWidth: number;
-  numberGap: number;
-  titleFontSize: number;
-  metaFontSize: number;
-  questionFontSize: number;
-  questionLineHeight: number;
-  metaLineFontSize: number;
-  metaLineHeight: number;
-};
-
-type PageContext = {
-  page: PDFPage;
-  contentWidth: number;
-  cursorY: number;
-};
+import type { PageContext, PdfRenderConfig, PromptUnderlineSpec } from './examPdfService.types';
 
 // 内部で利用する補助処理を定義する
 const mmToPt = (mm: number): number => (mm * 72) / 25.4;
@@ -142,6 +118,7 @@ const wrapTextByChar = (text: string, maxWidth: number, font: PDFFont, fontSize:
 
       // 条件に応じて処理を分岐する
       if (width <= maxWidth) {
+        // 値を代入する
         current = candidate;
         continue;
       }
@@ -149,11 +126,13 @@ const wrapTextByChar = (text: string, maxWidth: number, font: PDFFont, fontSize:
       // 条件に応じて処理を分岐する
       if (current.length === 0) {
         lines.push(candidate);
+        // 値を代入する
         current = '';
         continue;
       }
 
       lines.push(current);
+      // 値を代入する
       current = ch;
     }
 
@@ -197,7 +176,7 @@ const drawPromptWithUnderline = (params: {
   y: number;
   indexText: string;
   promptText: string;
-  underlineSpec: { type: 'promptSpan'; start: number; length: number };
+  underlineSpec: PromptUnderlineSpec;
   baseFontSize: number;
   minFontSize: number;
   textMaxWidth: number;
@@ -226,6 +205,7 @@ const drawPromptWithUnderline = (params: {
   if (totalWidth > params.textMaxWidth) {
     // 処理で使う値を準備する
     const scaled = (fontSize * params.textMaxWidth) / totalWidth;
+    // 値を代入する
     fontSize = Math.max(params.minFontSize, scaled);
   }
 
@@ -244,25 +224,31 @@ const drawPromptWithUnderline = (params: {
   let postRendered = post;
   // 後続処理で更新する値を初期化する
   let truncated = false;
+  // 対象データを順番に処理する
   while (postRendered.length > 0) {
     // 処理で使う値を準備する
     const width = params.font.widthOfTextAtSize(postRendered, fontSize);
     // 条件に応じて処理を分岐する
     if (width <= remainingForPost) break;
+    // 値を代入する
     truncated = true;
+    // 値を代入する
     postRendered = postRendered.slice(0, -1);
   }
 
   // 条件に応じて処理を分岐する
   if (truncated && postRendered.length > 0) {
+    // 対象データを順番に処理する
     while (postRendered.length > 0) {
       // 処理で使う値を準備する
       const width = params.font.widthOfTextAtSize(postRendered + '…', fontSize);
       // 条件に応じて処理を分岐する
       if (width <= remainingForPost) {
+        // 値を代入する
         postRendered = postRendered + '…';
         break;
       }
+      // 値を代入する
       postRendered = postRendered.slice(0, -1);
     }
   }
@@ -383,8 +369,7 @@ const renderKanjiWorksheetLayout = (params: {
     // 処理で使う値を準備する
     const readingHiragana = String((item as { readingHiragana?: string }).readingHiragana ?? '').trim();
     // 処理で使う値を準備する
-    const underlineSpec = (item as { underlineSpec?: { type: 'promptSpan'; start: number; length: number } })
-      .underlineSpec;
+    const underlineSpec = (item as { underlineSpec?: PromptUnderlineSpec }).underlineSpec;
 
     // 条件に応じて処理を分岐する
     if (!promptText || !readingHiragana || !underlineSpec) {
@@ -515,6 +500,7 @@ const generatePdfBufferImpl = async (
 
     // 条件に応じて処理を分岐する
     if (pageContext.cursorY - requiredHeight < config.margin) {
+      // 値を代入する
       pageContext = createPage({
         pdfDoc,
         jpFont,
@@ -617,6 +603,7 @@ const loadJapaneseFontBytes = async (): Promise<Uint8Array> => {
       if (!s.isFile()) continue;
       // 非同期で必要な値を取得する
       const font = await readFile(candidate);
+      // 値を代入する
       cachedJapaneseFontBytes = new Uint8Array(font);
       // 処理結果を呼び出し元へ返す
       return cachedJapaneseFontBytes;
@@ -651,6 +638,7 @@ const loadJapaneseFontBytes = async (): Promise<Uint8Array> => {
       const gz = await readFile(candidate);
       // 非同期で必要な値を取得する
       const font = (await gunzipAsync(gz)) as Buffer;
+      // 値を代入する
       cachedJapaneseFontBytes = new Uint8Array(font);
       // 処理結果を呼び出し元へ返す
       return cachedJapaneseFontBytes;

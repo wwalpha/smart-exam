@@ -1,19 +1,11 @@
 // Module: createReviewAttemptsService responsibilities.
 
-import type { ReviewAttempt, ReviewTargetType, SubjectId } from '@smart-exam/api-types';
-
 import type { Repositories } from '@/repositories/createRepositories';
+import type { ReviewAttemptsService } from './createReviewAttemptsService.types';
 
 import { createListReviewAttempts } from './listReviewAttempts';
 
-/** Type definition for ReviewAttemptsService. */
-export type ReviewAttemptsService = {
-  listReviewAttempts: (params: {
-    targetType: ReviewTargetType;
-    targetId: string;
-    subject?: SubjectId;
-  }) => Promise<ReviewAttempt[]>;
-};
+export type { ReviewAttemptsService } from './createReviewAttemptsService.types';
 
 /** Creates review attempts service. */
 export const createReviewAttemptsService = (repositories: Repositories): ReviewAttemptsService => {

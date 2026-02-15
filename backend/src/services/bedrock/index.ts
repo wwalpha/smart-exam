@@ -1,5 +1,16 @@
-// Bedrockサービスの生成関数と型を再エクスポートする
-export { createBedrockService, type BedrockService } from './createBedrockService';
+import type { AnalyzePaperResponse } from '@smart-exam/api-types';
 
-// 既存参照向けに別名のサービス生成関数を再エクスポートする
-export { createBedrockService as bedrockService } from './createBedrockService';
+import type { Repositories } from '@/repositories/createRepositories';
+
+import { createAnalyzeExamPaper } from './analyzeExamPaper';
+
+export type BedrockService = {
+  analyzeExamPaper: (s3Key: string, subject: string) => Promise<AnalyzePaperResponse['questions']>;
+};
+
+const createBedrockService = (repositories: Repositories): BedrockService => {
+  const analyzeExamPaper = createAnalyzeExamPaper(repositories);
+  return { analyzeExamPaper };
+};
+
+export const bedrockService = createBedrockService;

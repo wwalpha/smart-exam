@@ -7,10 +7,12 @@ import type { MaterialQuestionTable } from '@/types/db';
 import type { QuestionsService } from './createQuestionsService';
 import { toSortNumber } from './toSortNumber';
 
+// 内部で利用する処理を定義する
 const createQuestionImpl = async (
   repositories: Repositories,
   data: Parameters<QuestionsService['createQuestion']>[0],
 ): Promise<Question> => {
+  // 内部で利用する処理を定義する
   const id = createUuid();
 
   const dbItem: MaterialQuestionTable = {
@@ -21,7 +23,9 @@ const createQuestionImpl = async (
     canonicalKey: data.canonicalKey,
   };
 
+  // 非同期処理の完了を待つ
   await repositories.questions.create(dbItem);
+  // 非同期処理の完了を待つ
   await repositories.materials.incrementQuestionCount(data.materialId, 1);
 
   const item: Question = {
@@ -29,9 +33,12 @@ const createQuestionImpl = async (
     ...data,
   };
 
+  // 処理結果を呼び出し元へ返す
   return item;
 };
 
+// 公開する処理を定義する
 export const createCreateQuestion = (repositories: Repositories): QuestionsService['createQuestion'] => {
+  // 処理結果を呼び出し元へ返す
   return createQuestionImpl.bind(null, repositories);
 };

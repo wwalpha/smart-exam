@@ -1,5 +1,14 @@
-// ダッシュボードサービスの生成関数と型を再エクスポートする
-export { createDashboardService, type DashboardService } from './createDashboardService';
+import type { DashboardData } from '@smart-exam/api-types';
 
-// 既存参照向けに別名のサービス生成関数を再エクスポートする
-export { createDashboardService as dashboardService } from './createDashboardService';
+import { createGetDashboardData } from './getDashboardData';
+
+export type DashboardService = {
+  getDashboardData: () => Promise<DashboardData>;
+};
+
+const createDashboardService = (): DashboardService => {
+  const getDashboardData = createGetDashboardData();
+  return { getDashboardData };
+};
+
+export const dashboardService = createDashboardService;

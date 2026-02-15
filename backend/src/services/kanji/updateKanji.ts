@@ -4,80 +4,70 @@ import type { Repositories } from '@/repositories/createRepositories';
 
 import { computeKanjiQuestionFields } from './computeKanjiQuestionFields';
 import type { KanjiService } from './createKanjiService';
+import type { UpdateKanjiData } from './updateKanji.types';
 
-// 公開するサービス処理を定義する
-export const createUpdateKanji = (repositories: Repositories): KanjiService['updateKanji'] => {
-  // 処理結果を呼び出し元へ返す
-  return async (id, data): Promise<Kanji | null> => {
-    // 非同期で必要な値を取得する
-    const existing = await repositories.wordMaster.get(id);
-    // 条件に応じて処理を分岐する
-    if (!existing) return null;
+const resolveKanjiQuestionFields = (nextQuestion: string, nextAnswer: string): { question: string; answer: string } => {
+  const question = String(nextQuestion ?? '').trim();
+  const answer = String(nextAnswer ?? '').trim();
+  if (!question || !answer) {
+    throw new Error('question/answer is missing');
+  }
+  return { question, answer };
+};
 
-    // 処理で使う値を準備する
-    const nextQuestion = data.kanji !== undefined ? data.kanji : String(existing.question ?? '');
-    // 処理で使う値を準備する
-    const nextAnswer = data.reading !== undefined ? data.reading : String(existing.answer ?? '');
+const regenerateKanjiFields = async (repositories: Repositories, id: string, question: string, answer: string) => {
+  const bulk = await repositories.bedrock.generateKanjiQuestionReadingsBulk({
+    items: [{ id, question, answer }],
+  });
+  const raw = bulk.items.find((x) => x.id === id);
+  if (!raw) throw new Error('読み生成に失敗しました: 結果が返りませんでした');
 
-    // 処理で使う値を準備する
-    const shouldRegenerateKanjiQuestionFields =
-      (data.kanji !== undefined || data.reading !== undefined) &&
-      Boolean(existing.readingHiragana || existing.underlineSpec);
+  return computeKanjiQuestionFields({
+    question,
+    readingHiragana: String(raw.readingHiragana ?? '').trim(),
+  });
+};
 
-    // 処理で使う値を準備する
-    const kanjiQuestionFields = shouldRegenerateKanjiQuestionFields
-      ? (() => {
-          // 処理で使う値を準備する
-          const question = String(nextQuestion ?? '').trim();
-          // 処理で使う値を準備する
-          const answer = String(nextAnswer ?? '').trim();
-          // 条件に応じて処理を分岐する
-          if (!question || !answer) {
-            throw new Error('question/answer is missing');
-          }
-          // 処理結果を呼び出し元へ返す
-          return { question, answer };
-        })()
+const updateKanjiImpl = async (
+  repositories: Repositories,
+  id: string,
+  data: UpdateKanjiData,
+): Promise<Kanji | null> => {
+  const existing = await repositories.wordMaster.get(id);
+  if (!existing) return null;
+
+  const nextQuestion = data.kanji !== undefined ? data.kanji : String(existing.question ?? '');
+  const nextAnswer = data.reading !== undefined ? data.reading : String(existing.answer ?? '');
+
+  const shouldRegenerateKanjiQuestionFields =
+    (data.kanji !== undefined || data.reading !== undefined) &&
+    Boolean(existing.readingHiragana || existing.underlineSpec);
+
+  const kanjiQuestionFields = shouldRegenerateKanjiQuestionFields
+    ? resolveKanjiQuestionFields(nextQuestion, nextAnswer)
+    : null;
+
+  const regenerated =
+    shouldRegenerateKanjiQuestionFields && kanjiQuestionFields
+      ? await regenerateKanjiFields(repositories, id, kanjiQuestionFields.question, kanjiQuestionFields.answer)
       : null;
 
-    // 処理で使う値を準備する
-    const regenerated = shouldRegenerateKanjiQuestionFields
-      ? await (async () => {
-          // 非同期で必要な値を取得する
-          const bulk = await repositories.bedrock.generateKanjiQuestionReadingsBulk({
-            items: [{ id, question: kanjiQuestionFields!.question, answer: kanjiQuestionFields!.answer }],
-          });
-          // 処理で使う値を準備する
-          const raw = bulk.items.find((x) => x.id === id);
-          // 条件に応じて処理を分岐する
-          if (!raw) throw new Error('読み生成に失敗しました: 結果が返りませんでした');
+  const updated = await repositories.wordMaster.update(id, {
+    ...(data.kanji !== undefined ? { question: data.kanji } : {}),
+    ...(data.reading !== undefined ? { answer: data.reading } : {}),
+    ...(data.subject !== undefined ? { subject: data.subject } : {}),
+    ...(regenerated ? { readingHiragana: regenerated.readingHiragana, underlineSpec: regenerated.underlineSpec } : {}),
+  });
+  if (!updated) return null;
 
-          // 処理結果を呼び出し元へ返す
-          return computeKanjiQuestionFields({
-            question: kanjiQuestionFields!.question,
-            readingHiragana: String(raw.readingHiragana ?? '').trim(),
-          });
-        })()
-      : null;
-
-    // 非同期で必要な値を取得する
-    const updated = await repositories.wordMaster.update(id, {
-      ...(data.kanji !== undefined ? { question: data.kanji } : {}),
-      ...(data.reading !== undefined ? { answer: data.reading } : {}),
-      ...(data.subject !== undefined ? { subject: data.subject } : {}),
-      ...(regenerated
-        ? { readingHiragana: regenerated.readingHiragana, underlineSpec: regenerated.underlineSpec }
-        : {}),
-    });
-    // 条件に応じて処理を分岐する
-    if (!updated) return null;
-
-    // 処理結果を呼び出し元へ返す
-    return {
-      id: updated.wordId,
-      kanji: updated.question,
-      reading: updated.answer,
-      subject: updated.subject,
-    };
+  return {
+    id: updated.wordId,
+    kanji: updated.question,
+    reading: updated.answer,
+    subject: updated.subject,
   };
+};
+
+export const createUpdateKanji = (repositories: Repositories): KanjiService['updateKanji'] => {
+  return updateKanjiImpl.bind(null, repositories);
 };

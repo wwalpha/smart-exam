@@ -1,33 +1,17 @@
-import type { ReviewMode, Exam, SubjectId } from '@smart-exam/api-types';
+import type { Exam, SubjectId } from '@smart-exam/api-types';
 
 import { ApiError } from '@/lib/apiError';
 import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import { createUuid } from '@/lib/uuid';
-import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable, ExamTable, WordMasterTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from '@/services/kanji/computeKanjiQuestionFields';
 
-import type { ExamsService } from './createExamsService';
+import type { ExamsService } from './createExamsService.types';
+import type { CandidateListParams, CreateExamDeps, ReviewCandidate } from './createExam.types';
 import { toApiExam } from './internal';
 import { ExamPdfService } from './examPdfService';
-
-type ReviewCandidate = {
-  targetType: 'QUESTION' | 'KANJI';
-  targetId: string;
-  subject: SubjectId;
-  registeredDate: string;
-  dueDate: string | null;
-  lastAttemptDate: string;
-  candidateKey?: string;
-};
-
-type CreateExamDeps = {
-  repositories: Repositories;
-  getExam: ExamsService['getExam'];
-  deleteExam: ExamsService['deleteExam'];
-};
 
 // 内部で利用する補助処理を定義する
 const isPrintableKanjiWorksheetWord = (w: WordMasterTable): boolean => {
@@ -37,6 +21,7 @@ const isPrintableKanjiWorksheetWord = (w: WordMasterTable): boolean => {
     String(w.answer ?? '').trim() &&
     String(w.readingHiragana ?? '').trim() &&
     w.underlineSpec &&
+    // 値を代入する
     w.underlineSpec.type === 'promptSpan' &&
     Number.isInteger(w.underlineSpec.start) &&
     Number.isInteger(w.underlineSpec.length) &&
@@ -58,11 +43,7 @@ const printableWordIds = (byId: Map<string, WordMasterTable>): Set<string> => {
 // 内部で利用する補助処理を定義する
 const listDueCandidates = async (
   deps: CreateExamDeps,
-  params: {
-    subject: SubjectId;
-    mode?: ReviewMode;
-    todayYmd?: string;
-  },
+  params: CandidateListParams,
 ): Promise<ExamCandidateTable[]> => {
   // 処理で使う値を準備する
   const today = params.todayYmd ?? DateUtils.todayYmd();
@@ -78,10 +59,7 @@ const listDueCandidates = async (
 // 内部で利用する補助処理を定義する
 const listOpenCandidates = async (
   deps: CreateExamDeps,
-  params: {
-    subject: SubjectId;
-    mode?: ReviewMode;
-  },
+  params: CandidateListParams,
 ): Promise<ExamCandidateTable[]> => {
   // 処理結果を呼び出し元へ返す
   return deps.repositories.examCandidates.listCandidates({
@@ -118,6 +96,7 @@ const createExamImpl = async (deps: CreateExamDeps, req: Parameters<ExamsService
 
   // 期限到来候補が0件でも、OPEN在庫があれば作成できるようにフォールバックする
   if (sourceCandidates.length === 0) {
+    // 値を代入する
     sourceCandidates = await listOpenCandidates(deps, { subject: req.subject, mode: req.mode });
   }
 
@@ -212,6 +191,7 @@ const createExamImpl = async (deps: CreateExamDeps, req: Parameters<ExamsService
             }),
           );
 
+          // 値を代入する
           printableIds = printableWordIds(byId);
         } catch {
           // 自動補完に失敗しても、ここでは候補の絞り込みだけ行い、最終的に 0 件なら従来通り 400
@@ -221,6 +201,7 @@ const createExamImpl = async (deps: CreateExamDeps, req: Parameters<ExamsService
 
     // 処理で使う値を準備する
     const filtered = candidates.filter((c) => printableIds.has(c.targetId));
+    // 値を代入する
     candidates.length = 0;
     candidates.push(...filtered);
   }

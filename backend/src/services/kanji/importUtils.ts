@@ -1,14 +1,9 @@
 // Module: importUtils responsibilities.
 
 import { DateUtils } from '@/lib/dateUtils';
+import type { ImportedHistoryEntry } from './importUtils.types';
 
-
-/** Type definition for ImportedHistoryEntry. */
-export type ImportedHistoryEntry = {
-  /** 実施日 (YYYY-MM-DD) */
-  submittedDate: string;
-  isCorrect: boolean;
-};
+export type { ImportedHistoryEntry } from './importUtils.types';
 
 // 内部で利用する補助処理を定義する
 const parseOkNg = (raw: string): boolean | null => {
@@ -34,8 +29,10 @@ const parseHistoryTokens = (tokens: string[]): ImportedHistoryEntry[] => {
     let ymd = '';
     // 例外が発生しうる処理を実行する
     try {
+      // 値を代入する
       ymd = DateUtils.formatYmd(dateRaw ?? '') ?? '';
     } catch {
+      // 値を代入する
       ymd = '';
     }
     // 処理で使う値を準備する
