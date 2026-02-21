@@ -3,7 +3,7 @@ import { ENV } from '@/lib/env';
 import { MaterialQuestionTable } from '@/types/db';
 
 // 問題テーブル名を環境変数から取得する
-const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
+const TABLE_NAME = ENV.TABLE_MATERIAL_DETAILS;
 
 // 問題テーブルの全レコードを取得する
 export const scanAll = async (): Promise<MaterialQuestionTable[]> => {

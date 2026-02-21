@@ -39,8 +39,8 @@ resource "aws_lambda_function" "api" {
       FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
 
       TABLE_MATERIALS          = aws_dynamodb_table.materials.name
-      TABLE_MATERIAL_QUESTIONS = aws_dynamodb_table.material_questions.name
-      TABLE_WORD_MASTER        = aws_dynamodb_table.word_master.name
+      TABLE_MATERIAL_DETAILS   = aws_dynamodb_table.material_details.name
+      TABLE_KANJI              = aws_dynamodb_table.kanji.name
       TABLE_EXAM_CANDIDATES    = aws_dynamodb_table.exam_candidates.name
       TABLE_EXAM_HISTORIES     = aws_dynamodb_table.exam_histories.name
       TABLE_EXAMS              = aws_dynamodb_table.exam.name

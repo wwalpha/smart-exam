@@ -33,7 +33,7 @@ const createTables = async (client: DynamoDBClient) => {
 
   await create(
     new CreateTableCommand({
-      TableName: 'material_questions',
+      TableName: 'material_details',
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [
         { AttributeName: 'questionId', AttributeType: 'S' },

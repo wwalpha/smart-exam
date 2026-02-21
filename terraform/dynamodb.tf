@@ -29,10 +29,10 @@ resource "aws_dynamodb_table" "materials" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for material questions.
+# DynamoDB table for material details.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "material_questions" {
-  name         = "${var.project_name}_material_questions"
+resource "aws_dynamodb_table" "material_details" {
+  name         = "${var.project_name}_material_details"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "questionId"
 

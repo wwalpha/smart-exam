@@ -2,7 +2,7 @@ import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
 
 // 問題テーブル名を環境変数から取得する
-const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
+const TABLE_NAME = ENV.TABLE_MATERIAL_DETAILS;
 
 // questionId をキーに問題レコードを削除する
 export const remove = async (questionId: string): Promise<void> => {
