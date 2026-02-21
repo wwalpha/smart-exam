@@ -345,7 +345,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       await withStatus(
         setStatus,
         async () => {
-          const response = await MATERIAL_API.updateMaterial(materialId, { isCompleted: true });
+          const response = await MATERIAL_API.completeMaterial(materialId);
           updateMaterial({ detail: response });
         },
         '教材セットの完了処理に失敗しました。',

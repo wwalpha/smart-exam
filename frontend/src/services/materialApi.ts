@@ -13,6 +13,8 @@ import type {
   UpdateQuestionRequest,
   SetQuestionChoiceRequest,
   SetQuestionChoiceResponse,
+  CompleteMaterialRequest,
+  CompleteMaterialResponse,
 } from '@smart-exam/api-types';
 
 export const listMaterials = async (params?: SearchMaterialsRequest): Promise<MaterialListResponse> => {
@@ -50,6 +52,14 @@ export const deleteMaterial = async (materialId: string): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
     path: `/api/materials/${materialId}`,
+  });
+};
+
+export const completeMaterial = async (materialId: string): Promise<CompleteMaterialResponse> => {
+  return apiRequest<CompleteMaterialResponse, CompleteMaterialRequest>({
+    method: 'POST',
+    path: `/api/materials/${materialId}/completion`,
+    body: {},
   });
 };
 

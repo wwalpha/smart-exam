@@ -12,6 +12,12 @@ export type DeleteMaterialParams = {
   materialId: string;
 };
 
+/** `POST /materials/:materialId/completion` */
+export type CompleteMaterialParams = {
+  /** 教材ID */
+  materialId: string;
+};
+
 /** `GET /materials/:materialId/questions` */
 export type ListQuestionsParams = {
   /** 教材ID */
@@ -89,9 +95,13 @@ export type UpdateMaterialRequest = Partial<CreateMaterialRequest> & {
   answerPdfPath?: string;
   /** 採点済み答案PDFのS3キー */
   answerSheetPath?: string;
-  /** 完了状態 */
-  isCompleted?: boolean;
 };
+
+/** `POST /materials/:materialId/completion` */
+export type CompleteMaterialRequest = Record<string, never>;
+
+/** `POST /materials/:materialId/completion` */
+export type CompleteMaterialResponse = Material;
 
 /** `PATCH /materials/:materialId` */
 export type UpdateMaterialParams = {

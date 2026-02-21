@@ -6,7 +6,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { MaterialQuestionsTable } from '@/types/db';
 
 import type { MaterialQuestionsService } from './materialQuestions.types';
-import { toSortNumber } from './toSortNumber';
+import { toSortNumber } from './materialQuestions.lib';
 
 // 内部で利用する処理を定義する
 const createQuestionImpl = async (
@@ -31,7 +31,7 @@ const createQuestionImpl = async (
     subjectId: material.subjectId,
     number: toSortNumber(data.canonicalKey),
     canonicalKey: data.canonicalKey,
-    choice: undefined,
+    choice: 'CORRECT',
   };
 
   // 非同期処理の完了を待つ
@@ -45,7 +45,7 @@ const createQuestionImpl = async (
     subject: material.subjectId,
     materialId: data.materialId,
     tags: data.tags,
-    choice: undefined,
+    choice: 'CORRECT',
   };
 
   // 処理結果を呼び出し元へ返す

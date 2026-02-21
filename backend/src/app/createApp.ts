@@ -78,6 +78,12 @@ export const createApp = (): express.Express => {
     validateBody(controllers.materials.UpdateMaterialBodySchema),
     handleRequest(controllers.materials.updateMaterial),
   );
+  // 指定した教材を完了にするAPI
+  app.post(
+    '/api/materials/:materialId/completion',
+    validateParams(MaterialIdParamsSchema),
+    handleRequest(controllers.materials.completeMaterial),
+  );
   // 指定した教材を削除するAPI
   app.delete(
     '/api/materials/:materialId',

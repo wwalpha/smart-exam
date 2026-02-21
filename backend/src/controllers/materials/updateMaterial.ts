@@ -23,19 +23,11 @@ export const updateMaterial =
       ...(typeof updates.questionPdfPath === 'string' ? { questionPdfPath: updates.questionPdfPath } : {}),
       ...(typeof updates.answerPdfPath === 'string' ? { answerPdfPath: updates.answerPdfPath } : {}),
       ...(typeof updates.answerSheetPath === 'string' ? { answerSheetPath: updates.answerSheetPath } : {}),
-      ...(typeof updates.isCompleted === 'boolean' ? { isCompleted: updates.isCompleted } : {}),
     });
 
     if (!updated) {
       res.status(404).json({ error: 'Not Found' });
       return;
-    }
-
-    if (updates.isCompleted === true) {
-      await services.materialQuestions.applyQuestionChoicesToCandidatesForMaterial({
-        materialId,
-        baseDateYmd: updated.registeredDate,
-      });
     }
 
     res.json(updated);
