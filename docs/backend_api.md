@@ -38,20 +38,12 @@
 | Questions       | PATCH    | `/api/materials/:materialId/questions/:questionId`         | 指定した問題を更新するAPI                             | ✅           |
 | Questions       | PATCH    | `/api/materials/:materialId/questions/:questionId/choices` | 指定した問題の正誤選択を更新するAPI                   | ✅           |
 | Questions       | DELETE   | `/api/materials/:materialId/questions/:questionId`         | 指定した問題を削除するAPI                             | ✅           |
-| Exam (Kanji)    | POST     | `/api/exam/kanji/search`                                   | 条件を指定して漢字テストを検索するAPI                 | ✅           |
-| Exam (Kanji)    | POST     | `/api/exam/kanji`                                          | 漢字テストを新規作成するAPI                           | ✅           |
-| Exam (Kanji)    | GET      | `/api/exam/kanji/targets`                                  | 漢字テスト作成対象の候補一覧を取得するAPI             | ✅           |
-| Exam (Kanji)    | GET      | `/api/exam/kanji/:examId`                                  | 指定した漢字テストの詳細を取得するAPI                 | ✅           |
-| Exam (Kanji)    | GET      | `/api/exam/kanji/:examId/pdf`                              | 指定した漢字テストのPDF情報を取得するAPI              | ✅           |
-| Exam (Kanji)    | PATCH    | `/api/exam/kanji/:examId`                                  | 指定した漢字テストのステータスを更新するAPI           | ✅           |
-| Exam (Kanji)    | DELETE   | `/api/exam/kanji/:examId`                                  | 指定した漢字テストを削除するAPI                       | ✅           |
-| Exam (Kanji)    | POST     | `/api/exam/kanji/:examId/results`                          | 指定した漢字テストの結果を登録するAPI                 | ✅           |
-| Exam (Material) | POST     | `/api/exam/material/search`                                | 条件を指定して問題テストを検索するAPI                 | ✅           |
-| Exam (Material) | POST     | `/api/exam/material`                                       | 問題テストを新規作成するAPI                           | ✅           |
-| Exam (Material) | GET      | `/api/exam/material/targets`                               | 問題テスト作成対象の候補一覧を取得するAPI             | ✅           |
-| Exam (Material) | GET      | `/api/exam/material/:examId`                               | 指定した問題テストの詳細を取得するAPI                 | ✅           |
-| Exam (Material) | GET      | `/api/exam/material/:examId/pdf`                           | 指定した問題テストのPDF情報を取得するAPI              | ✅           |
-| Exam (Material) | PATCH    | `/api/exam/material/:examId`                               | 指定した問題テストのステータスを更新するAPI           | ✅           |
-| Exam (Material) | DELETE   | `/api/exam/material/:examId`                               | 指定した問題テストを削除するAPI                       | ✅           |
-| Exam (Material) | POST     | `/api/exam/material/:examId/results`                       | 指定した問題テストの結果を登録するAPI                 | ✅           |
+| Exam            | POST     | `/api/exam/search`                                         | 条件を指定して復習テストを検索するAPI                 | ✅           |
+| Exam            | POST     | `/api/exam`                                                | 復習テストを新規作成するAPI                           | ✅           |
+| Exam            | GET      | `/api/exam/targets`                                        | 復習テスト作成対象の候補一覧を取得するAPI             | ✅           |
+| Exam            | GET      | `/api/exam/:examId/pdf`                                    | 指定した復習テストのPDF情報を取得するAPI              | ✅           |
+| Exam            | GET      | `/api/exam/:examId`                                        | 指定した復習テストの詳細を取得するAPI                 | ✅           |
+| Exam            | PATCH    | `/api/exam/:examId`                                        | 指定した復習テストのステータスを更新するAPI           | ✅           |
+| Exam            | POST     | `/api/exam/:examId/results`                                | 指定した復習テストの結果を登録するAPI                 | ✅           |
+| Exam            | DELETE   | `/api/exam/:examId`                                        | 指定した復習テストを削除するAPI                       | ✅           |
 | Exam            | POST     | `/api/exam/:examId/completion`                             | 採点結果を候補者テーブルへ反映してテストを完了するAPI | ✅           |
