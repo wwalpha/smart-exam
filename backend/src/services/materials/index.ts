@@ -14,7 +14,7 @@ export type { MaterialsService } from './materials.types';
 
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {
   const listMaterials = createListMaterials(repositories);
-  const searchMaterials = createSearchMaterials({ listMaterials });
+  const searchMaterials = createSearchMaterials(repositories);
   const createMaterial = createCreateMaterial(repositories);
   const getMaterial = createGetMaterial(repositories);
   const updateMaterial = createUpdateMaterial(repositories);

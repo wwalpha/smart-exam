@@ -62,15 +62,16 @@ const createExamDispatcher = async (deps: CreateExamDeps, req: CreateExamRequest
 // 公開する処理を定義する
 export const createCreateExam = (deps: CreateExamDeps): ExamsService['createExam'] => {
   // 処理結果を呼び出し元へ返す
-  return createExamDispatcher.bind(null, deps);
+  return async (req: CreateExamRequest): Promise<Exam> => {
+    return createExamDispatcher(deps, req);
+  };
 };
 
 // 公開する処理を定義する
 export const createExamsService = (repositories: Repositories): ExamsService => {
   // 内部で利用する処理を定義する
   const listExams = createListExams(repositories);
-  // 内部で利用する処理を定義する
-  const searchExams = createSearchExams({ listExams });
+  const searchExams = createSearchExams(repositories);
 
   // 内部で利用する処理を定義する
   const deleteExam = createDeleteExam(repositories);
