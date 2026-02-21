@@ -10,13 +10,22 @@ export const lockCandidateIfUnlocked = async (params: {
   candidateKey: string;
   examId: string;
   status?: 'LOCKED';
-}): Promise<void> => {
-  await dbHelper.update({
-    TableName: TABLE_NAME,
-    Key: { subject: params.subject, candidateKey: params.candidateKey },
-    ConditionExpression: 'attribute_not_exists(#examId)',
-    UpdateExpression: 'SET #examId = :examId, #status = :status',
-    ExpressionAttributeNames: { '#examId': 'examId', '#status': 'status' },
-    ExpressionAttributeValues: { ':examId': params.examId, ':status': params.status ?? 'LOCKED' },
-  });
+}): Promise<boolean> => {
+  try {
+    await dbHelper.update({
+      TableName: TABLE_NAME,
+      Key: { subject: params.subject, candidateKey: params.candidateKey },
+      ConditionExpression: 'attribute_not_exists(#examId)',
+      UpdateExpression: 'SET #examId = :examId, #status = :status',
+      ExpressionAttributeNames: { '#examId': 'examId', '#status': 'status' },
+      ExpressionAttributeValues: { ':examId': params.examId, ':status': params.status ?? 'LOCKED' },
+    });
+    return true;
+  } catch (error: unknown) {
+    const name = (error as { name?: string } | null)?.name;
+    if (name === 'ConditionalCheckFailedException') {
+      return false;
+    }
+    throw error;
+  }
 };

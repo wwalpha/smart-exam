@@ -5,13 +5,21 @@ import type { ExamHistoryTable } from '@/types/db';
 const TABLE_NAME = ENV.TABLE_EXAM_HISTORIES;
 
 export const putHistory = async (item: ExamHistoryTable): Promise<void> => {
-  await dbHelper.put({
-    TableName: TABLE_NAME,
-    Item: item,
-    ConditionExpression: 'attribute_not_exists(#subject) AND attribute_not_exists(#candidateKey)',
-    ExpressionAttributeNames: {
-      '#subject': 'subject',
-      '#candidateKey': 'candidateKey',
-    },
-  });
+  try {
+    await dbHelper.put({
+      TableName: TABLE_NAME,
+      Item: item,
+      ConditionExpression: 'attribute_not_exists(#subject) AND attribute_not_exists(#candidateKey)',
+      ExpressionAttributeNames: {
+        '#subject': 'subject',
+        '#candidateKey': 'candidateKey',
+      },
+    });
+  } catch (error: unknown) {
+    const name = (error as { name?: string } | null)?.name;
+    if (name === 'ConditionalCheckFailedException') {
+      return;
+    }
+    throw error;
+  }
 };

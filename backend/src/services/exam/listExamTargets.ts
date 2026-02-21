@@ -7,11 +7,10 @@ import type { ExamsService } from './index';
 import { sortTargets, toReviewTargetKey } from './internal';
 
 // 期間内の試験から「どの問題が何回含まれたか」を集計して返す。
-const listExamTargetsImpl: ExamsService['listExamTargets'] = async function listExamTargetsImpl(
-  this: Repositories,
-  params,
-): Promise<ExamTarget[]> {
-  const repositories = this;
+export const createListExamTargets = async (
+  repositories: Repositories,
+  params: Parameters<ExamsService['listExamTargets']>[0],
+): Promise<ExamTarget[]> => {
   const from = params.fromYmd;
   const to = params.toYmd;
 
@@ -115,9 +114,4 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
     }
   }
   return sortTargets(Array.from(byKey.values()));
-};
-
-// repositories を this に束縛してサービス関数として公開する。
-export const createListExamTargets = (repositories: Repositories): ExamsService['listExamTargets'] => {
-  return listExamTargetsImpl.bind(repositories);
 };

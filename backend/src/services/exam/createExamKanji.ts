@@ -33,8 +33,8 @@ const listOpenCandidates = async (deps: CreateExamDeps, params: CandidateListPar
 const lockCandidate = async (
   deps: CreateExamDeps,
   params: { subject: SubjectId; candidateKey: string; examId: string },
-): Promise<void> => {
-  await deps.repositories.examCandidates.lockCandidateIfUnlocked({
+): Promise<boolean> => {
+  return deps.repositories.examCandidates.lockCandidateIfUnlocked({
     subject: params.subject,
     candidateKey: params.candidateKey,
     examId: params.examId,
@@ -120,21 +120,15 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
   for (const candidate of candidates) {
     if (selected.length >= req.count) break;
     if (!candidate.dueDate) continue;
-    try {
-      if (candidate.candidateKey) {
-        await lockCandidate(deps, {
-          subject: candidate.subject,
-          candidateKey: candidate.candidateKey,
-          examId,
-        });
-      }
-      selected.push(candidate);
-    } catch (error: unknown) {
-      // 先行トランザクションと競合した候補はスキップして次候補へ進む。
-      const name = (error as { name?: string } | null)?.name;
-      if (name === 'ConditionalCheckFailedException') continue;
-      throw error;
+    if (candidate.candidateKey) {
+      const locked = await lockCandidate(deps, {
+        subject: candidate.subject,
+        candidateKey: candidate.candidateKey,
+        examId,
+      });
+      if (!locked) continue;
     }
+    selected.push(candidate);
   }
   const targetIds = selected.map((candidate) => candidate.targetId);
   const pdfS3Key = targetIds.length > 0 ? `exams/${examId}.pdf` : undefined;
