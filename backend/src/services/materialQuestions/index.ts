@@ -1,4 +1,4 @@
-export { createQuestionsService } from './createQuestionsService';
-export type { QuestionsService } from './createQuestionsService.types';
+export { createMaterialQuestionsService } from './createMaterialQuestionsService';
+export type { MaterialQuestionsService } from './materialQuestionsService.types';
 
-export { createQuestionsService as materialQuestionsService } from './createQuestionsService';
+export { createMaterialQuestionsService as materialQuestionsService } from './createMaterialQuestionsService';

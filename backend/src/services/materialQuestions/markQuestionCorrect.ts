@@ -1,6 +1,6 @@
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { QuestionsService } from './createQuestionsService';
+import type { MaterialQuestionsService } from './materialQuestionsService.types';
 
 // 内部で利用する補助処理を定義する
 const markQuestionCorrectImpl = async (repositories: Repositories, questionId: string): Promise<boolean> => {
@@ -29,7 +29,9 @@ const markQuestionCorrectImpl = async (repositories: Repositories, questionId: s
 };
 
 // 公開するサービス処理を定義する
-export const createMarkQuestionCorrect = (repositories: Repositories): QuestionsService['markQuestionCorrect'] => {
+export const createMarkQuestionCorrect = (
+  repositories: Repositories,
+): MaterialQuestionsService['markQuestionCorrect'] => {
   // 処理結果を呼び出し元へ返す
   return markQuestionCorrectImpl.bind(null, repositories);
 };

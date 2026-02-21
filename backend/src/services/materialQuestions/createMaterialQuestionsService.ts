@@ -1,7 +1,7 @@
-// Module: createQuestionsService responsibilities.
+// Module: createMaterialQuestionsService responsibilities.
 
 import type { Repositories } from '@/repositories/createRepositories';
-import type { QuestionsService } from './createQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestionsService.types';
 
 import { createCreateQuestion } from './createQuestion';
 import { createDeleteQuestion } from './deleteQuestion';
@@ -12,10 +12,10 @@ import { createRecalculateCandidatesForMaterial } from './recalculateCandidatesF
 import { createSearchQuestions } from './searchQuestions';
 import { createUpdateQuestion } from './updateQuestion';
 
-export type { QuestionsService } from './createQuestionsService.types';
+export type { MaterialQuestionsService } from './materialQuestionsService.types';
 
 /** Creates questions service. */
-export const createQuestionsService = (repositories: Repositories): QuestionsService => {
+export const createMaterialQuestionsService = (repositories: Repositories): MaterialQuestionsService => {
   // 処理で使う値を準備する
   const listQuestions = createListQuestions(repositories);
   // 処理で使う値を準備する

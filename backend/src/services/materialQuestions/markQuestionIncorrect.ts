@@ -2,7 +2,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { QuestionsService } from './createQuestionsService';
+import type { MaterialQuestionsService } from './materialQuestionsService.types';
 
 // 内部で利用する補助処理を定義する
 const markQuestionIncorrectImpl = async (repositories: Repositories, questionId: string): Promise<boolean> => {
@@ -58,7 +58,9 @@ const markQuestionIncorrectImpl = async (repositories: Repositories, questionId:
 };
 
 // 公開するサービス処理を定義する
-export const createMarkQuestionIncorrect = (repositories: Repositories): QuestionsService['markQuestionIncorrect'] => {
+export const createMarkQuestionIncorrect = (
+  repositories: Repositories,
+): MaterialQuestionsService['markQuestionIncorrect'] => {
   // 処理結果を呼び出し元へ返す
   return markQuestionIncorrectImpl.bind(null, repositories);
 };

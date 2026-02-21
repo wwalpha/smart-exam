@@ -2,12 +2,12 @@ import type { QuestionSearchResult } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { QuestionsService } from './createQuestionsService';
+import type { MaterialQuestionsService } from './materialQuestionsService.types';
 
 // 内部で利用する処理を定義する
 const searchQuestionsImpl = async (
   repositories: Repositories,
-  params: Parameters<QuestionsService['searchQuestions']>[0],
+  params: Parameters<MaterialQuestionsService['searchQuestions']>[0],
 ): Promise<QuestionSearchResult[]> => {
   // 内部で利用する処理を定義する
   const keyword = (params.keyword ?? '').trim().toLowerCase();
@@ -55,7 +55,7 @@ const searchQuestionsImpl = async (
 };
 
 // 公開する処理を定義する
-export const createSearchQuestions = (repositories: Repositories): QuestionsService['searchQuestions'] => {
+export const createSearchQuestions = (repositories: Repositories): MaterialQuestionsService['searchQuestions'] => {
   // 処理結果を呼び出し元へ返す
   return searchQuestionsImpl.bind(null, repositories);
 };

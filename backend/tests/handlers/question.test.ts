@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { questionsController } from '@/controllers/questions';
+import { materialQuestionsController } from '@/controllers/materialQuestions';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type {
@@ -18,12 +18,12 @@ describe('question handler', () => {
   it('listQuestions returns items', async () => {
     const mockItems = [{ id: '1', canonicalKey: '1-1' }];
     const services = {
-      questions: {
+      materialQuestions: {
         listQuestions: vi.fn().mockResolvedValue(mockItems as unknown),
       },
     } as unknown as Services;
 
-    const controller = questionsController(services);
+    const controller = materialQuestionsController(services);
 
     const req = {
       params: { materialId: 'mat1' },
@@ -42,12 +42,12 @@ describe('question handler', () => {
   it('createQuestion creates item', async () => {
     const mockItem = { id: '1', canonicalKey: '1-1' };
     const services = {
-      questions: {
+      materialQuestions: {
         createQuestion: vi.fn().mockResolvedValue(mockItem as unknown),
       },
     } as unknown as Services;
 
-    const controller = questionsController(services);
+    const controller = materialQuestionsController(services);
 
     const req = {
       params: { materialId: 'mat1' },
@@ -68,12 +68,12 @@ describe('question handler', () => {
   it('updateQuestion updates item', async () => {
     const mockItem = { id: '1', canonicalKey: '1-2' };
     const services = {
-      questions: {
+      materialQuestions: {
         updateQuestion: vi.fn().mockResolvedValue(mockItem as unknown),
       },
     } as unknown as Services;
 
-    const controller = questionsController(services);
+    const controller = materialQuestionsController(services);
 
     const req = {
       params: { questionId: '1' },
@@ -103,12 +103,12 @@ describe('question handler', () => {
     ];
 
     const services = {
-      questions: {
+      materialQuestions: {
         searchQuestions: vi.fn().mockResolvedValue(mockItems as unknown),
       },
     } as unknown as Services;
 
-    const controller = questionsController(services);
+    const controller = materialQuestionsController(services);
 
     const req = {
       body: { keyword: 'Q1', subject: '4' },
@@ -126,12 +126,12 @@ describe('question handler', () => {
 
   it('deleteQuestion returns 204', async () => {
     const services = {
-      questions: {
+      materialQuestions: {
         deleteQuestion: vi.fn().mockResolvedValue(true),
       },
     } as unknown as Services;
 
-    const controller = questionsController(services);
+    const controller = materialQuestionsController(services);
 
     const req = {
       params: { questionId: 'q1' },
@@ -145,7 +145,7 @@ describe('question handler', () => {
 
     await controller.deleteQuestion(req, res, next);
 
-    expect(services.questions.deleteQuestion).toHaveBeenCalledWith('q1');
+    expect(services.materialQuestions.deleteQuestion).toHaveBeenCalledWith('q1');
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.send).toHaveBeenCalled();
   });

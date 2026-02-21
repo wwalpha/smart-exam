@@ -1,7 +1,7 @@
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { QuestionsService } from './createQuestionsService';
+import type { MaterialQuestionsService } from './materialQuestionsService.types';
 
 // 内部で利用する処理を定義する
 const recalculateCandidatesForMaterialImpl = async (
@@ -65,7 +65,7 @@ const recalculateCandidatesForMaterialImpl = async (
 // 公開する処理を定義する
 export const createRecalculateCandidatesForMaterial = (
   repositories: Repositories,
-): QuestionsService['recalculateCandidatesForMaterial'] => {
+): MaterialQuestionsService['recalculateCandidatesForMaterial'] => {
   // 処理結果を呼び出し元へ返す
   return recalculateCandidatesForMaterialImpl.bind(null, repositories);
 };
