@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Repositories } from '@/repositories/createRepositories';
 
 describe('KanjiService.deleteKanji', () => {
-  it('removes deleted wordId from existing KANJI review tests (questions/results/count) and clears pdfS3Key', async () => {
+  it('removes deleted wordId from existing KANJI exams (details/results/count) and clears pdfS3Key', async () => {
     const { createDeleteKanji } = await import('@/services/kanji/deleteKanji');
 
     const examsPut = vi.fn().mockResolvedValue(undefined);
@@ -19,12 +19,11 @@ describe('KanjiService.deleteKanji', () => {
       exams: {
         scanAll: vi.fn().mockResolvedValue([
           {
-            testId: 't1',
+            examId: 'e1',
             subject: '1',
             mode: 'KANJI',
             status: 'IN_PROGRESS',
             count: 3,
-            questions: ['w1', 'w2', 'w3'],
             createdDate: '2026-02-14',
             pdfS3Key: 'exams/t1.pdf',
             results: [
@@ -33,28 +32,43 @@ describe('KanjiService.deleteKanji', () => {
             ],
           },
           {
-            testId: 't2',
+            examId: 'e2',
             subject: '1',
             mode: 'KANJI',
             status: 'COMPLETED',
             count: 1,
-            questions: ['w9'],
             createdDate: '2026-02-14',
             pdfS3Key: 'exams/t2.pdf',
             results: [{ id: 'w9', isCorrect: true }],
           },
           {
-            testId: 't3',
+            examId: 'e3',
             subject: '1',
             mode: 'QUESTION',
             status: 'IN_PROGRESS',
             count: 1,
-            questions: ['q1'],
             createdDate: '2026-02-14',
             results: [],
           },
         ]),
         put: examsPut,
+      },
+      examDetails: {
+        listByExamId: vi.fn().mockImplementation(async (examId: string) => {
+          if (examId === 'e1') {
+            return [
+              { examId: 'e1', seq: 1, targetType: 'KANJI', targetId: 'w1' },
+              { examId: 'e1', seq: 2, targetType: 'KANJI', targetId: 'w2' },
+              { examId: 'e1', seq: 3, targetType: 'KANJI', targetId: 'w3' },
+            ];
+          }
+          if (examId === 'e2') {
+            return [{ examId: 'e2', seq: 1, targetType: 'KANJI', targetId: 'w9' }];
+          }
+          return [{ examId: 'e3', seq: 1, targetType: 'QUESTION', targetId: 'q1' }];
+        }),
+        deleteByExamId: vi.fn().mockResolvedValue(undefined),
+        putMany: vi.fn().mockResolvedValue(undefined),
       },
     } as unknown as Repositories;
 
@@ -73,11 +87,13 @@ describe('KanjiService.deleteKanji', () => {
     expect(examsPut).toHaveBeenCalledTimes(1);
     const putArg = examsPut.mock.calls[0]?.[0] as any;
 
-    expect(putArg.testId).toBe('t1');
+    expect(putArg.examId).toBe('e1');
     expect(putArg.mode).toBe('KANJI');
-    expect(putArg.questions).toEqual(['w2', 'w3']);
     expect(putArg.count).toBe(2);
     expect(putArg.results).toEqual([{ id: 'w3', isCorrect: false }]);
+
+    expect(repositories.examDetails.deleteByExamId).toHaveBeenCalledWith('e1');
+    expect(repositories.examDetails.putMany).toHaveBeenCalledWith('e1', ['w2', 'w3'], 'KANJI');
 
     // pdfS3Key should be removed to force regeneration
     expect('pdfS3Key' in putArg).toBe(false);

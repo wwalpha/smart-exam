@@ -15,6 +15,9 @@ describe('KanjiService.importKanji (single pipe format)', () => {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
         bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
       },
+      examHistories: {
+        putHistory: vi.fn().mockResolvedValue(undefined),
+      },
       bedrock: {
         generateKanjiQuestionReadingsBulk: vi
           .fn()
@@ -33,7 +36,7 @@ describe('KanjiService.importKanji (single pipe format)', () => {
 
     const res = await service.importKanji({
       subject: '1',
-      fileContent: '詩集をしゅっぱんする。|出版|2016/01/01,OK|2015/11/01,NG|2015/10/01,OK',
+      fileContent: '詩集をしゅっぱんする。|出版|2016-01-01,OK|2015-11-01,NG|2015-10-01,OK',
     });
 
     expect(res.successCount).toBe(1);
@@ -41,11 +44,12 @@ describe('KanjiService.importKanji (single pipe format)', () => {
 
     expect(repositories.kanji.bulkCreate).toHaveBeenCalledTimes(1);
 
-    // 履歴3件（CLOSED） + 最終状態1件（OPEN/EXCLUDED）
+    // 現行仕様では、履歴3件は examHistories へ保存し、candidate は最終状態のみ作成する。
     const createdCandidates = (
       repositories.examCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
     ).mock.calls[0][0] as unknown[];
-    expect(createdCandidates.length).toBe(4);
+    expect(createdCandidates.length).toBe(1);
+    expect(repositories.examHistories.putHistory).toHaveBeenCalledTimes(3);
     expect(repositories.examCandidates.deleteCandidatesByTargetId).toHaveBeenCalledTimes(1);
   });
 

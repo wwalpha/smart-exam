@@ -11,7 +11,7 @@ describe('kanji handler', () => {
 
     const services = {
       kanji: {
-        createKanji: vi.fn().mockResolvedValue(mockItem as unknown),
+        registKanji: vi.fn().mockResolvedValue(mockItem as unknown),
       },
     } as unknown as Services;
 
