@@ -7,6 +7,8 @@ import type {
   CreateQuestionRequest,
   DeleteQuestionParams,
   ListQuestionsParams,
+  SetQuestionChoiceParams,
+  SetQuestionChoiceRequest,
   SearchQuestionsResponse,
   UpdateQuestionParams,
   UpdateQuestionRequest,
@@ -76,7 +78,7 @@ describe('question handler', () => {
     const controller = materialQuestionsController(services);
 
     const req = {
-      params: { questionId: '1' },
+      params: { materialId: 'mat1', questionId: '1' },
       body: { canonicalKey: '1-2' },
     } as unknown as Request<UpdateQuestionParams, unknown, UpdateQuestionRequest>;
     const res = {
@@ -87,6 +89,7 @@ describe('question handler', () => {
 
     await controller.updateQuestion(req, res, next);
 
+    expect(services.materialQuestions.updateQuestion).toHaveBeenCalledWith('mat1', '1', { canonicalKey: '1-2' });
     expect(res.json).toHaveBeenCalledWith(mockItem);
   });
 
@@ -134,7 +137,7 @@ describe('question handler', () => {
     const controller = materialQuestionsController(services);
 
     const req = {
-      params: { questionId: 'q1' },
+      params: { materialId: 'mat1', questionId: 'q1' },
     } as unknown as Request<DeleteQuestionParams>;
     const res = {
       json: vi.fn(),
@@ -145,8 +148,37 @@ describe('question handler', () => {
 
     await controller.deleteQuestion(req, res, next);
 
-    expect(services.materialQuestions.deleteQuestion).toHaveBeenCalledWith('q1');
+    expect(services.materialQuestions.deleteQuestion).toHaveBeenCalledWith('mat1', 'q1');
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.send).toHaveBeenCalled();
+  });
+
+  it('setQuestionChoice returns ok', async () => {
+    const services = {
+      materialQuestions: {
+        setQuestionChoice: vi.fn().mockResolvedValue(true),
+      },
+    } as unknown as Services;
+
+    const controller = materialQuestionsController(services);
+
+    const req = {
+      params: { materialId: 'mat1', questionId: 'q1' },
+      body: { isCorrect: false },
+    } as unknown as Request<SetQuestionChoiceParams, unknown, SetQuestionChoiceRequest>;
+    const res = {
+      json: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+    } as unknown as Response;
+    const next = vi.fn();
+
+    await controller.setQuestionChoice(req, res, next);
+
+    expect(services.materialQuestions.setQuestionChoice).toHaveBeenCalledWith({
+      materialId: 'mat1',
+      questionId: 'q1',
+      isCorrect: false,
+    });
+    expect(res.json).toHaveBeenCalledWith({ ok: true });
   });
 });

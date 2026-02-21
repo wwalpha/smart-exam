@@ -11,6 +11,7 @@ const listQuestionsImpl = async (repositories: Repositories, materialId: string)
     canonicalKey: row.canonicalKey,
     subject: row.subjectId,
     materialId: row.materialId,
+    choice: row.choice,
     tags: [],
   }));
 };

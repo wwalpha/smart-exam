@@ -12,18 +12,24 @@ export type GetMaterialParams = {
 
 /** `PATCH /questions/:questionId` */
 export type UpdateQuestionParams = {
+  /** 教材ID */
+  materialId: string;
   /** 問題ID */
   questionId: string;
 };
 
-/** `PUT /questions/:questionId/review-candidate` */
-export type UpsertQuestionReviewCandidateParams = {
+/** `DELETE /materials/:materialId/questions/:questionId` */
+export type DeleteQuestionParams = {
+  /** 教材ID */
+  materialId: string;
   /** 問題ID */
   questionId: string;
 };
 
-/** `DELETE /questions/:questionId/review-candidate` */
-export type DeleteQuestionReviewCandidateParams = {
+/** `PATCH /materials/:materialId/questions/:questionId/choices` */
+export type SetQuestionChoiceParams = {
+  /** 教材ID */
+  materialId: string;
   /** 問題ID */
   questionId: string;
 };

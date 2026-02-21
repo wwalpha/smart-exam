@@ -159,17 +159,12 @@ export const createApp = (): express.Express => {
     validateBody(controllers.materialQuestions.UpdateQuestionBodySchema),
     handleRequest(controllers.materialQuestions.updateQuestion),
   );
-  // 指定した問題の復習候補を作成または更新するAPI
-  app.put(
-    '/api/materials/:materialId/questions/:questionId/review-candidate',
+  // 指定した問題の正誤選択を更新するAPI
+  app.patch(
+    '/api/materials/:materialId/questions/:questionId/choices',
     validateParams(MaterialQuestionIdParamsSchema),
-    handleRequest(controllers.materialQuestions.upsertQuestionReviewCandidate),
-  );
-  // 指定した問題の復習候補を削除するAPI
-  app.delete(
-    '/api/materials/:materialId/questions/:questionId/review-candidate',
-    validateParams(MaterialQuestionIdParamsSchema),
-    handleRequest(controllers.materialQuestions.deleteQuestionReviewCandidate),
+    validateBody(controllers.materialQuestions.SetQuestionChoiceBodySchema),
+    handleRequest(controllers.materialQuestions.setQuestionChoice),
   );
   // 指定した問題を削除するAPI
   app.delete(

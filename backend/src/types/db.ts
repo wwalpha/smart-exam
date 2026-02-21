@@ -28,6 +28,8 @@ export interface MaterialTable {
   questionPdfPath?: string;
   /** 解答PDFパス（試験用紙の場合のみ） */
   answerPdfPath?: string;
+  /** 教材セット完了フラグ */
+  isCompleted?: boolean;
 }
 
 /**
@@ -44,6 +46,8 @@ export interface MaterialQuestionsTable {
   number: number;
   /** 識別キー */
   canonicalKey: string;
+  /** 正誤選択（未選択の場合はundefined） */
+  choice?: 'CORRECT' | 'INCORRECT';
 }
 
 /**

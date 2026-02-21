@@ -19,8 +19,7 @@ export const useQuestionManagement = () => {
   const createQuestion = useWordTestStore((s) => s.createQuestion);
   const createQuestionsBulk = useWordTestStore((s) => s.createQuestionsBulk);
   const deleteQuestion = useWordTestStore((s) => s.deleteQuestion);
-  const markQuestionCorrect = useWordTestStore((s) => s.markQuestionCorrect);
-  const markQuestionIncorrect = useWordTestStore((s) => s.markQuestionIncorrect);
+  const setQuestionChoice = useWordTestStore((s) => s.setQuestionChoice);
   const extractQuestionsFromGradedAnswer = useWordTestStore((s) => s.extractQuestionsFromGradedAnswer);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -63,6 +62,8 @@ export const useQuestionManagement = () => {
     if (!id || !detail || detail.id !== id) return;
     // useEffectの再実行（StrictMode含む）でも二重抽出しない
     if (extractedRef.current) return;
+    // 完了済み教材では問題の自動抽出を行わない
+    if (detail.isCompleted) return;
     // 既に問題が登録済みなら自動抽出しない
     if (questions.length > 0) return;
     // 採点済み解答PDFがある場合のみ抽出対象とする
@@ -75,6 +76,7 @@ export const useQuestionManagement = () => {
   const submit = async (data: QuestionFormValues) => {
     // URLが不正/教材未取得の状態で送信される可能性をガードする
     if (!id || !detail) return;
+    if (detail.isCompleted) return;
     await createQuestion(id, {
       ...data,
       subject: detail.subject,
@@ -86,6 +88,7 @@ export const useQuestionManagement = () => {
   const submitBulk = async () => {
     // URLが不正/教材未取得の状態で送信される可能性をガードする
     if (!id || !detail) return;
+    if (detail.isCompleted) return;
 
     const normalized = bulkInput
       .split(/[\s,]+/)
@@ -106,6 +109,7 @@ export const useQuestionManagement = () => {
   };
 
   const remove = async (questionId: string) => {
+    if (detail?.isCompleted) return;
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
       if (!id) return;
       await deleteQuestion(id, questionId);
@@ -114,13 +118,14 @@ export const useQuestionManagement = () => {
   };
 
   const markCorrect = async (questionId: string) => {
+    if (detail?.isCompleted) return;
     // 二重クリック等で同時に複数更新しない（UX・整合性のため）
     if (busyQuestionId) return;
     setBusyQuestionId(questionId);
     setOptimisticResultByQuestionId((prev) => ({ ...prev, [questionId]: 'correct' }));
     try {
       if (!id) return;
-      await markQuestionCorrect(id, questionId);
+      await setQuestionChoice(id, questionId, true);
       if (id) fetchQuestions(id);
     } finally {
       // API失敗時もボタン操作を復帰させる
@@ -129,13 +134,14 @@ export const useQuestionManagement = () => {
   };
 
   const markIncorrect = async (questionId: string) => {
+    if (detail?.isCompleted) return;
     // 二重クリック等で同時に複数更新しない（UX・整合性のため）
     if (busyQuestionId) return;
     setBusyQuestionId(questionId);
     setOptimisticResultByQuestionId((prev) => ({ ...prev, [questionId]: 'incorrect' }));
     try {
       if (!id) return;
-      await markQuestionIncorrect(id, questionId);
+      await setQuestionChoice(id, questionId, false);
       if (id) fetchQuestions(id);
     } finally {
       // API失敗時もボタン操作を復帰させる

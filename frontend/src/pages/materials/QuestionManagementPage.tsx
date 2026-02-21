@@ -64,7 +64,7 @@ export const QuestionManagementPage = () => {
           </Button>
           <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
             <DialogTrigger asChild>
-              <Button disabled={isBusy} variant="outline">
+              <Button disabled={isBusy || !!material?.isCompleted} variant="outline">
                 一括追加
               </Button>
             </DialogTrigger>
@@ -77,17 +77,21 @@ export const QuestionManagementPage = () => {
                 <Textarea
                   value={bulkInput}
                   onChange={(e) => setBulkInput(e.target.value)}
-                  disabled={isBusy}
+                  disabled={isBusy || !!material?.isCompleted}
                   placeholder={'例:\n1-1\n1-2\n2-1'}
                   rows={8}
                 />
                 <p className="text-xs text-muted-foreground">改行/スペース/カンマ区切りで複数入力できます</p>
               </div>
               <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsBulkDialogOpen(false)} disabled={isBusy}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsBulkDialogOpen(false)}
+                  disabled={isBusy || !!material?.isCompleted}>
                   キャンセル
                 </Button>
-                <Button type="button" onClick={submitBulk} disabled={isBusy}>
+                <Button type="button" onClick={submitBulk} disabled={isBusy || !!material?.isCompleted}>
                   追加
                 </Button>
               </div>
@@ -95,7 +99,7 @@ export const QuestionManagementPage = () => {
           </Dialog>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button disabled={isBusy}>手動追加</Button>
+              <Button disabled={isBusy || !!material?.isCompleted}>手動追加</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -115,6 +119,7 @@ export const QuestionManagementPage = () => {
                     aria-invalid={!!errors.canonicalKey}
                     className={errors.canonicalKey ? 'border-destructive focus-visible:ring-destructive' : undefined}
                     placeholder="例: 1-1"
+                    disabled={isBusy || !!material?.isCompleted}
                   />
                   {errors.canonicalKey?.message ? (
                     <p className="text-sm text-destructive">{String(errors.canonicalKey.message)}</p>
@@ -122,10 +127,14 @@ export const QuestionManagementPage = () => {
                   <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1 / 1-8-A / 1-9-カナ)</p>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isBusy}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    disabled={isBusy || !!material?.isCompleted}>
                     キャンセル
                   </Button>
-                  <Button type="submit" disabled={isBusy}>
+                  <Button type="submit" disabled={isBusy || !!material?.isCompleted}>
                     追加
                   </Button>
                 </div>
@@ -163,27 +172,17 @@ export const QuestionManagementPage = () => {
                         return (
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">不正解</Badge>
-                            {q.reviewCandidate?.status === 'OPEN' ? (
-                              <span className="text-sm text-muted-foreground">次回: {q.reviewCandidate.nextTime}</span>
-                            ) : null}
                           </div>
                         );
                       }
 
-                      return q.reviewCandidate ? (
-                      <div className="flex items-center gap-2">
-                        {q.reviewCandidate.status === 'OPEN' ? (
-                          <Badge variant="outline">不正解</Badge>
-                        ) : (
-                          <Badge variant="secondary">履歴</Badge>
-                        )}
-                        {q.reviewCandidate.status === 'OPEN' ? (
-                          <span className="text-sm text-muted-foreground">次回: {q.reviewCandidate.nextTime}</span>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">未設定</span>
-                    );
+                      if (q.choice === 'CORRECT') {
+                        return <Badge variant="secondary">正解</Badge>;
+                      }
+                      if (q.choice === 'INCORRECT') {
+                        return <Badge variant="outline">不正解</Badge>;
+                      }
+                      return <span className="text-sm text-muted-foreground">未設定</span>;
                     })()}
                   </TableCell>
                   <TableCell className="py-2">
@@ -194,8 +193,8 @@ export const QuestionManagementPage = () => {
 
                         const value = (() => {
                           if (optimistic) return optimistic;
-                          if (!q.reviewCandidate) return '';
-                          if (q.reviewCandidate.status === 'OPEN') return 'incorrect';
+                          if (q.choice === 'CORRECT') return 'correct';
+                          if (q.choice === 'INCORRECT') return 'incorrect';
                           return '';
                         })();
 
@@ -203,7 +202,7 @@ export const QuestionManagementPage = () => {
                           <div className="flex items-center gap-3">
                             <RadioGroup
                               value={value}
-                              disabled={isRowBusy}
+                              disabled={isRowBusy || !!material?.isCompleted}
                               onValueChange={(v) => {
                                 if (v === value) return;
                                 if (v === 'correct') return markCorrect(q.id);
@@ -227,7 +226,7 @@ export const QuestionManagementPage = () => {
                               variant="outline"
                               size="sm"
                               className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                              disabled={isRowBusy}
+                              disabled={isRowBusy || !!material?.isCompleted}
                               onClick={() => remove(q.id)}>
                               削除
                             </Button>

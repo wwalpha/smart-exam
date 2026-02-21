@@ -23,6 +23,7 @@ const createMaterialImpl = async (
     provider: data.provider,
     materialDate: data.materialDate,
     registeredDate: data.registeredDate,
+    isCompleted: false,
   };
 
   // 非同期処理の完了を待つ

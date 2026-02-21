@@ -38,5 +38,6 @@ export const toApiMaterial = (dbItem: MaterialTable): Material => {
     provider: requireNonEmpty(dbItem.provider, 'Material.provider'),
     materialDate: requireYmd(dbItem.materialDate, 'Material.materialDate'),
     registeredDate: requireYmd(dbItem.registeredDate ?? dbItem.materialDate, 'Material.registeredDate'),
+    isCompleted: dbItem.isCompleted ?? false,
   };
 };

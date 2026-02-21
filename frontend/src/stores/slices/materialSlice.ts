@@ -312,7 +312,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.markQuestionCorrect(materialId, questionId);
+          await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect: true });
         },
         '採点結果（正解）の登録に失敗しました。',
         { rethrow: true }
@@ -323,9 +323,32 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.markQuestionIncorrect(materialId, questionId);
+          await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect: false });
         },
         '採点結果（不正解）の登録に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    setQuestionChoice: async (materialId, questionId, isCorrect) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect });
+        },
+        '採点結果の登録に失敗しました。',
+        { rethrow: true }
+      );
+    },
+
+    completeMaterial: async (materialId) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          const response = await MATERIAL_API.updateMaterial(materialId, { isCompleted: true });
+          updateMaterial({ detail: response });
+        },
+        '教材セットの完了処理に失敗しました。',
         { rethrow: true }
       );
     },

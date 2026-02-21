@@ -11,10 +11,8 @@ import type {
   QuestionListResponse,
   CreateQuestionRequest,
   UpdateQuestionRequest,
-  UpsertQuestionReviewCandidateRequest,
-  UpsertQuestionReviewCandidateResponse,
-  DeleteQuestionReviewCandidateRequest,
-  DeleteQuestionReviewCandidateResponse,
+  SetQuestionChoiceRequest,
+  SetQuestionChoiceResponse,
 } from '@smart-exam/api-types';
 
 export const listMaterials = async (params?: SearchMaterialsRequest): Promise<MaterialListResponse> => {
@@ -106,23 +104,33 @@ export const deleteQuestion = async (materialId: string, questionId: string): Pr
 export const markQuestionIncorrect = async (
   materialId: string,
   questionId: string,
-  request: UpsertQuestionReviewCandidateRequest = {}
-): Promise<UpsertQuestionReviewCandidateResponse> => {
-  return apiRequest<UpsertQuestionReviewCandidateResponse, UpsertQuestionReviewCandidateRequest>({
-    method: 'PUT',
-    path: `/api/materials/${materialId}/questions/${questionId}/review-candidate`,
-    body: request,
+): Promise<SetQuestionChoiceResponse> => {
+  return apiRequest<SetQuestionChoiceResponse, SetQuestionChoiceRequest>({
+    method: 'PATCH',
+    path: `/api/materials/${materialId}/questions/${questionId}/choices`,
+    body: { isCorrect: false },
   });
 };
 
 export const markQuestionCorrect = async (
   materialId: string,
   questionId: string,
-  request: DeleteQuestionReviewCandidateRequest = {}
-): Promise<DeleteQuestionReviewCandidateResponse> => {
-  return apiRequest<DeleteQuestionReviewCandidateResponse, DeleteQuestionReviewCandidateRequest>({
-    method: 'DELETE',
-    path: `/api/materials/${materialId}/questions/${questionId}/review-candidate`,
+): Promise<SetQuestionChoiceResponse> => {
+  return apiRequest<SetQuestionChoiceResponse, SetQuestionChoiceRequest>({
+    method: 'PATCH',
+    path: `/api/materials/${materialId}/questions/${questionId}/choices`,
+    body: { isCorrect: true },
+  });
+};
+
+export const setQuestionChoice = async (
+  materialId: string,
+  questionId: string,
+  request: SetQuestionChoiceRequest
+): Promise<SetQuestionChoiceResponse> => {
+  return apiRequest<SetQuestionChoiceResponse, SetQuestionChoiceRequest>({
+    method: 'PATCH',
+    path: `/api/materials/${materialId}/questions/${questionId}/choices`,
     body: request,
   });
 };

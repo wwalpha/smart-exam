@@ -39,6 +39,7 @@ export const useMaterialDetail = () => {
   const fetchMaterialFiles = useWordTestStore((s) => s.fetchMaterialFiles);
   const uploadMaterialPdf = useWordTestStore((s) => s.uploadMaterialPdf);
   const updateMaterial = useWordTestStore((s) => s.updateMaterial);
+  const completeMaterial = useWordTestStore((s) => s.completeMaterial);
 
   const [registeredDate, setRegisteredDate] = useState<string>('');
 
@@ -97,6 +98,18 @@ export const useMaterialDetail = () => {
     }
   }, [id, registeredDate, updateMaterial]);
 
+  const complete = useCallback(async () => {
+    if (!id || !detail) return;
+    if (detail.isCompleted) return;
+    try {
+      await completeMaterial(id);
+      toast.success('教材を完了にしました');
+      await fetchMaterial(id);
+    } catch {
+      // store側でエラー表示されるため二重表示しない
+    }
+  }, [id, detail, completeMaterial, fetchMaterial]);
+
   const previewFile = useCallback(async (fileId: string) => {
     try {
       // IDが不正な状態ではプレビューできない
@@ -154,5 +167,6 @@ export const useMaterialDetail = () => {
     registeredDate,
     setRegisteredDate,
     saveRegisteredDate,
+    complete,
   };
 };

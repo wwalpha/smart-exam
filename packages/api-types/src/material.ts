@@ -40,24 +40,24 @@ export type CreateQuestionParams = {
 
 /** `PATCH /questions/:questionId` */
 export type UpdateQuestionParams = {
+  /** 教材ID */
+  materialId: string;
   /** 問題ID */
   questionId: string;
 };
 
 /** `DELETE /questions/:questionId` */
 export type DeleteQuestionParams = {
+  /** 教材ID */
+  materialId: string;
   /** 問題ID */
   questionId: string;
 };
 
-/** `PUT /questions/:questionId/review-candidate` */
-export type UpsertQuestionReviewCandidateParams = {
-  /** 問題ID */
-  questionId: string;
-};
-
-/** `DELETE /questions/:questionId/review-candidate` */
-export type DeleteQuestionReviewCandidateParams = {
+/** `PATCH /materials/:materialId/questions/:questionId/choices` */
+export type SetQuestionChoiceParams = {
+  /** 教材ID */
+  materialId: string;
   /** 問題ID */
   questionId: string;
 };
@@ -89,6 +89,8 @@ export type UpdateMaterialRequest = Partial<CreateMaterialRequest> & {
   answerPdfPath?: string;
   /** 採点済み答案PDFのS3キー */
   answerSheetPath?: string;
+  /** 完了状態 */
+  isCompleted?: boolean;
 };
 
 /** `PATCH /materials/:materialId` */
@@ -191,6 +193,8 @@ export type Question = {
   tags?: string[];
   /** 復習候補（最新） */
   reviewCandidate?: QuestionReviewCandidateSummary;
+  /** 正誤選択（画面入力値） */
+  choice?: 'CORRECT' | 'INCORRECT';
 };
 
 /** 問題作成リクエスト */
@@ -233,6 +237,8 @@ export type Material = {
   materialDate: string;
   /** 初回実施日 (YYYY-MM-DD) */
   registeredDate: string;
+  /** 完了状態 */
+  isCompleted?: boolean;
 };
 /** 問題一覧取得レスポンス */
 export type QuestionListResponse = {
@@ -270,20 +276,14 @@ export type SearchQuestionsResponse = {
   datas: QuestionSearchResult[];
 };
 
-/** `PUT /questions/:questionId/review-candidate` */
-export type UpsertQuestionReviewCandidateRequest = {};
-
-/** `PUT /questions/:questionId/review-candidate` */
-export type UpsertQuestionReviewCandidateResponse = {
-  /** 成功フラグ */
-  ok: true;
+/** `PATCH /materials/:materialId/questions/:questionId/choices` */
+export type SetQuestionChoiceRequest = {
+  /** 正解なら true */
+  isCorrect: boolean;
 };
 
-/** `DELETE /questions/:questionId/review-candidate` */
-export type DeleteQuestionReviewCandidateRequest = {};
-
-/** `DELETE /questions/:questionId/review-candidate` */
-export type DeleteQuestionReviewCandidateResponse = {
+/** `PATCH /materials/:materialId/questions/:questionId/choices` */
+export type SetQuestionChoiceResponse = {
   /** 成功フラグ */
   ok: true;
 };

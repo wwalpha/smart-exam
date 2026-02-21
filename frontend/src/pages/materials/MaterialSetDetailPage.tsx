@@ -25,6 +25,7 @@ export const MaterialSetDetailPage = () => {
     registeredDate,
     setRegisteredDate,
     saveRegisteredDate,
+    complete,
   } = useMaterialDetail();
   const fileInputRefs = useRef<Partial<Record<PdfFileType, HTMLInputElement | null>>>({});
 
@@ -75,6 +76,9 @@ export const MaterialSetDetailPage = () => {
             <Badge variant="outline" className="px-4 py-2 text-sm">
               {material.name}
             </Badge>
+            <Badge variant="outline" className="px-4 py-2 text-sm">
+              {material.isCompleted ? '完了' : '未完了'}
+            </Badge>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -86,9 +90,22 @@ export const MaterialSetDetailPage = () => {
                   value={registeredDate}
                   onChange={(e) => setRegisteredDate(e.target.value)}
                   className="w-[180px]"
+                  disabled={isBusy || !!material.isCompleted}
                 />
-                <Button type="button" variant="outline" size="sm" onClick={() => void saveRegisteredDate()} disabled={isBusy}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void saveRegisteredDate()}
+                  disabled={isBusy || !!material.isCompleted}>
                   更新
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => void complete()}
+                  disabled={isBusy || !!material.isCompleted}>
+                  完了
                 </Button>
               </div>
             </div>

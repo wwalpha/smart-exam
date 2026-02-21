@@ -6,9 +6,9 @@ import type { MaterialQuestionsService } from './materialQuestionsService.types'
 import { createCreateQuestion } from './createQuestion';
 import { createDeleteQuestion } from './deleteQuestion';
 import { createListQuestions } from './listQuestions';
-import { createMarkQuestionCorrect } from './markQuestionCorrect';
-import { createMarkQuestionIncorrect } from './markQuestionIncorrect';
+import { createSetQuestionChoice } from './setQuestionChoice';
 import { createRecalculateCandidatesForMaterial } from './recalculateCandidatesForMaterial';
+import { createApplyQuestionChoicesToCandidatesForMaterial } from './applyQuestionChoicesToCandidatesForMaterial';
 import { createSearchQuestions } from './searchQuestions';
 import { createUpdateQuestion } from './updateQuestion';
 
@@ -27,11 +27,11 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
   // 処理で使う値を準備する
   const searchQuestions = createSearchQuestions(repositories);
   // 処理で使う値を準備する
-  const markQuestionCorrect = createMarkQuestionCorrect(repositories);
-  // 処理で使う値を準備する
-  const markQuestionIncorrect = createMarkQuestionIncorrect(repositories);
+  const setQuestionChoice = createSetQuestionChoice(repositories);
   // 処理で使う値を準備する
   const recalculateCandidatesForMaterial = createRecalculateCandidatesForMaterial(repositories);
+  // 処理で使う値を準備する
+  const applyQuestionChoicesToCandidatesForMaterial = createApplyQuestionChoicesToCandidatesForMaterial(repositories);
 
   // 処理結果を呼び出し元へ返す
   return {
@@ -40,8 +40,8 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
     updateQuestion,
     deleteQuestion,
     searchQuestions,
-    markQuestionCorrect,
-    markQuestionIncorrect,
+    setQuestionChoice,
     recalculateCandidatesForMaterial,
+    applyQuestionChoicesToCandidatesForMaterial,
   };
 };

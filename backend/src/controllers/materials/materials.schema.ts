@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { DateUtils } from '@/lib/dateUtils';
+import { BooleanFromUnknownSchema } from '@/lib/zodSchemas';
 import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 /** CreateMaterialBodySchema validates input shape. */
@@ -46,4 +47,5 @@ export const UpdateMaterialBodySchema = z.object({
   questionPdfPath: z.string().min(1).optional(),
   answerPdfPath: z.string().min(1).optional(),
   answerSheetPath: z.string().min(1).optional(),
+  isCompleted: BooleanFromUnknownSchema.optional(),
 });
