@@ -8,7 +8,7 @@ import { SUBJECT_LABEL } from '@/lib/Consts';
 import { formatYmdSlash } from '@/utils/date';
 
 export const ExamKanjiDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, updateExamStatus, ConfirmDialog } = useReviewKanjiDetail();
+  const { review, isLoading, error, basePath, remove, completeExam, ConfirmDialog } = useReviewKanjiDetail();
   const navigate = useNavigate();
 
   const infoBadgeClass = 'px-4 py-2 text-sm';
@@ -20,9 +20,9 @@ export const ExamKanjiDetailPage = () => {
 
   const complete = useCallback(async () => {
     if (!review) return;
-    await updateExamStatus(review.examId, { status: 'COMPLETED' }, 'KANJI');
+    await completeExam(review.examId);
     navigate(basePath);
-  }, [review, updateExamStatus, navigate, basePath]);
+  }, [review, completeExam, navigate, basePath]);
 
   if (isLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;

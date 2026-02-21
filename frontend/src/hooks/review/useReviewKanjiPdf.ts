@@ -18,7 +18,7 @@ export const useReviewKanjiPdf = () => {
     fetchExam(id, 'KANJI');
   }, [id, fetchExam, currentTest?.examId]);
 
-  const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/kanji/${id}/pdf` : '');
+  const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/${id}/pdf` : '');
 
   const [presignedUrl, setPresignedUrl] = useState<string>('');
   const [isFetchingPdfUrl, setIsFetchingPdfUrl] = useState(false);

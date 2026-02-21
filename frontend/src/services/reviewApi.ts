@@ -11,24 +11,18 @@ import type {
   ListExamTargetsResponse,
 } from '@smart-exam/api-types';
 
-const toModeSegment = (mode: ExamMode): 'kanji' | 'material' => (mode === 'KANJI' ? 'kanji' : 'material');
-
 export const listExams = async (params: SearchExamsRequest): Promise<ExamListResponse> => {
-  const path = params.mode === 'KANJI' ? '/api/exam/kanji/search' : '/api/exam/material/search';
-
   return apiRequest<ExamListResponse, SearchExamsRequest>({
     method: 'POST',
-    path,
+    path: '/api/exam/search',
     body: params,
   });
 };
 
 export const createExam = async (request: CreateExamRequest): Promise<Exam> => {
-  const path = request.mode === 'KANJI' ? '/api/exam/kanji' : '/api/exam/material';
-
   return apiRequest<Exam, CreateExamRequest>({
     method: 'POST',
-    path,
+    path: '/api/exam',
     body: request,
   });
 };
@@ -38,9 +32,10 @@ export const getExam = async (examId: string): Promise<ExamDetail> => {
 };
 
 export const getExamByMode = async (examId: string, mode: ExamMode): Promise<ExamDetail> => {
+  void mode;
   return apiRequest<ExamDetail>({
     method: 'GET',
-    path: `/api/exam/${toModeSegment(mode)}/${examId}`,
+    path: `/api/exam/${examId}`,
   });
 };
 
@@ -51,11 +46,11 @@ export const updateExamStatus = async (examId: string, request: UpdateExamStatus
 export const updateExamStatusByMode = async (
   examId: string,
   request: UpdateExamStatusRequest,
-  mode: ExamMode,
+  _mode: ExamMode,
 ): Promise<Exam> => {
   return apiRequest<Exam, UpdateExamStatusRequest>({
     method: 'PATCH',
-    path: `/api/exam/${toModeSegment(mode)}/${examId}`,
+    path: `/api/exam/${examId}`,
     body: request,
   });
 };
@@ -64,10 +59,10 @@ export const deleteExam = async (examId: string): Promise<void> => {
   return deleteExamByMode(examId, 'MATERIAL');
 };
 
-export const deleteExamByMode = async (examId: string, mode: ExamMode): Promise<void> => {
+export const deleteExamByMode = async (examId: string, _mode: ExamMode): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
-    path: `/api/exam/${toModeSegment(mode)}/${examId}`,
+    path: `/api/exam/${examId}`,
   });
 };
 
@@ -78,11 +73,11 @@ export const submitExamResults = async (examId: string, request: SubmitExamResul
 export const submitExamResultsByMode = async (
   examId: string,
   request: SubmitExamResultsRequest,
-  mode: ExamMode,
+  _mode: ExamMode,
 ): Promise<void> => {
   return apiRequest<void, SubmitExamResultsRequest>({
     method: 'POST',
-    path: `/api/exam/${toModeSegment(mode)}/${examId}/results`,
+    path: `/api/exam/${examId}/results`,
     body: request,
   });
 };
@@ -94,16 +89,15 @@ export const listExamTargets = async (params: {
   subject?: string;
 }): Promise<ListExamTargetsResponse> => {
   const qs = new URLSearchParams({
+    mode: params.mode,
     from: params.from,
     to: params.to,
     ...(params.subject ? { subject: params.subject } : {}),
   });
 
-  const path = params.mode === 'KANJI' ? '/api/exam/kanji/targets' : '/api/exam/material/targets';
-
   return apiRequest<ListExamTargetsResponse>({
     method: 'GET',
-    path: `${path}?${qs.toString()}`,
+    path: `/api/exam/targets?${qs.toString()}`,
   });
 };
 

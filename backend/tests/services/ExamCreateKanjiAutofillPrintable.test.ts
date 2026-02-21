@@ -56,7 +56,7 @@ describe('createExam (KANJI) printable filter only', () => {
       mode: 'KANJI',
       createdDate: '2026-02-14',
       status: 'IN_PROGRESS',
-      pdf: { url: '/api/exam/kanji/t1/pdf', downloadUrl: '/api/exam/kanji/t1/pdf?download=1' },
+      pdf: { url: '/api/exam/t1/pdf', downloadUrl: '/api/exam/t1/pdf?download=1' },
       count: 1,
       results: [],
       items: [

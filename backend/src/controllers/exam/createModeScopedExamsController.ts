@@ -6,7 +6,6 @@ import type {
   SearchExamsRequest,
   SearchExamsResponse,
   SubjectId,
-  SubmitExamResultsRequest,
   UpdateExamStatusRequest,
   UpdateExamStatusResponse,
 } from '@smart-exam/api-types';
@@ -18,7 +17,6 @@ import type { ValidatedBody, ValidatedQuery } from '@/types/express';
 import type { Services } from '@/services/createServices';
 
 import { CreateTestBodySchema, ListTestTargetsQuerySchema, SearchTestsBodySchema } from './modeScopedExam.schema';
-import { SubmitExamResultsBodySchema } from './submitExamResults.schema';
 import { UpdateExamStatusBodySchema } from './updateExamStatus.schema';
 
 export const createModeScopedExamsController = (services: Services, mode: ExamMode) => {
@@ -83,21 +81,6 @@ export const createModeScopedExamsController = (services: Services, mode: ExamMo
     res.json({ items });
   };
 
-  const getTest: AsyncHandler<
-    { examId: string },
-    { error: string } | unknown,
-    Record<string, never>,
-    ParsedQs
-  > = async (req, res) => {
-    const { examId } = req.params;
-    const item = await services.exams.getExam(examId);
-    if (!item || item.mode !== mode) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-    res.json(item);
-  };
-
   const getTestPdf: AsyncHandler<
     { examId: string },
     { url: string } | { error: string },
@@ -160,80 +143,16 @@ export const createModeScopedExamsController = (services: Services, mode: ExamMo
     res.json(item);
   };
 
-  const deleteTest: AsyncHandler<
-    { examId: string },
-    void | { error: string },
-    Record<string, never>,
-    ParsedQs
-  > = async (req, res) => {
-    const { examId } = req.params;
-    const matched = await ensureModeMatched(examId);
-    if (!matched) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-    await services.exams.deleteExam(examId);
-    res.status(204).send();
-  };
-
-  const submitTestResults: AsyncHandler<
-    { examId: string },
-    void | { error: string },
-    SubmitExamResultsRequest,
-    ParsedQs
-  > = async (req, res) => {
-    const { examId } = req.params;
-    const matched = await ensureModeMatched(examId);
-    if (!matched) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-
-    const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SubmitExamResultsBodySchema>;
-    const ok = await services.exams.submitExamResults(examId, body);
-    if (!ok) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-    res.status(204).send();
-  };
-
-  const completeTest: AsyncHandler<
-    { examId: string },
-    void | { error: string },
-    Record<string, never>,
-    ParsedQs
-  > = async (req, res) => {
-    const { examId } = req.params;
-    const matched = await ensureModeMatched(examId);
-    if (!matched) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-
-    const ok = await services.exams.completeExam(examId);
-    if (!ok) {
-      res.status(404).json({ error: 'Not Found' });
-      return;
-    }
-    res.status(204).send();
-  };
-
   return {
     CreateTestBodySchema,
     SearchTestsBodySchema,
     ListTestTargetsQuerySchema,
     UpdateExamStatusBodySchema,
-    SubmitExamResultsBodySchema,
     listTests,
     searchTests,
     createTest,
     listTestTargets,
-    getTest,
     getTestPdf,
     updateTestStatus,
-    deleteTest,
-    submitTestResults,
-    completeTest,
   };
 };

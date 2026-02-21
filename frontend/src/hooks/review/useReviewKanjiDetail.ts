@@ -12,7 +12,7 @@ export const useReviewKanjiDetail = () => {
   const { detail, status } = useWordTestStore((s) => s.review);
   const fetchExam = useWordTestStore((s) => s.fetchExam);
   const deleteExam = useWordTestStore((s) => s.deleteExam);
-  const updateExamStatus = useWordTestStore((s) => s.updateExamStatus);
+  const completeExam = useWordTestStore((s) => s.completeExam);
   const { confirm, ConfirmDialog } = useConfirm();
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export const useReviewKanjiDetail = () => {
     error: status.error,
     basePath: BASE_PATH,
     remove,
-    updateExamStatus,
+    completeExam,
     ConfirmDialog,
   };
 };

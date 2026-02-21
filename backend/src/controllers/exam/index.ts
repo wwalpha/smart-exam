@@ -1,6 +1,7 @@
 // スキーマ定義の再エクスポート
 export { CreateExamBodySchema } from './createExam.schema';
 export { DeleteExamParamsSchema } from './deleteExam.schema';
+export { CompleteExamParamsSchema } from './completeExam.schema';
 export { GetExamParamsSchema } from './getExam.schema';
 export { GetExamPdfParamsSchema, GetExamPdfQuerySchema } from './getExamPdf.schema';
 export { ListExamsQuerySchema } from './listExams.schema';
@@ -14,11 +15,13 @@ export { CreateTestBodySchema, SearchTestsBodySchema, ListTestTargetsQuerySchema
 export { kanjiTestsController } from './kanjiTestsController';
 export { materialsTestsController } from './materialsTestsController';
 export { createExamController } from './createExam';
-export { deleteExamController } from './deleteExam';
-export { getExamController } from './getExam';
+export { examsController } from './examsController';
+export { deleteExam } from './deleteExam';
+export { completeExam } from './completeExam';
+export { getExam } from './getExam';
 export { getExamPdfController } from './getExamPdf';
 export { listExamTargetsController } from './listExamTargets';
 export { listExamsController } from './listExams';
 export { searchExamsController } from './searchExams';
-export { submitExamResultsController } from './submitExamResults';
-export { updateExamStatusController } from './updateExamStatus';
+export { submitExamResults } from './submitExamResults';
+export { updateExamStatus } from './updateExamStatus';

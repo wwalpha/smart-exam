@@ -118,7 +118,7 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
       mode: 'KANJI',
       createdDate: '2026-02-14',
       status: 'IN_PROGRESS',
-      pdf: { url: '/api/exam/kanji/t1/pdf', downloadUrl: '/api/exam/kanji/t1/pdf?download=1' },
+      pdf: { url: '/api/exam/t1/pdf', downloadUrl: '/api/exam/t1/pdf?download=1' },
       count: 60,
       results: [],
       items: Array.from({ length: 60 }, (_v, i) => ({

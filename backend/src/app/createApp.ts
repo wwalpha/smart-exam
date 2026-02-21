@@ -179,114 +179,63 @@ export const createApp = (): express.Express => {
     handleRequest(controllers.materialQuestions.deleteQuestion),
   );
 
-  // 条件を指定して漢字テストを検索するAPI
+  // 条件を指定して復習テストを検索するAPI
   app.post(
-    '/api/exam/kanji/search',
-    validateBody(controllers.exams.kanji.SearchTestsBodySchema),
-    handleRequest(controllers.exams.kanji.searchTests),
+    '/api/exam/search',
+    validateBody(controllers.exams.SearchExamsBodySchema),
+    handleRequest(controllers.exams.searchExams),
   );
-  // 漢字テストを新規作成するAPI
+  // 復習テストを新規作成するAPI
   app.post(
-    '/api/exam/kanji',
-    validateBody(controllers.exams.kanji.CreateTestBodySchema),
-    handleRequest(controllers.exams.kanji.createTest),
+    '/api/exam',
+    validateBody(controllers.exams.CreateExamBodySchema),
+    handleRequest(controllers.exams.createExam),
   );
-  // 漢字テスト作成対象の候補一覧を取得するAPI
+  // 復習テスト作成対象の候補一覧を取得するAPI
   app.get(
-    '/api/exam/kanji/targets',
-    validateQuery(controllers.exams.kanji.ListTestTargetsQuerySchema),
-    handleRequest(controllers.exams.kanji.listTestTargets),
+    '/api/exam/targets',
+    validateQuery(controllers.exams.ListExamTargetsQuerySchema),
+    handleRequest(controllers.exams.listExamTargets),
   );
-
-  // 条件を指定して問題テストを検索するAPI
-  app.post(
-    '/api/exam/material/search',
-    validateBody(controllers.exams.materials.SearchTestsBodySchema),
-    handleRequest(controllers.exams.materials.searchTests),
-  );
-  // 問題テストを新規作成するAPI
-  app.post(
-    '/api/exam/material',
-    validateBody(controllers.exams.materials.CreateTestBodySchema),
-    handleRequest(controllers.exams.materials.createTest),
-  );
-  // 問題テスト作成対象の候補一覧を取得するAPI
+  // 指定した復習テストの詳細を取得するAPI
   app.get(
-    '/api/exam/material/targets',
-    validateQuery(controllers.exams.materials.ListTestTargetsQuerySchema),
-    handleRequest(controllers.exams.materials.listTestTargets),
-  );
-  // 指定した漢字テストの詳細を取得するAPI
-  app.get(
-    '/api/exam/kanji/:examId',
+    '/api/exam/:examId',
     validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.kanji.getTest),
+    handleRequest(controllers.exams.getExam),
   );
-  // 指定した漢字テストのPDF情報を取得するAPI
+  // 指定した復習テストのPDF情報を取得するAPI
   app.get(
-    '/api/exam/kanji/:examId/pdf',
-    validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.kanji.getTestPdf),
+    '/api/exam/:examId/pdf',
+    validateParams(controllers.exams.GetExamPdfParamsSchema),
+    validateQuery(controllers.exams.GetExamPdfQuerySchema),
+    handleRequest(controllers.exams.getExamPdf),
   );
-  // 指定した漢字テストのステータスを更新するAPI
+  // 指定した復習テストのステータスを更新するAPI
   app.patch(
-    '/api/exam/kanji/:examId',
-    validateParams(ExamIdParamsSchema),
-    validateBody(controllers.exams.kanji.UpdateExamStatusBodySchema),
-    handleRequest(controllers.exams.kanji.updateTestStatus),
+    '/api/exam/:examId',
+    validateParams(controllers.exams.UpdateExamStatusParamsSchema),
+    validateBody(controllers.exams.UpdateExamStatusBodySchema),
+    handleRequest(controllers.exams.updateExamStatus),
   );
-  // 指定した漢字テストを削除するAPI
+  // 指定した復習テストを削除するAPI
   app.delete(
-    '/api/exam/kanji/:examId',
-    validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.kanji.deleteTest),
+    '/api/exam/:examId',
+    validateParams(controllers.exams.DeleteExamParamsSchema),
+    handleRequest(controllers.exams.deleteExam),
   );
-  // 指定した漢字テストの結果を登録するAPI
+  // 指定した復習テストの結果を登録するAPI
   app.post(
-    '/api/exam/kanji/:examId/results',
+    '/api/exam/:examId/results',
     validateParams(ExamIdParamsSchema),
-    validateBody(controllers.exams.kanji.SubmitExamResultsBodySchema),
-    handleRequest(controllers.exams.kanji.submitTestResults),
-  );
-
-  // 指定した問題テストの詳細を取得するAPI
-  app.get(
-    '/api/exam/material/:examId',
-    validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.materials.getTest),
-  );
-  // 指定した問題テストのPDF情報を取得するAPI
-  app.get(
-    '/api/exam/material/:examId/pdf',
-    validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.materials.getTestPdf),
-  );
-  // 指定した問題テストのステータスを更新するAPI
-  app.patch(
-    '/api/exam/material/:examId',
-    validateParams(ExamIdParamsSchema),
-    validateBody(controllers.exams.materials.UpdateExamStatusBodySchema),
-    handleRequest(controllers.exams.materials.updateTestStatus),
-  );
-  // 指定した問題テストを削除するAPI
-  app.delete(
-    '/api/exam/material/:examId',
-    validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.materials.deleteTest),
-  );
-  // 指定した問題テストの結果を登録するAPI
-  app.post(
-    '/api/exam/material/:examId/results',
-    validateParams(ExamIdParamsSchema),
-    validateBody(controllers.exams.materials.SubmitExamResultsBodySchema),
-    handleRequest(controllers.exams.materials.submitTestResults),
+    validateBody(controllers.exams.SubmitExamResultsBodySchema),
+    handleRequest(controllers.exams.submitExamResults),
   );
 
   // 指定した問題テストを完了し候補テーブルへ反映するAPI
   app.post(
     '/api/exam/:examId/completion',
-    validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.materials.completeTest),
+    validateParams(controllers.exams.CompleteExamParamsSchema),
+    handleRequest(controllers.exams.completeExam),
   );
 
   return app;

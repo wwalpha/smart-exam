@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  createExamController,
-  getExamController,
-  listExamTargetsController,
-  listExamsController,
-} from '@/controllers/exam';
+import { createExamController, getExam, listExamTargetsController, listExamsController } from '@/controllers/exam';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type { CreateExamRequest, GetExamParams } from '@smart-exam/api-types';
@@ -23,7 +18,7 @@ describe('exam handler', () => {
     const controller = {
       ...listExamsController(services),
       ...createExamController(services),
-      ...getExamController(services),
+      getExam: getExam(services),
       ...listExamTargetsController(services),
     };
 
@@ -50,7 +45,7 @@ describe('exam handler', () => {
     const controller = {
       ...listExamsController(services),
       ...createExamController(services),
-      ...getExamController(services),
+      getExam: getExam(services),
       ...listExamTargetsController(services),
     };
 
@@ -80,7 +75,7 @@ describe('exam handler', () => {
     const controller = {
       ...listExamsController(services),
       ...createExamController(services),
-      ...getExamController(services),
+      getExam: getExam(services),
       ...listExamTargetsController(services),
     };
 
@@ -111,7 +106,7 @@ describe('exam handler', () => {
     const controller = {
       ...listExamsController(services),
       ...createExamController(services),
-      ...getExamController(services),
+      getExam: getExam(services),
       ...listExamTargetsController(services),
     };
 

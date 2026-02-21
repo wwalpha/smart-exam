@@ -51,8 +51,8 @@ async function main(): Promise<void> {
     createdDate: ymd,
     status: 'IN_PROGRESS' as const,
     pdf: {
-      url: `/api/exam/kanji/${testId}/pdf`,
-      downloadUrl: `/api/exam/kanji/${testId}/pdf?download=1`,
+      url: `/api/exam/${testId}/pdf`,
+      downloadUrl: `/api/exam/${testId}/pdf?download=1`,
     },
     count: 60,
     questions: Array.from({ length: 60 }, (_v, i) => `w-${i + 1}`),

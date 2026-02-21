@@ -17,8 +17,8 @@ export const toApiExam = (row: ExamTable): Exam => ({
   createdDate: row.createdDate,
   status: row.status,
   pdf: {
-    url: `/api/exam/${row.mode === 'KANJI' ? 'kanji' : 'material'}/${row.examId}/pdf`,
-    downloadUrl: `/api/exam/${row.mode === 'KANJI' ? 'kanji' : 'material'}/${row.examId}/pdf?download=1`,
+    url: `/api/exam/${row.examId}/pdf`,
+    downloadUrl: `/api/exam/${row.examId}/pdf?download=1`,
   },
   count: row.count,
   submittedDate: row.submittedDate,
