@@ -10,6 +10,3 @@ export * from './useReviewQuestionPdf';
 export * from './useReviewKanjiPdf';
 export * from './useReviewQuestionDetailPage';
 export * from './useReviewTargets';
-export * from './useReviewAttemptHistory';
-export * from './useReviewAttemptHistoryDialog';
-export * from './useReviewCandidateForTarget';

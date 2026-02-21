@@ -10,8 +10,6 @@ import { MaterialSetListPage } from '@/pages/materials/MaterialSetListPage';
 import { MaterialSetCreatePage } from '@/pages/materials/MaterialSetCreatePage';
 import { MaterialSetDetailPage } from '@/pages/materials/MaterialSetDetailPage';
 import { QuestionManagementPage } from '@/pages/materials/QuestionManagementPage';
-import { QuestionAttemptHistoryListPage } from '@/pages/materials/QuestionAttemptHistoryListPage';
-import { QuestionAttemptHistoryPage } from '@/pages/materials/QuestionAttemptHistoryPage';
 
 // Review Tests (Questions & Kanji)
 import { ExamQuestionListPage } from '@/pages/review/ExamQuestionListPage';
@@ -29,8 +27,6 @@ import { ExamKanjiPdfPage } from '@/pages/review/ExamKanjiPdfPage';
 import { KanjiListPage } from '@/pages/kanji/KanjiListPage';
 import { KanjiCreatePage } from '@/pages/kanji/KanjiCreatePage';
 import { KanjiImportPage } from '@/pages/kanji/KanjiImportPage';
-// import { KanjiAttemptHistoryListPage } from '@/pages/kanji/KanjiAttemptHistoryListPage';
-// import { KanjiAttemptHistoryPage } from '@/pages/kanji/KanjiAttemptHistoryPage';
 
 // Search
 import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
@@ -57,8 +53,6 @@ export const App = () => {
 
       { pattern: '/materials', title: '教材セット一覧' },
       { pattern: '/materials/new', title: '教材セット登録' },
-      { pattern: '/materials/attempts', title: '問題テスト履歴' },
-      { pattern: '/materials/:id/attempts', title: '問題テスト履歴' },
       { pattern: '/materials/:id/questions', title: '問題管理' },
       { pattern: '/materials/:id', title: '教材セット詳細' },
 
@@ -77,8 +71,6 @@ export const App = () => {
       { pattern: '/kanji', title: '漢字一覧' },
       { pattern: '/kanji/new', title: '漢字登録' },
       { pattern: '/kanji/import', title: '漢字一括登録' },
-      { pattern: '/kanji/attempts', title: '漢字テスト履歴' },
-      { pattern: '/kanji/:id/attempts', title: '漢字テスト履歴' },
       { pattern: '/kanji/:id', title: '漢字編集' },
 
       { pattern: '/search/questions', title: '問題検索' },
@@ -101,8 +93,6 @@ export const App = () => {
         <Route path="/materials/new" element={<MaterialSetCreatePage />} />
         <Route path="/materials/:id" element={<MaterialSetDetailPage />} />
         <Route path="/materials/:id/questions" element={<QuestionManagementPage />} />
-        <Route path="/materials/attempts" element={<QuestionAttemptHistoryListPage />} />
-        <Route path="/materials/:id/attempts" element={<QuestionAttemptHistoryPage />} />
 
         {/* Exam (Questions) */}
         <Route path="/exam/questions" element={<ExamQuestionListPage />} />
@@ -122,8 +112,6 @@ export const App = () => {
         <Route path="/kanji" element={<KanjiListPage />} />
         <Route path="/kanji/new" element={<KanjiCreatePage />} />
         <Route path="/kanji/import" element={<KanjiImportPage />} />
-        {/* <Route path="/kanji/attempts" element={<KanjiAttemptHistoryListPage />} />
-        <Route path="/kanji/:id/attempts" element={<KanjiAttemptHistoryPage />} /> */}
         <Route path="/kanji/:id" element={<KanjiCreatePage />} />
 
         {/* Search */}

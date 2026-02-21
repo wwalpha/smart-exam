@@ -20,8 +20,6 @@ import type {
   UpdateExamStatusRequest,
   SubmitExamResultsRequest,
   ExamTarget,
-  ExamAttempt,
-  ExamCandidate,
   Kanji,
   RegistKanjiRequest,
   UpdateKanjiRequest,
@@ -90,16 +88,6 @@ export type ReviewTargetState = {
   status: ApiStatus;
 };
 
-export type ReviewAttemptHistoryState = {
-  items: ExamAttempt[];
-  status: ApiStatus;
-};
-
-export type ReviewCandidateState = {
-  items: ExamCandidate[];
-  status: ApiStatus;
-};
-
 /**
  * Kanji Slice State
  */
@@ -124,8 +112,6 @@ export type ExamSlice = {
   /** 復習テスト state */
   review: ReviewState;
   reviewTargets: ReviewTargetState;
-  reviewAttempts: ReviewAttemptHistoryState;
-  reviewCandidates: ReviewCandidateState;
   fetchExams: (params: SearchExamsRequest) => Promise<void>;
   createExam: (request: CreateExamRequest) => Promise<Exam>;
   fetchExam: (id: string, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
@@ -138,12 +124,6 @@ export type ExamSlice = {
     to: string;
     subject?: string;
   }) => Promise<void>;
-  fetchReviewAttempts: (params: {
-    targetType: 'MATERIAL' | 'KANJI';
-    targetId: string;
-    subject?: string;
-  }) => Promise<void>;
-  fetchExamCandidates: (params?: { subject?: string; mode?: 'MATERIAL' | 'KANJI' }) => Promise<void>;
 };
 
 /**

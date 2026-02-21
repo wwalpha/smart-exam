@@ -9,7 +9,6 @@ import type {
   SearchExamsRequest,
   SubmitExamResultsRequest,
   ListExamTargetsResponse,
-  ListExamCandidatesResponse,
 } from '@smart-exam/api-types';
 
 const toModeSegment = (mode: ExamMode): 'kanji' | 'question' => (mode === 'KANJI' ? 'kanji' : 'question');
@@ -105,22 +104,5 @@ export const listExamTargets = async (params: {
   return apiRequest<ListExamTargetsResponse>({
     method: 'GET',
     path: `${path}?${qs.toString()}`,
-  });
-};
-
-export const listExamCandidates = async (params?: {
-  subject?: string;
-  mode?: 'MATERIAL' | 'KANJI';
-}): Promise<ListExamCandidatesResponse> => {
-  const qs = new URLSearchParams({
-    ...(params?.subject ? { subject: params.subject } : {}),
-    ...(params?.mode ? { mode: params.mode } : {}),
-  });
-
-  const suffix = qs.toString() ? `?${qs.toString()}` : '';
-
-  return apiRequest<ListExamCandidatesResponse>({
-    method: 'GET',
-    path: `/api/review-test-candidates${suffix}`,
   });
 };

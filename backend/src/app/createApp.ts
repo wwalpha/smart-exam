@@ -216,20 +216,6 @@ export const createApp = (): express.Express => {
     validateQuery(controllers.exams.question.ListTestTargetsQuerySchema),
     handleRequest(controllers.exams.question.listTestTargets),
   );
-  // 復習テスト候補の一覧を取得するAPI
-  app.get(
-    '/api/review-test-candidates',
-    validateQuery(controllers.examCandidates.ListExamCandidatesQuerySchema),
-    handleRequest(controllers.examCandidates.listExamCandidates),
-  );
-
-  // 復習テストの実施履歴を参照する読み取り専用API
-  app.get(
-    '/api/exam-attempts',
-    validateQuery(controllers.examAttempts.ListExamAttemptsQuerySchema),
-    handleRequest(controllers.examAttempts.listExamAttempts),
-  );
-
   // 指定した漢字テストの詳細を取得するAPI
   app.get(
     '/api/exam/kanji/:examId',

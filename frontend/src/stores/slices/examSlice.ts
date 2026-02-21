@@ -4,7 +4,6 @@ import type { ExamSlice } from '@/stores/store.types';
 import type { GradingData } from '@smart-exam/api-types';
 import * as WORDTEST_API from '@/services/wordtestApi';
 import * as REVIEW_API from '@/services/reviewApi';
-import * as EXAM_ATTEMPT_API from '@/services/examAttemptApi';
 import { withStatus } from '../utils';
 
 export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set, get) => {
@@ -178,22 +177,6 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       },
     },
 
-    reviewAttempts: {
-      items: [],
-      status: {
-        isLoading: false,
-        error: null,
-      },
-    },
-
-    reviewCandidates: {
-      items: [],
-      status: {
-        isLoading: false,
-        error: null,
-      },
-    },
-
     fetchExams: async (params) => {
       await withStatus(
         setReviewStatus,
@@ -305,66 +288,6 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
           });
         },
         '対象一覧の取得に失敗しました。',
-        { rethrow: true },
-      );
-    },
-
-    fetchReviewAttempts: async (params) => {
-      const setAttemptsStatus = (next: Partial<ExamSlice['reviewAttempts']['status']>) => {
-        const current = get().reviewAttempts;
-        set({
-          reviewAttempts: {
-            ...current,
-            status: {
-              ...current.status,
-              ...next,
-            },
-          },
-        });
-      };
-
-      await withStatus(
-        setAttemptsStatus,
-        async () => {
-          const response = await EXAM_ATTEMPT_API.listReviewAttempts(params);
-          set({
-            reviewAttempts: {
-              items: response.items,
-              status: get().reviewAttempts.status,
-            },
-          });
-        },
-        '履歴の取得に失敗しました。',
-        { rethrow: true },
-      );
-    },
-
-    fetchExamCandidates: async (params) => {
-      const setCandidatesStatus = (next: Partial<ExamSlice['reviewCandidates']['status']>) => {
-        const current = get().reviewCandidates;
-        set({
-          reviewCandidates: {
-            ...current,
-            status: {
-              ...current.status,
-              ...next,
-            },
-          },
-        });
-      };
-
-      await withStatus(
-        setCandidatesStatus,
-        async () => {
-          const response = await REVIEW_API.listExamCandidates(params);
-          set({
-            reviewCandidates: {
-              items: response.items,
-              status: get().reviewCandidates.status,
-            },
-          });
-        },
-        '候補一覧の取得に失敗しました。',
         { rethrow: true },
       );
     },

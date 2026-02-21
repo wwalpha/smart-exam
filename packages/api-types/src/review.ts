@@ -199,77 +199,6 @@ export type SubmitExamResultsRequest = {
 };
 
 /**
- * 復習履歴 (対象ごと)
- */
-export type ExamAttempt = {
-  /** 対象種別 */
-  targetType: ExamTargetType;
-  /** 対象ID */
-  targetId: string;
-  /** 科目 */
-  subject: SubjectId;
-  /** 実施日 (YYYY-MM-DD) */
-  dateYmd: string;
-  /** 実施日時 (ISO8601) */
-  attemptedAt: string;
-  /** 正誤 */
-  isCorrect: boolean;
-  /** メモ */
-  memo?: string;
-  /** 復習テストID (由来がある場合) */
-  examId?: string;
-};
-
-/** `GET /exam-attempts?targetType=...&targetId=...` */
-export type ListExamAttemptsResponse = {
-  /** 復習履歴一覧 */
-  items: ExamAttempt[];
-};
-
-/** `PUT /exam-attempts` */
-export type UpsertExamAttemptRequest = {
-  /** 対象種別 */
-  targetType: ExamTargetType;
-  /** 対象ID */
-  targetId: string;
-  /** 科目 */
-  subject: SubjectId;
-  /** 実施日 (YYYY-MM-DD) */
-  dateYmd: string;
-  /** 正誤 */
-  isCorrect: boolean;
-  /** メモ */
-  memo?: string;
-  /** 実施日を変更する場合に指定 (YYYY-MM-DD) */
-  previousDateYmd?: string;
-};
-
-/** `PUT /exam-attempts` */
-export type UpsertExamAttemptResponse = ExamAttempt;
-
-/** `DELETE /exam-attempts?targetType=...&targetId=...&dateYmd=...` */
-export type DeleteExamAttemptRequest = {
-  /** 対象種別 */
-  targetType: ExamTargetType;
-  /** 対象ID */
-  targetId: string;
-  /** 実施日 (YYYY-MM-DD) */
-  dateYmd: string;
-};
-
-export type DeleteExamAttemptResponse = {
-  /** 成功フラグ */
-  ok: true;
-};
-
-export type ReviewAttempt = ExamAttempt;
-export type ListReviewAttemptsResponse = ListExamAttemptsResponse;
-export type UpsertReviewAttemptRequest = UpsertExamAttemptRequest;
-export type UpsertReviewAttemptResponse = UpsertExamAttemptResponse;
-export type DeleteReviewAttemptRequest = DeleteExamAttemptRequest;
-export type DeleteReviewAttemptResponse = DeleteExamAttemptResponse;
-
-/**
  * 復習テスト対象（指定期間内に出題された対象のユニーク一覧）
  */
 export type ExamTarget = {
@@ -303,30 +232,4 @@ export type ExamTarget = {
 export type ListExamTargetsResponse = {
   /** 復習対象一覧 */
   items: ExamTarget[];
-};
-
-/**
- * 復習テスト候補（ExamCandidateTable）
- */
-export type ExamCandidate = {
-  /** 候補ID */
-  id: string;
-  /** 科目 */
-  subject: SubjectId;
-  /** 対象ID（MATERIAL: questionId / KANJI: wordId） */
-  targetId: string;
-  /** モード */
-  mode: ExamMode;
-  /** 連続正解回数（streak相当） */
-  correctCount: number;
-  /** 次回日付 (YYYY-MM-DD) */
-  nextTime: string;
-  /** ロック: 紐付けられた復習テストID */
-  examId?: string;
-};
-
-/** `GET /review-test-candidates?subject=...&mode=...` */
-export type ListExamCandidatesResponse = {
-  /** 候補一覧 */
-  items: ExamCandidate[];
 };

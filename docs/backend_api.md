@@ -54,5 +54,3 @@
 | Exam (Question) | PATCH    | `/api/exam/question/:examId`                               | 指定した問題テストのステータスを更新するAPI           | ✅           |
 | Exam (Question) | DELETE   | `/api/exam/question/:examId`                               | 指定した問題テストを削除するAPI                       | ✅           |
 | Exam (Question) | POST     | `/api/exam/question/:examId/results`                       | 指定した問題テストの結果を登録するAPI                 | ✅           |
-| Exam Candidates | GET      | `/api/review-test-candidates`                              | 復習テスト候補の一覧を取得するAPI                     | ✅           |
-| Review Attempts | GET      | `/api/exam-attempts`                                       | 復習テストの実施履歴を参照する読み取り専用API         | ✅           |
