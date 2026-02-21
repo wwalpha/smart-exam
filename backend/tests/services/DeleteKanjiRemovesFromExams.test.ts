@@ -16,9 +16,25 @@ describe('KanjiService.deleteKanji', () => {
       examCandidates: {
         deleteCandidatesByTargetId: vi.fn().mockResolvedValue(undefined),
       },
+      examDetails: {
+        listExamIdsByTargetId: vi.fn().mockResolvedValue(['e1']),
+        listByExamId: vi.fn().mockImplementation(async (examId: string) => {
+          if (examId === 'e1') {
+            return [
+              { examId: 'e1', seq: 1, targetType: 'KANJI', targetId: 'w1' },
+              { examId: 'e1', seq: 2, targetType: 'KANJI', targetId: 'w2' },
+              { examId: 'e1', seq: 3, targetType: 'KANJI', targetId: 'w3' },
+            ];
+          }
+          return [];
+        }),
+        deleteByExamId: vi.fn().mockResolvedValue(undefined),
+        putMany: vi.fn().mockResolvedValue(undefined),
+      },
       exams: {
-        scanAll: vi.fn().mockResolvedValue([
-          {
+        get: vi.fn().mockImplementation(async (examId: string) => {
+          if (examId !== 'e1') return null;
+          return {
             examId: 'e1',
             subject: '1',
             mode: 'KANJI',
@@ -30,45 +46,9 @@ describe('KanjiService.deleteKanji', () => {
               { id: 'w1', isCorrect: true },
               { id: 'w3', isCorrect: false },
             ],
-          },
-          {
-            examId: 'e2',
-            subject: '1',
-            mode: 'KANJI',
-            status: 'COMPLETED',
-            count: 1,
-            createdDate: '2026-02-14',
-            pdfS3Key: 'exams/t2.pdf',
-            results: [{ id: 'w9', isCorrect: true }],
-          },
-          {
-            examId: 'e3',
-            subject: '1',
-            mode: 'QUESTION',
-            status: 'IN_PROGRESS',
-            count: 1,
-            createdDate: '2026-02-14',
-            results: [],
-          },
-        ]),
-        put: examsPut,
-      },
-      examDetails: {
-        listByExamId: vi.fn().mockImplementation(async (examId: string) => {
-          if (examId === 'e1') {
-            return [
-              { examId: 'e1', seq: 1, targetType: 'KANJI', targetId: 'w1' },
-              { examId: 'e1', seq: 2, targetType: 'KANJI', targetId: 'w2' },
-              { examId: 'e1', seq: 3, targetType: 'KANJI', targetId: 'w3' },
-            ];
-          }
-          if (examId === 'e2') {
-            return [{ examId: 'e2', seq: 1, targetType: 'KANJI', targetId: 'w9' }];
-          }
-          return [{ examId: 'e3', seq: 1, targetType: 'QUESTION', targetId: 'q1' }];
+          };
         }),
-        deleteByExamId: vi.fn().mockResolvedValue(undefined),
-        putMany: vi.fn().mockResolvedValue(undefined),
+        put: examsPut,
       },
     } as unknown as Repositories;
 
@@ -81,7 +61,8 @@ describe('KanjiService.deleteKanji', () => {
       subject: '1',
       targetId: 'w1',
     });
-    expect(repositories.exams.scanAll).toHaveBeenCalledTimes(1);
+    expect(repositories.examDetails.listExamIdsByTargetId).toHaveBeenCalledWith('w1');
+    expect(repositories.exams.get).toHaveBeenCalledWith('e1');
 
     // only t1 is affected
     expect(examsPut).toHaveBeenCalledTimes(1);
@@ -111,8 +92,11 @@ describe('KanjiService.deleteKanji', () => {
       examCandidates: {
         deleteCandidatesByTargetId: vi.fn(),
       },
+      examDetails: {
+        listExamIdsByTargetId: vi.fn(),
+      },
       exams: {
-        scanAll: vi.fn(),
+        get: vi.fn(),
         put: vi.fn(),
       },
     } as unknown as Repositories;
@@ -122,6 +106,6 @@ describe('KanjiService.deleteKanji', () => {
 
     expect(ok).toBe(false);
     expect(repositories.examCandidates.deleteCandidatesByTargetId).not.toHaveBeenCalled();
-    expect(repositories.exams.scanAll).not.toHaveBeenCalled();
+    expect(repositories.examDetails.listExamIdsByTargetId).not.toHaveBeenCalled();
   });
 });

@@ -71,6 +71,7 @@
 ## テスト
 
 - `describe.skip` / `it.skip` 等でスキップしたテストは残さず、不要なら削除してください（Skip のテストケースは直接削除する）。
+- Jest / Vitest のテストファイルは `src` と同じ責務・ディレクトリ構造に対応させて配置してください（例: `src/services/kanji/*` に対応するテストは `tests/services/kanji/*`）。
 
 ## Terraform
 
