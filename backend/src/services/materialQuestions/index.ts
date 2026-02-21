@@ -12,6 +12,7 @@ import type { MaterialQuestionsService } from './materialQuestions.types';
 export type { MaterialQuestionsService } from './materialQuestions.types';
 
 export const createMaterialQuestionsService = (repositories: Repositories): MaterialQuestionsService => {
+  // 各ユースケースをリポジトリ依存込みで組み立てる。
   const listQuestions = createListQuestions(repositories);
   const createQuestion = createCreateQuestion(repositories);
   const updateQuestion = createUpdateQuestion(repositories);
@@ -20,6 +21,7 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
   const setQuestionChoice = createSetQuestionChoice(repositories);
   const applyChoices = createApplyChoices(repositories);
 
+  // サービスの公開APIを返す。
   return {
     listQuestions,
     createQuestion,

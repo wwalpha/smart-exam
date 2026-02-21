@@ -8,10 +8,12 @@ import { toSortNumber } from './materialQuestions.lib';
 
 export const createUpdateQuestion = (repositories: Repositories): MaterialQuestionsService['updateQuestion'] => {
   return async (materialId, questionId, updates): Promise<Question | null> => {
+    // 更新対象の設問と教材の対応関係を確認する。
     const existing = await repositories.materialQuestions.get(questionId);
     if (!existing) return null;
     if (existing.materialId !== materialId) return null;
 
+    // 教材の存在確認と更新可否（未完了）を検証する。
     const material = await repositories.materials.get(materialId);
     if (!material) {
       throw new ApiError('material not found', 404, ['material_not_found']);
@@ -21,6 +23,7 @@ export const createUpdateQuestion = (repositories: Repositories): MaterialQuesti
       throw new ApiError('material is completed', 409, ['material_already_completed']);
     }
 
+    // 指定された項目だけを部分更新し、canonicalKey 更新時は並び順番号も再計算する。
     const next = await repositories.materialQuestions.update(questionId, {
       ...(typeof updates.subject === 'string' ? { subjectId: updates.subject } : {}),
       ...(typeof updates.canonicalKey === 'string'
@@ -30,6 +33,7 @@ export const createUpdateQuestion = (repositories: Repositories): MaterialQuesti
 
     if (!next) return null;
 
+    // 更新後レコードをAPIレスポンス形式へ変換する。
     return {
       id: next.questionId,
       canonicalKey: next.canonicalKey,
