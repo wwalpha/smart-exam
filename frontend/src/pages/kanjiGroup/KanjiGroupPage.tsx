@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useWordMasterPage } from '@/hooks/wordmaster';
-import { WordMasterCreateDialog } from './WordMasterCreateDialog';
+import { useKanjiGroupPage } from '@/hooks/kanjiGroup';
+import { KanjiGroupCreateDialog } from './KanjiGroupCreateDialog';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 
-export const WordMasterPage = () => {
-  const { groups, status, isCreateDialogOpen, openCreateDialog, closeCreateDialog } = useWordMasterPage();
+export const KanjiGroupPage = () => {
+  const { groups, status, isCreateDialogOpen, openCreateDialog, closeCreateDialog } = useKanjiGroupPage();
 
   return (
     <div className="space-y-6 p-8">
@@ -54,7 +54,7 @@ export const WordMasterPage = () => {
         </CardContent>
       </Card>
 
-      <WordMasterCreateDialog open={isCreateDialogOpen} onClose={closeCreateDialog} />
+      <KanjiGroupCreateDialog open={isCreateDialogOpen} onClose={closeCreateDialog} />
     </div>
   );
 }

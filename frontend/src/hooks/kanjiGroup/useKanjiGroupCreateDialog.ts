@@ -10,9 +10,9 @@ type FormValues = {
   file: FileList;
 };
 
-export const useWordMasterCreateDialog = (params: { onClose: () => void }) => {
+export const useKanjiGroupCreateDialog = (params: { onClose: () => void }) => {
   const createWordGroup = useWordTestStore((s) => s.createWordGroup);
-  const status = useWordTestStore((s) => s.wordmaster.status);
+  const status = useWordTestStore((s) => s.kanjiGroup.status);
   const { confirm, ConfirmDialog } = useConfirm();
 
   const {

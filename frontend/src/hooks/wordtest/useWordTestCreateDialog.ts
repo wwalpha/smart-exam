@@ -11,7 +11,7 @@ type FormValues = {
 
 export const useWordTestCreateDialog = (params: { onClose: () => void }) => {
   const createWordTest = useWordTestStore((s) => s.createWordTest);
-  const groups = useWordTestStore((s) => s.wordmaster.groups);
+  const groups = useWordTestStore((s) => s.kanjiGroup.groups);
   const status = useWordTestStore((s) => s.wordtest.status);
 
   const form = useForm<FormValues>({

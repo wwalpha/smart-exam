@@ -2,17 +2,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useWordMasterCreateDialog } from '@/hooks/wordmaster';
+import { useKanjiGroupCreateDialog } from '@/hooks/kanjiGroup';
 import { SUBJECT as subjects, SUBJECT_LABEL } from '@/lib/Consts';
 
-type WordMasterCreateDialogProps = {
+type KanjiGroupCreateDialogProps = {
   open: boolean;
   onClose: () => void;
 };
 
-export const WordMasterCreateDialog = ({ open, onClose }: WordMasterCreateDialogProps) => {
+export const KanjiGroupCreateDialog = ({ open, onClose }: KanjiGroupCreateDialogProps) => {
   const { register, formState, selectedSubject, isCreateDisabled, getSubjectClickHandler, onCreateClick, error, ConfirmDialog } =
-    useWordMasterCreateDialog({ onClose });
+    useKanjiGroupCreateDialog({ onClose });
   const { errors } = formState;
 
   return (
@@ -60,10 +60,10 @@ export const WordMasterCreateDialog = ({ open, onClose }: WordMasterCreateDialog
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="wordmaster-file">ファイル選択 (TXT)</Label>
+            <Label htmlFor="kanjiGroup-file">ファイル選択 (TXT)</Label>
             <p className="text-xs text-muted-foreground">形式: 問題|答え (例: 反省の気持ちをしめす。|示す)</p>
             <Input
-              id="wordmaster-file"
+              id="kanjiGroup-file"
               type="file"
               accept=".txt"
               {...register('file', { required: '必須です' })}

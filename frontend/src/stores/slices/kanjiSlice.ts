@@ -2,16 +2,16 @@ import type { StateCreator } from 'zustand';
 import type { KanjiSlice } from '@/stores/store.types';
 import orderBy from 'lodash/orderBy';
 import * as KANJI_API from '@/services/kanjiApi';
-import * as WORDMASTER_API from '@/services/wordMasterApi';
+import * as KANJI_GROUP_API from '@/services/kanjiGroupApi';
 import { withStatus } from '../utils';
 
 export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (set, get) => {
   type KanjiState = KanjiSlice['kanji'];
   type KanjiPatch = Partial<KanjiState>;
 
-  type WordMasterFeatureState = KanjiSlice['wordmaster'];
-  type WordMasterFeaturePatch = Omit<Partial<WordMasterFeatureState>, 'status'> & {
-    status?: Partial<WordMasterFeatureState['status']>;
+  type KanjiGroupFeatureState = KanjiSlice['kanjiGroup'];
+  type KanjiGroupFeaturePatch = Omit<Partial<KanjiGroupFeatureState>, 'status'> & {
+    status?: Partial<KanjiGroupFeatureState['status']>;
   };
 
   const getKanji = (): KanjiState => get().kanji;
@@ -42,12 +42,12 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
     });
   };
 
-  const getWordMaster = (): WordMasterFeatureState => get().wordmaster;
+  const getKanjiGroup = (): KanjiGroupFeatureState => get().kanjiGroup;
 
-  const updateWordMaster = (patch: WordMasterFeaturePatch) => {
-    const current = getWordMaster();
+  const updateKanjiGroup = (patch: KanjiGroupFeaturePatch) => {
+    const current = getKanjiGroup();
     set({
-      wordmaster: {
+      kanjiGroup: {
         ...current,
         ...patch,
         status: patch.status
@@ -60,8 +60,8 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
     });
   };
 
-  const setWordMasterStatus = (next: Partial<WordMasterFeatureState['status']>) => {
-    updateWordMaster({ status: next });
+  const setKanjiGroupStatus = (next: Partial<KanjiGroupFeatureState['status']>) => {
+    updateKanjiGroup({ status: next });
   };
 
 
@@ -77,7 +77,7 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
       },
     },
 
-    wordmaster: {
+    kanjiGroup: {
       groups: [],
       status: {
         isLoading: false,
@@ -185,21 +185,21 @@ export const createKanjiSlice: StateCreator<KanjiSlice, [], [], KanjiSlice> = (s
     },
 
     fetchWordGroups: async () => {
-      await withStatus(setWordMasterStatus, async () => {
-        const response = await WORDMASTER_API.listWordGroups();
+      await withStatus(setKanjiGroupStatus, async () => {
+        const response = await KANJI_GROUP_API.listWordGroups();
         const sorted = orderBy(response.datas, ['createdAt'], ['desc']);
-        updateWordMaster({ groups: sorted });
+        updateKanjiGroup({ groups: sorted });
       }, '単語グループ一覧の取得に失敗しました。');
     },
 
     createWordGroup: async (request) => {
       return await withStatus(
-        setWordMasterStatus,
+        setKanjiGroupStatus,
         async () => {
-          const response = await WORDMASTER_API.createWordGroup(request);
-          const current = getWordMaster();
+          const response = await KANJI_GROUP_API.createWordGroup(request);
+          const current = getKanjiGroup();
           const nextGroups = orderBy([response, ...current.groups], ['createdAt'], ['desc']);
-          updateWordMaster({ groups: nextGroups });
+          updateKanjiGroup({ groups: nextGroups });
           return response;
         },
         '単語グループの作成に失敗しました。',

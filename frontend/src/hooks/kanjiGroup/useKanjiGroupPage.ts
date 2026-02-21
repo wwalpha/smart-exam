@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useWordTestStore } from '@/stores';
 
-export const useWordMasterPage = () => {
+export const useKanjiGroupPage = () => {
   const fetchWordGroups = useWordTestStore((s) => s.fetchWordGroups);
-  const groups = useWordTestStore((s) => s.wordmaster.groups);
-  const status = useWordTestStore((s) => s.wordmaster.status);
+  const groups = useWordTestStore((s) => s.kanjiGroup.groups);
+  const status = useWordTestStore((s) => s.kanjiGroup.status);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 

@@ -7,5 +7,5 @@ export * from './question-types';
 export * from './review';
 export * from './s3';
 export * from './subject';
-export * from './wordmaster';
+export * from './kanjiGroup';
 export * from './wordtest';

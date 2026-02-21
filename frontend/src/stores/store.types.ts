@@ -56,7 +56,7 @@ export type WordTestState = {
 /**
  * 単語マスタ機能の Zustand state
  */
-export type WordMasterState = {
+export type KanjiGroupState = {
   /** 単語グループ一覧 */
   groups: WordGroup[];
   /** API 状態 */
@@ -187,8 +187,8 @@ export type KanjiSlice = {
   deleteManyKanji: (ids: string[]) => Promise<void>;
   importKanji: (request: ImportKanjiRequest) => Promise<ImportKanjiResponse>;
 
-  /** 単語グループ（wordmaster）も漢字系として統合 */
-  wordmaster: WordMasterState;
+  /** 単語グループ（kanjiGroup）も漢字系として統合 */
+  kanjiGroup: KanjiGroupState;
   fetchWordGroups: () => Promise<void>;
   createWordGroup: (request: CreateWordGroupRequest) => Promise<CreateWordGroupResponse>;
 };
