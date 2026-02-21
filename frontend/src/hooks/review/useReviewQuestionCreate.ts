@@ -30,7 +30,7 @@ export const useReviewQuestionCreate = () => {
     }
 
     const newTest = await createExam({
-      mode: 'QUESTION',
+      mode: 'MATERIAL',
       subject: data.subject,
       count: Number(data.count),
     });

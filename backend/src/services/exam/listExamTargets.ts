@@ -63,7 +63,7 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
   const wordById = new Map<string, KanjiTable>();
 
   // 条件に応じて処理を分岐する
-  if (params.mode === 'QUESTION') {
+  if (params.mode === 'MATERIAL') {
     // 非同期で必要な値を取得する
     const qRows = await Promise.all(Array.from(allTargetIds).map((qid) => repositories.questions.get(qid)));
     // 対象データを順番に処理する
@@ -130,7 +130,7 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
           reading,
           materialName: m?.title,
           materialDate: m?.materialDate,
-          questionText: params.mode === 'QUESTION' ? q?.canonicalKey : w?.question,
+          questionText: params.mode === 'MATERIAL' ? q?.canonicalKey : w?.question,
           lastTestCreatedDate: t.createdDate,
           includedCount: 1,
         });
@@ -148,7 +148,7 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
         reading: current.reading ?? reading,
         materialName: current.materialName ?? m?.title,
         materialDate: current.materialDate ?? m?.materialDate,
-        questionText: current.questionText ?? (params.mode === 'QUESTION' ? q?.canonicalKey : w?.question),
+        questionText: current.questionText ?? (params.mode === 'MATERIAL' ? q?.canonicalKey : w?.question),
         lastTestCreatedDate: nextLast,
         includedCount: (current.includedCount ?? 0) + 1,
       });

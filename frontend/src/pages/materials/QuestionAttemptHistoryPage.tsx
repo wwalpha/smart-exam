@@ -25,7 +25,7 @@ export const QuestionAttemptHistoryPage = () => {
   }, [initialQuestionId, history]);
 
   const candidateState = useReviewCandidateForTarget({
-    mode: EXAM_MODE.QUESTION,
+    mode: EXAM_MODE.MATERIAL,
     targetId: history.selectedQuestion?.id ?? null,
     subject: material?.subject ?? null,
     enabled: history.isOpen,

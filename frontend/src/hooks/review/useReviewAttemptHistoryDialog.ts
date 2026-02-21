@@ -18,12 +18,12 @@ export const useReviewAttemptHistoryDialog = () => {
       setSelected(params);
       setIsOpen(true);
       await fetchReviewAttempts({
-        targetType: 'QUESTION',
+        targetType: 'MATERIAL',
         targetId: params.targetId,
         subject: params.subject,
       });
     },
-    [fetchReviewAttempts]
+    [fetchReviewAttempts],
   );
 
   const close = useCallback(() => {

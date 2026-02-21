@@ -34,7 +34,7 @@ const recalculateCandidatesForMaterialImpl = async (
       await repositories.examCandidates.createCandidate({
         subject: q.subjectId,
         questionId: q.questionId,
-        mode: 'QUESTION',
+        mode: 'MATERIAL',
         nextTime: ReviewNextTime.EXCLUDED_NEXT_TIME,
         correctCount: open.correctCount,
         status: 'EXCLUDED',
@@ -44,7 +44,7 @@ const recalculateCandidatesForMaterialImpl = async (
 
     // 内部で利用する処理を定義する
     const computed = ReviewNextTime.compute({
-      mode: 'QUESTION',
+      mode: 'MATERIAL',
       baseDateYmd: params.registeredDate,
       isCorrect: false,
       currentCorrectCount: 0,
@@ -54,7 +54,7 @@ const recalculateCandidatesForMaterialImpl = async (
     await repositories.examCandidates.createCandidate({
       subject: q.subjectId,
       questionId: q.questionId,
-      mode: 'QUESTION',
+      mode: 'MATERIAL',
       nextTime: computed.nextTime,
       correctCount: computed.nextCorrectCount,
       status: 'OPEN',

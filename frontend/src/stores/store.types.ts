@@ -128,22 +128,22 @@ export type ExamSlice = {
   reviewCandidates: ReviewCandidateState;
   fetchExams: (params: SearchExamsRequest) => Promise<void>;
   createExam: (request: CreateExamRequest) => Promise<Exam>;
-  fetchExam: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
-  updateExamStatus: (id: string, request: UpdateExamStatusRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
-  deleteExam: (id: string, mode: 'QUESTION' | 'KANJI') => Promise<void>;
-  submitExamResults: (id: string, request: SubmitExamResultsRequest, mode: 'QUESTION' | 'KANJI') => Promise<void>;
+  fetchExam: (id: string, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
+  updateExamStatus: (id: string, request: UpdateExamStatusRequest, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
+  deleteExam: (id: string, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
+  submitExamResults: (id: string, request: SubmitExamResultsRequest, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
   fetchExamTargets: (params: {
-    mode: 'QUESTION' | 'KANJI';
+    mode: 'MATERIAL' | 'KANJI';
     from: string;
     to: string;
     subject?: string;
   }) => Promise<void>;
   fetchReviewAttempts: (params: {
-    targetType: 'QUESTION' | 'KANJI';
+    targetType: 'MATERIAL' | 'KANJI';
     targetId: string;
     subject?: string;
   }) => Promise<void>;
-  fetchExamCandidates: (params?: { subject?: string; mode?: 'QUESTION' | 'KANJI' }) => Promise<void>;
+  fetchExamCandidates: (params?: { subject?: string; mode?: 'MATERIAL' | 'KANJI' }) => Promise<void>;
 };
 
 /**

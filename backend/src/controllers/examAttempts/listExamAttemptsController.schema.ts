@@ -4,7 +4,7 @@ import { EXAM_MODE } from '@smart-exam/api-types';
 
 import { SubjectIdSchema } from '@/lib/zodSchemas';
 
-const ReviewModeSchema = z.enum([EXAM_MODE.QUESTION, EXAM_MODE.KANJI]);
+const ReviewModeSchema = z.enum([EXAM_MODE.MATERIAL, EXAM_MODE.KANJI]);
 
 const queryString = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string());
 const queryStringOptional = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string().optional());

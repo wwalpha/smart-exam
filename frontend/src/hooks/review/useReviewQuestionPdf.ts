@@ -15,7 +15,7 @@ export const useReviewQuestionPdf = () => {
   useEffect(() => {
     if (!id) return;
     if (currentTest?.examId === id) return;
-    fetchExam(id, 'QUESTION');
+    fetchExam(id, 'MATERIAL');
   }, [id, fetchExam, currentTest?.examId]);
 
   const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/question/${id}/pdf` : '');

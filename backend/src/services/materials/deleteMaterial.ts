@@ -45,7 +45,7 @@ const deleteMaterialImpl = async (repositories: Repositories, materialId: string
     // 対象データを順番に処理する
     for (const test of tests) {
       // 条件に応じて処理を分岐する
-      if (test.mode !== 'QUESTION') continue;
+      if (test.mode !== 'MATERIAL') continue;
 
       // 内部で利用する処理を定義する
       const hasAny =

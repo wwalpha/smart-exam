@@ -25,7 +25,7 @@ export const useReviewQuestionList = () => {
 
   const search = (data: SearchFormValues) => {
     fetchExams({
-      mode: 'QUESTION',
+      mode: 'MATERIAL',
       subject: data.subject,
       ...(data.status === 'ALL' ? {} : { status: data.status }),
     });
@@ -33,10 +33,10 @@ export const useReviewQuestionList = () => {
 
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
-      await deleteExam(id, 'QUESTION');
+      await deleteExam(id, 'MATERIAL');
       const current = form.getValues();
       fetchExams({
-        mode: 'QUESTION',
+        mode: 'MATERIAL',
         subject: current.subject,
         ...(current.status === 'ALL' ? {} : { status: current.status }),
       });
@@ -45,8 +45,8 @@ export const useReviewQuestionList = () => {
 
   return {
     basePath: BASE_PATH,
-    // storeはKANJI/QUESTIONで共通のため、画面側でモード一致のみ表示する
-    reviews: list.filter((x) => x.mode === 'QUESTION'),
+    // storeはKANJI/MATERIALで共通のため、画面側でモード一致のみ表示する
+    reviews: list.filter((x) => x.mode === 'MATERIAL'),
     total,
     isLoading: status.isLoading,
     error: status.error,

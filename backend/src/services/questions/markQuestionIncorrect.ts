@@ -37,7 +37,7 @@ const markQuestionIncorrectImpl = async (repositories: Repositories, questionId:
 
   // 処理で使う値を準備する
   const computed = ReviewNextTime.compute({
-    mode: 'QUESTION',
+    mode: 'MATERIAL',
     baseDateYmd,
     isCorrect: false,
     currentCorrectCount,
@@ -47,7 +47,7 @@ const markQuestionIncorrectImpl = async (repositories: Repositories, questionId:
   await repositories.examCandidates.createCandidate({
     subject: q.subjectId,
     questionId,
-    mode: 'QUESTION',
+    mode: 'MATERIAL',
     nextTime: computed.nextTime,
     correctCount: computed.nextCorrectCount,
     status: 'OPEN',

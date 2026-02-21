@@ -35,7 +35,7 @@ export const createExam = async (request: CreateExamRequest): Promise<Exam> => {
 };
 
 export const getExam = async (examId: string): Promise<ExamDetail> => {
-  return getExamByMode(examId, 'QUESTION');
+  return getExamByMode(examId, 'MATERIAL');
 };
 
 export const getExamByMode = async (examId: string, mode: ExamMode): Promise<ExamDetail> => {
@@ -45,17 +45,14 @@ export const getExamByMode = async (examId: string, mode: ExamMode): Promise<Exa
   });
 };
 
-export const updateExamStatus = async (
-  examId: string,
-  request: UpdateExamStatusRequest
-): Promise<Exam> => {
-  return updateExamStatusByMode(examId, request, 'QUESTION');
+export const updateExamStatus = async (examId: string, request: UpdateExamStatusRequest): Promise<Exam> => {
+  return updateExamStatusByMode(examId, request, 'MATERIAL');
 };
 
 export const updateExamStatusByMode = async (
   examId: string,
   request: UpdateExamStatusRequest,
-  mode: ExamMode
+  mode: ExamMode,
 ): Promise<Exam> => {
   return apiRequest<Exam, UpdateExamStatusRequest>({
     method: 'PATCH',
@@ -65,7 +62,7 @@ export const updateExamStatusByMode = async (
 };
 
 export const deleteExam = async (examId: string): Promise<void> => {
-  return deleteExamByMode(examId, 'QUESTION');
+  return deleteExamByMode(examId, 'MATERIAL');
 };
 
 export const deleteExamByMode = async (examId: string, mode: ExamMode): Promise<void> => {
@@ -75,17 +72,14 @@ export const deleteExamByMode = async (examId: string, mode: ExamMode): Promise<
   });
 };
 
-export const submitExamResults = async (
-  examId: string,
-  request: SubmitExamResultsRequest
-): Promise<void> => {
-  return submitExamResultsByMode(examId, request, 'QUESTION');
+export const submitExamResults = async (examId: string, request: SubmitExamResultsRequest): Promise<void> => {
+  return submitExamResultsByMode(examId, request, 'MATERIAL');
 };
 
 export const submitExamResultsByMode = async (
   examId: string,
   request: SubmitExamResultsRequest,
-  mode: ExamMode
+  mode: ExamMode,
 ): Promise<void> => {
   return apiRequest<void, SubmitExamResultsRequest>({
     method: 'POST',
@@ -95,7 +89,7 @@ export const submitExamResultsByMode = async (
 };
 
 export const listExamTargets = async (params: {
-  mode: 'QUESTION' | 'KANJI';
+  mode: 'MATERIAL' | 'KANJI';
   from: string;
   to: string;
   subject?: string;
@@ -116,7 +110,7 @@ export const listExamTargets = async (params: {
 
 export const listExamCandidates = async (params?: {
   subject?: string;
-  mode?: 'QUESTION' | 'KANJI';
+  mode?: 'MATERIAL' | 'KANJI';
 }): Promise<ListExamCandidatesResponse> => {
   const qs = new URLSearchParams({
     ...(params?.subject ? { subject: params.subject } : {}),

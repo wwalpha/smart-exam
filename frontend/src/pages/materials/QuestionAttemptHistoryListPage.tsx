@@ -11,20 +11,20 @@ import type { WordTestSubject } from '@typings/wordtest';
 import { EXAM_MODE } from '@smart-exam/api-types';
 
 export const QuestionAttemptHistoryListPage = () => {
-  const { items, isLoading, error, form, submit } = useReviewTargets({ mode: EXAM_MODE.QUESTION });
+  const { items, isLoading, error, form, submit } = useReviewTargets({ mode: EXAM_MODE.MATERIAL });
   const {
     register,
     formState: { errors },
   } = form;
 
   const targets = useMemo(() => {
-    return items.filter((x) => x.targetType === EXAM_MODE.QUESTION);
+    return items.filter((x) => x.targetType === EXAM_MODE.MATERIAL);
   }, [items]);
 
   const dialog = useReviewAttemptHistoryDialog();
 
   const candidateState = useReviewCandidateForTarget({
-    mode: EXAM_MODE.QUESTION,
+    mode: EXAM_MODE.MATERIAL,
     targetId: dialog.selected?.targetId ?? null,
     subject: dialog.selected?.subject ?? null,
     enabled: dialog.isOpen,

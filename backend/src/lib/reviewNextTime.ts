@@ -15,7 +15,7 @@ export const ReviewNextTime = {
     currentCorrectCount: number;
   }): { nextTime: string; nextCorrectCount: number } => {
     const current = Number.isFinite(params.currentCorrectCount) ? params.currentCorrectCount : 0;
-    const maxStreak = params.mode === 'QUESTION' ? 2 : 3;
+    const maxStreak = params.mode === 'MATERIAL' ? 2 : 3;
     const currentClamped = Math.max(0, Math.min(maxStreak, Math.trunc(current)));
 
     if (params.isCorrect) {
@@ -29,7 +29,7 @@ export const ReviewNextTime = {
         return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, addDays), nextCorrectCount };
       }
 
-      // QUESTION
+      // MATERIAL
       return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 90), nextCorrectCount };
     }
 
@@ -39,7 +39,7 @@ export const ReviewNextTime = {
       return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 7), nextCorrectCount };
     }
 
-    // QUESTION
+    // MATERIAL
     return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 30), nextCorrectCount };
   },
 };

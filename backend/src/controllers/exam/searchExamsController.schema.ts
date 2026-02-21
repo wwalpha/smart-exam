@@ -5,7 +5,7 @@ import { EXAM_MODE } from '@smart-exam/api-types';
 import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 // 復習モードは問題単位か漢字単位のいずれかを許可する
-const ReviewModeSchema = z.enum([EXAM_MODE.QUESTION, EXAM_MODE.KANJI]);
+const ReviewModeSchema = z.enum([EXAM_MODE.MATERIAL, EXAM_MODE.KANJI]);
 
 /** SearchExamsBodySchema validates input shape. */
 export const SearchExamsBodySchema = z.object({

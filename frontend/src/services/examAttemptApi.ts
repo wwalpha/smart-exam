@@ -8,7 +8,7 @@ import type {
 } from '@smart-exam/api-types';
 
 export const listReviewAttempts = async (params: {
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: 'MATERIAL' | 'KANJI';
   targetId: string;
 }): Promise<ListExamAttemptsResponse> => {
   const qs = new URLSearchParams({ targetType: params.targetType, targetId: params.targetId });

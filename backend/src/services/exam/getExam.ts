@@ -86,7 +86,7 @@ const getExamImpl = async (repositories: Repositories, examId: string): Promise<
         id: targetId,
         itemId: targetId,
         examId,
-        targetType: 'QUESTION',
+        targetType: 'MATERIAL',
         targetId,
         displayLabel: q?.canonicalKey,
         canonicalKey: q?.canonicalKey,

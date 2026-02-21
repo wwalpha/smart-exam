@@ -6,7 +6,7 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable, ExamHistoryTable, KanjiTable } from '@/types/db';
 
-import { computeKanjiQuestionFields } from './kanji.lib';
+import { computeKanjiQuestionFields, parsePipeQuestionLine } from './kanji.lib';
 import type {
   BatchBuildResult,
   BuildCandidateRowParams,
@@ -15,7 +15,6 @@ import type {
   ParseRowsResult,
   ParsedImportRow,
 } from './kanji.types';
-import { parsePipeQuestionLine } from './importUtils';
 
 const toHistoryItem = (candidate: ExamCandidateTable): ExamHistoryTable => {
   return {

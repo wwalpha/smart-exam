@@ -6,7 +6,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { SubjectIdSchema } from '@/lib/zodSchemas';
 
 // 復習モードは問題単位か漢字単位のいずれかを許可する
-const ReviewModeSchema = z.enum([EXAM_MODE.QUESTION, EXAM_MODE.KANJI]);
+const ReviewModeSchema = z.enum([EXAM_MODE.MATERIAL, EXAM_MODE.KANJI]);
 
 // クエリ値が配列で来た場合は先頭要素のみを文字列として扱う
 const queryString = () => z.preprocess((v) => (Array.isArray(v) ? v[0] : v), z.string());

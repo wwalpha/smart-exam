@@ -5,5 +5,5 @@ import type { Services } from '@/services/createServices';
 import { createModeScopedTestsController } from './createModeScopedTestsController';
 
 export const questionTestsController = (services: Services) => {
-  return createModeScopedTestsController(services, EXAM_MODE.QUESTION);
+  return createModeScopedTestsController(services, EXAM_MODE.MATERIAL);
 };

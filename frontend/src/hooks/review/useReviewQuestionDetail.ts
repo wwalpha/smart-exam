@@ -16,12 +16,12 @@ export const useReviewQuestionDetail = () => {
   const { confirm, ConfirmDialog } = useConfirm();
 
   useEffect(() => {
-    if (id) fetchExam(id, 'QUESTION');
+    if (id) fetchExam(id, 'MATERIAL');
   }, [id, fetchExam]);
 
   const remove = async () => {
     if (detail && (await confirm('本当に削除しますか？', { variant: 'destructive' }))) {
-      await deleteExam(detail.examId, 'QUESTION');
+      await deleteExam(detail.examId, 'MATERIAL');
       navigate(BASE_PATH);
     }
   };

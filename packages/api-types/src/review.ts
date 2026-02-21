@@ -1,8 +1,8 @@
 import type { SubjectId } from './subject';
 
 export const EXAM_MODE = {
-  /** 問題モード */
-  QUESTION: 'QUESTION',
+  /** 教材モード */
+  MATERIAL: 'MATERIAL',
   /** 漢字モード */
   KANJI: 'KANJI',
 } as const;
@@ -45,7 +45,7 @@ export type CreateExamRequest = {
   subject: SubjectId;
   /** 出題数 */
   count: number;
-  /** モード (QUESTION: 問題, KANJI: 漢字) */
+  /** モード (MATERIAL: 問題, KANJI: 漢字) */
   mode: ExamMode;
 };
 
@@ -313,7 +313,7 @@ export type ExamCandidate = {
   id: string;
   /** 科目 */
   subject: SubjectId;
-  /** 対象ID（QUESTION: questionId / KANJI: wordId） */
+  /** 対象ID（MATERIAL: questionId / KANJI: wordId） */
   targetId: string;
   /** モード */
   mode: ExamMode;

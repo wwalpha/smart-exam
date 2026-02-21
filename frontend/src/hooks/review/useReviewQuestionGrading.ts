@@ -29,7 +29,7 @@ export const useReviewQuestionGrading = () => {
   const { fields } = useFieldArray({ control, name: 'items' });
 
   useEffect(() => {
-    if (id) fetchExam(id, 'QUESTION');
+    if (id) fetchExam(id, 'MATERIAL');
   }, [id, fetchExam]);
 
   useEffect(() => {
@@ -57,9 +57,9 @@ export const useReviewQuestionGrading = () => {
         {
           results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
         },
-        'QUESTION',
+        'MATERIAL',
       );
-      await fetchExam(id, 'QUESTION');
+      await fetchExam(id, 'MATERIAL');
     } finally {
       setIsSaving(false);
     }

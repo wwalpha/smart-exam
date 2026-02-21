@@ -3,10 +3,7 @@ import { useWordTestStore } from '@/stores';
 import type { Question } from '@smart-exam/api-types';
 import type { SubjectId } from '@smart-exam/api-types';
 
-export const useQuestionAttemptHistory = (params: {
-  subject: SubjectId | null;
-  questions: Question[];
-}) => {
+export const useQuestionAttemptHistory = (params: { subject: SubjectId | null; questions: Question[] }) => {
   const { items, status } = useWordTestStore((s) => s.reviewAttempts);
   const fetchReviewAttempts = useWordTestStore((s) => s.fetchReviewAttempts);
 
@@ -25,12 +22,12 @@ export const useQuestionAttemptHistory = (params: {
 
       if (!params.subject) return;
       await fetchReviewAttempts({
-        targetType: 'QUESTION',
+        targetType: 'MATERIAL',
         targetId: questionId,
         subject: params.subject,
       });
     },
-    [fetchReviewAttempts, params.subject]
+    [fetchReviewAttempts, params.subject],
   );
 
   const close = useCallback(() => {

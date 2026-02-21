@@ -1,13 +1,13 @@
 import type { SubjectId } from '@smart-exam/api-types';
 
 // 復習対象の種別
-export type ReviewTargetType = 'QUESTION' | 'KANJI';
+export type ReviewTargetType = 'MATERIAL' | 'KANJI';
 
 // 復習候補データ
 export type ReviewCandidate =
   | {
       // 問題復習候補
-      targetType: 'QUESTION';
+      targetType: 'MATERIAL';
       // 対象ID
       targetId: string;
       // 科目ID

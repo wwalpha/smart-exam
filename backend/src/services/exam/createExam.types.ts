@@ -7,7 +7,7 @@ import type { ExamsService } from './index';
 // 試験作成処理で扱う候補データ型
 export type ReviewCandidate = {
   // 候補の種別
-  targetType: 'QUESTION' | 'KANJI';
+  targetType: 'MATERIAL' | 'KANJI';
   // 対象ID
   targetId: string;
   // 科目ID

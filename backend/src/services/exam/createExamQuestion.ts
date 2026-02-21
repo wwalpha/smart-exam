@@ -52,7 +52,7 @@ export const buildQuestionCandidates = (
   return sourceCandidates
     .filter((candidate) => Boolean(candidate.nextTime))
     .map((candidate) => ({
-      targetType: 'QUESTION',
+      targetType: 'MATERIAL',
       targetId: candidate.questionId,
       subject: candidate.subject,
       registeredDate: createdDate,
