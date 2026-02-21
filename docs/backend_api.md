@@ -10,146 +10,49 @@
 
 ---
 
-## 共通
-
-- GET /health
-  - ヘルスチェック
-- GET /v1/health
-  - ヘルスチェック（互換パス）
-
----
-
-## S3（アップロード）
-
-- POST /api/upload-url
-  - S3 へアップロードするための署名付きURLを発行
-
----
-
-## Bedrock（解析）
-
-- POST /api/analyze-paper
-  - 試験用紙を解析して構造化データを生成
-
----
-
-## Dashboard
-
-- GET /api/dashboard
-  - ダッシュボード表示用の集計情報を取得
-
----
-
-## Materials（教材）
-
-- GET /api/materials
-  - 教材一覧を取得
-- POST /api/materials/search
-  - 条件を指定して教材を検索
-- POST /api/materials
-  - 教材を新規作成
-- GET /api/materials/{materialId}
-  - 指定した教材の詳細を取得
-- PATCH /api/materials/{materialId}
-  - 指定した教材の情報を更新
-- DELETE /api/materials/{materialId}
-  - 指定した教材を削除
-- GET /api/materials/{materialId}/files
-  - 指定した教材に紐づくファイル一覧を取得
-- GET /api/materials/{materialId}/files/{fileId}
-  - 指定した教材ファイルの詳細を取得
-
----
-
-## Kanji（漢字）
-
-- GET /api/kanji
-  - 漢字データの一覧を取得
-- POST /api/kanji/search
-  - 条件を指定して漢字データを検索
-- POST /api/kanji
-  - 漢字データを新規作成
-- GET /api/kanji/{kanjiId}
-  - 指定した漢字データの詳細を取得
-- PATCH /api/kanji/{kanjiId}
-  - 指定した漢字データを更新
-- DELETE /api/kanji/{kanjiId}
-  - 指定した漢字データを削除
-- POST /api/kanji/deletions
-  - 複数の漢字データを一括削除
-- POST /api/kanji/import
-  - 漢字データを一括インポート
-
----
-
-## Questions（問題）
-
-- POST /api/questions/search
-  - 条件を指定して問題を検索
-- GET /api/materials/{materialId}/questions
-  - 指定した教材に紐づく問題一覧を取得
-- POST /api/materials/{materialId}/questions
-  - 指定した教材に新しい問題を追加
-- PATCH /api/questions/{questionId}
-  - 指定した問題を更新
-- PUT /api/questions/{questionId}/review-candidate
-  - 指定した問題の復習候補を作成または更新
-- DELETE /api/questions/{questionId}/review-candidate
-  - 指定した問題の復習候補を削除
-- DELETE /api/questions/{questionId}
-  - 指定した問題を削除
-
----
-
-## Tests（復習テスト）
-
-### Kanji Tests
-
-- GET /api/exam/kanji
-  - 漢字テスト一覧を取得
-- POST /api/exam/kanji/search
-  - 条件を指定して漢字テストを検索
-- POST /api/exam/kanji
-  - 漢字テストを新規作成
-- GET /api/exam/kanji/targets
-  - 漢字テスト作成対象の候補一覧を取得
-
-- GET /api/exam/kanji/{testId}
-  - 指定した漢字テストの詳細を取得
-- GET /api/exam/kanji/{testId}/pdf
-  - 指定した漢字テストのPDF情報を取得
-- PATCH /api/exam/kanji/{testId}
-  - 指定した漢字テストのステータスを更新
-- DELETE /api/exam/kanji/{testId}
-  - 指定した漢字テストを削除
-- POST /api/exam/kanji/{testId}/results
-  - 指定した漢字テストの結果を登録
-
-### Question Tests
-
-- GET /api/exam/question
-  - 問題テスト一覧を取得
-- POST /api/exam/question/search
-  - 条件を指定して問題テストを検索
-- POST /api/exam/question
-  - 問題テストを新規作成
-- GET /api/exam/question/targets
-  - 問題テスト作成対象の候補一覧を取得
-
-- GET /api/exam/question/{testId}
-  - 指定した問題テストの詳細を取得
-- GET /api/exam/question/{testId}/pdf
-  - 指定した問題テストのPDF情報を取得
-- PATCH /api/exam/question/{testId}
-  - 指定した問題テストのステータスを更新
-- DELETE /api/exam/question/{testId}
-  - 指定した問題テストを削除
-- POST /api/exam/question/{testId}/results
-  - 指定した問題テストの結果を登録
-
-### Related
-
-- GET /api/review-test-candidates
-  - 復習テスト候補の一覧を取得
-- GET /api/review-attempts
-  - 復習テストの実施履歴を参照（読み取り専用）
+| カテゴリ | メソッド | パス | 概要 | Frontend利用 |
+| --- | --- | --- | --- | --- |
+| 共通 | GET | `/health`, `/v1/health` | アプリケーションの稼働状態を確認するヘルスチェックAPI | - |
+| S3 | POST | `/api/upload-url` | S3へアップロードするための署名付きURLを発行するAPI | ✅ |
+| Bedrock | POST | `/api/analyze-paper` | 試験用紙を解析して構造化データを生成するAPI | ✅ |
+| Dashboard | GET | `/api/dashboard` | ダッシュボード表示用の集計情報を取得するAPI | ✅ |
+| Materials | GET | `/api/materials` | 教材一覧を取得するAPI | - |
+| Materials | POST | `/api/materials/search` | 条件を指定して教材を検索するAPI | ✅ |
+| Materials | POST | `/api/materials` | 新しい教材を作成するAPI | ✅ |
+| Materials | GET | `/api/materials/:materialId` | 指定した教材の詳細を取得するAPI | ✅ |
+| Materials | PATCH | `/api/materials/:materialId` | 指定した教材の情報を更新するAPI | ✅ |
+| Materials | DELETE | `/api/materials/:materialId` | 指定した教材を削除するAPI | ✅ |
+| Materials | GET | `/api/materials/:materialId/files` | 指定した教材に紐づくファイル一覧を取得するAPI | ✅ |
+| Materials | GET | `/api/materials/:materialId/files/:fileId` | 指定した教材ファイルの詳細を取得するAPI | ✅ |
+| Kanji | POST | `/api/kanji/search` | 条件を指定して漢字データを検索するAPI | ✅ |
+| Kanji | POST | `/api/kanji` | 漢字データを新規作成するAPI | ✅ |
+| Kanji | GET | `/api/kanji/:kanjiId` | 指定した漢字データの詳細を取得するAPI | ✅ |
+| Kanji | PATCH | `/api/kanji/:kanjiId` | 指定した漢字データを更新するAPI | ✅ |
+| Kanji | DELETE | `/api/kanji/:kanjiId` | 指定した漢字データを削除するAPI | ✅ |
+| Kanji | POST | `/api/kanji/deletions` | 複数の漢字データを一括削除するAPI | ✅ |
+| Kanji | POST | `/api/kanji/import` | 漢字データを一括インポートするAPI | ✅ |
+| Questions | POST | `/api/questions/search` | 条件を指定して問題を検索するAPI | - |
+| Questions | GET | `/api/materials/:materialId/questions` | 指定した教材に紐づく問題一覧を取得するAPI | ✅ |
+| Questions | POST | `/api/materials/:materialId/questions` | 指定した教材に新しい問題を追加するAPI | ✅ |
+| Questions | PATCH | `/api/questions/:questionId` | 指定した問題を更新するAPI | ✅ |
+| Questions | PUT | `/api/questions/:questionId/review-candidate` | 指定した問題の復習候補を作成または更新するAPI | ✅ |
+| Questions | DELETE | `/api/questions/:questionId/review-candidate` | 指定した問題の復習候補を削除するAPI | ✅ |
+| Questions | DELETE | `/api/questions/:questionId` | 指定した問題を削除するAPI | ✅ |
+| Exam (Kanji) | POST | `/api/exam/kanji/search` | 条件を指定して漢字テストを検索するAPI | ✅ |
+| Exam (Kanji) | POST | `/api/exam/kanji` | 漢字テストを新規作成するAPI | ✅ |
+| Exam (Kanji) | GET | `/api/exam/kanji/targets` | 漢字テスト作成対象の候補一覧を取得するAPI | ✅ |
+| Exam (Kanji) | GET | `/api/exam/kanji/:examId` | 指定した漢字テストの詳細を取得するAPI | ✅ |
+| Exam (Kanji) | GET | `/api/exam/kanji/:examId/pdf` | 指定した漢字テストのPDF情報を取得するAPI | ✅ |
+| Exam (Kanji) | PATCH | `/api/exam/kanji/:examId` | 指定した漢字テストのステータスを更新するAPI | ✅ |
+| Exam (Kanji) | DELETE | `/api/exam/kanji/:examId` | 指定した漢字テストを削除するAPI | ✅ |
+| Exam (Kanji) | POST | `/api/exam/kanji/:examId/results` | 指定した漢字テストの結果を登録するAPI | ✅ |
+| Exam (Question) | POST | `/api/exam/question/search` | 条件を指定して問題テストを検索するAPI | ✅ |
+| Exam (Question) | POST | `/api/exam/question` | 問題テストを新規作成するAPI | ✅ |
+| Exam (Question) | GET | `/api/exam/question/targets` | 問題テスト作成対象の候補一覧を取得するAPI | ✅ |
+| Exam (Question) | GET | `/api/exam/question/:examId` | 指定した問題テストの詳細を取得するAPI | ✅ |
+| Exam (Question) | GET | `/api/exam/question/:examId/pdf` | 指定した問題テストのPDF情報を取得するAPI | ✅ |
+| Exam (Question) | PATCH | `/api/exam/question/:examId` | 指定した問題テストのステータスを更新するAPI | ✅ |
+| Exam (Question) | DELETE | `/api/exam/question/:examId` | 指定した問題テストを削除するAPI | ✅ |
+| Exam (Question) | POST | `/api/exam/question/:examId/results` | 指定した問題テストの結果を登録するAPI | ✅ |
+| Exam Candidates | GET | `/api/review-test-candidates` | 復習テスト候補の一覧を取得するAPI | ✅ |
+| Review Attempts | GET | `/api/review-attempts` | 復習テストの実施履歴を参照する読み取り専用API | ✅ |
