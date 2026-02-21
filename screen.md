@@ -43,5 +43,5 @@
 | 単語テスト（詳細）       | `/wordtest/:id`                          | wordtest/WordTestDetailPage.tsx       | タイトルは `test.name`（動的）                              |
 | 単語テスト（採点）       | `/wordtest/:id/grading`                  | wordtest/WordTestGradingPage.tsx      | タイトルは `test.name - 採点`（動的）                       |
 | 単語テスト作成ダイアログ | -                                        | wordtest/WordTestCreateDialog.tsx     | `WordTestPage` から利用される Dialog                        |
-| 単語データ管理           | -                                        | wordmaster/WordMasterPage.tsx         | App.tsx に Route が無い                                     |
-| 単語データ登録ダイアログ | -                                        | wordmaster/WordMasterCreateDialog.tsx | `WordMasterPage` から利用される Dialog                      |
+| 単語データ管理           | -                                        | kanjiGroup/KanjiGroupPage.tsx         | App.tsx に Route が無い                                     |
+| 単語データ登録ダイアログ | -                                        | kanjiGroup/KanjiGroupCreateDialog.tsx | `KanjiGroupPage` から利用される Dialog                      |

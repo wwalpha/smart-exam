@@ -4,7 +4,7 @@ import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedQuery } from '@/types/express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import type { ListExamCandidatesResponse, ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ListExamCandidatesResponse, ExamMode, SubjectId } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
 import { ListExamCandidatesQuerySchema } from './examCandidatesController.schema';
@@ -21,7 +21,7 @@ export const examCandidatesController = (services: Services) => {
 
     const items = await services.exams.listExamCandidates({
       subject: q.subject as SubjectId | undefined,
-      mode: q.mode as ReviewMode | undefined,
+      mode: q.mode as ExamMode | undefined,
     });
 
     res.json({

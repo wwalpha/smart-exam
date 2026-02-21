@@ -2,7 +2,7 @@ export * from './dashboard';
 export * from './bedrock';
 export * from './kanji';
 export * from './material';
-export * from './review';
+export * from './exam';
 export * from './s3';
 export * from './subject';
 export * from './kanjiGroup';

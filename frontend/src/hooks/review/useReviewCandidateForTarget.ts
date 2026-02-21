@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import { useWordTestStore } from '@/stores';
-import type { ReviewMode, ExamCandidate } from '@smart-exam/api-types';
+import type { ExamMode, ExamCandidate } from '@smart-exam/api-types';
 import type { SubjectId } from '@smart-exam/api-types';
 
 export const useReviewCandidateForTarget = (params: {
-  mode: ReviewMode;
+  mode: ExamMode;
   targetId: string | null;
   subject?: SubjectId | null;
   enabled: boolean;

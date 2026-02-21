@@ -1,8 +1,8 @@
 import type {
   CreateExamRequest,
   CreateExamResponse,
+  ExamMode,
   ListExamTargetsResponse,
-  ReviewMode,
   SearchExamsRequest,
   SearchExamsResponse,
   SubjectId,
@@ -21,7 +21,7 @@ import { CreateTestBodySchema, ListTestTargetsQuerySchema, SearchTestsBodySchema
 import { SubmitExamResultsBodySchema } from '@/controllers/exam/submitExamResultsController.schema';
 import { UpdateExamStatusBodySchema } from '@/controllers/exam/updateExamStatusController.schema';
 
-export const createModeScopedTestsController = (services: Services, mode: ReviewMode) => {
+export const createModeScopedTestsController = (services: Services, mode: ExamMode) => {
   const ensureModeMatched = async (examId: string): Promise<boolean> => {
     const item = await services.exams.getExam(examId);
     if (!item) return false;

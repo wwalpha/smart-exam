@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useWordTestStore } from '@/stores';
-import type { ReviewAttempt, ReviewTargetType } from '@smart-exam/api-types';
+import type { ExamAttempt, ExamTargetType } from '@smart-exam/api-types';
 
 export const useReviewAttemptHistory = (params: {
-  targetType: ReviewTargetType;
+  targetType: ExamTargetType;
   targetId: string | null;
   subject?: string | null;
   enabled: boolean;
@@ -23,7 +23,7 @@ export const useReviewAttemptHistory = (params: {
   }, [params.enabled, params.targetId, params.targetType, params.subject, fetchReviewAttempts]);
 
   return {
-    attempts: items as ReviewAttempt[],
+    attempts: items as ExamAttempt[],
     isLoading: status.isLoading,
     error: status.error,
     refetch: async () => {

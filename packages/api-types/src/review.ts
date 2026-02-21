@@ -7,9 +7,13 @@ export const EXAM_MODE = {
   KANJI: 'KANJI',
 } as const;
 
-export type ReviewMode = (typeof EXAM_MODE)[keyof typeof EXAM_MODE];
+export type ExamMode = (typeof EXAM_MODE)[keyof typeof EXAM_MODE];
 
-export type ReviewTargetType = ReviewMode;
+export type ReviewMode = ExamMode;
+
+export type ExamTargetType = ExamMode;
+
+export type ReviewTargetType = ExamTargetType;
 
 /** `GET /api/exam/:examId` */
 export type GetExamParams = {
@@ -42,7 +46,7 @@ export type CreateExamRequest = {
   /** 出題数 */
   count: number;
   /** モード (QUESTION: 問題, KANJI: 漢字) */
-  mode: ReviewMode;
+  mode: ExamMode;
 };
 
 /** 復習テスト作成レスポンス */
@@ -66,7 +70,7 @@ export type SearchExamsRequest = {
   /** 科目条件（ALL指定可） */
   subject: 'ALL' | SubjectId;
   /** モード */
-  mode: ReviewMode;
+  mode: ExamMode;
   /** ステータス条件 */
   status?: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
   /** 1ページあたりの取得件数 */
@@ -87,7 +91,7 @@ export type ExamItem = {
   /** 試験ID */
   examId: string;
   /** 対象種別 */
-  targetType: ReviewTargetType;
+  targetType: ExamTargetType;
   /** 対象ID */
   targetId: string;
   /** 表示ラベル */
@@ -151,7 +155,7 @@ export type Exam = {
   /** 科目 */
   subject: SubjectId;
   /** モード */
-  mode: ReviewMode;
+  mode: ExamMode;
   /** 作成日 (YYYY-MM-DD) */
   createdDate: string;
   /** 提出日 (YYYY-MM-DD) */
@@ -197,9 +201,9 @@ export type SubmitExamResultsRequest = {
 /**
  * 復習履歴 (対象ごと)
  */
-export type ReviewAttempt = {
+export type ExamAttempt = {
   /** 対象種別 */
-  targetType: ReviewTargetType;
+  targetType: ExamTargetType;
   /** 対象ID */
   targetId: string;
   /** 科目 */
@@ -216,16 +220,16 @@ export type ReviewAttempt = {
   examId?: string;
 };
 
-/** `GET /review-attempts?targetType=...&targetId=...` */
-export type ListReviewAttemptsResponse = {
+/** `GET /exam-attempts?targetType=...&targetId=...` */
+export type ListExamAttemptsResponse = {
   /** 復習履歴一覧 */
-  items: ReviewAttempt[];
+  items: ExamAttempt[];
 };
 
-/** `PUT /review-attempts` */
-export type UpsertReviewAttemptRequest = {
+/** `PUT /exam-attempts` */
+export type UpsertExamAttemptRequest = {
   /** 対象種別 */
-  targetType: ReviewTargetType;
+  targetType: ExamTargetType;
   /** 対象ID */
   targetId: string;
   /** 科目 */
@@ -240,30 +244,37 @@ export type UpsertReviewAttemptRequest = {
   previousDateYmd?: string;
 };
 
-/** `PUT /review-attempts` */
-export type UpsertReviewAttemptResponse = ReviewAttempt;
+/** `PUT /exam-attempts` */
+export type UpsertExamAttemptResponse = ExamAttempt;
 
-/** `DELETE /review-attempts?targetType=...&targetId=...&dateYmd=...` */
-export type DeleteReviewAttemptRequest = {
+/** `DELETE /exam-attempts?targetType=...&targetId=...&dateYmd=...` */
+export type DeleteExamAttemptRequest = {
   /** 対象種別 */
-  targetType: ReviewTargetType;
+  targetType: ExamTargetType;
   /** 対象ID */
   targetId: string;
   /** 実施日 (YYYY-MM-DD) */
   dateYmd: string;
 };
 
-export type DeleteReviewAttemptResponse = {
+export type DeleteExamAttemptResponse = {
   /** 成功フラグ */
   ok: true;
 };
+
+export type ReviewAttempt = ExamAttempt;
+export type ListReviewAttemptsResponse = ListExamAttemptsResponse;
+export type UpsertReviewAttemptRequest = UpsertExamAttemptRequest;
+export type UpsertReviewAttemptResponse = UpsertExamAttemptResponse;
+export type DeleteReviewAttemptRequest = DeleteExamAttemptRequest;
+export type DeleteReviewAttemptResponse = DeleteExamAttemptResponse;
 
 /**
  * 復習テスト対象（指定期間内に出題された対象のユニーク一覧）
  */
 export type ExamTarget = {
   /** 対象種別 */
-  targetType: ReviewTargetType;
+  targetType: ExamTargetType;
   /** 対象ID */
   targetId: string;
   /** 科目 */
@@ -305,7 +316,7 @@ export type ExamCandidate = {
   /** 対象ID（QUESTION: questionId / KANJI: wordId） */
   targetId: string;
   /** モード */
-  mode: ReviewMode;
+  mode: ExamMode;
   /** 連続正解回数（streak相当） */
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */

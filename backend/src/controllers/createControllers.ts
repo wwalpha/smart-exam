@@ -2,10 +2,10 @@
 
 import { analyzePaperController } from '@/controllers/bedrock';
 import { getDashboardController } from '@/controllers/dashboard';
+import { listExamAttemptsController } from '@/controllers/examAttempts';
 import { kanjiController } from '@/controllers/kanji';
 import { materialsController } from '@/controllers/materials';
 import { questionsController } from '@/controllers/questions';
-import { listReviewAttemptsController } from '@/controllers/reviewAttempts';
 import { examCandidatesController } from '@/controllers/examCandidates';
 import { getUploadUrlController } from '@/controllers/s3';
 import { kanjiTestsController, questionTestsController } from '@/controllers/tests';
@@ -19,7 +19,8 @@ export type Controllers = {
   kanji: ReturnType<typeof kanjiController>;
   materials: ReturnType<typeof materialsController>;
   questions: ReturnType<typeof questionsController>;
-  reviewAttempts: ReturnType<typeof listReviewAttemptsController>;
+  examAttempts: ReturnType<typeof listExamAttemptsController>;
+  reviewAttempts: ReturnType<typeof listExamAttemptsController>;
   examCandidates: ReturnType<typeof examCandidatesController>;
   exams: {
     kanji: ReturnType<typeof kanjiTestsController>;
@@ -36,7 +37,8 @@ export const createControllers = (services: Services): Controllers => {
     kanji: kanjiController(services),
     materials: materialsController(services),
     questions: questionsController(services),
-    reviewAttempts: listReviewAttemptsController(services),
+    examAttempts: listExamAttemptsController(services),
+    reviewAttempts: listExamAttemptsController(services),
     examCandidates: examCandidatesController(services),
     exams: {
       kanji: kanjiTestsController(services),

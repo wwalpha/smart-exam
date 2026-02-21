@@ -1,15 +1,15 @@
 import { DateUtils } from '@/lib/dateUtils';
-import type { ReviewMode } from '@smart-exam/api-types';
+import type { ExamMode } from '@smart-exam/api-types';
 
 const EXCLUDED_NEXT_TIME = '2099-12-31';
 
-export type { ReviewMode };
+export type { ExamMode };
 
 export const ReviewNextTime = {
   EXCLUDED_NEXT_TIME,
 
   compute: (params: {
-    mode: ReviewMode;
+    mode: ExamMode;
     baseDateYmd: string;
     isCorrect: boolean;
     currentCorrectCount: number;

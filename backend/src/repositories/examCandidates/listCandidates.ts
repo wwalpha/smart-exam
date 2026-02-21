@@ -1,4 +1,4 @@
-import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ExamMode, SubjectId } from '@smart-exam/api-types';
 
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
@@ -10,7 +10,7 @@ const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 
 export const listCandidates = async (params: {
   subject?: SubjectId;
-  mode?: ReviewMode;
+  mode?: ExamMode;
 }): Promise<ExamCandidateTable[]> => {
   const expAttrNames: Record<string, string> = {
     '#status': 'status',

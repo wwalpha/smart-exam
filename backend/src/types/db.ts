@@ -1,6 +1,6 @@
 // Module: db responsibilities.
 
-import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ExamMode, SubjectId } from '@smart-exam/api-types';
 
 /**
  * 教材テーブル
@@ -77,7 +77,7 @@ export interface ExamTable {
   /** 科目 */
   subject: SubjectId;
   /** モード */
-  mode: ReviewMode;
+  mode: ExamMode;
   /** ステータス */
   status: 'IN_PROGRESS' | 'COMPLETED';
   /** 出題数 */
@@ -101,7 +101,7 @@ export interface ExamDetailTable {
   /** 明細順序 (SK) */
   seq: number;
   /** 対象種別 */
-  targetType: ReviewMode;
+  targetType: ExamMode;
   /** 対象ID */
   targetId: string;
 }
@@ -119,7 +119,7 @@ export interface ExamCandidateTable {
   /** 対象ID（QUESTION: questionId / KANJI: wordId） */
   questionId: string;
   /** モード */
-  mode: ReviewMode;
+  mode: ExamMode;
   /** 状態 */
   status: 'OPEN' | 'CLOSED' | 'EXCLUDED' | 'LOCKED';
   /** 連続正解回数（必須、default 0） */
@@ -147,7 +147,7 @@ export interface ExamHistoryTable {
   /** 対象ID（QUESTION: questionId / KANJI: wordId） */
   questionId: string;
   /** モード */
-  mode: ReviewMode;
+  mode: ExamMode;
   /** 状態 */
   status: 'CLOSED';
   /** 連続正解回数 */

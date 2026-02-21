@@ -2,7 +2,7 @@ import { createUuid } from '@/lib/uuid';
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
 import { DateUtils } from '@/lib/dateUtils';
-import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ExamMode, SubjectId } from '@smart-exam/api-types';
 import type { ExamCandidateTable } from '@/types/db';
 
 const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
@@ -10,7 +10,7 @@ const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 export const createCandidate = async (params: {
   subject: SubjectId;
   questionId: string;
-  mode: ReviewMode;
+  mode: ExamMode;
   nextTime: string;
   correctCount: number;
   status: 'OPEN' | 'EXCLUDED' | 'CLOSED';

@@ -1,4 +1,4 @@
-import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ExamMode, SubjectId } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
@@ -37,7 +37,7 @@ export type CandidateListParams = {
   // 科目ID
   subject: SubjectId;
   // 復習モード
-  mode?: ReviewMode;
+  mode?: ExamMode;
   // 判定日（未指定時は当日）
   todayYmd?: string;
 };

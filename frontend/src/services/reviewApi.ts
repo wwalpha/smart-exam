@@ -1,7 +1,7 @@
 import { apiRequest } from './apiClient';
 import type {
   Exam,
-  ReviewMode,
+  ExamMode,
   ExamListResponse,
   CreateExamRequest,
   ExamDetail,
@@ -12,7 +12,7 @@ import type {
   ListExamCandidatesResponse,
 } from '@smart-exam/api-types';
 
-const toModeSegment = (mode: ReviewMode): 'kanji' | 'question' => (mode === 'KANJI' ? 'kanji' : 'question');
+const toModeSegment = (mode: ExamMode): 'kanji' | 'question' => (mode === 'KANJI' ? 'kanji' : 'question');
 
 export const listExams = async (params: SearchExamsRequest): Promise<ExamListResponse> => {
   const path = params.mode === 'KANJI' ? '/api/exam/kanji/search' : '/api/exam/question/search';
@@ -38,7 +38,7 @@ export const getExam = async (examId: string): Promise<ExamDetail> => {
   return getExamByMode(examId, 'QUESTION');
 };
 
-export const getExamByMode = async (examId: string, mode: ReviewMode): Promise<ExamDetail> => {
+export const getExamByMode = async (examId: string, mode: ExamMode): Promise<ExamDetail> => {
   return apiRequest<ExamDetail>({
     method: 'GET',
     path: `/api/exam/${toModeSegment(mode)}/${examId}`,
@@ -55,7 +55,7 @@ export const updateExamStatus = async (
 export const updateExamStatusByMode = async (
   examId: string,
   request: UpdateExamStatusRequest,
-  mode: ReviewMode
+  mode: ExamMode
 ): Promise<Exam> => {
   return apiRequest<Exam, UpdateExamStatusRequest>({
     method: 'PATCH',
@@ -68,7 +68,7 @@ export const deleteExam = async (examId: string): Promise<void> => {
   return deleteExamByMode(examId, 'QUESTION');
 };
 
-export const deleteExamByMode = async (examId: string, mode: ReviewMode): Promise<void> => {
+export const deleteExamByMode = async (examId: string, mode: ExamMode): Promise<void> => {
   return apiRequest<void>({
     method: 'DELETE',
     path: `/api/exam/${toModeSegment(mode)}/${examId}`,
@@ -85,7 +85,7 @@ export const submitExamResults = async (
 export const submitExamResultsByMode = async (
   examId: string,
   request: SubmitExamResultsRequest,
-  mode: ReviewMode
+  mode: ExamMode
 ): Promise<void> => {
   return apiRequest<void, SubmitExamResultsRequest>({
     method: 'POST',

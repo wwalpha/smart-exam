@@ -20,7 +20,7 @@ import type {
   UpdateExamStatusRequest,
   SubmitExamResultsRequest,
   ExamTarget,
-  ReviewAttempt,
+  ExamAttempt,
   ExamCandidate,
   Kanji,
   RegistKanjiRequest,
@@ -91,7 +91,7 @@ export type ReviewTargetState = {
 };
 
 export type ReviewAttemptHistoryState = {
-  items: ReviewAttempt[];
+  items: ExamAttempt[];
   status: ApiStatus;
 };
 

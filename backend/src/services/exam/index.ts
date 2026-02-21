@@ -1,6 +1,6 @@
 import type {
   CreateExamRequest,
-  ReviewMode,
+  ExamMode,
   Exam,
   ExamDetail,
   ExamTarget,
@@ -39,12 +39,12 @@ export type ExamsService = {
   submitExamResults: (examId: string, req: SubmitExamResultsRequest) => Promise<boolean>;
   deleteExam: (examId: string) => Promise<boolean>;
   listExamTargets: (params: {
-    mode: ReviewMode;
+    mode: ExamMode;
     fromYmd: string;
     toYmd: string;
     subject?: SubjectId;
   }) => Promise<ExamTarget[]>;
-  listExamCandidates: (params: { subject?: SubjectId; mode?: ReviewMode }) => Promise<ExamCandidateTable[]>;
+  listExamCandidates: (params: { subject?: SubjectId; mode?: ExamMode }) => Promise<ExamCandidateTable[]>;
 };
 
 // 内部で利用する処理を定義する

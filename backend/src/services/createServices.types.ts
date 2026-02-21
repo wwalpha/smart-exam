@@ -1,10 +1,10 @@
 import type { BedrockService } from '@/services/bedrock';
 import type { DashboardService } from '@/services/dashboard';
+import type { ExamAttemptsService } from '@/services/examAttempts';
 import type { ExamsService } from '@/services/exam';
 import type { KanjiService } from '@/services/kanji';
 import type { MaterialsService } from '@/services/materials';
 import type { QuestionsService } from '@/services/questions';
-import type { ReviewAttemptsService } from '@/services/reviewAttempts';
 import type { S3Service } from '@/services/s3';
 
 export type Services = {
@@ -13,7 +13,8 @@ export type Services = {
   kanji: KanjiService;
   materials: MaterialsService;
   questions: QuestionsService;
-  reviewAttempts: ReviewAttemptsService;
+  examAttempts: ExamAttemptsService;
+  reviewAttempts: ExamAttemptsService;
   exams: ExamsService;
   s3: S3Service;
 };

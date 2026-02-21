@@ -4,7 +4,7 @@ import type { ExamSlice } from '@/stores/store.types';
 import type { GradingData } from '@smart-exam/api-types';
 import * as WORDTEST_API from '@/services/wordtestApi';
 import * as REVIEW_API from '@/services/reviewApi';
-import * as REVIEW_ATTEMPT_API from '@/services/reviewAttemptApi';
+import * as EXAM_ATTEMPT_API from '@/services/examAttemptApi';
 import { withStatus } from '../utils';
 
 export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set, get) => {
@@ -326,7 +326,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setAttemptsStatus,
         async () => {
-          const response = await REVIEW_ATTEMPT_API.listReviewAttempts(params);
+          const response = await EXAM_ATTEMPT_API.listReviewAttempts(params);
           set({
             reviewAttempts: {
               items: response.items,

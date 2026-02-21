@@ -1,9 +1,9 @@
-import type { ReviewAttempt, ReviewTargetType } from '@smart-exam/api-types';
+import type { ExamAttempt, ExamTargetType } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamTable } from '@/types/db';
 
-import type { ReviewAttemptsService } from './createReviewAttemptsService';
+import type { ExamAttemptsService } from './createExamAttemptsService';
 
 // 内部で利用する補助処理を定義する
 const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
@@ -12,9 +12,9 @@ const toAttemptedAt = (dateYmd: string): string => `${dateYmd}T00:00:00.000Z`;
 const getAttemptFromTest = (params: {
   test: ExamTable;
   targetIds: string[];
-  targetType: ReviewTargetType;
+  targetType: ExamTargetType;
   targetId: string;
-}): ReviewAttempt | null => {
+}): ExamAttempt | null => {
   const { test, targetIds, targetType, targetId } = params;
   // 条件に応じて処理を分岐する
   if (test.mode !== targetType) return null;
@@ -40,10 +40,10 @@ const getAttemptFromTest = (params: {
   };
 };
 
-const listReviewAttemptsImpl = async (
+const listExamAttemptsImpl = async (
   repositories: Repositories,
-  params: Parameters<ReviewAttemptsService['listReviewAttempts']>[0],
-): Promise<ReviewAttempt[]> => {
+  params: Parameters<ExamAttemptsService['listExamAttempts']>[0],
+): Promise<ExamAttempt[]> => {
   const items: ExamTable[] = await repositories.exams.scanAll();
 
   const detailsByExamId = new Map<string, string[]>();
@@ -70,7 +70,7 @@ const listReviewAttemptsImpl = async (
         targetId: params.targetId,
       }),
     )
-    .filter((x): x is ReviewAttempt => Boolean(x));
+    .filter((x): x is ExamAttempt => Boolean(x));
 
   filtered.sort((a, b) => {
     if (a.dateYmd !== b.dateYmd) return a.dateYmd < b.dateYmd ? 1 : -1;
@@ -81,6 +81,6 @@ const listReviewAttemptsImpl = async (
   return filtered;
 };
 
-export const createListReviewAttempts = (repositories: Repositories): ReviewAttemptsService['listReviewAttempts'] => {
-  return listReviewAttemptsImpl.bind(null, repositories);
+export const createListExamAttempts = (repositories: Repositories): ExamAttemptsService['listExamAttempts'] => {
+  return listExamAttemptsImpl.bind(null, repositories);
 };

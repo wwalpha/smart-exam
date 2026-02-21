@@ -221,9 +221,9 @@ export const createApp = (): express.Express => {
 
   // 復習テストの実施履歴を参照する読み取り専用API
   app.get(
-    '/api/review-attempts',
-    validateQuery(controllers.reviewAttempts.ListReviewAttemptsQuerySchema),
-    handleRequest(controllers.reviewAttempts.listReviewAttempts),
+    '/api/exam-attempts',
+    validateQuery(controllers.examAttempts.ListExamAttemptsQuerySchema),
+    handleRequest(controllers.examAttempts.listExamAttempts),
   );
 
   // 指定した漢字テストの詳細を取得するAPI

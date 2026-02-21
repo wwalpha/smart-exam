@@ -1,4 +1,4 @@
-import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
+import type { ExamMode, SubjectId } from '@smart-exam/api-types';
 
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
@@ -12,7 +12,7 @@ const INDEX_GSI_SUBJECT_NEXT_TIME = 'gsi_subject_next_time';
 
 export const listDueCandidates = async (params: {
   subject: SubjectId;
-  mode?: ReviewMode;
+  mode?: ExamMode;
   todayYmd: string;
 }): Promise<ExamCandidateTable[]> => {
   const expNames: Record<string, string> = {
