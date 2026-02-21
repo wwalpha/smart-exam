@@ -18,12 +18,11 @@ import type {
 
 const toHistoryItem = (candidate: ExamCandidateTable): ExamHistoryTable => {
   return {
-    subject: candidate.subject,
-    candidateKey: candidate.candidateKey,
     id: candidate.id,
+    subject: candidate.subject,
     questionId: candidate.questionId,
     mode: candidate.mode,
-    status: 'CLOSED',
+    status: candidate.status === 'EXCLUDED' ? 'EXCLUDED' : 'CLOSED',
     correctCount: candidate.correctCount,
     nextTime: candidate.nextTime,
     closedAt: candidate.createdAt,
@@ -276,8 +275,10 @@ const buildItemsByBatch = async (params: {
             histories: row.histories,
             finalStatus: 'AUTO',
           });
-          historiesToCreate.push(...rebuilt.filter((x) => x.status === 'CLOSED').map(toHistoryItem));
-          candidatesToCreate.push(...rebuilt.filter((x) => x.status !== 'CLOSED'));
+          historiesToCreate.push(
+            ...rebuilt.filter((x) => x.status === 'CLOSED' || x.status === 'EXCLUDED').map(toHistoryItem),
+          );
+          candidatesToCreate.push(...rebuilt.filter((x) => x.status === 'OPEN'));
         } else {
           candidatesToCreate.push(
             buildCandidateRow({

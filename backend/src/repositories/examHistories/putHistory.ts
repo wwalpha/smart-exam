@@ -9,10 +9,9 @@ export const putHistory = async (item: ExamHistoryTable): Promise<void> => {
     await dbHelper.put({
       TableName: TABLE_NAME,
       Item: item,
-      ConditionExpression: 'attribute_not_exists(#subject) AND attribute_not_exists(#candidateKey)',
+      ConditionExpression: 'attribute_not_exists(#id)',
       ExpressionAttributeNames: {
-        '#subject': 'subject',
-        '#candidateKey': 'candidateKey',
+        '#id': 'id',
       },
     });
   } catch (error: unknown) {

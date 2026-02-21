@@ -181,16 +181,10 @@ resource "aws_dynamodb_table" "exam_details" {
 resource "aws_dynamodb_table" "exam_histories" {
   name         = "${var.project_name}_exam_histories"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "subject"
-  range_key    = "candidateKey"
+  hash_key     = "id"
 
   attribute {
-    name = "subject"
-    type = "S"
-  }
-
-  attribute {
-    name = "candidateKey"
+    name = "id"
     type = "S"
   }
 

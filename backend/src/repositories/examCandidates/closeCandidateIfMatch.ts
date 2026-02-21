@@ -33,9 +33,8 @@ export const closeCandidateIfMatch = async (params: {
 
   const closedAt = DateUtils.now();
   const historyItem: ExamHistoryTable = {
-    subject: candidate.subject,
-    candidateKey: candidate.candidateKey,
     id: candidate.id,
+    subject: candidate.subject,
     questionId: candidate.questionId,
     mode: candidate.mode,
     status: 'CLOSED',
@@ -48,10 +47,9 @@ export const closeCandidateIfMatch = async (params: {
     await dbHelper.put({
       TableName: HISTORIES_TABLE_NAME,
       Item: historyItem,
-      ConditionExpression: 'attribute_not_exists(#subject) AND attribute_not_exists(#candidateKey)',
+      ConditionExpression: 'attribute_not_exists(#id)',
       ExpressionAttributeNames: {
-        '#subject': 'subject',
-        '#candidateKey': 'candidateKey',
+        '#id': 'id',
       },
     });
   } catch (e: unknown) {

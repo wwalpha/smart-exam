@@ -144,18 +144,16 @@ export interface ExamCandidateTable {
  * 復習テスト履歴テーブル
  */
 export interface ExamHistoryTable {
-  /** 科目 (PK) */
-  subject: SubjectId;
-  /** 候補キー (SK): nextTime#candidateId */
-  candidateKey: string;
-  /** 候補ID */
+  /** 履歴ID (PK) */
   id: string;
+  /** 科目 */
+  subject: SubjectId;
   /** 対象ID（QUESTION: questionId / KANJI: wordId） */
   questionId: string;
   /** モード */
   mode: ExamMode;
   /** 状態 */
-  status: 'CLOSED';
+  status: 'CLOSED' | 'EXCLUDED';
   /** 連続正解回数 */
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */
