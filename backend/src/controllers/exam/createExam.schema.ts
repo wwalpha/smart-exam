@@ -5,7 +5,7 @@ import { EXAM_MODE } from '@smart-exam/api-types';
 import { PositiveIntFromUnknownSchema, SubjectIdSchema } from '@/lib/zodSchemas';
 
 // 復習モードは問題単位か漢字単位のいずれかを許可する
-const ReviewModeSchema = z.enum([EXAM_MODE.MATERIAL, EXAM_MODE.KANJI]);
+const ExamModeSchema = z.enum([EXAM_MODE.MATERIAL, EXAM_MODE.KANJI]);
 
 /** CreateExamBodySchema validates input shape. */
 export const CreateExamBodySchema = z.object({
@@ -14,5 +14,5 @@ export const CreateExamBodySchema = z.object({
   // 出題件数
   count: PositiveIntFromUnknownSchema,
   // 復習モード
-  mode: ReviewModeSchema,
+  mode: ExamModeSchema,
 });

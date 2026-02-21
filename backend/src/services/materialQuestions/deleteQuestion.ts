@@ -20,12 +20,6 @@ export const createDeleteQuestion = (repositories: Repositories): MaterialQuesti
       throw new ApiError('material is completed', 409, ['material_already_completed']);
     }
 
-    // 設問削除前に、紐づく未対応の復習候補を先に除去する。
-    await repositories.examCandidates.deleteOpenCandidatesByTargetId({
-      subject: existing.subjectId,
-      targetId: questionId,
-    });
-
     // 設問本体を削除し、教材側の設問数を減算する。
     await repositories.materialQuestions.delete(questionId);
     await repositories.materials.incrementQuestionCount(existing.materialId, -1);

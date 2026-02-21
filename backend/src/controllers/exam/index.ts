@@ -11,11 +11,11 @@ export { UpdateExamStatusParamsSchema, UpdateExamStatusBodySchema } from './upda
 
 // コントローラ本体の再エクスポート
 export { createExamController } from './createExam';
-export { deleteExamController } from './deleteExamController';
-export { getExamController } from './getExamController';
-export { getExamPdfController } from './getExamPdfController';
-export { listExamTargetsController } from './listExamTargetsController';
-export { listExamsController } from './listExamsController';
-export { searchExamsController } from './searchExamsController';
-export { submitExamResultsController } from './submitExamResultsController';
-export { updateExamStatusController } from './updateExamStatusController';
+export { deleteExamController } from './deleteExam';
+export { getExamController } from './getExam';
+export { getExamPdfController } from './getExamPdf';
+export { listExamTargetsController } from './listExamTargets';
+export { listExamsController } from './listExams';
+export { searchExamsController } from './searchExams';
+export { submitExamResultsController } from './submitExamResults';
+export { updateExamStatusController } from './updateExamStatus';
