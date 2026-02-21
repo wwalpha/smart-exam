@@ -65,7 +65,7 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
   // 条件に応じて処理を分岐する
   if (params.mode === 'MATERIAL') {
     // 非同期で必要な値を取得する
-    const qRows = await Promise.all(Array.from(allTargetIds).map((qid) => repositories.questions.get(qid)));
+    const qRows = await Promise.all(Array.from(allTargetIds).map((qid) => repositories.materialQuestions.get(qid)));
     // 対象データを順番に処理する
     for (const q of qRows) {
       // 条件に応じて処理を分岐する

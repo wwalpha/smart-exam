@@ -172,10 +172,10 @@ export type MaterialSlice = {
   extractQuestionsFromGradedAnswer: (materialId: string) => Promise<void>;
   createQuestion: (materialId: string, request: CreateQuestionRequest) => Promise<void>;
   createQuestionsBulk: (materialId: string, requests: CreateQuestionRequest[]) => Promise<void>;
-  updateQuestion: (questionId: string, request: UpdateQuestionRequest) => Promise<void>;
-  deleteQuestion: (questionId: string) => Promise<void>;
-  markQuestionCorrect: (questionId: string) => Promise<void>;
-  markQuestionIncorrect: (questionId: string) => Promise<void>;
+  updateQuestion: (materialId: string, questionId: string, request: UpdateQuestionRequest) => Promise<void>;
+  deleteQuestion: (materialId: string, questionId: string) => Promise<void>;
+  markQuestionCorrect: (materialId: string, questionId: string) => Promise<void>;
+  markQuestionIncorrect: (materialId: string, questionId: string) => Promise<void>;
 };
 
 /**

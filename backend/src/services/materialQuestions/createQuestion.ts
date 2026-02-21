@@ -4,13 +4,15 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { MaterialQuestionsTable } from '@/types/db';
 
-import type { MaterialQuestionsService } from './materialQuestions.types';
+import type { QuestionsService } from './createQuestionsService';
 import { toSortNumber } from './toSortNumber';
 
-const registQuestionImpl = async (
+// 内部で利用する処理を定義する
+const createQuestionImpl = async (
   repositories: Repositories,
-  data: Parameters<MaterialQuestionsService['registQuestion']>[0],
+  data: Parameters<QuestionsService['createQuestion']>[0],
 ): Promise<Question> => {
+  // 内部で利用する処理を定義する
   const id = createUuid();
 
   const dbItem: MaterialQuestionsTable = {
@@ -21,20 +23,22 @@ const registQuestionImpl = async (
     canonicalKey: data.canonicalKey,
   };
 
+  // 非同期処理の完了を待つ
   await repositories.materialQuestions.create(dbItem);
+  // 非同期処理の完了を待つ
   await repositories.materials.incrementQuestionCount(data.materialId, 1);
 
-  return {
+  const item: Question = {
     id,
-    canonicalKey: data.canonicalKey,
-    subject: data.subject,
-    materialId: data.materialId,
-    tags: data.tags,
+    ...data,
   };
+
+  // 処理結果を呼び出し元へ返す
+  return item;
 };
 
-export const createRegistQuestion = (
-  repositories: Repositories,
-): MaterialQuestionsService['registQuestion'] => {
-  return registQuestionImpl.bind(null, repositories);
+// 公開する処理を定義する
+export const createCreateQuestion = (repositories: Repositories): QuestionsService['createQuestion'] => {
+  // 処理結果を呼び出し元へ返す
+  return createQuestionImpl.bind(null, repositories);
 };

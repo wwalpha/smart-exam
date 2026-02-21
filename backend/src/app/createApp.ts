@@ -19,7 +19,10 @@ export const createApp = (): express.Express => {
   const MaterialIdParamsSchema = z.object({ materialId: z.string().min(1) });
   const MaterialFileParamsSchema = z.object({ materialId: z.string().min(1), fileId: z.string().min(1) });
   const KanjiIdParamsSchema = z.object({ kanjiId: z.string().min(1) });
-  const QuestionIdParamsSchema = z.object({ questionId: z.string().min(1) });
+  const MaterialQuestionIdParamsSchema = z.object({
+    materialId: z.string().min(1),
+    questionId: z.string().min(1),
+  });
   const ExamIdParamsSchema = z.object({ examId: z.string().min(1) });
 
   const app = express();
@@ -133,46 +136,46 @@ export const createApp = (): express.Express => {
   // 条件を指定して問題を検索するAPI
   app.post(
     '/api/questions/search',
-    validateBody(controllers.questions.SearchQuestionsBodySchema),
-    handleRequest(controllers.questions.searchQuestions),
+    validateBody(controllers.materialQuestions.SearchQuestionsBodySchema),
+    handleRequest(controllers.materialQuestions.searchQuestions),
   );
   // 指定した教材に紐づく問題一覧を取得するAPI
   app.get(
     '/api/materials/:materialId/questions',
     validateParams(MaterialIdParamsSchema),
-    handleRequest(controllers.questions.listQuestions),
+    handleRequest(controllers.materialQuestions.listQuestions),
   );
   // 指定した教材に新しい問題を追加するAPI
   app.post(
     '/api/materials/:materialId/questions',
     validateParams(MaterialIdParamsSchema),
-    validateBody(controllers.questions.CreateQuestionBodySchema),
-    handleRequest(controllers.questions.createQuestion),
+    validateBody(controllers.materialQuestions.CreateQuestionBodySchema),
+    handleRequest(controllers.materialQuestions.createQuestion),
   );
   // 指定した問題を更新するAPI
   app.patch(
-    '/api/questions/:questionId',
-    validateParams(QuestionIdParamsSchema),
-    validateBody(controllers.questions.UpdateQuestionBodySchema),
-    handleRequest(controllers.questions.updateQuestion),
+    '/api/materials/:materialId/questions/:questionId',
+    validateParams(MaterialQuestionIdParamsSchema),
+    validateBody(controllers.materialQuestions.UpdateQuestionBodySchema),
+    handleRequest(controllers.materialQuestions.updateQuestion),
   );
   // 指定した問題の復習候補を作成または更新するAPI
   app.put(
-    '/api/questions/:questionId/review-candidate',
-    validateParams(QuestionIdParamsSchema),
-    handleRequest(controllers.questions.upsertQuestionReviewCandidate),
+    '/api/materials/:materialId/questions/:questionId/review-candidate',
+    validateParams(MaterialQuestionIdParamsSchema),
+    handleRequest(controllers.materialQuestions.upsertQuestionReviewCandidate),
   );
   // 指定した問題の復習候補を削除するAPI
   app.delete(
-    '/api/questions/:questionId/review-candidate',
-    validateParams(QuestionIdParamsSchema),
-    handleRequest(controllers.questions.deleteQuestionReviewCandidate),
+    '/api/materials/:materialId/questions/:questionId/review-candidate',
+    validateParams(MaterialQuestionIdParamsSchema),
+    handleRequest(controllers.materialQuestions.deleteQuestionReviewCandidate),
   );
   // 指定した問題を削除するAPI
   app.delete(
-    '/api/questions/:questionId',
-    validateParams(QuestionIdParamsSchema),
-    handleRequest(controllers.questions.deleteQuestion),
+    '/api/materials/:materialId/questions/:questionId',
+    validateParams(MaterialQuestionIdParamsSchema),
+    handleRequest(controllers.materialQuestions.deleteQuestion),
   );
 
   // 条件を指定して漢字テストを検索するAPI

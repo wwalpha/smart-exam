@@ -30,7 +30,7 @@ import type { Services } from '@/services/createServices';
 import { CreateQuestionBodySchema, SearchQuestionsBodySchema, UpdateQuestionBodySchema } from './questions.schema';
 
 /** Creates questions controller. */
-export const questionsController = (services: Services) => {
+export const materialQuestionsController = (services: Services) => {
   const listQuestions: AsyncHandler<
     ListQuestionsParams,
     QuestionListResponse,
@@ -38,7 +38,7 @@ export const questionsController = (services: Services) => {
     ParsedQs
   > = async (req, res) => {
     const { materialId } = req.params;
-    const items = await services.questions.listQuestions(materialId);
+    const items = await services.materialQuestions.listQuestions(materialId);
     res.json({ datas: items });
   };
 
@@ -50,7 +50,7 @@ export const questionsController = (services: Services) => {
   > = async (req, res) => {
     const { materialId } = req.params;
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateQuestionBodySchema>;
-    const item = await services.questions.createQuestion({
+    const item = await services.materialQuestions.createQuestion({
       ...body,
       materialId,
     });
@@ -65,7 +65,7 @@ export const questionsController = (services: Services) => {
   > = async (req, res) => {
     const { questionId } = req.params;
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateQuestionBodySchema>;
-    const item = await services.questions.updateQuestion(questionId, body);
+    const item = await services.materialQuestions.updateQuestion(questionId, body);
     if (!item) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -80,7 +80,7 @@ export const questionsController = (services: Services) => {
     ParsedQs
   > = async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchQuestionsBodySchema>;
-    const items = await services.questions.searchQuestions({ keyword: body.keyword, subject: body.subject });
+    const items = await services.materialQuestions.searchQuestions({ keyword: body.keyword, subject: body.subject });
     res.json({ datas: items });
   };
 
@@ -91,7 +91,7 @@ export const questionsController = (services: Services) => {
     ParsedQs
   > = async (req, res) => {
     const { questionId } = req.params;
-    const deleted = await services.questions.deleteQuestion(questionId);
+    const deleted = await services.materialQuestions.deleteQuestion(questionId);
     if (!deleted) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -106,7 +106,7 @@ export const questionsController = (services: Services) => {
     ParsedQs
   > = async (req, res) => {
     const { questionId } = req.params;
-    const ok = await services.questions.markQuestionIncorrect(questionId);
+    const ok = await services.materialQuestions.markQuestionIncorrect(questionId);
     if (!ok) {
       res.status(404).json({ error: 'Not Found' });
       return;
@@ -121,7 +121,7 @@ export const questionsController = (services: Services) => {
     ParsedQs
   > = async (req, res) => {
     const { questionId } = req.params;
-    const ok = await services.questions.markQuestionCorrect(questionId);
+    const ok = await services.materialQuestions.markQuestionCorrect(questionId);
     if (!ok) {
       res.status(404).json({ error: 'Not Found' });
       return;

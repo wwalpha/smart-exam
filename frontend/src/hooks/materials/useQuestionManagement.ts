@@ -98,7 +98,7 @@ export const useQuestionManagement = () => {
 
     await createQuestionsBulk(
       id,
-      unique.map((canonicalKey) => ({ canonicalKey, subject: detail.subject }))
+      unique.map((canonicalKey) => ({ canonicalKey, subject: detail.subject })),
     );
 
     setBulkInput('');
@@ -107,7 +107,8 @@ export const useQuestionManagement = () => {
 
   const remove = async (questionId: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
-      await deleteQuestion(questionId);
+      if (!id) return;
+      await deleteQuestion(id, questionId);
       if (id) fetchQuestions(id);
     }
   };
@@ -118,7 +119,8 @@ export const useQuestionManagement = () => {
     setBusyQuestionId(questionId);
     setOptimisticResultByQuestionId((prev) => ({ ...prev, [questionId]: 'correct' }));
     try {
-      await markQuestionCorrect(questionId);
+      if (!id) return;
+      await markQuestionCorrect(id, questionId);
       if (id) fetchQuestions(id);
     } finally {
       // API失敗時もボタン操作を復帰させる
@@ -132,7 +134,8 @@ export const useQuestionManagement = () => {
     setBusyQuestionId(questionId);
     setOptimisticResultByQuestionId((prev) => ({ ...prev, [questionId]: 'incorrect' }));
     try {
-      await markQuestionIncorrect(questionId);
+      if (!id) return;
+      await markQuestionIncorrect(id, questionId);
       if (id) fetchQuestions(id);
     } finally {
       // API失敗時もボタン操作を復帰させる

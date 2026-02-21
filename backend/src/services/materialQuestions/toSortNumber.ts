@@ -1,14 +1,11 @@
-const normalizeDigits = (raw: string): string => {
-  return raw.replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0));
-};
+// Module: toSortNumber responsibilities.
 
+/** Converts data with to sort number. */
 export const toSortNumber = (canonicalKey: string): number => {
-  const normalized = normalizeDigits(String(canonicalKey ?? ''));
-  const matched = normalized.match(/\d+/);
-  if (!matched) return Number.MAX_SAFE_INTEGER;
-
-  const numberValue = Number(matched[0]);
-  if (!Number.isFinite(numberValue)) return Number.MAX_SAFE_INTEGER;
-
-  return numberValue;
+  // 処理で使う値を準備する
+  const head = canonicalKey.split('-')[0] ?? '';
+  // 処理で使う値を準備する
+  const value = Number.parseInt(head, 10);
+  // 処理結果を呼び出し元へ返す
+  return Number.isFinite(value) ? value : 0;
 };

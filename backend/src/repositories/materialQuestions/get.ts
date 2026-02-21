@@ -1,14 +1,19 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import type { MaterialQuestionsTable } from '@/types/db';
+import { MaterialQuestionsTable } from '@/types/db';
 
+// 問題テーブル名を環境変数から取得する
 const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
 
+// questionId をキーに単一の問題レコードを取得する
 export const get = async (questionId: string): Promise<MaterialQuestionsTable | null> => {
+  // DynamoDBから対象レコードを取得する
   const result = await dbHelper.get<MaterialQuestionsTable>({
+    // 取得対象テーブル
     TableName: TABLE_NAME,
+    // 取得対象レコードの主キー
     Key: { questionId },
   });
-
-  return result?.Item ?? null;
+  // レコードが存在しない場合は null を返す
+  return result?.Item || null;
 };

@@ -5,7 +5,7 @@ import { getDashboardController } from '@/controllers/dashboard';
 import { listExamAttemptsController } from '@/controllers/examAttempts';
 import { kanjiController } from '@/controllers/kanji';
 import { materialsController } from '@/controllers/materials';
-import { questionsController } from '@/controllers/questions';
+import { materialQuestionsController } from '@/controllers/materialQuestions';
 import { examCandidatesController } from '@/controllers/examCandidates';
 import { getUploadUrlController } from '@/controllers/s3';
 import { kanjiTestsController, questionTestsController } from '@/controllers/tests';
@@ -18,7 +18,7 @@ export type Controllers = {
   dashboard: ReturnType<typeof getDashboardController>;
   kanji: ReturnType<typeof kanjiController>;
   materials: ReturnType<typeof materialsController>;
-  questions: ReturnType<typeof questionsController>;
+  materialQuestions: ReturnType<typeof materialQuestionsController>;
   examAttempts: ReturnType<typeof listExamAttemptsController>;
   reviewAttempts: ReturnType<typeof listExamAttemptsController>;
   examCandidates: ReturnType<typeof examCandidatesController>;
@@ -36,7 +36,7 @@ export const createControllers = (services: Services): Controllers => {
     dashboard: getDashboardController(services),
     kanji: kanjiController(services),
     materials: materialsController(services),
-    questions: questionsController(services),
+    materialQuestions: materialQuestionsController(services),
     examAttempts: listExamAttemptsController(services),
     reviewAttempts: listExamAttemptsController(services),
     examCandidates: examCandidatesController(services),

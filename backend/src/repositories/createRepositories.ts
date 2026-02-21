@@ -2,7 +2,6 @@
 
 import { MaterialsRepository } from '@/repositories/materials';
 import { MaterialQuestionsRepository } from '@/repositories/materialQuestions';
-import { QuestionsRepository } from '@/repositories/questions';
 import { ExamCandidatesRepository } from '@/repositories/examCandidates';
 import { ExamDetailsRepository } from '@/repositories/examDetails';
 import { ExamHistoriesRepository } from '@/repositories/examHistories';
@@ -15,7 +14,6 @@ import { S3Repository } from '@/repositories/s3';
 export type Repositories = {
   materials: typeof MaterialsRepository;
   materialQuestions: typeof MaterialQuestionsRepository;
-  questions: typeof QuestionsRepository;
   examCandidates: typeof ExamCandidatesRepository;
   examDetails: typeof ExamDetailsRepository;
   examHistories: typeof ExamHistoriesRepository;
@@ -33,7 +31,6 @@ export const createRepositories = (): Repositories => {
   return {
     materials: MaterialsRepository,
     materialQuestions: MaterialQuestionsRepository,
-    questions: QuestionsRepository,
     examCandidates: ExamCandidatesRepository,
     examDetails: ExamDetailsRepository,
     examHistories: ExamHistoriesRepository,

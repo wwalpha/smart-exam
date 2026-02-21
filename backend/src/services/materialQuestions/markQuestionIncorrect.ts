@@ -7,7 +7,7 @@ import type { QuestionsService } from './createQuestionsService';
 // 内部で利用する補助処理を定義する
 const markQuestionIncorrectImpl = async (repositories: Repositories, questionId: string): Promise<boolean> => {
   // 非同期で必要な値を取得する
-  const q = await repositories.questions.get(questionId);
+  const q = await repositories.materialQuestions.get(questionId);
   // 条件に応じて処理を分岐する
   if (!q) return false;
 

@@ -31,7 +31,7 @@ export const updateMaterial =
     }
 
     if (typeof updates.registeredDate === 'string') {
-      await services.questions.recalculateCandidatesForMaterial({
+      await services.materialQuestions.recalculateCandidatesForMaterial({
         materialId,
         registeredDate: updates.registeredDate,
       });

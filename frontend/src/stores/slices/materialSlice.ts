@@ -284,11 +284,11 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    updateQuestion: async (questionId, request) => {
+    updateQuestion: async (materialId, questionId, request) => {
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.updateQuestion(questionId, request);
+          await MATERIAL_API.updateQuestion(materialId, questionId, request);
           // Note: Ideally we should update the specific item in the list without refetching
           // But for simplicity, we might rely on refetching or just updating local state if we had the materialId
         },
@@ -297,33 +297,33 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    deleteQuestion: async (questionId) => {
+    deleteQuestion: async (materialId, questionId) => {
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.deleteQuestion(questionId);
+          await MATERIAL_API.deleteQuestion(materialId, questionId);
         },
         '問題の削除に失敗しました。',
         { rethrow: true }
       );
     },
 
-    markQuestionCorrect: async (questionId) => {
+    markQuestionCorrect: async (materialId, questionId) => {
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.markQuestionCorrect(questionId);
+          await MATERIAL_API.markQuestionCorrect(materialId, questionId);
         },
         '採点結果（正解）の登録に失敗しました。',
         { rethrow: true }
       );
     },
 
-    markQuestionIncorrect: async (questionId) => {
+    markQuestionIncorrect: async (materialId, questionId) => {
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.markQuestionIncorrect(questionId);
+          await MATERIAL_API.markQuestionIncorrect(materialId, questionId);
         },
         '採点結果（不正解）の登録に失敗しました。',
         { rethrow: true }

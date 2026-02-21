@@ -11,7 +11,7 @@ const deleteMaterialImpl = async (repositories: Repositories, materialId: string
   if (!existing) return false;
 
   // 内部で利用する処理を定義する
-  const materialQuestions = await repositories.questions.listByMaterialId(materialId);
+  const materialQuestions = await repositories.materialQuestions.listByMaterialId(materialId);
 
   // 教材削除時は、復習候補と問題もまとめて削除する（孤児候補や復習テストへの混入を防ぐため）
   for (const q of materialQuestions) {
@@ -21,7 +21,7 @@ const deleteMaterialImpl = async (repositories: Repositories, materialId: string
       targetId: q.questionId,
     });
     // 非同期処理の完了を待つ
-    await repositories.questions.delete(q.questionId);
+    await repositories.materialQuestions.delete(q.questionId);
   }
 
   // 条件に応じて処理を分岐する

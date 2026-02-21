@@ -2,7 +2,6 @@
 
 export { MaterialsRepository } from './materials';
 export { MaterialQuestionsRepository } from './materialQuestions';
-export { QuestionsRepository } from './questions';
 export { ExamCandidatesRepository } from './examCandidates';
 export { ExamDetailsRepository } from './examDetails';
 export { ExamHistoriesRepository } from './examHistories';

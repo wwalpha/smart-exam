@@ -3,9 +3,8 @@ import type { DashboardService } from '@/services/dashboard';
 import type { ExamAttemptsService } from '@/services/examAttempts';
 import type { ExamsService } from '@/services/exam';
 import type { KanjiService } from '@/services/kanji';
-import type { MaterialQuestionsService } from '@/services/materialQuestions';
+import type { QuestionsService as MaterialQuestionsService } from '@/services/materialQuestions';
 import type { MaterialsService } from '@/services/materials';
-import type { QuestionsService } from '@/services/questions';
 import type { S3Service } from '@/services/s3';
 
 export type Services = {
@@ -14,7 +13,6 @@ export type Services = {
   kanji: KanjiService;
   materialQuestions: MaterialQuestionsService;
   materials: MaterialsService;
-  questions: QuestionsService;
   examAttempts: ExamAttemptsService;
   reviewAttempts: ExamAttemptsService;
   exams: ExamsService;

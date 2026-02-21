@@ -9,7 +9,7 @@ const recalculateCandidatesForMaterialImpl = async (
   params: { materialId: string; registeredDate: string },
 ): Promise<void> => {
   // 内部で利用する処理を定義する
-  const questions = await repositories.questions.listByMaterialId(params.materialId);
+  const questions = await repositories.materialQuestions.listByMaterialId(params.materialId);
 
   // 対象データを順番に処理する
   for (const q of questions) {

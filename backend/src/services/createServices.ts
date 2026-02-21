@@ -4,7 +4,6 @@ import { dashboardService } from '@/services/dashboard';
 import { kanjiService } from '@/services/kanji';
 import { materialQuestionsService } from '@/services/materialQuestions';
 import { materialsService } from '@/services/materials';
-import { questionsService } from '@/services/questions';
 import { examAttemptsService } from '@/services/examAttempts';
 import { examsService } from '@/services/exam';
 import { s3Service } from '@/services/s3';
@@ -21,7 +20,6 @@ export const createServices = (repositories: Repositories): Services => {
     kanji: kanjiService(repositories),
     materialQuestions: materialQuestionsService(repositories),
     materials: materialsService(repositories),
-    questions: questionsService(repositories),
     examAttempts: examAttemptsService(repositories),
     reviewAttempts: examAttemptsService(repositories),
     exams: examsService(repositories),

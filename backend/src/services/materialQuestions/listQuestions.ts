@@ -15,8 +15,6 @@ const listQuestionsImpl = async (repositories: Repositories, materialId: string)
   }));
 };
 
-export const createListQuestions = (
-  repositories: Repositories,
-): MaterialQuestionsService['listQuestions'] => {
+export const createListQuestions = (repositories: Repositories): MaterialQuestionsService['listQuestions'] => {
   return listQuestionsImpl.bind(null, repositories);
 };

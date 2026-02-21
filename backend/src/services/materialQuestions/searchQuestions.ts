@@ -14,7 +14,10 @@ const searchQuestionsImpl = async (
   // 内部で利用する処理を定義する
   const subject = (params.subject ?? '').trim().toLowerCase();
 
-  const [questions, materials] = await Promise.all([repositories.questions.scanAll(), repositories.materials.list()]);
+  const [questions, materials] = await Promise.all([
+    repositories.materialQuestions.scanAll(),
+    repositories.materials.list(),
+  ]);
   // 内部で利用する処理を定義する
   const materialById = new Map(materials.map((x) => [x.materialId, x] as const));
 

@@ -55,7 +55,7 @@ const getExamImpl = async (repositories: Repositories, examId: string): Promise<
   }
 
   // 非同期で必要な値を取得する
-  const questionRows = await Promise.all(targetIds.map((qid) => repositories.questions.get(qid)));
+  const questionRows = await Promise.all(targetIds.map((qid) => repositories.materialQuestions.get(qid)));
   // 処理で使う値を準備する
   const qById = new Map(
     questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const),
