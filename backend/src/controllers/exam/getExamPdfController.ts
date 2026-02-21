@@ -6,7 +6,7 @@ import type { ParsedQs } from 'qs';
 
 import type { Services } from '@/services/createServices';
 
-import { GetExamPdfParamsSchema, GetExamPdfQuerySchema } from './getExamPdfController.schema';
+import { GetExamPdfParamsSchema, GetExamPdfQuerySchema } from './getExamPdf.schema';
 
 /** Creates get review test PDF controller. */
 export const getExamPdfController = (services: Services) => {

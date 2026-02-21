@@ -200,14 +200,14 @@ resource "aws_dynamodb_table" "exam_histories" {
   }
 
   attribute {
-    name = "createdAt"
+    name = "closedAt"
     type = "S"
   }
 
   global_secondary_index {
-    name            = "gsi_question_id_created_at"
+    name            = "gsi_question_id_closed_at"
     hash_key        = "questionId"
-    range_key       = "createdAt"
+    range_key       = "closedAt"
     projection_type = "ALL"
   }
 }

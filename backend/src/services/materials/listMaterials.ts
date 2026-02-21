@@ -2,7 +2,7 @@ import type { Material } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { MaterialsService } from './createMaterialsService';
+import type { MaterialsService } from './createMaterialsService.types';
 import { toApiMaterial } from './materialMappers';
 
 // 内部で利用する処理を定義する

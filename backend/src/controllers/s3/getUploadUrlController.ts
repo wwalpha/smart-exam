@@ -8,7 +8,7 @@ import type { ParsedQs } from 'qs';
 import type { GetUploadUrlRequest, GetUploadUrlResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { GetUploadUrlBodySchema } from './getUploadUrlController.schema';
+import { GetUploadUrlBodySchema } from './getUploadUrl.schema';
 
 /** Creates get upload url controller. */
 export const getUploadUrlController = (services: Services) => {

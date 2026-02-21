@@ -7,7 +7,7 @@ import type { ParsedQs } from 'qs';
 import type { ListExamAttemptsResponse, ExamTargetType, SubjectId } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { ListExamAttemptsQuerySchema } from './listExamAttemptsController.schema';
+import { ListExamAttemptsQuerySchema } from './listExamAttempts.schema';
 
 /** Creates list exam attempts controller. */
 export const listExamAttemptsController = (services: Services) => {

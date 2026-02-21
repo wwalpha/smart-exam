@@ -1,13 +1,13 @@
 // スキーマ定義の再エクスポート
-export { CreateExamBodySchema } from './createExamController.schema';
-export { DeleteExamParamsSchema } from './deleteExamController.schema';
-export { GetExamParamsSchema } from './getExamController.schema';
-export { GetExamPdfParamsSchema, GetExamPdfQuerySchema } from './getExamPdfController.schema';
-export { ListExamsQuerySchema } from './listExamsController.schema';
-export { ListExamTargetsQuerySchema } from './listExamTargetsController.schema';
-export { SearchExamsBodySchema } from './searchExamsController.schema';
-export { SubmitExamResultsParamsSchema, SubmitExamResultsBodySchema } from './submitExamResultsController.schema';
-export { UpdateExamStatusParamsSchema, UpdateExamStatusBodySchema } from './updateExamStatusController.schema';
+export { CreateExamBodySchema } from './createExam.schema';
+export { DeleteExamParamsSchema } from './deleteExam.schema';
+export { GetExamParamsSchema } from './getExam.schema';
+export { GetExamPdfParamsSchema, GetExamPdfQuerySchema } from './getExamPdf.schema';
+export { ListExamsQuerySchema } from './listExams.schema';
+export { ListExamTargetsQuerySchema } from './listExamTargets.schema';
+export { SearchExamsBodySchema } from './searchExams.schema';
+export { SubmitExamResultsParamsSchema, SubmitExamResultsBodySchema } from './submitExamResults.schema';
+export { UpdateExamStatusParamsSchema, UpdateExamStatusBodySchema } from './updateExamStatus.schema';
 
 // コントローラ本体の再エクスポート
 export { createExamController } from './createExamController';

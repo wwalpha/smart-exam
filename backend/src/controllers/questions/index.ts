@@ -1,7 +1,3 @@
-export {
-  CreateQuestionBodySchema,
-  SearchQuestionsBodySchema,
-  UpdateQuestionBodySchema,
-} from './questionsController.schema';
+export { CreateQuestionBodySchema, SearchQuestionsBodySchema, UpdateQuestionBodySchema } from './questions.schema';
 
 export { questionsController } from './questionsController';

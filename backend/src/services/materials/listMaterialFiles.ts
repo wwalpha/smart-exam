@@ -4,7 +4,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { MaterialsService } from './createMaterialsService';
+import type { MaterialsService } from './createMaterialsService.types';
 
 // 内部で利用する処理を定義する
 const listMaterialFilesImpl = async (repositories: Repositories, materialId: string): Promise<MaterialFile[]> => {

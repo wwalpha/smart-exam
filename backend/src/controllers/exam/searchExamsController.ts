@@ -7,16 +7,14 @@ import type { ParsedQs } from 'qs';
 import type { SearchExamsRequest, SearchExamsResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { SearchExamsBodySchema } from './searchExamsController.schema';
+import { SearchExamsBodySchema } from './searchExams.schema';
 
 /** Creates search review tests controller. */
 export const searchExamsController = (services: Services) => {
-  const searchExams: AsyncHandler<
-    ParamsDictionary,
-    SearchExamsResponse,
-    SearchExamsRequest,
-    ParsedQs
-  > = async (req, res) => {
+  const searchExams: AsyncHandler<ParamsDictionary, SearchExamsResponse, SearchExamsRequest, ParsedQs> = async (
+    req,
+    res,
+  ) => {
     // バリデーション済みの検索条件を取得する
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SearchExamsBodySchema>;
     // 条件に一致する復習テストを検索する

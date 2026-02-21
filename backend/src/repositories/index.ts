@@ -1,6 +1,7 @@
 // Module: index responsibilities.
 
 export { MaterialsRepository } from './materials';
+export { MaterialDetailsRepository } from './materialDetails';
 export { QuestionsRepository } from './questions';
 export { ExamCandidatesRepository } from './examCandidates';
 export { ExamDetailsRepository } from './examDetails';

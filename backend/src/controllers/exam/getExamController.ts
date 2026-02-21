@@ -7,7 +7,7 @@ import type { ParsedQs } from 'qs';
 import type { GetExamParams, GetExamResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { GetExamParamsSchema } from './getExamController.schema';
+import { GetExamParamsSchema } from './getExam.schema';
 
 /** Creates get review test controller. */
 export const getExamController = (services: Services) => {

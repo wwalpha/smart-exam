@@ -27,11 +27,7 @@ import type {
 } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import {
-  CreateQuestionBodySchema,
-  SearchQuestionsBodySchema,
-  UpdateQuestionBodySchema,
-} from './questionsController.schema';
+import { CreateQuestionBodySchema, SearchQuestionsBodySchema, UpdateQuestionBodySchema } from './questions.schema';
 
 /** Creates questions controller. */
 export const questionsController = (services: Services) => {

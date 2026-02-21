@@ -1,2 +1,2 @@
-export { AnalyzePaperBodySchema } from './analyzePaperController.schema';
+export { AnalyzePaperBodySchema } from './analyzePaper.schema';
 export { analyzePaperController } from './analyzePaperController';

@@ -4,7 +4,7 @@ import type { ParsedQs } from 'qs';
 
 import type { Services } from '@/services/createServices';
 
-import { ListExamsQuerySchema } from './listExamsController.schema';
+import { ListExamsQuerySchema } from './listExams.schema';
 
 /** Creates list review tests controller. */
 export const listExamsController = (services: Services) => {

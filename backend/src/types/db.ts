@@ -154,8 +154,6 @@ export interface ExamHistoryTable {
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */
   nextTime: string;
-  /** 作成日時 */
-  createdAt: string;
   /** クローズ日時 */
   closedAt: string;
 }

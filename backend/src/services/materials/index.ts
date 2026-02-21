@@ -1,6 +1,38 @@
-// 教材サービスの生成関数と型を再エクスポートする
-export { createMaterialsService } from './createMaterialsService';
+import type { Repositories } from '@/repositories/createRepositories';
+
+import { createCreateMaterial } from './createMaterial';
+import { createDeleteMaterial } from './deleteMaterial';
+import { createGetMaterial } from './getMaterial';
+import { createGetMaterialFile } from './getMaterialFile';
+import { createListMaterialFiles } from './listMaterialFiles';
+import { createListMaterials } from './listMaterials';
+import { createSearchMaterials } from './searchMaterials';
+import { createUpdateMaterial } from './updateMaterial';
+import type { MaterialsService } from './createMaterialsService.types';
+
 export type { MaterialsService } from './createMaterialsService.types';
 
-// 既存参照向けに別名のサービス生成関数を再エクスポートする
-export { createMaterialsService as materialsService } from './createMaterialsService';
+export const createMaterialsService = (repositories: Repositories): MaterialsService => {
+  const listMaterials = createListMaterials(repositories);
+  const searchMaterials = createSearchMaterials({ listMaterials });
+  const createMaterial = createCreateMaterial(repositories);
+  const getMaterial = createGetMaterial(repositories);
+  const updateMaterial = createUpdateMaterial(repositories);
+  const deleteMaterial = createDeleteMaterial(repositories);
+
+  const listMaterialFiles = createListMaterialFiles(repositories);
+  const getMaterialFile = createGetMaterialFile(repositories, { listMaterialFiles });
+
+  return {
+    listMaterials,
+    searchMaterials,
+    createMaterial,
+    getMaterial,
+    updateMaterial,
+    deleteMaterial,
+    listMaterialFiles,
+    getMaterialFile,
+  };
+};
+
+export { createMaterialsService as materialsService };

@@ -6,7 +6,7 @@ import type { ParsedQs } from 'qs';
 import type { AnalyzePaperRequest, AnalyzePaperResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { AnalyzePaperBodySchema } from './analyzePaperController.schema';
+import { AnalyzePaperBodySchema } from './analyzePaper.schema';
 
 /** Creates analyze paper controller. */
 export const analyzePaperController = (services: Services) => {

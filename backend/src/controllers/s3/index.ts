@@ -1,2 +1,2 @@
-export { GetUploadUrlBodySchema } from './getUploadUrlController.schema';
+export { GetUploadUrlBodySchema } from './getUploadUrl.schema';
 export { getUploadUrlController } from './getUploadUrlController';

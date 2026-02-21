@@ -5,7 +5,7 @@ import type { ParsedQs } from 'qs';
 import type { DeleteExamParams } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { DeleteExamParamsSchema } from './deleteExamController.schema';
+import { DeleteExamParamsSchema } from './deleteExam.schema';
 
 /** Creates delete review test controller. */
 export const deleteExamController = (services: Services) => {

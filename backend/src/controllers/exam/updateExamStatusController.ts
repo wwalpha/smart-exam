@@ -7,7 +7,7 @@ import type { ParsedQs } from 'qs';
 import type { UpdateExamStatusParams, UpdateExamStatusRequest, UpdateExamStatusResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { UpdateExamStatusBodySchema, UpdateExamStatusParamsSchema } from './updateExamStatusController.schema';
+import { UpdateExamStatusBodySchema, UpdateExamStatusParamsSchema } from './updateExamStatus.schema';
 
 /** Creates update review test status controller. */
 export const updateExamStatusController = (services: Services) => {

@@ -26,7 +26,6 @@ const toHistoryItem = (candidate: ExamCandidateTable): ExamHistoryTable => {
     status: 'CLOSED',
     correctCount: candidate.correctCount,
     nextTime: candidate.nextTime,
-    createdAt: candidate.createdAt,
     closedAt: candidate.createdAt,
   };
 };

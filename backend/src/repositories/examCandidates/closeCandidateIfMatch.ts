@@ -41,7 +41,6 @@ export const closeCandidateIfMatch = async (params: {
     status: 'CLOSED',
     correctCount: candidate.correctCount,
     nextTime: candidate.nextTime,
-    createdAt: candidate.createdAt,
     closedAt,
   };
 

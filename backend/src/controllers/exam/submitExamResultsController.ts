@@ -7,7 +7,7 @@ import type { ParsedQs } from 'qs';
 import type { SubmitExamResultsParams, SubmitExamResultsRequest } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { SubmitExamResultsBodySchema, SubmitExamResultsParamsSchema } from './submitExamResultsController.schema';
+import { SubmitExamResultsBodySchema, SubmitExamResultsParamsSchema } from './submitExamResults.schema';
 
 /** Creates submit review test results controller. */
 export const submitExamResultsController = (services: Services) => {
