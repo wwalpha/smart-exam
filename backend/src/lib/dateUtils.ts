@@ -104,4 +104,31 @@ export const DateUtils = {
     const parsed = dayjs(ymd.trim(), 'YYYY-MM-DD', true);
     return parsed.isValid();
   },
+
+  /** YYYY-MM-DD を当日開始時刻の ISO8601 へ変換する */
+  toIsoAtStartOfDay: (ymd: string): string => {
+    return dayjs.tz(`${ymd}T00:00:00`, JST_TZ).format(ISO_WITH_OFFSET);
+  },
+
+  /** YYYY-MM-DD が指定範囲内か判定する */
+  isWithinYmdRange: (ymd: string, range: { fromYmd?: string; toYmd?: string }): boolean => {
+    if (range.fromYmd && ymd < range.fromYmd) return false;
+    if (range.toYmd && ymd > range.toYmd) return false;
+    return true;
+  },
+
+  /** 復習候補の次回日付（初回デフォルト）を算出する */
+  computeDefaultDueDate: (params: { targetType: 'MATERIAL' | 'KANJI'; registeredDate: string }): {
+    dueDate: string | null;
+    lastAttemptDate: string;
+  } => {
+    if (params.targetType === 'KANJI') {
+      return {
+        dueDate: DateUtils.addDaysYmd(params.registeredDate, 7),
+        lastAttemptDate: params.registeredDate,
+      };
+    }
+
+    return { dueDate: params.registeredDate, lastAttemptDate: params.registeredDate };
+  },
 };

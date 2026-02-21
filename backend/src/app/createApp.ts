@@ -200,21 +200,21 @@ export const createApp = (): express.Express => {
 
   // 条件を指定して問題テストを検索するAPI
   app.post(
-    '/api/exam/question/search',
-    validateBody(controllers.exams.question.SearchTestsBodySchema),
-    handleRequest(controllers.exams.question.searchTests),
+    '/api/exam/material/search',
+    validateBody(controllers.exams.materials.SearchTestsBodySchema),
+    handleRequest(controllers.exams.materials.searchTests),
   );
   // 問題テストを新規作成するAPI
   app.post(
-    '/api/exam/question',
-    validateBody(controllers.exams.question.CreateTestBodySchema),
-    handleRequest(controllers.exams.question.createTest),
+    '/api/exam/material',
+    validateBody(controllers.exams.materials.CreateTestBodySchema),
+    handleRequest(controllers.exams.materials.createTest),
   );
   // 問題テスト作成対象の候補一覧を取得するAPI
   app.get(
-    '/api/exam/question/targets',
-    validateQuery(controllers.exams.question.ListTestTargetsQuerySchema),
-    handleRequest(controllers.exams.question.listTestTargets),
+    '/api/exam/material/targets',
+    validateQuery(controllers.exams.materials.ListTestTargetsQuerySchema),
+    handleRequest(controllers.exams.materials.listTestTargets),
   );
   // 指定した漢字テストの詳細を取得するAPI
   app.get(
@@ -251,35 +251,42 @@ export const createApp = (): express.Express => {
 
   // 指定した問題テストの詳細を取得するAPI
   app.get(
-    '/api/exam/question/:examId',
+    '/api/exam/material/:examId',
     validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.question.getTest),
+    handleRequest(controllers.exams.materials.getTest),
   );
   // 指定した問題テストのPDF情報を取得するAPI
   app.get(
-    '/api/exam/question/:examId/pdf',
+    '/api/exam/material/:examId/pdf',
     validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.question.getTestPdf),
+    handleRequest(controllers.exams.materials.getTestPdf),
   );
   // 指定した問題テストのステータスを更新するAPI
   app.patch(
-    '/api/exam/question/:examId',
+    '/api/exam/material/:examId',
     validateParams(ExamIdParamsSchema),
-    validateBody(controllers.exams.question.UpdateExamStatusBodySchema),
-    handleRequest(controllers.exams.question.updateTestStatus),
+    validateBody(controllers.exams.materials.UpdateExamStatusBodySchema),
+    handleRequest(controllers.exams.materials.updateTestStatus),
   );
   // 指定した問題テストを削除するAPI
   app.delete(
-    '/api/exam/question/:examId',
+    '/api/exam/material/:examId',
     validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.question.deleteTest),
+    handleRequest(controllers.exams.materials.deleteTest),
   );
   // 指定した問題テストの結果を登録するAPI
   app.post(
-    '/api/exam/question/:examId/results',
+    '/api/exam/material/:examId/results',
     validateParams(ExamIdParamsSchema),
-    validateBody(controllers.exams.question.SubmitExamResultsBodySchema),
-    handleRequest(controllers.exams.question.submitTestResults),
+    validateBody(controllers.exams.materials.SubmitExamResultsBodySchema),
+    handleRequest(controllers.exams.materials.submitTestResults),
+  );
+
+  // 指定した問題テストを完了し候補テーブルへ反映するAPI
+  app.post(
+    '/api/exam/:examId/completion',
+    validateParams(ExamIdParamsSchema),
+    handleRequest(controllers.exams.materials.completeTest),
   );
 
   return app;

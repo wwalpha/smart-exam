@@ -234,6 +234,29 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       );
     },
 
+    completeExam: async (id) => {
+      await withStatus(
+        setReviewStatus,
+        async () => {
+          await REVIEW_API.completeExam(id);
+
+          const currentDetail = getReview().detail;
+          const currentList = getReview().list;
+          if (currentDetail && currentDetail.examId === id) {
+            updateReview({ detail: { ...currentDetail, status: 'COMPLETED' } });
+          }
+
+          if (currentList.length > 0) {
+            updateReview({
+              list: currentList.map((item) => (item.examId === id ? { ...item, status: 'COMPLETED' } : item)),
+            });
+          }
+        },
+        '完了処理に失敗しました。',
+        { rethrow: true },
+      );
+    },
+
     deleteExam: async (id, mode) => {
       await withStatus(
         setReviewStatus,

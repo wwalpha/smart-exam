@@ -17,11 +17,11 @@ import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody, ValidatedQuery } from '@/types/express';
 import type { Services } from '@/services/createServices';
 
-import { CreateTestBodySchema, ListTestTargetsQuerySchema, SearchTestsBodySchema } from './test.schema';
-import { SubmitExamResultsBodySchema } from '@/controllers/exam/submitExamResults.schema';
-import { UpdateExamStatusBodySchema } from '@/controllers/exam/updateExamStatus.schema';
+import { CreateTestBodySchema, ListTestTargetsQuerySchema, SearchTestsBodySchema } from './modeScopedExam.schema';
+import { SubmitExamResultsBodySchema } from './submitExamResults.schema';
+import { UpdateExamStatusBodySchema } from './updateExamStatus.schema';
 
-export const createModeScopedTestsController = (services: Services, mode: ExamMode) => {
+export const createModeScopedExamsController = (services: Services, mode: ExamMode) => {
   const ensureModeMatched = async (examId: string): Promise<boolean> => {
     const item = await services.exams.getExam(examId);
     if (!item) return false;
@@ -198,6 +198,27 @@ export const createModeScopedTestsController = (services: Services, mode: ExamMo
     res.status(204).send();
   };
 
+  const completeTest: AsyncHandler<
+    { examId: string },
+    void | { error: string },
+    Record<string, never>,
+    ParsedQs
+  > = async (req, res) => {
+    const { examId } = req.params;
+    const matched = await ensureModeMatched(examId);
+    if (!matched) {
+      res.status(404).json({ error: 'Not Found' });
+      return;
+    }
+
+    const ok = await services.exams.completeExam(examId);
+    if (!ok) {
+      res.status(404).json({ error: 'Not Found' });
+      return;
+    }
+    res.status(204).send();
+  };
+
   return {
     CreateTestBodySchema,
     SearchTestsBodySchema,
@@ -213,5 +234,6 @@ export const createModeScopedTestsController = (services: Services, mode: ExamMo
     updateTestStatus,
     deleteTest,
     submitTestResults,
+    completeTest,
   };
 };

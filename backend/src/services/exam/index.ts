@@ -12,16 +12,15 @@ import type {
 } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ExamCandidateTable } from '@/types/db';
 
 import type { CreateExamDeps } from './createExam.types';
 import { createKanjiExam } from './createExamKanji';
+import { createCompleteExam } from './completeExam';
 import { createQuestionExam } from './createExamQuestion';
 import { createDeleteExam } from './deleteExam';
 import { createGenerateExamPdfBuffer } from './generateExamPdfBuffer';
 import { createGetExam } from './getExam';
 import { createGetExamPdfUrl } from './getExamPdfUrl';
-import { createListExamCandidates } from './listExamCandidates';
 import { createListExamTargets } from './listExamTargets';
 import { createListExams } from './listExams';
 import { createSearchExams } from './searchExams';
@@ -36,6 +35,7 @@ export type ExamsService = {
   getExamPdfUrl: (examId: string, params?: { download?: boolean }) => Promise<{ url: string } | null>;
   generateExamPdfBuffer: (examId: string, options?: { includeGenerated?: boolean }) => Promise<Buffer | null>;
   updateExamStatus: (examId: string, req: UpdateExamStatusRequest) => Promise<Exam | null>;
+  completeExam: (examId: string) => Promise<boolean>;
   submitExamResults: (examId: string, req: SubmitExamResultsRequest) => Promise<boolean>;
   deleteExam: (examId: string) => Promise<boolean>;
   listExamTargets: (params: {
@@ -44,7 +44,6 @@ export type ExamsService = {
     toYmd: string;
     subject?: SubjectId;
   }) => Promise<ExamTarget[]>;
-  listExamCandidates: (params: { subject?: SubjectId; mode?: ExamMode }) => Promise<ExamCandidateTable[]>;
 };
 
 // 内部で利用する処理を定義する
@@ -84,9 +83,8 @@ export const createExamsService = (repositories: Repositories): ExamsService => 
   // 内部で利用する処理を定義する
   const listExamTargets = createListExamTargets(repositories);
   // 内部で利用する処理を定義する
-  const listExamCandidates = createListExamCandidates(repositories);
-  // 内部で利用する処理を定義する
   const updateExamStatus = createUpdateExamStatus(repositories);
+  const completeExam = createCompleteExam(repositories);
   // 内部で利用する処理を定義する
   const submitExamResults = createSubmitExamResults(repositories);
 
@@ -104,10 +102,10 @@ export const createExamsService = (repositories: Repositories): ExamsService => 
     getExamPdfUrl,
     generateExamPdfBuffer,
     updateExamStatus,
+    completeExam,
     submitExamResults,
     deleteExam,
     listExamTargets,
-    listExamCandidates,
   };
 };
 

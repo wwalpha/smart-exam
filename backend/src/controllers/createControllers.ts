@@ -6,7 +6,7 @@ import { kanjiController } from '@/controllers/kanji';
 import { materialsController } from '@/controllers/materials';
 import { materialQuestionsController } from '@/controllers/materialQuestions';
 import { getUploadUrlController } from '@/controllers/s3';
-import { kanjiTestsController, questionTestsController } from '@/controllers/tests';
+import { kanjiTestsController, materialsTestsController } from '@/controllers/exam';
 
 import type { Services } from '@/services/createServices';
 
@@ -19,7 +19,7 @@ export type Controllers = {
   materialQuestions: ReturnType<typeof materialQuestionsController>;
   exams: {
     kanji: ReturnType<typeof kanjiTestsController>;
-    question: ReturnType<typeof questionTestsController>;
+    materials: ReturnType<typeof materialsTestsController>;
   };
   s3: ReturnType<typeof getUploadUrlController>;
 };
@@ -34,7 +34,7 @@ export const createControllers = (services: Services): Controllers => {
     materialQuestions: materialQuestionsController(services),
     exams: {
       kanji: kanjiTestsController(services),
-      question: questionTestsController(services),
+      materials: materialsTestsController(services),
     },
     s3: getUploadUrlController(services),
   };

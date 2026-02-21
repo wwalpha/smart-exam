@@ -39,8 +39,8 @@ async function main(): Promise<void> {
     createdDate: ymd,
     status: 'IN_PROGRESS' as const,
     pdf: {
-      url: `/api/exam/question/${testId}/pdf`,
-      downloadUrl: `/api/exam/question/${testId}/pdf?download=1`,
+      url: `/api/exam/material/${testId}/pdf`,
+      downloadUrl: `/api/exam/material/${testId}/pdf?download=1`,
     },
     count: EXPECTED_LINES.length,
     questions: EXPECTED_LINES.map((_v, i) => `q-${i + 1}`),

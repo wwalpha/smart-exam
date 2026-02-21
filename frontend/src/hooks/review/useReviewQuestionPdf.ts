@@ -18,7 +18,7 @@ export const useReviewQuestionPdf = () => {
     fetchExam(id, 'MATERIAL');
   }, [id, fetchExam, currentTest?.examId]);
 
-  const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/question/${id}/pdf` : '');
+  const pdfApiPath = currentTest?.pdf?.url ?? (id ? `/api/exam/material/${id}/pdf` : '');
 
   const [presignedUrl, setPresignedUrl] = useState<string>('');
   const [isFetchingPdfUrl, setIsFetchingPdfUrl] = useState(false);

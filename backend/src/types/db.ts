@@ -108,6 +108,8 @@ export interface ExamDetailTable {
   targetType: ExamMode;
   /** 対象ID */
   targetId: string;
+  /** 正誤（採点後） */
+  isCorrect?: boolean;
 }
 
 /**

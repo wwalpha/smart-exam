@@ -19,6 +19,11 @@ export const createGetExam = (repositories: Repositories): ExamsService['getExam
 
     // 処理で使う値を準備する
     const resultByTargetId = new Map((test.results ?? []).map((r) => [r.id, r.isCorrect] as const));
+    const detailResultByTargetId = new Map(
+      details
+        .filter((detail) => typeof detail.isCorrect === 'boolean')
+        .map((detail) => [detail.targetId, detail.isCorrect as boolean] as const),
+    );
 
     // 条件に応じて処理を分岐する
     if (test.mode === 'KANJI') {
@@ -36,7 +41,7 @@ export const createGetExam = (repositories: Repositories): ExamsService['getExam
           // 処理で使う値を準備する
           const w = byId.get(targetId);
           // 処理で使う値を準備する
-          const isCorrect = resultByTargetId.get(targetId);
+          const isCorrect = detailResultByTargetId.get(targetId) ?? resultByTargetId.get(targetId);
           // 処理結果を呼び出し元へ返す
           return {
             id: targetId,
@@ -81,7 +86,7 @@ export const createGetExam = (repositories: Repositories): ExamsService['getExam
         // 処理で使う値を準備する
         const m = q ? mById.get(q.materialId) : undefined;
         // 処理で使う値を準備する
-        const isCorrect = resultByTargetId.get(targetId);
+        const isCorrect = detailResultByTargetId.get(targetId) ?? resultByTargetId.get(targetId);
 
         // 処理結果を呼び出し元へ返す
         return {

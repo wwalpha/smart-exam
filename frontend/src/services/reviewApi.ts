@@ -11,10 +11,10 @@ import type {
   ListExamTargetsResponse,
 } from '@smart-exam/api-types';
 
-const toModeSegment = (mode: ExamMode): 'kanji' | 'question' => (mode === 'KANJI' ? 'kanji' : 'question');
+const toModeSegment = (mode: ExamMode): 'kanji' | 'material' => (mode === 'KANJI' ? 'kanji' : 'material');
 
 export const listExams = async (params: SearchExamsRequest): Promise<ExamListResponse> => {
-  const path = params.mode === 'KANJI' ? '/api/exam/kanji/search' : '/api/exam/question/search';
+  const path = params.mode === 'KANJI' ? '/api/exam/kanji/search' : '/api/exam/material/search';
 
   return apiRequest<ExamListResponse, SearchExamsRequest>({
     method: 'POST',
@@ -24,7 +24,7 @@ export const listExams = async (params: SearchExamsRequest): Promise<ExamListRes
 };
 
 export const createExam = async (request: CreateExamRequest): Promise<Exam> => {
-  const path = request.mode === 'KANJI' ? '/api/exam/kanji' : '/api/exam/question';
+  const path = request.mode === 'KANJI' ? '/api/exam/kanji' : '/api/exam/material';
 
   return apiRequest<Exam, CreateExamRequest>({
     method: 'POST',
@@ -99,10 +99,17 @@ export const listExamTargets = async (params: {
     ...(params.subject ? { subject: params.subject } : {}),
   });
 
-  const path = params.mode === 'KANJI' ? '/api/exam/kanji/targets' : '/api/exam/question/targets';
+  const path = params.mode === 'KANJI' ? '/api/exam/kanji/targets' : '/api/exam/material/targets';
 
   return apiRequest<ListExamTargetsResponse>({
     method: 'GET',
     path: `${path}?${qs.toString()}`,
+  });
+};
+
+export const completeExam = async (examId: string): Promise<void> => {
+  return apiRequest<void>({
+    method: 'POST',
+    path: `/api/exam/${examId}/completion`,
   });
 };

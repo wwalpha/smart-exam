@@ -116,6 +116,7 @@ export type ExamSlice = {
   createExam: (request: CreateExamRequest) => Promise<Exam>;
   fetchExam: (id: string, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
   updateExamStatus: (id: string, request: UpdateExamStatusRequest, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
+  completeExam: (id: string) => Promise<void>;
   deleteExam: (id: string, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
   submitExamResults: (id: string, request: SubmitExamResultsRequest, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
   fetchExamTargets: (params: {

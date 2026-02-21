@@ -8,8 +8,11 @@ export { ListExamTargetsQuerySchema } from './listExamTargets.schema';
 export { SearchExamsBodySchema } from './searchExams.schema';
 export { SubmitExamResultsParamsSchema, SubmitExamResultsBodySchema } from './submitExamResults.schema';
 export { UpdateExamStatusParamsSchema, UpdateExamStatusBodySchema } from './updateExamStatus.schema';
+export { CreateTestBodySchema, SearchTestsBodySchema, ListTestTargetsQuerySchema } from './modeScopedExam.schema';
 
 // コントローラ本体の再エクスポート
+export { kanjiTestsController } from './kanjiTestsController';
+export { materialsTestsController } from './materialsTestsController';
 export { createExamController } from './createExam';
 export { deleteExamController } from './deleteExam';
 export { getExamController } from './getExam';
