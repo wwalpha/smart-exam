@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import { getDynamoDbLocal, stopDynamoDbLocal } from '../setup/dynamodbLocal';
+import { getDynamoDbLocal, stopDynamoDbLocal } from '../../setup/dynamodbLocal';
 
 const runDynamoDbLocalTest = process.env.DDB_LOCAL_INTEGRATION === '1';
 
