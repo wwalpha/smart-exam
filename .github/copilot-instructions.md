@@ -2,6 +2,7 @@
 
 ## その他
 
+- 画面名（ページタイトル/メニュー名）とTSXファイルの対応を確認する際は、リポジトリルートの screen.md を一次情報として参照してください。必要に応じて screen.md 内に記載の出典（App.tsx の Routes / pages配下）も併用して確認してください。
 - AWS CLI を利用する際は常に `--no-cli-pager` オプションを付与してください。
 - CI（Ubuntu/Linux）はファイル名の大小文字を区別するため、TypeScript の import パスは git 管理されている実ファイル名と **大小文字まで完全一致** させてください（大小文字だけのリネームは `git mv` で確実に反映）。
 - Frontend の `yarn dev` は MSW を使用しません。API を叩く場合は `VITE_APIGW_URL` または `VITE_API_ENDPOINT` を設定して実バックエンドに向けてください。
