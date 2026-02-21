@@ -17,5 +17,5 @@ export type MaterialQuestionsService = {
   deleteQuestion: (materialId: string, questionId: string) => Promise<boolean>;
   searchQuestions: (params: SearchQuestionsRequest) => Promise<QuestionSearchResult[]>;
   setQuestionChoice: (params: { materialId: string; questionId: string; isCorrect: boolean }) => Promise<boolean>;
-  applyQuestionChoicesToCandidatesForMaterial: (params: { materialId: string; baseDateYmd: string }) => Promise<void>;
+  applyChoices: (params: { materialId: string; baseDateYmd: string }) => Promise<void>;
 };

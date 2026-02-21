@@ -19,7 +19,7 @@ export const completeMaterial = (
       return;
     }
 
-    await services.materialQuestions.applyQuestionChoicesToCandidatesForMaterial({
+    await services.materialQuestions.applyChoices({
       materialId,
       baseDateYmd: updated.registeredDate,
     });

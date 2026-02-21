@@ -6,6 +6,7 @@
 - AWS CLI を利用する際は常に `--no-cli-pager` オプションを付与してください。
 - CI（Ubuntu/Linux）はファイル名の大小文字を区別するため、TypeScript の import パスは git 管理されている実ファイル名と **大小文字まで完全一致** させてください（大小文字だけのリネームは `git mv` で確実に反映）。
 - Frontend の `yarn dev` は MSW を使用しません。API を叩く場合は `VITE_APIGW_URL` または `VITE_API_ENDPOINT` を設定して実バックエンドに向けてください。
+- 実装後は必ずコードレビュー（セキュリティ・性能観点）を実施してください。レビュー結果（懸念点・対応方針）を作業結果に含め、毎回省略しないでください。
 
 - AWS Lambda（Node.js 24 以降）は callback ベースのハンドラーをサポートしないため、ハンドラーは `async` 関数で Promise を返す形式にしてください（`(event, context, callback)` は使用しない）。
 

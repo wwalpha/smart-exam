@@ -8,52 +8,38 @@ import type { MaterialQuestionsTable } from '@/types/db';
 import type { MaterialQuestionsService } from './materialQuestions.types';
 import { toSortNumber } from './materialQuestions.lib';
 
-// 内部で利用する処理を定義する
-const createQuestionImpl = async (
-  repositories: Repositories,
-  data: Parameters<MaterialQuestionsService['createQuestion']>[0],
-): Promise<Question> => {
-  const material = await repositories.materials.get(data.materialId);
-  if (!material) {
-    throw new ApiError('material not found', 404, ['material_not_found']);
-  }
-  if (material.isCompleted) {
-    // 完了済み教材では設問を変更させない
-    throw new ApiError('material is completed', 409, ['material_already_completed']);
-  }
-
-  // 内部で利用する処理を定義する
-  const id = createUuid();
-
-  const dbItem: MaterialQuestionsTable = {
-    questionId: id,
-    materialId: data.materialId,
-    subjectId: material.subjectId,
-    number: toSortNumber(data.canonicalKey),
-    canonicalKey: data.canonicalKey,
-    choice: 'CORRECT',
-  };
-
-  // 非同期処理の完了を待つ
-  await repositories.materialQuestions.create(dbItem);
-  // 非同期処理の完了を待つ
-  await repositories.materials.incrementQuestionCount(data.materialId, 1);
-
-  const item: Question = {
-    id,
-    canonicalKey: data.canonicalKey,
-    subject: material.subjectId,
-    materialId: data.materialId,
-    tags: data.tags,
-    choice: 'CORRECT',
-  };
-
-  // 処理結果を呼び出し元へ返す
-  return item;
-};
-
-// 公開する処理を定義する
 export const createCreateQuestion = (repositories: Repositories): MaterialQuestionsService['createQuestion'] => {
-  // 処理結果を呼び出し元へ返す
-  return createQuestionImpl.bind(null, repositories);
+  return async (data): Promise<Question> => {
+    const material = await repositories.materials.get(data.materialId);
+    if (!material) {
+      throw new ApiError('material not found', 404, ['material_not_found']);
+    }
+    if (material.isCompleted) {
+      // 完了済み教材では設問を変更させない
+      throw new ApiError('material is completed', 409, ['material_already_completed']);
+    }
+
+    const id = createUuid();
+
+    const dbItem: MaterialQuestionsTable = {
+      questionId: id,
+      materialId: data.materialId,
+      subjectId: material.subjectId,
+      number: toSortNumber(data.canonicalKey),
+      canonicalKey: data.canonicalKey,
+      choice: 'CORRECT',
+    };
+
+    await repositories.materialQuestions.create(dbItem);
+    await repositories.materials.incrementQuestionCount(data.materialId, 1);
+
+    return {
+      id,
+      canonicalKey: data.canonicalKey,
+      subject: material.subjectId,
+      materialId: data.materialId,
+      tags: data.tags,
+      choice: 'CORRECT',
+    };
+  };
 };
