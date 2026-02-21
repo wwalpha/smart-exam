@@ -23,8 +23,7 @@ const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']
 };
 
 export const useReviewQuestionDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, updateExamStatus, ConfirmDialog } =
-    useReviewQuestionDetail();
+  const { review, isLoading, error, basePath, remove, updateExamStatus, ConfirmDialog } = useReviewQuestionDetail();
   const navigate = useNavigate();
 
   const blocks = useMemo(() => {
@@ -108,7 +107,7 @@ export const useReviewQuestionDetailPage = () => {
 
   const complete = useCallback(async () => {
     if (!review) return;
-    await updateExamStatus(review.examId, { status: 'COMPLETED' }, 'QUESTION');
+    await updateExamStatus(review.examId, { status: 'COMPLETED' }, 'MATERIAL');
     navigate(basePath);
   }, [review, updateExamStatus, navigate, basePath]);
 

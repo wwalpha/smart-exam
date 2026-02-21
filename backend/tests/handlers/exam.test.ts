@@ -55,7 +55,7 @@ describe('exam handler', () => {
     };
 
     const req = {
-      body: { subject: '1', mode: 'QUESTION', count: 20 },
+      body: { subject: '1', mode: 'MATERIAL', count: 20 },
     } as unknown as Request<Record<string, never>, unknown, CreateExamRequest>;
     const res = {
       json: vi.fn(),
@@ -100,7 +100,7 @@ describe('exam handler', () => {
 
   it('listExamTargets returns items', async () => {
     const mockTargets = [
-      { targetType: 'QUESTION', targetId: 'q1', subject: '1', lastTestCreatedDate: '2026-01-01', includedCount: 2 },
+      { targetType: 'MATERIAL', targetId: 'q1', subject: '1', lastTestCreatedDate: '2026-01-01', includedCount: 2 },
     ];
     const services = {
       exams: {
@@ -117,7 +117,7 @@ describe('exam handler', () => {
 
     const req = {
       validated: {
-        query: { mode: 'QUESTION', from: '2026-01-01', to: '2026-01-31', subject: undefined },
+        query: { mode: 'MATERIAL', from: '2026-01-01', to: '2026-01-31', subject: undefined },
       },
     } as unknown as Request;
     const res = {
