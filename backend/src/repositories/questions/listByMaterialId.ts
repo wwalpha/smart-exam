@@ -1,14 +1,14 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import { MaterialQuestionTable } from '@/types/db';
+import { MaterialDetailsTable } from '@/types/db';
 
 // 問題テーブル名を環境変数から取得する
 const TABLE_NAME = ENV.TABLE_MATERIAL_DETAILS;
 
 // materialId に紐づく問題レコード一覧を取得する
-export const listByMaterialId = async (materialId: string): Promise<MaterialQuestionTable[]> => {
+export const listByMaterialId = async (materialId: string): Promise<MaterialDetailsTable[]> => {
   // GSIを使って教材IDで問題一覧を検索する
-  const result = await dbHelper.query<MaterialQuestionTable>({
+  const result = await dbHelper.query<MaterialDetailsTable>({
     // 検索対象テーブル
     TableName: TABLE_NAME,
     // materialId 検索用インデックス

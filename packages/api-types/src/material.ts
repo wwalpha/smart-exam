@@ -2,64 +2,79 @@ import type { SubjectId } from './subject';
 
 /** `GET /materials/:materialId` */
 export type GetMaterialParams = {
+  /** 教材ID */
   materialId: string;
 };
 
 /** `DELETE /materials/:materialId` */
 export type DeleteMaterialParams = {
+  /** 教材ID */
   materialId: string;
 };
 
 /** `GET /materials/:materialId/questions` */
 export type ListQuestionsParams = {
+  /** 教材ID */
   materialId: string;
 };
 
 /** `GET /materials/:materialId/files` */
 export type ListMaterialFilesParams = {
+  /** 教材ID */
   materialId: string;
 };
 
 /** `GET /materials/:materialId/files/:fileId` */
 export type GetMaterialFileParams = {
+  /** 教材ID */
   materialId: string;
+  /** ファイルID */
   fileId: string;
 };
 
 /** `POST /materials/:materialId/questions` */
 export type CreateQuestionParams = {
+  /** 教材ID */
   materialId: string;
 };
 
 /** `PATCH /questions/:questionId` */
 export type UpdateQuestionParams = {
+  /** 問題ID */
   questionId: string;
 };
 
 /** `DELETE /questions/:questionId` */
 export type DeleteQuestionParams = {
+  /** 問題ID */
   questionId: string;
 };
 
 /** `PUT /questions/:questionId/review-candidate` */
 export type UpsertQuestionReviewCandidateParams = {
+  /** 問題ID */
   questionId: string;
 };
 
 /** `DELETE /questions/:questionId/review-candidate` */
 export type DeleteQuestionReviewCandidateParams = {
+  /** 問題ID */
   questionId: string;
 };
 
 /** 教材セット作成リクエスト */
 export type CreateMaterialRequest = {
+  /** 教材名 */
   name: string;
+  /** 科目 */
   subject: SubjectId;
   /** 教材年月日 (YYYY-MM-DD) */
   materialDate: string;
   /** 初回実施日 (YYYY-MM-DD) */
   registeredDate: string;
+  /** 学年 */
   grade: string;
+  /** 提供元 */
   provider: string;
 };
 
@@ -78,6 +93,7 @@ export type UpdateMaterialRequest = Partial<CreateMaterialRequest> & {
 
 /** `PATCH /materials/:materialId` */
 export type UpdateMaterialParams = {
+  /** 教材ID */
   materialId: string;
 };
 
@@ -102,13 +118,21 @@ export type MaterialListResponse = {
 
 /** `POST /materials/search` */
 export type SearchMaterialsRequest = {
+  /** 科目での絞り込み */
   subject?: SubjectId;
+  /** 学年での絞り込み */
   grade?: string;
+  /** 提供元での絞り込み */
   provider?: string;
+  /** 教材年月日の開始日 */
   from?: string;
+  /** 教材年月日の終了日 */
   to?: string;
+  /** 自由検索キーワード */
   q?: string;
+  /** 1ページあたりの取得件数 */
   limit?: number;
+  /** 次ページ取得用カーソル */
   cursor?: string;
 };
 
@@ -137,6 +161,7 @@ export type MaterialFile = {
 
 /** `GET /materials/:materialId/files` */
 export type ListMaterialFilesResponse = {
+  /** ファイル一覧 */
   datas: MaterialFile[];
 };
 
@@ -170,8 +195,11 @@ export type Question = {
 
 /** 問題作成リクエスト */
 export type CreateQuestionRequest = {
+  /** 識別キー（正規化されたキー） */
   canonicalKey: string;
+  /** 科目 */
   subject: SubjectId;
+  /** タグ */
   tags?: string[];
 };
 
@@ -208,27 +236,37 @@ export type Material = {
 };
 /** 問題一覧取得レスポンス */
 export type QuestionListResponse = {
+  /** 問題一覧 */
   datas: Question[];
 };
 
 /** 検索結果（問題検索） */
 export type QuestionSearchResult = {
+  /** 問題ID */
   id: string;
+  /** 科目 */
   subject: SubjectId;
+  /** 単元 */
   unit?: string;
+  /** 問題文 */
   questionText: string;
+  /** 出典教材ID */
   sourceMaterialId: string;
+  /** 出典教材名 */
   sourceMaterialName: string;
 };
 
 /** `POST /questions/search` */
 export type SearchQuestionsRequest = {
+  /** 検索キーワード */
   keyword?: string;
+  /** 科目での絞り込み */
   subject?: SubjectId;
 };
 
 /** `POST /questions/search` */
 export type SearchQuestionsResponse = {
+  /** 問題検索結果一覧 */
   datas: QuestionSearchResult[];
 };
 
@@ -237,6 +275,7 @@ export type UpsertQuestionReviewCandidateRequest = {};
 
 /** `PUT /questions/:questionId/review-candidate` */
 export type UpsertQuestionReviewCandidateResponse = {
+  /** 成功フラグ */
   ok: true;
 };
 
@@ -245,5 +284,6 @@ export type DeleteQuestionReviewCandidateRequest = {};
 
 /** `DELETE /questions/:questionId/review-candidate` */
 export type DeleteQuestionReviewCandidateResponse = {
+  /** 成功フラグ */
   ok: true;
 };

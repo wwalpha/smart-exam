@@ -1,10 +1,10 @@
 import type { WordTestSubject } from './wordtest';
 
 /**
- * 単語グループ（単語帳）
+ * 漢字グループ（漢字帳）
  */
-export type WordGroup = {
-  /** グループID */
+export type KanjiGroup = {
+  /** 漢字グループID */
   id: string;
   /** タイトル */
   title: string;
@@ -15,12 +15,12 @@ export type WordGroup = {
 };
 
 /**
- * 単語
+ * 漢字グループ内の漢字項目
  */
-export type Word = {
-  /** 単語ID */
+export type KanjiGroupItem = {
+  /** 漢字項目ID */
   id: string;
-  /** グループID */
+  /** 漢字グループID */
   groupId: string;
   /** 問題 */
   question: string;
@@ -28,20 +28,26 @@ export type Word = {
   answer: string;
 };
 
-/** 単語グループ一覧取得レスポンス */
-export type ListWordGroupsResponse = {
-  datas: WordGroup[];
+/** 漢字グループ一覧取得レスポンス */
+export type ListKanjiGroupsResponse = {
+  /** 漢字グループ一覧 */
+  datas: KanjiGroup[];
 };
 
-/** 単語グループ作成リクエスト */
-export type CreateWordGroupRequest = {
+/** 漢字グループ作成リクエスト */
+export type CreateKanjiGroupRequest = {
   /** タイトル */
   title: string;
   /** 科目 */
   subject: WordTestSubject;
-  /** 単語リスト */
-  words: { question: string; answer: string }[];
+  /** 漢字項目リスト */
+  words: {
+    /** 問題文 */
+    question: string;
+    /** 解答 */
+    answer: string;
+  }[];
 };
 
-/** 単語グループ作成レスポンス */
-export type CreateWordGroupResponse = WordGroup;
+/** 漢字グループ作成レスポンス */
+export type CreateKanjiGroupResponse = KanjiGroup;

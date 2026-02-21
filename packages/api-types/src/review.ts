@@ -1,7 +1,9 @@
 import type { SubjectId } from './subject';
 
 export const EXAM_MODE = {
+  /** 問題モード */
   QUESTION: 'QUESTION',
+  /** 漢字モード */
   KANJI: 'KANJI',
 } as const;
 
@@ -11,21 +13,25 @@ export type ReviewTargetType = ReviewMode;
 
 /** `GET /api/exam/:examId` */
 export type GetExamParams = {
+  /** 復習テストID */
   examId: string;
 };
 
 /** `PATCH /api/exam/:examId` */
 export type UpdateExamStatusParams = {
+  /** 復習テストID */
   examId: string;
 };
 
 /** `DELETE /api/exam/:examId` */
 export type DeleteExamParams = {
+  /** 復習テストID */
   examId: string;
 };
 
 /** `POST /api/exam/:examId/results` */
 export type SubmitExamResultsParams = {
+  /** 復習テストID */
   examId: string;
 };
 
@@ -57,10 +63,15 @@ export type ExamListResponse = {
 
 /** `POST /exams/search` */
 export type SearchExamsRequest = {
+  /** 科目条件（ALL指定可） */
   subject: 'ALL' | SubjectId;
+  /** モード */
   mode: ReviewMode;
+  /** ステータス条件 */
   status?: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
+  /** 1ページあたりの取得件数 */
   limit?: number;
+  /** 次ページ取得用カーソル */
   cursor?: string;
 };
 
@@ -102,7 +113,14 @@ export type ExamItem = {
   /** 漢字問題: 読み（ひらがな、本文中で下線対象） */
   readingHiragana?: string;
   /** 漢字問題: 下線指定（本文内の部分範囲） */
-  underlineSpec?: { type: 'promptSpan'; start: number; length: number };
+  underlineSpec?: {
+    /** 下線種別 */
+    type: 'promptSpan';
+    /** 開始位置（UTF-16インデックス） */
+    start: number;
+    /** 下線長（UTF-16文字数） */
+    length: number;
+  };
   /** 正誤 (採点後) */
   isCorrect?: boolean;
   /** アイテムID (Frontend compatibility) */
@@ -117,6 +135,7 @@ export type ExamDetail = Exam & {
 
 /** 復習テストステータス更新リクエスト */
 export type UpdateExamStatusRequest = {
+  /** 変更後ステータス */
   status: 'IN_PROGRESS' | 'COMPLETED';
 };
 
@@ -149,7 +168,12 @@ export type Exam = {
   /** 出題数 */
   count: number;
   /** 採点結果 */
-  results: { id: string; isCorrect: boolean }[];
+  results: {
+    /** 対象ID */
+    id: string;
+    /** 正誤 */
+    isCorrect: boolean;
+  }[];
 };
 
 /**
@@ -194,17 +218,23 @@ export type ReviewAttempt = {
 
 /** `GET /review-attempts?targetType=...&targetId=...` */
 export type ListReviewAttemptsResponse = {
+  /** 復習履歴一覧 */
   items: ReviewAttempt[];
 };
 
 /** `PUT /review-attempts` */
 export type UpsertReviewAttemptRequest = {
+  /** 対象種別 */
   targetType: ReviewTargetType;
+  /** 対象ID */
   targetId: string;
+  /** 科目 */
   subject: SubjectId;
   /** 実施日 (YYYY-MM-DD) */
   dateYmd: string;
+  /** 正誤 */
   isCorrect: boolean;
+  /** メモ */
   memo?: string;
   /** 実施日を変更する場合に指定 (YYYY-MM-DD) */
   previousDateYmd?: string;
@@ -215,13 +245,16 @@ export type UpsertReviewAttemptResponse = ReviewAttempt;
 
 /** `DELETE /review-attempts?targetType=...&targetId=...&dateYmd=...` */
 export type DeleteReviewAttemptRequest = {
+  /** 対象種別 */
   targetType: ReviewTargetType;
+  /** 対象ID */
   targetId: string;
   /** 実施日 (YYYY-MM-DD) */
   dateYmd: string;
 };
 
 export type DeleteReviewAttemptResponse = {
+  /** 成功フラグ */
   ok: true;
 };
 
@@ -257,6 +290,7 @@ export type ExamTarget = {
 
 /** `GET /exams/targets?mode=...&from=YYYY-MM-DD&to=YYYY-MM-DD` */
 export type ListExamTargetsResponse = {
+  /** 復習対象一覧 */
   items: ExamTarget[];
 };
 
@@ -282,5 +316,6 @@ export type ExamCandidate = {
 
 /** `GET /review-test-candidates?subject=...&mode=...` */
 export type ListExamCandidatesResponse = {
+  /** 候補一覧 */
   items: ExamCandidate[];
 };

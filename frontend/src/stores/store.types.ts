@@ -4,9 +4,9 @@ import type {
   GradingData,
   GetWordTestDetailResponse,
   WordTestTitle,
-  CreateWordGroupRequest,
-  CreateWordGroupResponse,
-  WordGroup,
+  CreateKanjiGroupRequest,
+  CreateKanjiGroupResponse,
+  KanjiGroup,
   Material,
   CreateMaterialRequest,
   UpdateMaterialRequest,
@@ -58,7 +58,7 @@ export type WordTestState = {
  */
 export type KanjiGroupState = {
   /** 単語グループ一覧 */
-  groups: WordGroup[];
+  groups: KanjiGroup[];
   /** API 状態 */
   status: ApiStatus;
 };
@@ -138,7 +138,11 @@ export type ExamSlice = {
     to: string;
     subject?: string;
   }) => Promise<void>;
-  fetchReviewAttempts: (params: { targetType: 'QUESTION' | 'KANJI'; targetId: string; subject?: string }) => Promise<void>;
+  fetchReviewAttempts: (params: {
+    targetType: 'QUESTION' | 'KANJI';
+    targetId: string;
+    subject?: string;
+  }) => Promise<void>;
   fetchExamCandidates: (params?: { subject?: string; mode?: 'QUESTION' | 'KANJI' }) => Promise<void>;
 };
 
@@ -190,7 +194,7 @@ export type KanjiSlice = {
   /** 単語グループ（kanjiGroup）も漢字系として統合 */
   kanjiGroup: KanjiGroupState;
   fetchWordGroups: () => Promise<void>;
-  createWordGroup: (request: CreateWordGroupRequest) => Promise<CreateWordGroupResponse>;
+  createWordGroup: (request: CreateKanjiGroupRequest) => Promise<CreateKanjiGroupResponse>;
 };
 
 /**

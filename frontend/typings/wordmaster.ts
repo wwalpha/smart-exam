@@ -1,1 +1,1 @@
-export type { WordGroup, Word } from '@smart-exam/api-types';
+export type { KanjiGroup, KanjiGroupItem } from '@smart-exam/api-types';

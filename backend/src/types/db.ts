@@ -31,9 +31,9 @@ export interface MaterialTable {
 }
 
 /**
- * 問題テーブル
+ * 教材明細テーブル
  */
-export interface MaterialQuestionTable {
+export interface MaterialDetailsTable {
   /** 問題ID (PK) */
   questionId: string;
   /** 教材ID (GSI1 PK) */
@@ -69,7 +69,7 @@ export interface KanjiTable {
 }
 
 /**
- * 復習テストテーブル
+ * テストテーブル
  */
 export interface ExamTable {
   /** 試験ID (PK) */

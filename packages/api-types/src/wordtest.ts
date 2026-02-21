@@ -56,6 +56,7 @@ export type ListWordTestsRequest = Record<string, never>;
  * 単語テスト一覧取得レスポンス
  */
 export type ListWordTestsResponse = {
+  /** 単語テスト一覧 */
   datas: WordTestTitle[];
 };
 
@@ -64,6 +65,7 @@ export type ListWordTestsResponse = {
  * 単語テスト詳細取得リクエスト（path params）
  */
 export type GetWordTestDetailRequest = {
+  /** 単語テストID */
   wordTestId: string;
 };
 
@@ -72,7 +74,9 @@ export type GetWordTestDetailRequest = {
  * 単語テスト詳細取得レスポンス
  */
 export type GetWordTestDetailResponse = {
+  /** 単語テストID */
   id: string;
+  /** 出題アイテム一覧 */
   items: WordTestItem[];
 };
 
@@ -108,6 +112,7 @@ export type CreateWordTestResponse = WordTestTitle;
  * 採点反映リクエスト
  */
 export type ApplyWordTestGradingRequest = {
+  /** 採点結果一覧 */
   results: GradingData[];
 };
 

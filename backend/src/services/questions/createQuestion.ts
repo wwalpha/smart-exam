@@ -2,7 +2,7 @@ import type { Question } from '@smart-exam/api-types';
 
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { MaterialQuestionTable } from '@/types/db';
+import type { MaterialDetailsTable } from '@/types/db';
 
 import type { QuestionsService } from './createQuestionsService';
 import { toSortNumber } from './toSortNumber';
@@ -15,7 +15,7 @@ const createQuestionImpl = async (
   // 内部で利用する処理を定義する
   const id = createUuid();
 
-  const dbItem: MaterialQuestionTable = {
+  const dbItem: MaterialDetailsTable = {
     questionId: id,
     materialId: data.materialId,
     subjectId: data.subject,
