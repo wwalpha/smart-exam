@@ -14,6 +14,50 @@ export type Kanji = {
   subject: SubjectId;
 };
 
+/** 漢字問題の下線位置情報 */
+export type KanjiUnderlineSpec = {
+  type: 'promptSpan';
+  /** JavaScript 文字インデックス（UTF-16 code unit 基準） */
+  start: number;
+  /** 文字数（UTF-16 code unit 基準） */
+  length: number;
+};
+
+/**
+ * 漢字問題（本文中の読み(ひらがな)を下線にする用途）
+ */
+export type KanjiQuestion = {
+  id: string;
+  subject: SubjectId;
+
+  /** 問題文（本文） */
+  question: string;
+  /** 解答（記入すべき漢字） */
+  answer: string;
+
+  readingHiragana?: string;
+  underlineSpec?: KanjiUnderlineSpec;
+};
+
+/** 漢字問題読み生成レスポンス */
+export type KanjiQuestionGenerateReadingResponse = {
+  id: string;
+  readingHiragana: string;
+  underlineSpec: KanjiUnderlineSpec;
+};
+
+/** 漢字問題更新リクエスト */
+export type KanjiQuestionPatchRequest = {
+  readingHiragana?: string;
+  underlineSpec?: KanjiUnderlineSpec;
+};
+
+/** 漢字問題更新レスポンス */
+export type KanjiQuestionPatchResponse = KanjiQuestion;
+
+/** 漢字問題検証レスポンス */
+export type KanjiQuestionVerifyResponse = KanjiQuestion;
+
 /** 漢字一覧取得レスポンス */
 export type KanjiListResponse = {
   /** 漢字リスト */

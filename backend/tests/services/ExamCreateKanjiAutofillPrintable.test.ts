@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ExamDetail } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 
-describe('createExam (KANJI) autofill printable fields', () => {
-  it('tries to generate reading/underline when printable is empty', async () => {
+describe('createExam (KANJI) printable filter only', () => {
+  it('does not auto-generate fields and creates exam with zero printable items', async () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
 
@@ -37,19 +37,6 @@ describe('createExam (KANJI) autofill printable fields', () => {
           subject: '1',
           question,
           answer,
-        }),
-        updateKanjiQuestionFields: vi.fn().mockResolvedValue({
-          wordId,
-          subject: '1',
-          question,
-          answer,
-          readingHiragana: 'けいせい',
-          underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-        }),
-      },
-      bedrock: {
-        generateKanjiQuestionReadingsBulk: vi.fn().mockResolvedValue({
-          items: [{ id: wordId, readingHiragana: 'けいせい' }],
         }),
       },
       exams: {
@@ -90,12 +77,12 @@ describe('createExam (KANJI) autofill printable fields', () => {
     const deleteExam = vi.fn().mockResolvedValue(true);
     const createExam = createCreateExam({ repositories, getExam, deleteExam });
 
-    await expect(createExam({ subject: '1', mode: 'KANJI', count: 60 })).resolves.toEqual(
-      expect.objectContaining({ mode: 'KANJI' }),
-    );
+    const result = await createExam({ subject: '1', mode: 'KANJI', count: 60 });
 
-    expect(repositories.bedrock.generateKanjiQuestionReadingsBulk).toHaveBeenCalledTimes(1);
-    expect(repositories.kanji.updateKanjiQuestionFields).toHaveBeenCalledTimes(1);
-    expect(repositories.s3.putObject).toHaveBeenCalledTimes(1);
+    expect(result.mode).toBe('KANJI');
+    expect(result.count).toBe(0);
+
+    expect(repositories.examCandidates.lockCandidateIfUnlocked).not.toHaveBeenCalled();
+    expect(repositories.s3.putObject).not.toHaveBeenCalled();
   });
 });

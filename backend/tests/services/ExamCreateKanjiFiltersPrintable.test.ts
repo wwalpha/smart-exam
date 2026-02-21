@@ -39,6 +39,7 @@ describe('ExamsService.createExam (KANJI)', () => {
         lockCandidateIfUnlocked: vi.fn().mockResolvedValue(undefined),
         getLatestCandidateByTargetId: vi.fn().mockResolvedValue(null),
         releaseLockIfMatch: vi.fn().mockResolvedValue(undefined),
+        listLockedCandidatesByExamId: vi.fn().mockResolvedValue([]),
       },
       exams: {
         put: vi.fn().mockResolvedValue(undefined),
@@ -58,6 +59,11 @@ describe('ExamsService.createExam (KANJI)', () => {
         }),
         delete: vi.fn().mockResolvedValue(undefined),
         scanAll: vi.fn().mockResolvedValue([]),
+      },
+      examDetails: {
+        putMany: vi.fn().mockResolvedValue(undefined),
+        listByExamId: vi.fn().mockResolvedValue([{ examId: 'dummy', targetId: 'w-verified', sortKey: '001' }]),
+        deleteByExamId: vi.fn().mockResolvedValue(undefined),
       },
       kanji: {
         get: vi.fn().mockImplementation(async (id: string) => {

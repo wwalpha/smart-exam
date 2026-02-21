@@ -7,8 +7,6 @@ import { createUuid } from '@/lib/uuid';
 import type { ExamCandidateTable, KanjiTable } from '@/types/db';
 import type { ExamTable } from '@/types/db';
 
-import { computeKanjiQuestionFields } from '@/services/kanji/kanji.lib';
-
 import type { CandidateListParams, CreateExamDeps, ReviewCandidate } from './createExam.types';
 import { ExamPdfService } from './examPdfService';
 import { toApiExam } from './internal';
@@ -113,78 +111,7 @@ export const buildKanjiCandidates = async (
   );
 
   // 処理で使う値を準備する
-  let printableIds = printableWordIds(byId);
-  // 条件に応じて処理を分岐する
-  if (printableIds.size === 0 && byId.size > 0) {
-    // 内部で利用する処理を定義する
-    const toFill = Array.from(byId.values()).filter((word) => {
-      // 条件に応じて処理を分岐する
-      if (isPrintableKanjiWorksheetWord(word)) return false;
-      // 処理結果を呼び出し元へ返す
-      return Boolean(String(word.question ?? '').trim() && String(word.answer ?? '').trim());
-    });
-
-    // 条件に応じて処理を分岐する
-    if (toFill.length > 0) {
-      // 例外が発生しうる処理を実行する
-      try {
-        // 内部で利用する処理を定義する
-        const bulk = await deps.repositories.bedrock.generateKanjiQuestionReadingsBulk({
-          items: toFill.map((word) => ({
-            id: word.wordId,
-            question: String(word.question ?? ''),
-            answer: String(word.answer ?? ''),
-          })),
-        });
-        // 内部で利用する処理を定義する
-        const generatedById = new Map(bulk.items.map((item) => [String(item.id ?? ''), item] as const));
-
-        // 非同期処理の完了を待つ
-        await Promise.all(
-          toFill.map(async (word) => {
-            // 内部で利用する処理を定義する
-            const generated = generatedById.get(word.wordId);
-            // 条件に応じて処理を分岐する
-            if (!generated) return;
-
-            // 内部で利用する処理を定義する
-            const readingHiragana = String(generated.readingHiragana ?? '').trim();
-            // 条件に応じて処理を分岐する
-            if (!readingHiragana) return;
-
-            // 例外が発生しうる処理を実行する
-            try {
-              // 内部で利用する処理を定義する
-              const computed = computeKanjiQuestionFields({
-                question: word.question,
-                readingHiragana,
-              });
-
-              // 非同期処理の完了を待つ
-              await deps.repositories.kanji.updateKanjiQuestionFields(word.wordId, {
-                readingHiragana: computed.readingHiragana,
-                underlineSpec: computed.underlineSpec,
-              });
-
-              byId.set(word.wordId, {
-                ...word,
-                readingHiragana: computed.readingHiragana,
-                underlineSpec: computed.underlineSpec,
-              });
-            } catch {
-              // 処理結果を呼び出し元へ返す
-              return;
-            }
-          }),
-        );
-
-        // 値を代入する
-        printableIds = printableWordIds(byId);
-      } catch {
-        // 自動補完に失敗しても候補絞り込みのみを継続する
-      }
-    }
-  }
+  const printableIds = printableWordIds(byId);
 
   // 処理結果を呼び出し元へ返す
   return candidates.filter((candidate) => printableIds.has(candidate.targetId));

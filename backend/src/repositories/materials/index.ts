@@ -1,7 +1,7 @@
 import { create } from './create';
 import { remove } from './delete';
 import { get } from './get';
-import { incrementQuestionCount } from './incrementQuestionCount';
+import { incrementQuestionCount } from './incrementCount';
 import { list } from './list';
 import { update } from './update';
 

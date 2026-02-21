@@ -37,13 +37,6 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
         get: vi.fn().mockImplementation(async (id: string) => {
           return kanjis.get(id) ?? null;
         }),
-        updateKanjiQuestionFields: vi.fn().mockImplementation(async (id: string, updates: Partial<KanjiItem>) => {
-          const existing = kanjis.get(id);
-          if (!existing) return null;
-          const next = { ...existing, ...updates };
-          kanjis.set(id, next);
-          return next;
-        }),
       },
       examCandidates: {
         deleteCandidatesByTargetId: vi
@@ -80,6 +73,9 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
             candidateParams.push(params);
             return params as unknown;
           }),
+      },
+      examHistories: {
+        putHistory: vi.fn().mockResolvedValue(undefined),
       },
       bedrock: {
         generateKanjiQuestionReadingsBulk: vi

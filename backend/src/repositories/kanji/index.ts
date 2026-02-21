@@ -4,16 +4,14 @@ import { remove } from './delete';
 import { get } from './get';
 import { listKanji } from './listKanji';
 import { update } from './update';
-import { updateKanjiQuestionFields } from './updateKanjiQuestionFields';
 
-export { bulkCreate, create, remove, get, listKanji, update, updateKanjiQuestionFields };
+export { bulkCreate, create, remove, get, listKanji, update };
 
 export const KanjiRepository = {
   bulkCreate,
   create,
   get,
   update,
-  updateKanjiQuestionFields,
   delete: remove,
   listKanji,
 };
