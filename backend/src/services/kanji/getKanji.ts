@@ -4,18 +4,16 @@ import type { Repositories } from '@/repositories/createRepositories';
 
 import type { KanjiService } from './kanji.types';
 
-const getKanjiImpl = async (repositories: Repositories, id: string): Promise<Kanji | null> => {
-  const dbItem = await repositories.kanji.get(id);
-  if (!dbItem) return null;
-
-  return {
-    id: dbItem.wordId,
-    kanji: dbItem.question,
-    reading: dbItem.answer,
-    subject: dbItem.subject,
-  };
-};
-
 export const createGetKanji = (repositories: Repositories): KanjiService['getKanji'] => {
-  return getKanjiImpl.bind(null, repositories);
+  return async (id: string): Promise<Kanji | null> => {
+    const dbItem = await repositories.kanji.get(id);
+    if (!dbItem) return null;
+
+    return {
+      id: dbItem.wordId,
+      kanji: dbItem.question,
+      reading: dbItem.answer,
+      subject: dbItem.subject,
+    };
+  };
 };

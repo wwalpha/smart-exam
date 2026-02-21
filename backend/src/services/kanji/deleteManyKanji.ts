@@ -66,31 +66,28 @@ const syncExamByDeletedTargets = async (
   }
 };
 
-// 内部で利用する処理を定義する
-const deleteManyKanjiImpl = async (repositories: Repositories, ids: string[]): Promise<void> => {
-  const uniqueIds = Array.from(new Set(ids.map((x) => x.trim()).filter((x) => x.length > 0)));
-  const limit = pLimit(MAX_CONCURRENCY);
-
-  const deletedIds = (
-    await Promise.all(uniqueIds.map((id) => limit(() => deleteWordAndCandidates(repositories, id))))
-  ).filter((id): id is string => Boolean(id));
-
-  if (deletedIds.length === 0) return;
-
-  const deletedIdSet = new Set(deletedIds);
-
-  const examIdsByTarget = await Promise.all(
-    deletedIds.map((targetId) => limit(() => repositories.examDetails.listExamIdsByTargetId(targetId))),
-  );
-  const affectedExamIds = Array.from(new Set(examIdsByTarget.flat()));
-
-  await Promise.all(
-    affectedExamIds.map((examId) => limit(() => syncExamByDeletedTargets(repositories, examId, deletedIdSet))),
-  );
-};
-
 // 公開する処理を定義する
 export const createDeleteManyKanji = (repositories: Repositories): KanjiService['deleteManyKanji'] => {
   // 処理結果を呼び出し元へ返す
-  return deleteManyKanjiImpl.bind(null, repositories);
+  return async (ids: string[]): Promise<void> => {
+    const uniqueIds = Array.from(new Set(ids.map((x) => x.trim()).filter((x) => x.length > 0)));
+    const limit = pLimit(MAX_CONCURRENCY);
+
+    const deletedIds = (
+      await Promise.all(uniqueIds.map((id) => limit(() => deleteWordAndCandidates(repositories, id))))
+    ).filter((id): id is string => Boolean(id));
+
+    if (deletedIds.length === 0) return;
+
+    const deletedIdSet = new Set(deletedIds);
+
+    const examIdsByTarget = await Promise.all(
+      deletedIds.map((targetId) => limit(() => repositories.examDetails.listExamIdsByTargetId(targetId))),
+    );
+    const affectedExamIds = Array.from(new Set(examIdsByTarget.flat()));
+
+    await Promise.all(
+      affectedExamIds.map((examId) => limit(() => syncExamByDeletedTargets(repositories, examId, deletedIdSet))),
+    );
+  };
 };

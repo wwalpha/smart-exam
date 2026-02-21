@@ -352,52 +352,49 @@ const persistImportedRows = async (params: {
   await params.repositories.examCandidates.bulkCreateCandidates(params.candidatesToCreate);
 };
 
-const importKanjiImpl = async (
-  repositories: Repositories,
-  data: Parameters<KanjiService['importKanji']>[0],
-): Promise<ImportKanjiResponse> => {
-  const subject = data.subject;
-  const lines = normalizeImportLines(data.fileContent);
-  const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
-
-  // 既存データと同一キーの重複登録を避けるため、question+answer のキー集合を先に作成する。
-  const existing = (await repositories.kanji.listKanji(subject)).filter((x) => Boolean(x.underlineSpec));
-  const existingKey = new Set(
-    existing.map((x) => `${String(x.question ?? '').trim()}|${String(x.answer ?? '').trim()}`).filter((x) => x !== '|'),
-  );
-  const parsedResult = parseValidRows({ lines, existingKey, formatErrorReason });
-
-  const buildResult = await buildItemsByBatch({
-    repositories,
-    rows: parsedResult.rows,
-    subject,
-  });
-
-  await persistImportedRows({
-    repositories,
-    kanjiItems: buildResult.kanjiItems,
-    historiesToCreate: buildResult.historiesToCreate,
-    candidateTargetsToDelete: buildResult.candidateTargetsToDelete,
-    candidatesToCreate: buildResult.candidatesToCreate,
-  });
-
-  // 複数フェーズの結果を最後に集約して返すことで、失敗行と成功行を同時に可視化する。
-  const errors = [...parsedResult.errors, ...buildResult.errors];
-  const errorCount = parsedResult.errorCount + buildResult.errorCount;
-  const successCount = buildResult.successCount;
-  const duplicateCount = parsedResult.duplicateCount;
-  const questionIds = buildResult.questionIds;
-
-  // 処理結果を呼び出し元へ返す
-  return {
-    successCount,
-    duplicateCount,
-    errorCount,
-    questionIds,
-    errors,
-  };
-};
-
 export const createImportKanji = (repositories: Repositories): KanjiService['importKanji'] => {
-  return importKanjiImpl.bind(null, repositories);
+  return async (data: Parameters<KanjiService['importKanji']>[0]): Promise<ImportKanjiResponse> => {
+    const subject = data.subject;
+    const lines = normalizeImportLines(data.fileContent);
+    const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
+
+    // 既存データと同一キーの重複登録を避けるため、question+answer のキー集合を先に作成する。
+    const existing = (await repositories.kanji.listKanji(subject)).filter((x) => Boolean(x.underlineSpec));
+    const existingKey = new Set(
+      existing
+        .map((x) => `${String(x.question ?? '').trim()}|${String(x.answer ?? '').trim()}`)
+        .filter((x) => x !== '|'),
+    );
+    const parsedResult = parseValidRows({ lines, existingKey, formatErrorReason });
+
+    const buildResult = await buildItemsByBatch({
+      repositories,
+      rows: parsedResult.rows,
+      subject,
+    });
+
+    await persistImportedRows({
+      repositories,
+      kanjiItems: buildResult.kanjiItems,
+      historiesToCreate: buildResult.historiesToCreate,
+      candidateTargetsToDelete: buildResult.candidateTargetsToDelete,
+      candidatesToCreate: buildResult.candidatesToCreate,
+    });
+
+    // 複数フェーズの結果を最後に集約して返すことで、失敗行と成功行を同時に可視化する。
+    const errors = [...parsedResult.errors, ...buildResult.errors];
+    const errorCount = parsedResult.errorCount + buildResult.errorCount;
+    const successCount = buildResult.successCount;
+    const duplicateCount = parsedResult.duplicateCount;
+    const questionIds = buildResult.questionIds;
+
+    // 処理結果を呼び出し元へ返す
+    return {
+      successCount,
+      duplicateCount,
+      errorCount,
+      questionIds,
+      errors,
+    };
+  };
 };

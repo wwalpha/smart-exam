@@ -27,46 +27,42 @@ const regenerateKanjiFields = async (repositories: Repositories, id: string, que
   });
 };
 
-const updateKanjiImpl = async (
-  repositories: Repositories,
-  id: string,
-  data: UpdateKanjiData,
-): Promise<Kanji | null> => {
-  const existing = await repositories.kanji.get(id);
-  if (!existing) return null;
+export const createUpdateKanji = (repositories: Repositories): KanjiService['updateKanji'] => {
+  return async (id: string, data: UpdateKanjiData): Promise<Kanji | null> => {
+    const existing = await repositories.kanji.get(id);
+    if (!existing) return null;
 
-  const nextQuestion = data.kanji !== undefined ? data.kanji : String(existing.question ?? '');
-  const nextAnswer = data.reading !== undefined ? data.reading : String(existing.answer ?? '');
+    const nextQuestion = data.kanji !== undefined ? data.kanji : String(existing.question ?? '');
+    const nextAnswer = data.reading !== undefined ? data.reading : String(existing.answer ?? '');
 
-  const shouldRegenerateKanjiQuestionFields =
-    (data.kanji !== undefined || data.reading !== undefined) &&
-    Boolean(existing.readingHiragana || existing.underlineSpec);
+    const shouldRegenerateKanjiQuestionFields =
+      (data.kanji !== undefined || data.reading !== undefined) &&
+      Boolean(existing.readingHiragana || existing.underlineSpec);
 
-  const kanjiQuestionFields = shouldRegenerateKanjiQuestionFields
-    ? resolveKanjiQuestionFields(nextQuestion, nextAnswer)
-    : null;
-
-  const regenerated =
-    shouldRegenerateKanjiQuestionFields && kanjiQuestionFields
-      ? await regenerateKanjiFields(repositories, id, kanjiQuestionFields.question, kanjiQuestionFields.answer)
+    const kanjiQuestionFields = shouldRegenerateKanjiQuestionFields
+      ? resolveKanjiQuestionFields(nextQuestion, nextAnswer)
       : null;
 
-  const updated = await repositories.kanji.update(id, {
-    ...(data.kanji !== undefined ? { question: data.kanji } : {}),
-    ...(data.reading !== undefined ? { answer: data.reading } : {}),
-    ...(data.subject !== undefined ? { subject: data.subject } : {}),
-    ...(regenerated ? { readingHiragana: regenerated.readingHiragana, underlineSpec: regenerated.underlineSpec } : {}),
-  });
-  if (!updated) return null;
+    const regenerated =
+      shouldRegenerateKanjiQuestionFields && kanjiQuestionFields
+        ? await regenerateKanjiFields(repositories, id, kanjiQuestionFields.question, kanjiQuestionFields.answer)
+        : null;
 
-  return {
-    id: updated.wordId,
-    kanji: updated.question,
-    reading: updated.answer,
-    subject: updated.subject,
+    const updated = await repositories.kanji.update(id, {
+      ...(data.kanji !== undefined ? { question: data.kanji } : {}),
+      ...(data.reading !== undefined ? { answer: data.reading } : {}),
+      ...(data.subject !== undefined ? { subject: data.subject } : {}),
+      ...(regenerated
+        ? { readingHiragana: regenerated.readingHiragana, underlineSpec: regenerated.underlineSpec }
+        : {}),
+    });
+    if (!updated) return null;
+
+    return {
+      id: updated.wordId,
+      kanji: updated.question,
+      reading: updated.answer,
+      subject: updated.subject,
+    };
   };
-};
-
-export const createUpdateKanji = (repositories: Repositories): KanjiService['updateKanji'] => {
-  return updateKanjiImpl.bind(null, repositories);
 };

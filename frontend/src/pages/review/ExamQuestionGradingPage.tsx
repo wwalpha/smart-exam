@@ -96,6 +96,7 @@ export const ExamQuestionGradingPage = () => {
                             <div
                               key={e.field.id}
                               className="flex items-center justify-between gap-3 rounded border px-3 py-2">
+                              <div className="text-sm font-medium">{e.item?.canonicalKey ?? e.item?.displayLabel ?? '-'}</div>
 
                               <div className="flex shrink-0 items-center gap-3">
                                 {e.isCorrect ? (

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
+import { compareQuestionNumber } from '@/utils/questionNumber';
 
 type GradingFormValues = {
   items: {
@@ -23,6 +24,18 @@ export const useReviewQuestionGrading = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [reviewSnapshot, setReviewSnapshot] = useState<typeof currentTest | null>(null);
 
+  const sortMaterialItems = (items: NonNullable<typeof currentTest>['items']) => {
+    return [...items].sort((a, b) => {
+      const aKey = a.canonicalKey?.trim();
+      const bKey = b.canonicalKey?.trim();
+
+      if (aKey && bKey) return compareQuestionNumber(aKey, bKey);
+      if (aKey) return -1;
+      if (bKey) return 1;
+      return a.id.localeCompare(b.id);
+    });
+  };
+
   const form = useForm<GradingFormValues>({ defaultValues: { items: [] } });
   const { control, handleSubmit, reset, setValue, getValues, watch } = form;
 
@@ -34,19 +47,24 @@ export const useReviewQuestionGrading = () => {
 
   useEffect(() => {
     if (!currentTest) return;
-    setReviewSnapshot(currentTest);
+
+    const nextItems = currentTest.mode === 'MATERIAL' ? sortMaterialItems(currentTest.items) : currentTest.items;
+    setReviewSnapshot({
+      ...currentTest,
+      items: nextItems,
+    });
     setHasLoadedOnce(true);
   }, [currentTest]);
 
   useEffect(() => {
-    if (!currentTest) return;
+    if (!reviewSnapshot) return;
     reset({
-      items: currentTest.items.map((item) => ({
+      items: reviewSnapshot.items.map((item) => ({
         itemId: item.itemId ?? item.id,
         isCorrect: item.isCorrect ?? true,
       })),
     });
-  }, [currentTest, reset]);
+  }, [reviewSnapshot, reset]);
 
   const submit = async (data: GradingFormValues) => {
     if (!id) return;

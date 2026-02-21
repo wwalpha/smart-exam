@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
 import { apiRequestBlob } from '@/services/apiClient';
 import * as MATERIAL_API from '@/services/materialApi';
+import { compareQuestionNumber } from '@/utils/questionNumber';
 import { useReviewQuestionDetail } from './useReviewQuestionDetail';
 
 type PdfAvailability = {
@@ -26,10 +27,26 @@ export const useReviewQuestionDetailPage = () => {
   const { review, isLoading, error, basePath, remove, updateExamStatus, ConfirmDialog } = useReviewQuestionDetail();
   const navigate = useNavigate();
 
+  const sortedItems = useMemo(() => {
+    if (!review) return [];
+    if (review.mode !== 'MATERIAL') return review.items;
+
+    // 問題番号ベースの昇順で固定し、画面表示順の揺れを防ぐ
+    return [...review.items].sort((a, b) => {
+      const aKey = a.canonicalKey?.trim();
+      const bKey = b.canonicalKey?.trim();
+
+      if (aKey && bKey) return compareQuestionNumber(aKey, bKey);
+      if (aKey) return -1;
+      if (bKey) return 1;
+      return a.id.localeCompare(b.id);
+    });
+  }, [review]);
+
   const blocks = useMemo(() => {
     if (!review) return [];
 
-    const entries = review.items;
+    const entries = sortedItems;
     const result: Array<{
       key: string;
       grade: string;
@@ -68,7 +85,7 @@ export const useReviewQuestionDetailPage = () => {
     }
 
     return result;
-  }, [review]);
+  }, [review, sortedItems]);
 
   const [pdfAvailability, setPdfAvailability] = useState<Record<string, PdfAvailability>>({});
 
