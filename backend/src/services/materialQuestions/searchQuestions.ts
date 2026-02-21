@@ -2,7 +2,7 @@ import type { QuestionSearchResult } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 
 // 内部で利用する処理を定義する
 const searchQuestionsImpl = async (

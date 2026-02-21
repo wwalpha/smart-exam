@@ -9,6 +9,7 @@ export const deleteQuestion = (
 ): AsyncHandler<DeleteQuestionParams, DeleteQuestionResponse | { error: string }, Record<string, never>, ParsedQs> => {
   return async (req, res) => {
     const { materialId, questionId } = req.params;
+
     const deleted = await services.materialQuestions.deleteQuestion(materialId, questionId);
     if (!deleted) {
       res.status(404).json({ error: 'Not Found' });

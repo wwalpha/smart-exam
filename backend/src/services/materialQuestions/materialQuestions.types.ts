@@ -9,10 +9,13 @@ import type {
 export type MaterialQuestionsService = {
   listQuestions: (materialId: string) => Promise<QuestionListResponse['datas']>;
   createQuestion: (data: CreateQuestionRequest & { materialId: string }) => Promise<Question>;
-  updateQuestion: (materialId: string, questionId: string, updates: Partial<CreateQuestionRequest>) => Promise<Question | null>;
+  updateQuestion: (
+    materialId: string,
+    questionId: string,
+    updates: Partial<CreateQuestionRequest>,
+  ) => Promise<Question | null>;
   deleteQuestion: (materialId: string, questionId: string) => Promise<boolean>;
   searchQuestions: (params: SearchQuestionsRequest) => Promise<QuestionSearchResult[]>;
   setQuestionChoice: (params: { materialId: string; questionId: string; isCorrect: boolean }) => Promise<boolean>;
-  recalculateCandidatesForMaterial: (params: { materialId: string; registeredDate: string }) => Promise<void>;
-  applyQuestionChoicesToCandidatesForMaterial: (params: { materialId: string }) => Promise<void>;
+  applyQuestionChoicesToCandidatesForMaterial: (params: { materialId: string; baseDateYmd: string }) => Promise<void>;
 };

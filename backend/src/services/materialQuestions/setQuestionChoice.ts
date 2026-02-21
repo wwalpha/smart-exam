@@ -1,7 +1,7 @@
 import type { Repositories } from '@/repositories/createRepositories';
 import { ApiError } from '@/lib/apiError';
 
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 
 const setQuestionChoiceImpl = async (
   repositories: Repositories,
@@ -20,11 +20,11 @@ const setQuestionChoiceImpl = async (
     throw new ApiError('material is completed', 409, ['material_already_completed']);
   }
 
-  await repositories.materialQuestions.update(params.questionId, {
+  const next = await repositories.materialQuestions.update(params.questionId, {
     choice: params.isCorrect ? 'CORRECT' : 'INCORRECT',
   });
 
-  return true;
+  return next !== null;
 };
 
 export const createSetQuestionChoice = (repositories: Repositories): MaterialQuestionsService['setQuestionChoice'] => {

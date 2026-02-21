@@ -31,15 +31,11 @@ export const updateMaterial =
       return;
     }
 
-    if (typeof updates.registeredDate === 'string') {
-      await services.materialQuestions.recalculateCandidatesForMaterial({
-        materialId,
-        registeredDate: updates.registeredDate,
-      });
-    }
-
     if (updates.isCompleted === true) {
-      await services.materialQuestions.applyQuestionChoicesToCandidatesForMaterial({ materialId });
+      await services.materialQuestions.applyQuestionChoicesToCandidatesForMaterial({
+        materialId,
+        baseDateYmd: updated.registeredDate,
+      });
     }
 
     res.json(updated);

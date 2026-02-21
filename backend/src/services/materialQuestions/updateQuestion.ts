@@ -3,7 +3,7 @@ import type { Question } from '@smart-exam/api-types';
 import { ApiError } from '@/lib/apiError';
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 import { toSortNumber } from './toSortNumber';
 
 const updateQuestionImpl = async (

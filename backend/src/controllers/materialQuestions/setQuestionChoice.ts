@@ -20,6 +20,7 @@ export const setQuestionChoice = (
   return async (req, res) => {
     const { materialId, questionId } = req.params;
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof SetQuestionChoiceBodySchema>;
+
     const ok = await services.materialQuestions.setQuestionChoice({
       materialId,
       questionId,

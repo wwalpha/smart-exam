@@ -13,6 +13,7 @@ export const createQuestion = (
   return async (req, res) => {
     const { materialId } = req.params;
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateQuestionBodySchema>;
+
     const item = await services.materialQuestions.createQuestion({
       ...body,
       materialId,

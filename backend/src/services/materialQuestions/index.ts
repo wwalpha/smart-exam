@@ -4,13 +4,12 @@ import { createApplyQuestionChoicesToCandidatesForMaterial } from './applyQuesti
 import { createCreateQuestion } from './createQuestion';
 import { createDeleteQuestion } from './deleteQuestion';
 import { createListQuestions } from './listQuestions';
-import { createRecalculateCandidatesForMaterial } from './recalculateCandidatesForMaterial';
 import { createSearchQuestions } from './searchQuestions';
 import { createSetQuestionChoice } from './setQuestionChoice';
 import { createUpdateQuestion } from './updateQuestion';
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 
-export type { MaterialQuestionsService } from './materialQuestionsService.types';
+export type { MaterialQuestionsService } from './materialQuestions.types';
 
 export const createMaterialQuestionsService = (repositories: Repositories): MaterialQuestionsService => {
   const listQuestions = createListQuestions(repositories);
@@ -19,7 +18,6 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
   const deleteQuestion = createDeleteQuestion(repositories);
   const searchQuestions = createSearchQuestions(repositories);
   const setQuestionChoice = createSetQuestionChoice(repositories);
-  const recalculateCandidatesForMaterial = createRecalculateCandidatesForMaterial(repositories);
   const applyQuestionChoicesToCandidatesForMaterial = createApplyQuestionChoicesToCandidatesForMaterial(repositories);
 
   return {
@@ -29,7 +27,6 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
     deleteQuestion,
     searchQuestions,
     setQuestionChoice,
-    recalculateCandidatesForMaterial,
     applyQuestionChoicesToCandidatesForMaterial,
   };
 };

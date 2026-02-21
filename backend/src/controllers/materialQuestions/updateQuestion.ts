@@ -13,6 +13,7 @@ export const updateQuestion = (
   return async (req, res) => {
     const { materialId, questionId } = req.params;
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof UpdateQuestionBodySchema>;
+
     const item = await services.materialQuestions.updateQuestion(materialId, questionId, body);
     if (!item) {
       res.status(404).json({ error: 'Not Found' });

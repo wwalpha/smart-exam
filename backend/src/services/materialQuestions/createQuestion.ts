@@ -5,7 +5,7 @@ import { ApiError } from '@/lib/apiError';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { MaterialQuestionsTable } from '@/types/db';
 
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 import { toSortNumber } from './toSortNumber';
 
 // 内部で利用する処理を定義する
@@ -28,7 +28,7 @@ const createQuestionImpl = async (
   const dbItem: MaterialQuestionsTable = {
     questionId: id,
     materialId: data.materialId,
-    subjectId: data.subject,
+    subjectId: material.subjectId,
     number: toSortNumber(data.canonicalKey),
     canonicalKey: data.canonicalKey,
     choice: undefined,
@@ -41,7 +41,10 @@ const createQuestionImpl = async (
 
   const item: Question = {
     id,
-    ...data,
+    canonicalKey: data.canonicalKey,
+    subject: material.subjectId,
+    materialId: data.materialId,
+    tags: data.tags,
     choice: undefined,
   };
 

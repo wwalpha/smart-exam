@@ -1,7 +1,7 @@
 import type { Repositories } from '@/repositories/createRepositories';
 import { ApiError } from '@/lib/apiError';
 
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 
 const deleteQuestionImpl = async (
   repositories: Repositories,

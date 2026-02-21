@@ -2,7 +2,7 @@ import type { Question } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 
 const listQuestionsImpl = async (repositories: Repositories, materialId: string): Promise<Question[]> => {
   const rows = await repositories.materialQuestions.listByMaterialId(materialId);

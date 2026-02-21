@@ -2,7 +2,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { MaterialQuestionsService } from './materialQuestionsService.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 
 const applyQuestionChoicesToCandidatesForMaterialImpl = async (
   repositories: Repositories,
@@ -11,8 +11,7 @@ const applyQuestionChoicesToCandidatesForMaterialImpl = async (
   const material = await repositories.materials.get(params.materialId);
   if (!material) return;
 
-  const preferred = material.registeredDate ?? material.materialDate ?? '';
-  const baseDateYmd = DateUtils.isValidYmd(preferred) ? preferred : DateUtils.todayYmd();
+  const baseDateYmd = DateUtils.isValidYmd(params.baseDateYmd) ? params.baseDateYmd : DateUtils.todayYmd();
   const questions = await repositories.materialQuestions.listByMaterialId(params.materialId);
 
   for (const question of questions) {
