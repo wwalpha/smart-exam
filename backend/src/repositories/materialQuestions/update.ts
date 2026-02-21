@@ -1,15 +1,15 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import type { MaterialDetailsTable } from '@/types/db';
+import type { MaterialQuestionsTable } from '@/types/db';
 
 import { get } from './get';
 
-const TABLE_NAME = ENV.TABLE_MATERIAL_DETAILS;
+const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
 
 export const update = async (
   questionId: string,
-  updates: Partial<MaterialDetailsTable>,
-): Promise<MaterialDetailsTable | null> => {
+  updates: Partial<MaterialQuestionsTable>,
+): Promise<MaterialQuestionsTable | null> => {
   const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
   if (entries.length === 0) {
     return get(questionId);
@@ -38,5 +38,5 @@ export const update = async (
     ReturnValues: 'ALL_NEW',
   });
 
-  return (result.Attributes as MaterialDetailsTable) ?? null;
+  return (result.Attributes as MaterialQuestionsTable) ?? null;
 };

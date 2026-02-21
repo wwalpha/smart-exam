@@ -4,7 +4,7 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { MaterialTable } from '@/types/db';
 
-import type { MaterialsService } from './createMaterialsService.types';
+import type { MaterialsService } from './materials.types';
 
 // 内部で利用する処理を定義する
 const createMaterialImpl = async (

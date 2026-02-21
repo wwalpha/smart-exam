@@ -1,7 +1,7 @@
 // Module: createRepositories responsibilities.
 
 import { MaterialsRepository } from '@/repositories/materials';
-import { MaterialDetailsRepository } from '@/repositories/materialDetails';
+import { MaterialQuestionsRepository } from '@/repositories/materialQuestions';
 import { QuestionsRepository } from '@/repositories/questions';
 import { ExamCandidatesRepository } from '@/repositories/examCandidates';
 import { ExamDetailsRepository } from '@/repositories/examDetails';
@@ -14,7 +14,7 @@ import { S3Repository } from '@/repositories/s3';
 /** Type definition for Repositories. */
 export type Repositories = {
   materials: typeof MaterialsRepository;
-  materialDetails: typeof MaterialDetailsRepository;
+  materialQuestions: typeof MaterialQuestionsRepository;
   questions: typeof QuestionsRepository;
   examCandidates: typeof ExamCandidatesRepository;
   examDetails: typeof ExamDetailsRepository;
@@ -32,7 +32,7 @@ export type Repositories = {
 export const createRepositories = (): Repositories => {
   return {
     materials: MaterialsRepository,
-    materialDetails: MaterialDetailsRepository,
+    materialQuestions: MaterialQuestionsRepository,
     questions: QuestionsRepository,
     examCandidates: ExamCandidatesRepository,
     examDetails: ExamDetailsRepository,

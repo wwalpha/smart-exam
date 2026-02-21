@@ -1,6 +1,6 @@
 import type { SearchMaterialsResponse } from '@smart-exam/api-types';
 
-import type { MaterialsService } from './createMaterialsService.types';
+import type { MaterialsService } from './materials.types';
 
 // 内部で利用する処理を定義する
 const searchMaterialsImpl = async (

@@ -7,7 +7,7 @@ import { update } from './update';
 
 export { create, get, remove, scanAll, listByMaterialId, update };
 
-export const MaterialDetailsRepository = {
+export const MaterialQuestionsRepository = {
   create,
   get,
   delete: remove,

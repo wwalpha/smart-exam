@@ -20,13 +20,13 @@ output "http_api_endpoint" {
 output "dynamodb_table_names" {
   description = "All DynamoDB table names created for the app."
   value = {
-    materials        = aws_dynamodb_table.materials.name
-    material_details = aws_dynamodb_table.material_details.name
-    kanji            = aws_dynamodb_table.kanji.name
-    exam_candidates  = aws_dynamodb_table.exam_candidates.name
-    exam_histories   = aws_dynamodb_table.exam_histories.name
-    exams            = aws_dynamodb_table.exam.name
-    exam_details     = aws_dynamodb_table.exam_details.name
+    materials          = aws_dynamodb_table.materials.name
+    material_questions = aws_dynamodb_table.material_questions.name
+    kanji              = aws_dynamodb_table.kanji.name
+    exam_candidates    = aws_dynamodb_table.exam_candidates.name
+    exam_histories     = aws_dynamodb_table.exam_histories.name
+    exams              = aws_dynamodb_table.exam.name
+    exam_details       = aws_dynamodb_table.exam_details.name
   }
 }
 

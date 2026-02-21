@@ -1,7 +1,7 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
 
-const TABLE_NAME = ENV.TABLE_MATERIAL_DETAILS;
+const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
 
 export const remove = async (questionId: string): Promise<void> => {
   await dbHelper.delete({

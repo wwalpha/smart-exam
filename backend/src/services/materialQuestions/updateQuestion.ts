@@ -2,18 +2,18 @@ import type { Question } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { MaterialDetailsService } from './materialDetails.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 import { toSortNumber } from './toSortNumber';
 
-const updateMaterialDetailImpl = async (
+const updateQuestionImpl = async (
   repositories: Repositories,
   questionId: string,
-  updates: Parameters<MaterialDetailsService['updateMaterialDetail']>[1],
+  updates: Parameters<MaterialQuestionsService['updateQuestion']>[1],
 ): Promise<Question | null> => {
-  const existing = await repositories.materialDetails.get(questionId);
+  const existing = await repositories.materialQuestions.get(questionId);
   if (!existing) return null;
 
-  const next = await repositories.materialDetails.update(questionId, {
+  const next = await repositories.materialQuestions.update(questionId, {
     ...(typeof updates.subject === 'string' ? { subjectId: updates.subject } : {}),
     ...(typeof updates.canonicalKey === 'string'
       ? { canonicalKey: updates.canonicalKey, number: toSortNumber(updates.canonicalKey) }
@@ -31,8 +31,8 @@ const updateMaterialDetailImpl = async (
   };
 };
 
-export const createUpdateMaterialDetail = (
+export const createUpdateQuestion = (
   repositories: Repositories,
-): MaterialDetailsService['updateMaterialDetail'] => {
-  return updateMaterialDetailImpl.bind(null, repositories);
+): MaterialQuestionsService['updateQuestion'] => {
+  return updateQuestionImpl.bind(null, repositories);
 };

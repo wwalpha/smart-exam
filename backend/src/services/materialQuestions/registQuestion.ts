@@ -2,18 +2,18 @@ import type { Question } from '@smart-exam/api-types';
 
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { MaterialDetailsTable } from '@/types/db';
+import type { MaterialQuestionsTable } from '@/types/db';
 
-import type { MaterialDetailsService } from './materialDetails.types';
+import type { MaterialQuestionsService } from './materialQuestions.types';
 import { toSortNumber } from './toSortNumber';
 
-const registMaterialDetailImpl = async (
+const registQuestionImpl = async (
   repositories: Repositories,
-  data: Parameters<MaterialDetailsService['registMaterialDetail']>[0],
+  data: Parameters<MaterialQuestionsService['registQuestion']>[0],
 ): Promise<Question> => {
   const id = createUuid();
 
-  const dbItem: MaterialDetailsTable = {
+  const dbItem: MaterialQuestionsTable = {
     questionId: id,
     materialId: data.materialId,
     subjectId: data.subject,
@@ -21,7 +21,7 @@ const registMaterialDetailImpl = async (
     canonicalKey: data.canonicalKey,
   };
 
-  await repositories.materialDetails.create(dbItem);
+  await repositories.materialQuestions.create(dbItem);
   await repositories.materials.incrementQuestionCount(data.materialId, 1);
 
   return {
@@ -33,8 +33,8 @@ const registMaterialDetailImpl = async (
   };
 };
 
-export const createRegistMaterialDetail = (
+export const createRegistQuestion = (
   repositories: Repositories,
-): MaterialDetailsService['registMaterialDetail'] => {
-  return registMaterialDetailImpl.bind(null, repositories);
+): MaterialQuestionsService['registQuestion'] => {
+  return registQuestionImpl.bind(null, repositories);
 };

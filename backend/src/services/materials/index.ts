@@ -8,9 +8,9 @@ import { createListMaterialFiles } from './listMaterialFiles';
 import { createListMaterials } from './listMaterials';
 import { createSearchMaterials } from './searchMaterials';
 import { createUpdateMaterial } from './updateMaterial';
-import type { MaterialsService } from './createMaterialsService.types';
+import type { MaterialsService } from './materials.types';
 
-export type { MaterialsService } from './createMaterialsService.types';
+export type { MaterialsService } from './materials.types';
 
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {
   const listMaterials = createListMaterials(repositories);

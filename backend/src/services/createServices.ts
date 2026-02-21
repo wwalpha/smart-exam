@@ -2,7 +2,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 import { bedrockService } from '@/services/bedrock';
 import { dashboardService } from '@/services/dashboard';
 import { kanjiService } from '@/services/kanji';
-import { materialDetailsService } from '@/services/materialDetails';
+import { materialQuestionsService } from '@/services/materialQuestions';
 import { materialsService } from '@/services/materials';
 import { questionsService } from '@/services/questions';
 import { examAttemptsService } from '@/services/examAttempts';
@@ -19,7 +19,7 @@ export const createServices = (repositories: Repositories): Services => {
     bedrock: bedrockService(repositories),
     dashboard: dashboardService(),
     kanji: kanjiService(repositories),
-    materialDetails: materialDetailsService(repositories),
+    materialQuestions: materialQuestionsService(repositories),
     materials: materialsService(repositories),
     questions: questionsService(repositories),
     examAttempts: examAttemptsService(repositories),

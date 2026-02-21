@@ -33,7 +33,7 @@ export interface MaterialTable {
 /**
  * 教材明細テーブル
  */
-export interface MaterialDetailsTable {
+export interface MaterialQuestionsTable {
   /** 問題ID (PK) */
   questionId: string;
   /** 教材ID (GSI1 PK) */

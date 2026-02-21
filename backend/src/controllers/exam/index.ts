@@ -10,7 +10,7 @@ export { SubmitExamResultsParamsSchema, SubmitExamResultsBodySchema } from './su
 export { UpdateExamStatusParamsSchema, UpdateExamStatusBodySchema } from './updateExamStatus.schema';
 
 // コントローラ本体の再エクスポート
-export { createExamController } from './createExamController';
+export { createExamController } from './createExam';
 export { deleteExamController } from './deleteExamController';
 export { getExamController } from './getExamController';
 export { getExamPdfController } from './getExamPdfController';

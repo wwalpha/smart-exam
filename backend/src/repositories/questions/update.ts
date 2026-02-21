@@ -1,15 +1,15 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import { MaterialDetailsTable } from '@/types/db';
+import { MaterialQuestionsTable } from '@/types/db';
 
 // 問題テーブル名を環境変数から取得する
-const TABLE_NAME = ENV.TABLE_MATERIAL_DETAILS;
+const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
 
 // questionId をキーに問題レコードを部分更新する
 export const update = async (
   questionId: string,
-  updates: Partial<MaterialDetailsTable>,
-): Promise<MaterialDetailsTable | null> => {
+  updates: Partial<MaterialQuestionsTable>,
+): Promise<MaterialQuestionsTable | null> => {
   // 更新式で使う属性名プレースホルダを保持する
   const expAttrNames: Record<string, string> = {};
   // 更新式で使う属性値プレースホルダを保持する
@@ -51,5 +51,5 @@ export const update = async (
   });
 
   // 更新後レコードを返し、取得できなければ null を返す
-  return (result.Attributes as MaterialDetailsTable) || null;
+  return (result.Attributes as MaterialQuestionsTable) || null;
 };

@@ -1,14 +1,14 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import { MaterialDetailsTable } from '@/types/db';
+import { MaterialQuestionsTable } from '@/types/db';
 
 // 問題テーブル名を環境変数から取得する
-const TABLE_NAME = ENV.TABLE_MATERIAL_DETAILS;
+const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
 
 // 問題テーブルの全レコードを取得する
-export const scanAll = async (): Promise<MaterialDetailsTable[]> => {
+export const scanAll = async (): Promise<MaterialQuestionsTable[]> => {
   // テーブル全体をスキャンする
-  const result = await dbHelper.scan<MaterialDetailsTable>({
+  const result = await dbHelper.scan<MaterialQuestionsTable>({
     // スキャン対象テーブル
     TableName: TABLE_NAME,
   });
