@@ -63,7 +63,7 @@ resource "aws_dynamodb_table" "material_questions" {
 # DynamoDB table for word master.
 # ----------------------------------------------------------------------------------------------
 resource "aws_dynamodb_table" "word_master" {
-  name         = "${var.project_name}_word_master"
+  name         = "${var.project_name}_kanji"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "wordId"
 

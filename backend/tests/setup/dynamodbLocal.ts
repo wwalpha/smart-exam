@@ -56,7 +56,7 @@ const createTables = async (client: DynamoDBClient) => {
 
   await create(
     new CreateTableCommand({
-      TableName: 'word_master',
+      TableName: 'kanji',
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [{ AttributeName: 'wordId', AttributeType: 'S' }],
       KeySchema: [{ AttributeName: 'wordId', KeyType: 'HASH' }],

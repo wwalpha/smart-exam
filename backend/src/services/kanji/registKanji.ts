@@ -5,7 +5,7 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { WordMasterTable } from '@/types/db';
 
-import { computeKanjiQuestionFields } from './computeKanjiQuestionFields';
+import { computeKanjiQuestionFields } from './kanji.lib';
 import type { KanjiService } from './index';
 
 const resolveKanjiQuestionFields = async (params: {

@@ -1,10 +1,9 @@
 import { createUuid } from '@/lib/uuid';
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
+import { DateUtils } from '@/lib/dateUtils';
 import type { ReviewMode, SubjectId } from '@smart-exam/api-types';
 import type { ExamCandidateTable } from '@/types/db';
-
-import { nowIso } from './nowIso';
 
 const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 
@@ -18,7 +17,7 @@ export const createCandidate = async (params: {
   createdAtIso?: string;
 }): Promise<ExamCandidateTable> => {
   const id = createUuid();
-  const createdAt = params.createdAtIso ?? nowIso();
+  const createdAt = params.createdAtIso ?? DateUtils.now();
   const candidateKey = `${params.nextTime}#${id}`;
 
   const item: ExamCandidateTable = {

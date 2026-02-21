@@ -7,7 +7,7 @@ import { createUuid } from '@/lib/uuid';
 import type { ExamCandidateTable, WordMasterTable } from '@/types/db';
 import type { ExamTable } from '@/types/db';
 
-import { computeKanjiQuestionFields } from '@/services/kanji/computeKanjiQuestionFields';
+import { computeKanjiQuestionFields } from '@/services/kanji/kanji.lib';
 
 import type { CandidateListParams, CreateExamDeps, ReviewCandidate } from './createExam.types';
 import { ExamPdfService } from './examPdfService';

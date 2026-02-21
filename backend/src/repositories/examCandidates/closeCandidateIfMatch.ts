@@ -1,12 +1,11 @@
 import type { SubjectId } from '@smart-exam/api-types';
 
 import { dbHelper } from '@/lib/aws';
+import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import type { ExamCandidateTableRaw } from '@/repositories/examCandidates/normalizeCandidate';
 import { normalizeCandidate } from '@/repositories/examCandidates/normalizeCandidate';
 import type { ExamHistoryTable } from '@/types/db';
-
-import { nowIso } from './nowIso';
 
 const CANDIDATES_TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 const HISTORIES_TABLE_NAME = ENV.TABLE_EXAM_HISTORIES;
@@ -32,7 +31,7 @@ export const closeCandidateIfMatch = async (params: {
     throw error;
   }
 
-  const closedAt = nowIso();
+  const closedAt = DateUtils.now();
   const historyItem: ExamHistoryTable = {
     subject: candidate.subject,
     candidateKey: candidate.candidateKey,

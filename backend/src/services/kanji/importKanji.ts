@@ -6,7 +6,7 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable, ExamHistoryTable, WordMasterTable } from '@/types/db';
 
-import { computeKanjiQuestionFields } from './computeKanjiQuestionFields';
+import { computeKanjiQuestionFields } from './kanji.lib';
 import type { KanjiService } from './index';
 import type { BuildCandidateRowParams, BuildCandidatesFromHistoriesParams } from './importKanji.types';
 import { parsePipeQuestionLine } from './importUtils';
