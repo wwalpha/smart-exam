@@ -6,7 +6,7 @@ export { ExamCandidatesRepository } from './examCandidates';
 export { ExamDetailsRepository } from './examDetails';
 export { ExamHistoriesRepository } from './examHistories';
 export { ExamsRepository } from './exams';
-export { WordMasterRepository } from './kanji';
+export { KanjiRepository } from './kanji';
 export { S3Repository } from './s3';
 
 export { analyzeExamPaper } from './BedrockRepository';

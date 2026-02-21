@@ -8,7 +8,7 @@ import type { ExamDetail } from '@smart-exam/api-types';
 
 describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)', () => {
   it('imports verified kanji question and generates worksheet PDF', async () => {
-    type WordMasterItem = {
+    type KanjiItem = {
       wordId: string;
       subject: string;
       question: string;
@@ -17,31 +17,31 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
       underlineSpec?: { type: 'promptSpan'; start: number; length: number };
     };
 
-    const wordMasters = new Map<string, WordMasterItem>();
+    const kanjis = new Map<string, KanjiItem>();
     const candidateParams: Array<{ subject: string; questionId: string; status: string }> = [];
 
     const repositories = {
-      wordMaster: {
+      kanji: {
         listKanji: vi.fn().mockImplementation(async (subject?: string) => {
-          const items = Array.from(wordMasters.values());
+          const items = Array.from(kanjis.values());
           return subject ? items.filter((x) => x.subject === subject) : items;
         }),
-        bulkCreate: vi.fn().mockImplementation(async (items: WordMasterItem[]) => {
+        bulkCreate: vi.fn().mockImplementation(async (items: KanjiItem[]) => {
           for (const item of items) {
-            wordMasters.set(item.wordId, item);
+            kanjis.set(item.wordId, item);
           }
         }),
-        create: vi.fn().mockImplementation(async (item: WordMasterItem) => {
-          wordMasters.set(item.wordId, item);
+        create: vi.fn().mockImplementation(async (item: KanjiItem) => {
+          kanjis.set(item.wordId, item);
         }),
         get: vi.fn().mockImplementation(async (id: string) => {
-          return wordMasters.get(id) ?? null;
+          return kanjis.get(id) ?? null;
         }),
-        updateKanjiQuestionFields: vi.fn().mockImplementation(async (id: string, updates: Partial<WordMasterItem>) => {
-          const existing = wordMasters.get(id);
+        updateKanjiQuestionFields: vi.fn().mockImplementation(async (id: string, updates: Partial<KanjiItem>) => {
+          const existing = kanjis.get(id);
           if (!existing) return null;
           const next = { ...existing, ...updates };
-          wordMasters.set(id, next);
+          kanjis.set(id, next);
           return next;
         }),
       },
@@ -107,7 +107,7 @@ describe('Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish)'
     expect(id).toBeTruthy();
 
     // import時点で印刷に必要なフィールドが保存される
-    const w = wordMasters.get(String(id));
+    const w = kanjis.get(String(id));
     expect(w?.readingHiragana).toBe('けいせい');
     expect(w?.underlineSpec).toEqual({ type: 'promptSpan', start: 2, length: 4 });
 

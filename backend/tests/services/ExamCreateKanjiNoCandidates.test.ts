@@ -12,7 +12,7 @@ describe('createExam (KANJI) with no candidates', () => {
         listCandidates: vi.fn().mockResolvedValue([]),
         lockCandidateIfUnlocked: vi.fn().mockResolvedValue(undefined),
       },
-      wordMaster: {
+      kanji: {
         get: vi.fn(),
       },
       bedrock: {

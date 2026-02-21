@@ -49,7 +49,7 @@ export interface MaterialQuestionTable {
 /**
  * 単語テーブル
  */
-export interface WordMasterTable {
+export interface KanjiTable {
   /** 単語ID (PK) */
   wordId: string;
   /** 問題文（漢字問題の場合は本文） */

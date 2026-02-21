@@ -8,7 +8,7 @@ import { updateKanjiQuestionFields } from './updateKanjiQuestionFields';
 
 export { bulkCreate, create, remove, get, listKanji, update, updateKanjiQuestionFields };
 
-export const WordMasterRepository = {
+export const KanjiRepository = {
   bulkCreate,
   create,
   get,

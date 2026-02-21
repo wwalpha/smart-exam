@@ -1,10 +1,10 @@
-import { WordMasterTable } from '@/types/db';
+import { KanjiTable } from '@/types/db';
 
 import { update } from './update';
 
 export const updateKanjiQuestionFields = async (
   wordId: string,
-  updates: Pick<Partial<WordMasterTable>, 'readingHiragana' | 'underlineSpec'>,
-): Promise<WordMasterTable | null> => {
+  updates: Pick<Partial<KanjiTable>, 'readingHiragana' | 'underlineSpec'>,
+): Promise<KanjiTable | null> => {
   return update(wordId, updates);
 };

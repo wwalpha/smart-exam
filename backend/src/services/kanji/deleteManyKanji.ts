@@ -7,9 +7,9 @@ import type { KanjiService } from './kanji.types';
 const MAX_CONCURRENCY = 50;
 
 const deleteWordAndCandidates = async (repositories: Repositories, id: string): Promise<string | null> => {
-  let existing: Awaited<ReturnType<typeof repositories.wordMaster.get>>;
+  let existing: Awaited<ReturnType<typeof repositories.kanji.get>>;
   try {
-    existing = await repositories.wordMaster.get(id);
+    existing = await repositories.kanji.get(id);
   } catch (error) {
     logger.error(`[kanji.deleteManyKanji] failed to load word id=${id}`, error);
     return null;
@@ -27,7 +27,7 @@ const deleteWordAndCandidates = async (repositories: Repositories, id: string): 
   }
 
   try {
-    await repositories.wordMaster.delete(id);
+    await repositories.kanji.delete(id);
     return id;
   } catch (error) {
     logger.error(`[kanji.deleteManyKanji] failed to delete word id=${id}`, error);

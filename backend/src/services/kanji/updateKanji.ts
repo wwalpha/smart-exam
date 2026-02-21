@@ -32,7 +32,7 @@ const updateKanjiImpl = async (
   id: string,
   data: UpdateKanjiData,
 ): Promise<Kanji | null> => {
-  const existing = await repositories.wordMaster.get(id);
+  const existing = await repositories.kanji.get(id);
   if (!existing) return null;
 
   const nextQuestion = data.kanji !== undefined ? data.kanji : String(existing.question ?? '');
@@ -51,7 +51,7 @@ const updateKanjiImpl = async (
       ? await regenerateKanjiFields(repositories, id, kanjiQuestionFields.question, kanjiQuestionFields.answer)
       : null;
 
-  const updated = await repositories.wordMaster.update(id, {
+  const updated = await repositories.kanji.update(id, {
     ...(data.kanji !== undefined ? { question: data.kanji } : {}),
     ...(data.reading !== undefined ? { answer: data.reading } : {}),
     ...(data.subject !== undefined ? { subject: data.subject } : {}),

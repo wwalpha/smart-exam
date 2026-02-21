@@ -4,7 +4,7 @@ import { ApiError } from '@/lib/apiError';
 import { DateUtils } from '@/lib/dateUtils';
 import { ENV } from '@/lib/env';
 import { createUuid } from '@/lib/uuid';
-import type { ExamCandidateTable, WordMasterTable } from '@/types/db';
+import type { ExamCandidateTable, KanjiTable } from '@/types/db';
 import type { ExamTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from '@/services/kanji/kanji.lib';
@@ -50,7 +50,7 @@ const lockCandidate = async (
 };
 
 // 内部で利用する処理を定義する
-const isPrintableKanjiWorksheetWord = (word: WordMasterTable): boolean => {
+const isPrintableKanjiWorksheetWord = (word: KanjiTable): boolean => {
   // 処理結果を呼び出し元へ返す
   return Boolean(
     String(word.question ?? '').trim() &&
@@ -67,7 +67,7 @@ const isPrintableKanjiWorksheetWord = (word: WordMasterTable): boolean => {
 };
 
 // 内部で利用する処理を定義する
-const printableWordIds = (byId: Map<string, WordMasterTable>): Set<string> => {
+const printableWordIds = (byId: Map<string, KanjiTable>): Set<string> => {
   // 処理結果を呼び出し元へ返す
   return new Set(
     Array.from(byId.values())
@@ -106,10 +106,10 @@ export const buildKanjiCandidates = async (
   // 内部で利用する処理を定義する
   const ids = Array.from(new Set(candidates.map((candidate) => candidate.targetId)));
   // 内部で利用する処理を定義する
-  const words = await Promise.all(ids.map((id) => deps.repositories.wordMaster.get(id)));
+  const words = await Promise.all(ids.map((id) => deps.repositories.kanji.get(id)));
   // 内部で利用する処理を定義する
   const byId = new Map(
-    words.filter((word): word is WordMasterTable => word !== null).map((word) => [word.wordId, word] as const),
+    words.filter((word): word is KanjiTable => word !== null).map((word) => [word.wordId, word] as const),
   );
 
   // 処理で使う値を準備する
@@ -161,7 +161,7 @@ export const buildKanjiCandidates = async (
               });
 
               // 非同期処理の完了を待つ
-              await deps.repositories.wordMaster.updateKanjiQuestionFields(word.wordId, {
+              await deps.repositories.kanji.updateKanjiQuestionFields(word.wordId, {
                 readingHiragana: computed.readingHiragana,
                 underlineSpec: computed.underlineSpec,
               });

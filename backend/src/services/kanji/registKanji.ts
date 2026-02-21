@@ -3,7 +3,7 @@ import type { Kanji } from '@smart-exam/api-types';
 import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { WordMasterTable } from '@/types/db';
+import type { KanjiTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from './kanji.lib';
 import type { KanjiService } from './kanji.types';
@@ -47,7 +47,7 @@ export const registKanji = async (
     answer: data.reading,
   });
 
-  const dbItem: WordMasterTable = {
+  const dbItem: KanjiTable = {
     wordId: id,
     question: data.kanji,
     answer: data.reading,
@@ -57,7 +57,7 @@ export const registKanji = async (
   };
 
   // 非同期処理の完了を待つ
-  await repositories.wordMaster.create(dbItem);
+  await repositories.kanji.create(dbItem);
 
   // 非同期処理の完了を待つ
   await repositories.examCandidates.createCandidate({

@@ -7,7 +7,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 describe('KanjiService.importKanji (single pipe format)', () => {
   it('creates kanji questions and persists imported histories', async () => {
     const repositories = {
-      wordMaster: {
+      kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
@@ -39,7 +39,7 @@ describe('KanjiService.importKanji (single pipe format)', () => {
     expect(res.successCount).toBe(1);
     expect(res.errorCount).toBe(0);
 
-    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(repositories.kanji.bulkCreate).toHaveBeenCalledTimes(1);
 
     // 履歴3件（CLOSED） + 最終状態1件（OPEN/EXCLUDED）
     const createdCandidates = (

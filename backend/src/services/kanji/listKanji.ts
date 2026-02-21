@@ -5,7 +5,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { KanjiService } from './kanji.types';
 
 const listKanjiImpl = async (repositories: Repositories): Promise<Kanji[]> => {
-  const items = await repositories.wordMaster.listKanji();
+  const items = await repositories.kanji.listKanji();
   return items.map((dbItem) => ({
     id: dbItem.wordId,
     kanji: dbItem.question,

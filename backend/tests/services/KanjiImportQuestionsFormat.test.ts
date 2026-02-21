@@ -6,7 +6,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 describe('KanjiService.importKanji (QUESTIONS format)', () => {
   it('creates kanji questions with reading/underline from "prompt|answer" lines', async () => {
     const repositories = {
-      wordMaster: {
+      kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
@@ -38,8 +38,8 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.errorCount).toBe(0);
     expect(res.questionIds?.length).toBe(1);
 
-    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledWith([
+    expect(repositories.kanji.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(repositories.kanji.bulkCreate).toHaveBeenCalledWith([
       expect.objectContaining({
         subject: '1',
         question: '彼はけいせいを説明した。',
@@ -52,7 +52,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
 
   it('returns line-numbered errors for invalid lines', async () => {
     const repositories = {
-      wordMaster: {
+      kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
@@ -85,7 +85,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
 
   it('counts duplicates within file and existing', async () => {
     const repositories = {
-      wordMaster: {
+      kanji: {
         listKanji: vi.fn().mockResolvedValue([
           {
             question: '彼はけいせいを説明した。',
@@ -127,12 +127,12 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.successCount).toBe(1);
     expect(res.duplicateCount).toBe(2);
     expect(res.errorCount).toBe(0);
-    expect(repositories.wordMaster.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(repositories.kanji.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
   it('rebuilds candidates from histories and creates a final candidate (OPEN/EXCLUDED)', async () => {
     const repositories = {
-      wordMaster: {
+      kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
@@ -167,7 +167,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(res.successCount).toBe(1);
     expect(res.errorCount).toBe(0);
 
-    const created = (repositories.wordMaster.bulkCreate as unknown as { mock: { calls: unknown[][] } }).mock
+    const created = (repositories.kanji.bulkCreate as unknown as { mock: { calls: unknown[][] } }).mock
       .calls[0][0] as Array<{ wordId: string }>;
     const id = created[0].wordId;
 

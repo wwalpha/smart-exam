@@ -31,7 +31,7 @@ describe('createExam (KANJI) autofill printable fields', () => {
         ]),
         lockCandidateIfUnlocked: vi.fn().mockResolvedValue(undefined),
       },
-      wordMaster: {
+      kanji: {
         get: vi.fn().mockResolvedValue({
           wordId,
           subject: '1',
@@ -95,7 +95,7 @@ describe('createExam (KANJI) autofill printable fields', () => {
     );
 
     expect(repositories.bedrock.generateKanjiQuestionReadingsBulk).toHaveBeenCalledTimes(1);
-    expect(repositories.wordMaster.updateKanjiQuestionFields).toHaveBeenCalledTimes(1);
+    expect(repositories.kanji.updateKanjiQuestionFields).toHaveBeenCalledTimes(1);
     expect(repositories.s3.putObject).toHaveBeenCalledTimes(1);
   });
 });

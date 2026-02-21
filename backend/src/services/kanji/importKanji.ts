@@ -4,7 +4,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ExamCandidateTable, ExamHistoryTable, WordMasterTable } from '@/types/db';
+import type { ExamCandidateTable, ExamHistoryTable, KanjiTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from './kanji.lib';
 import type {
@@ -214,7 +214,7 @@ const buildItemsByBatch = async (params: {
   rows: ParsedImportRow[];
   subject: SubjectId;
 }): Promise<BatchBuildResult> => {
-  const wordMasterItems: WordMasterTable[] = [];
+  const kanjiItems: KanjiTable[] = [];
   const candidatesToCreate: ExamCandidateTable[] = [];
   const historiesToCreate: ExamHistoryTable[] = [];
   const candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }> = [];
@@ -260,7 +260,7 @@ const buildItemsByBatch = async (params: {
           readingHiragana: String(raw.readingHiragana ?? '').trim(),
         });
 
-        wordMasterItems.push({
+        kanjiItems.push({
           wordId: row.wordId,
           subject: params.subject,
           question: row.question,
@@ -305,7 +305,7 @@ const buildItemsByBatch = async (params: {
   }
 
   return {
-    wordMasterItems,
+    kanjiItems,
     candidatesToCreate,
     historiesToCreate,
     candidateTargetsToDelete,
@@ -318,12 +318,12 @@ const buildItemsByBatch = async (params: {
 
 const persistImportedRows = async (params: {
   repositories: Repositories;
-  wordMasterItems: WordMasterTable[];
+  kanjiItems: KanjiTable[];
   historiesToCreate: ExamHistoryTable[];
   candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }>;
   candidatesToCreate: ExamCandidateTable[];
 }): Promise<void> => {
-  await params.repositories.wordMaster.bulkCreate(params.wordMasterItems);
+  await params.repositories.kanji.bulkCreate(params.kanjiItems);
 
   if (params.candidateTargetsToDelete.length > 0) {
     await Promise.all(
@@ -363,7 +363,7 @@ const importKanjiImpl = async (
   const formatErrorReason = '形式が不正です（1行=「本文|答え漢字|YYYY-MM-DD,OK|...」）';
 
   // 既存データと同一キーの重複登録を避けるため、question+answer のキー集合を先に作成する。
-  const existing = (await repositories.wordMaster.listKanji(subject)).filter((x) => Boolean(x.underlineSpec));
+  const existing = (await repositories.kanji.listKanji(subject)).filter((x) => Boolean(x.underlineSpec));
   const existingKey = new Set(
     existing.map((x) => `${String(x.question ?? '').trim()}|${String(x.answer ?? '').trim()}`).filter((x) => x !== '|'),
   );
@@ -377,7 +377,7 @@ const importKanjiImpl = async (
 
   await persistImportedRows({
     repositories,
-    wordMasterItems: buildResult.wordMasterItems,
+    kanjiItems: buildResult.kanjiItems,
     historiesToCreate: buildResult.historiesToCreate,
     candidateTargetsToDelete: buildResult.candidateTargetsToDelete,
     candidatesToCreate: buildResult.candidatesToCreate,

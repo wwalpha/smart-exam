@@ -10,7 +10,7 @@ const searchKanjiImpl = async (
   params: Parameters<KanjiService['searchKanji']>[0],
 ): Promise<SearchKanjiResponse> => {
   // 内部で利用する処理を定義する
-  const items = await repositories.wordMaster.listKanji();
+  const items = await repositories.kanji.listKanji();
 
   // 内部で利用する処理を定義する
   const qLower = (params.q ?? '').trim().toLowerCase();

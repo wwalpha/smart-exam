@@ -9,7 +9,7 @@ describe('KanjiService.deleteKanji', () => {
     const examsPut = vi.fn().mockResolvedValue(undefined);
 
     const repositories = {
-      wordMaster: {
+      kanji: {
         get: vi.fn().mockResolvedValue({ wordId: 'w1', subject: '1' }),
         delete: vi.fn().mockResolvedValue(undefined),
       },
@@ -82,14 +82,14 @@ describe('KanjiService.deleteKanji', () => {
     // pdfS3Key should be removed to force regeneration
     expect('pdfS3Key' in putArg).toBe(false);
 
-    expect(repositories.wordMaster.delete).toHaveBeenCalledWith('w1');
+    expect(repositories.kanji.delete).toHaveBeenCalledWith('w1');
   });
 
   it('returns false when target does not exist', async () => {
     const { createDeleteKanji } = await import('@/services/kanji/deleteKanji');
 
     const repositories = {
-      wordMaster: {
+      kanji: {
         get: vi.fn().mockResolvedValue(null),
       },
       examCandidates: {

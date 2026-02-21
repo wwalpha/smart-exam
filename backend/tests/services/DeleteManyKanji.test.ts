@@ -7,7 +7,7 @@ describe('KanjiService.deleteManyKanji', () => {
     const { createDeleteManyKanji } = await import('@/services/kanji/deleteManyKanji');
 
     const repositories = {
-      wordMaster: {
+      kanji: {
         get: vi
           .fn()
           .mockResolvedValueOnce({ wordId: 'w1', subject: '1' })
@@ -32,7 +32,7 @@ describe('KanjiService.deleteManyKanji', () => {
     const deleteManyKanji = createDeleteManyKanji(repositories);
 
     await expect(deleteManyKanji(['w1', 'w2'])).resolves.toBeUndefined();
-    expect(repositories.wordMaster.delete).toHaveBeenCalledTimes(2);
+    expect(repositories.kanji.delete).toHaveBeenCalledTimes(2);
     expect(repositories.examDetails.listExamIdsByTargetId).toHaveBeenCalledTimes(2);
     expect(repositories.exams.get).toHaveBeenCalledTimes(1);
   });

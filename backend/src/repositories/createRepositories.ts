@@ -6,7 +6,7 @@ import { ExamCandidatesRepository } from '@/repositories/examCandidates';
 import { ExamDetailsRepository } from '@/repositories/examDetails';
 import { ExamHistoriesRepository } from '@/repositories/examHistories';
 import { ExamsRepository } from '@/repositories/exams';
-import { WordMasterRepository } from '@/repositories/kanji';
+import { KanjiRepository } from '@/repositories/kanji';
 import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
 import { S3Repository } from '@/repositories/s3';
 
@@ -18,7 +18,7 @@ export type Repositories = {
   examDetails: typeof ExamDetailsRepository;
   examHistories: typeof ExamHistoriesRepository;
   exams: typeof ExamsRepository;
-  wordMaster: typeof WordMasterRepository;
+  kanji: typeof KanjiRepository;
   s3: typeof S3Repository;
   bedrock: {
     analyzeExamPaper: typeof analyzeExamPaper;
@@ -35,7 +35,7 @@ export const createRepositories = (): Repositories => {
     examDetails: ExamDetailsRepository,
     examHistories: ExamHistoriesRepository,
     exams: ExamsRepository,
-    wordMaster: WordMasterRepository,
+    kanji: KanjiRepository,
     s3: S3Repository,
     bedrock: { analyzeExamPaper, generateKanjiQuestionReadingsBulk },
   };

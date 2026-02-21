@@ -1,11 +1,11 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import { WordMasterTable } from '@/types/db';
+import { KanjiTable } from '@/types/db';
 
-const TABLE_NAME = ENV.TABLE_WORD_MASTER;
+const TABLE_NAME = ENV.TABLE_KANJI;
 
-export const get = async (wordId: string): Promise<WordMasterTable | null> => {
-  const result = await dbHelper.get<WordMasterTable>({
+export const get = async (wordId: string): Promise<KanjiTable | null> => {
+  const result = await dbHelper.get<KanjiTable>({
     TableName: TABLE_NAME,
     Key: { wordId },
   });

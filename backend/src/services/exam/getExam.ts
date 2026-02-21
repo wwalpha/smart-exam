@@ -21,7 +21,7 @@ const getExamImpl = async (repositories: Repositories, examId: string): Promise<
   // 条件に応じて処理を分岐する
   if (test.mode === 'KANJI') {
     // 非同期で必要な値を取得する
-    const words = await Promise.all(targetIds.map((id) => repositories.wordMaster.get(id)));
+    const words = await Promise.all(targetIds.map((id) => repositories.kanji.get(id)));
     // 処理で使う値を準備する
     const byId = new Map(
       words.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w.wordId, w] as const),

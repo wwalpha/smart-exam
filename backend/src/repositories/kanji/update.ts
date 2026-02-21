@@ -1,12 +1,12 @@
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import { WordMasterTable } from '@/types/db';
+import { KanjiTable } from '@/types/db';
 
 import { get } from './get';
 
-const TABLE_NAME = ENV.TABLE_WORD_MASTER;
+const TABLE_NAME = ENV.TABLE_KANJI;
 
-export const update = async (wordId: string, updates: Partial<WordMasterTable>): Promise<WordMasterTable | null> => {
+export const update = async (wordId: string, updates: Partial<KanjiTable>): Promise<KanjiTable | null> => {
   const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
   if (entries.length === 0) {
     return get(wordId);
@@ -35,5 +35,5 @@ export const update = async (wordId: string, updates: Partial<WordMasterTable>):
     ReturnValues: 'ALL_NEW',
   });
 
-  return (result.Attributes as WordMasterTable) || null;
+  return (result.Attributes as KanjiTable) || null;
 };

@@ -5,7 +5,7 @@ import type { KanjiService } from './kanji.types';
 // 内部で利用する漢字削除処理
 const deleteKanjiImpl = async (repositories: Repositories, id: string): Promise<boolean> => {
   // 削除対象の漢字データを取得する
-  const existing = await repositories.wordMaster.get(id);
+  const existing = await repositories.kanji.get(id);
   // 対象が存在しない場合は削除失敗として false を返す
   if (!existing) return false;
 
@@ -53,7 +53,7 @@ const deleteKanjiImpl = async (repositories: Repositories, id: string): Promise<
   );
 
   // 最後に漢字マスタ本体を削除する
-  await repositories.wordMaster.delete(id);
+  await repositories.kanji.delete(id);
   // 正常に削除できたため true を返す
   return true;
 };

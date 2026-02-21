@@ -29,7 +29,7 @@ describe('createExam (KANJI) fallback open candidates', () => {
         ]),
         lockCandidateIfUnlocked: vi.fn().mockResolvedValue(undefined),
       },
-      wordMaster: {
+      kanji: {
         get: vi.fn().mockResolvedValue({
           wordId,
           subject: '1',

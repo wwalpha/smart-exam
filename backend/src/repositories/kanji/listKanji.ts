@@ -2,13 +2,13 @@ import type { SubjectId } from '@smart-exam/api-types';
 
 import { dbHelper } from '@/lib/aws';
 import { ENV } from '@/lib/env';
-import { WordMasterTable } from '@/types/db';
+import { KanjiTable } from '@/types/db';
 
-const TABLE_NAME = ENV.TABLE_WORD_MASTER;
+const TABLE_NAME = ENV.TABLE_KANJI;
 
-export const listKanji = async (subject?: SubjectId): Promise<WordMasterTable[]> => {
+export const listKanji = async (subject?: SubjectId): Promise<KanjiTable[]> => {
   if (subject) {
-    const result = await dbHelper.query<WordMasterTable>({
+    const result = await dbHelper.query<KanjiTable>({
       TableName: TABLE_NAME,
       IndexName: 'gsi_subject_word_id',
       KeyConditionExpression: '#subject = :subject',
@@ -18,7 +18,7 @@ export const listKanji = async (subject?: SubjectId): Promise<WordMasterTable[]>
     return result.Items || [];
   }
 
-  const result = await dbHelper.scan<WordMasterTable>({
+  const result = await dbHelper.scan<KanjiTable>({
     TableName: TABLE_NAME,
   });
   return result.Items || [];

@@ -1,7 +1,7 @@
 import type { ExamTarget } from '@smart-exam/api-types';
 
 import type { Repositories } from '@/repositories/createRepositories';
-import type { ExamTable, WordMasterTable } from '@/types/db';
+import type { ExamTable, KanjiTable } from '@/types/db';
 
 import type { ExamsService } from './index';
 import { sortTargets, toReviewTargetKey } from './internal';
@@ -60,7 +60,7 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
   // 処理で使う値を準備する
   const materialById = new Map<string, { title?: string; materialDate?: string }>();
   // 処理で使う値を準備する
-  const wordById = new Map<string, WordMasterTable>();
+  const wordById = new Map<string, KanjiTable>();
 
   // 条件に応じて処理を分岐する
   if (params.mode === 'QUESTION') {
@@ -91,12 +91,12 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
     }
   } else {
     // 非同期で必要な値を取得する
-    const wRows = await Promise.all(Array.from(allTargetIds).map((wid) => repositories.wordMaster.get(wid)));
+    const wRows = await Promise.all(Array.from(allTargetIds).map((wid) => repositories.kanji.get(wid)));
     // 対象データを順番に処理する
     for (const w of wRows) {
       // 条件に応じて処理を分岐する
       if (!w) continue;
-      wordById.set(w.wordId, w as WordMasterTable);
+      wordById.set(w.wordId, w as KanjiTable);
     }
   }
 
@@ -116,7 +116,7 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
       // 処理で使う値を準備する
       const w = wordById.get(targetId);
       // 処理で使う値を準備する
-      const reading = (w as unknown as (WordMasterTable & { reading?: string }) | undefined)?.answer;
+      const reading = (w as unknown as (KanjiTable & { reading?: string }) | undefined)?.answer;
 
       // 条件に応じて処理を分岐する
       if (!current) {

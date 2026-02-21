@@ -59,7 +59,7 @@ describe('ExamsService.createExam (KANJI)', () => {
         delete: vi.fn().mockResolvedValue(undefined),
         scanAll: vi.fn().mockResolvedValue([]),
       },
-      wordMaster: {
+      kanji: {
         get: vi.fn().mockImplementation(async (id: string) => {
           if (id === 'w-verified') {
             return {
@@ -115,8 +115,8 @@ describe('ExamsService.createExam (KANJI)', () => {
     expect(res.mode).toBe('KANJI');
     expect(res.count).toBe(1);
 
-    expect(repositories.wordMaster.get).toHaveBeenCalledWith('w-draft');
-    expect(repositories.wordMaster.get).toHaveBeenCalledWith('w-verified');
+    expect(repositories.kanji.get).toHaveBeenCalledWith('w-draft');
+    expect(repositories.kanji.get).toHaveBeenCalledWith('w-verified');
 
     // should lock only the printable candidate
     expect(repositories.examCandidates.lockCandidateIfUnlocked).toHaveBeenCalledTimes(1);

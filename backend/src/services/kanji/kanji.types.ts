@@ -8,7 +8,7 @@ import type {
   SubjectId,
   UpdateKanjiRequest,
 } from '@smart-exam/api-types';
-import type { ExamCandidateTable, ExamHistoryTable, WordMasterTable } from '@/types/db';
+import type { ExamCandidateTable, ExamHistoryTable, KanjiTable } from '@/types/db';
 
 // 漢字サービス全体の公開インターフェース。
 export type KanjiService = {
@@ -111,8 +111,8 @@ export type ParseRowsResult = {
 
 // 取り込みバッチ構築フェーズの結果。
 export type BatchBuildResult = {
-  // word_master(kanji) へ投入する項目群。
-  wordMasterItems: WordMasterTable[];
+  // kanji テーブルへ投入する項目群。
+  kanjiItems: KanjiTable[];
   // exam_candidates へ投入する候補群。
   candidatesToCreate: ExamCandidateTable[];
   // exam_histories へ投入する履歴群。
