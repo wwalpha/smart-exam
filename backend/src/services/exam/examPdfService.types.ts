@@ -1,5 +1,7 @@
 import type { PDFPage } from 'pdf-lib';
 
+// examPdfService.ts の描画ロジックで使う型定義。
+
 // PDF描画時に利用するレイアウト設定
 export type PdfRenderConfig = {
   // A4横幅（pt）

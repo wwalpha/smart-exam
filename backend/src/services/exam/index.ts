@@ -46,54 +46,34 @@ export type ExamsService = {
   }) => Promise<ExamTarget[]>;
 };
 
-// 内部で利用する処理を定義する
+// 作成リクエストの mode に応じて問題系/漢字系の作成処理を切り替える。
 const createExamDispatcher = async (deps: CreateExamDeps, req: CreateExamRequest): Promise<Exam> => {
-  // 条件に応じて処理を分岐する
   if (req.mode === 'KANJI') {
-    // 処理結果を呼び出し元へ返す
     return createKanjiExam(deps, req);
   }
-
-  // 処理結果を呼び出し元へ返す
   return createQuestionExam(deps, req);
 };
 
-// 公開する処理を定義する
+// 依存関係を閉じ込めた createExam ハンドラを生成する。
 export const createCreateExam = (deps: CreateExamDeps): ExamsService['createExam'] => {
-  // 処理結果を呼び出し元へ返す
   return async (req: CreateExamRequest): Promise<Exam> => {
     return createExamDispatcher(deps, req);
   };
 };
 
-// 公開する処理を定義する
+// 各 use-case の関数を束ねて exam サービスを構築する。
 export const createExamsService = (repositories: Repositories): ExamsService => {
-  // 内部で利用する処理を定義する
   const listExams = createListExams(repositories);
   const searchExams = createSearchExams(repositories);
-
-  // 内部で利用する処理を定義する
   const deleteExam = createDeleteExam(repositories);
-  // 内部で利用する処理を定義する
   const getExam = createGetExam(repositories);
-
-  // 内部で利用する処理を定義する
   const createExam = createCreateExam({ repositories, getExam, deleteExam });
-
-  // 内部で利用する処理を定義する
   const listExamTargets = createListExamTargets(repositories);
-  // 内部で利用する処理を定義する
   const updateExamStatus = createUpdateExamStatus(repositories);
   const completeExam = createCompleteExam(repositories);
-  // 内部で利用する処理を定義する
   const submitExamResults = createSubmitExamResults(repositories);
-
-  // 内部で利用する処理を定義する
   const getExamPdfUrl = createGetExamPdfUrl({ repositories, getExam });
-  // 内部で利用する処理を定義する
   const generateExamPdfBuffer = createGenerateExamPdfBuffer({ getExam });
-
-  // 処理結果を呼び出し元へ返す
   return {
     listExams,
     searchExams,
@@ -109,5 +89,5 @@ export const createExamsService = (repositories: Repositories): ExamsService => 
   };
 };
 
-// 公開する処理を定義する
+// 既存呼び出しとの互換のためエイリアスを残す。
 export const examsService = createExamsService;

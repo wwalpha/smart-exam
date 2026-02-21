@@ -5,22 +5,15 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamsService } from './index';
 import { ExamPdfService } from './examPdfService';
 
-// 公開するサービス処理を定義する
+// 試験PDFの配布URLを返す。未生成の場合はその場で生成して保存する。
 export const createGetExamPdfUrl = (deps: {
   repositories: Repositories;
   getExam: ExamsService['getExam'];
 }): ExamsService['getExamPdfUrl'] => {
-  // 処理結果を呼び出し元へ返す
   return async (examId: string, params?: { download?: boolean }): Promise<{ url: string } | null> => {
-    // 非同期で必要な値を取得する
     const testRow = await deps.repositories.exams.get(examId);
-    // 条件に応じて処理を分岐する
     if (!testRow) return null;
-
-    // 処理で使う値を準備する
     const responseContentDisposition = params?.download ? 'attachment' : 'inline';
-
-    // 条件に応じて処理を分岐する
     if (!ENV.FILES_BUCKET_NAME) {
       throw new ApiError(
         'FILES_BUCKET_NAME is not configured',
@@ -30,30 +23,22 @@ export const createGetExamPdfUrl = (deps: {
       );
     }
 
-    // まずテーブルの pdfS3Key を使って presign（KANJI は作成時に生成済み）
+    // KANJI は作成時に PDF を持つ想定なので、保存済みキーから即時に署名URLを返す。
     if (testRow.mode === 'KANJI' && testRow.pdfS3Key) {
-      // 非同期で必要な値を取得する
       const url = await deps.repositories.s3.getPresignedGetUrl({
         bucket: ENV.FILES_BUCKET_NAME,
         key: testRow.pdfS3Key,
         responseContentDisposition,
         expiresInSeconds: 3600,
       });
-      // 処理結果を呼び出し元へ返す
       return { url };
     }
 
-    // QUESTION 等は生成（後方互換: pdfS3Key が無いKANJIもここで生成して復旧）
+    // MATERIAL と後方互換ケースはここで PDF を生成して S3 に永続化する。
     const review = await deps.getExam(examId);
-    // 条件に応じて処理を分岐する
     if (!review) return null;
-
-    // 非同期で必要な値を取得する
     const pdfBuffer = await ExamPdfService.generatePdfBuffer(review, { includeGenerated: false });
-    // 処理で使う値を準備する
     const key = testRow.pdfS3Key ?? `exams/${examId}.pdf`;
-
-    // 非同期処理の完了を待つ
     await deps.repositories.s3.putObject({
       bucket: ENV.FILES_BUCKET_NAME,
       key,
@@ -61,21 +46,16 @@ export const createGetExamPdfUrl = (deps: {
       contentType: 'application/pdf',
     });
 
-    // 条件に応じて処理を分岐する
+    // まだキー未設定のレコードは、次回以降の再生成を避けるため保存しておく。
     if (testRow.pdfS3Key !== key) {
-      // 非同期処理の完了を待つ
       await deps.repositories.exams.updatePdfS3Key(examId, key);
     }
-
-    // 非同期で必要な値を取得する
     const url = await deps.repositories.s3.getPresignedGetUrl({
       bucket: ENV.FILES_BUCKET_NAME,
       key,
       responseContentDisposition,
       expiresInSeconds: 3600,
     });
-
-    // 処理結果を呼び出し元へ返す
     return { url };
   };
 };

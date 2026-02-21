@@ -26,6 +26,7 @@ export const MaterialSetDetailPage = () => {
     setRegisteredDate,
     saveRegisteredDate,
     complete,
+    canComplete,
   } = useMaterialDetail();
   const fileInputRefs = useRef<Partial<Record<PdfFileType, HTMLInputElement | null>>>({});
 
@@ -104,7 +105,7 @@ export const MaterialSetDetailPage = () => {
                   type="button"
                   size="sm"
                   onClick={() => void complete()}
-                  disabled={isBusy || !!material.isCompleted}>
+                  disabled={isBusy || !canComplete}>
                   完了
                 </Button>
               </div>

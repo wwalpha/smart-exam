@@ -34,9 +34,10 @@ const fileTypeLabel = (fileType: string): string => {
 
 export const useMaterialDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { detail, files, status } = useWordTestStore((s) => s.material);
+  const { detail, files, questions, status } = useWordTestStore((s) => s.material);
   const fetchMaterial = useWordTestStore((s) => s.fetchMaterial);
   const fetchMaterialFiles = useWordTestStore((s) => s.fetchMaterialFiles);
+  const fetchQuestions = useWordTestStore((s) => s.fetchQuestions);
   const uploadMaterialPdf = useWordTestStore((s) => s.uploadMaterialPdf);
   const updateMaterial = useWordTestStore((s) => s.updateMaterial);
   const completeMaterial = useWordTestStore((s) => s.completeMaterial);
@@ -48,8 +49,9 @@ export const useMaterialDetail = () => {
     if (id) {
       fetchMaterial(id);
       fetchMaterialFiles(id);
+      fetchQuestions(id);
     }
-  }, [id, fetchMaterial, fetchMaterialFiles]);
+  }, [id, fetchMaterial, fetchMaterialFiles, fetchQuestions]);
 
   useEffect(() => {
     if (!detail) return;
@@ -101,6 +103,8 @@ export const useMaterialDetail = () => {
   const complete = useCallback(async () => {
     if (!id || !detail) return;
     if (detail.isCompleted) return;
+    // 問題が0件の教材は完了できない
+    if (questions.length === 0) return;
     try {
       await completeMaterial(id);
       toast.success('教材を完了にしました');
@@ -108,7 +112,9 @@ export const useMaterialDetail = () => {
     } catch {
       // store側でエラー表示されるため二重表示しない
     }
-  }, [id, detail, completeMaterial, fetchMaterial]);
+  }, [id, detail, questions.length, completeMaterial, fetchMaterial]);
+
+  const canComplete = !!detail && !detail.isCompleted && questions.length > 0;
 
   const previewFile = useCallback(async (fileId: string) => {
     try {
@@ -168,5 +174,6 @@ export const useMaterialDetail = () => {
     setRegisteredDate,
     saveRegisteredDate,
     complete,
+    canComplete,
   };
 };

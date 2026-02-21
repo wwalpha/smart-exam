@@ -1,4 +1,4 @@
-// Module: examPdfService responsibilities.
+// 試験詳細データから配布用 PDF を描画するサービス。
 
 import { PDFDocument, rgb } from 'pdf-lib';
 import type { PDFFont, PDFPage } from 'pdf-lib';
@@ -8,17 +8,13 @@ import type { ExamDetail } from '@smart-exam/api-types';
 import { ApiError } from '@/lib/apiError';
 import type { PageContext, PdfRenderConfig, PromptUnderlineSpec } from './examPdfService.types';
 
-// 内部で利用する補助処理を定義する
+// mm 指定を PDF 座標系(pt)へ変換する。
 const mmToPt = (mm: number): number => (mm * 72) / 25.4;
 
-// 内部で利用する補助処理を定義する
+// A4 縦向けレイアウトの標準設定を返す。
 const buildPdfRenderConfig = (): PdfRenderConfig => {
-  // 処理で使う値を準備する
   const questionFontSize = 14;
-  // 処理で使う値を準備する
   const metaLineFontSize = 10;
-
-  // 処理結果を呼び出し元へ返す
   return {
     a4Width: 595.28,
     a4Height: 841.89,
@@ -39,7 +35,7 @@ const buildPdfRenderConfig = (): PdfRenderConfig => {
   };
 };
 
-// 内部で利用する補助処理を定義する
+// ヘッダーを描画し、新規ページの描画コンテキストを初期化する。
 const createPage = (params: {
   pdfDoc: PDFDocument;
   jpFont: PDFFont;
@@ -51,21 +47,12 @@ const createPage = (params: {
   titleSize?: number;
   metaSize?: number;
 }): PageContext => {
-  // 処理で使う値を準備する
   const pageWidth = params.pageWidth ?? params.config.a4Width;
-  // 処理で使う値を準備する
   const pageHeight = params.pageHeight ?? params.config.a4Height;
-  // 処理で使う値を準備する
   const titleSize = params.titleSize ?? params.config.titleFontSize;
-  // 処理で使う値を準備する
   const metaSize = params.metaSize ?? params.config.metaFontSize;
-
-  // 処理で使う値を準備する
   const page = params.pdfDoc.addPage([pageWidth, pageHeight]);
-  // 処理で使う値を準備する
   const contentWidth = pageWidth - params.config.margin * 2;
-
-  // 処理で使う値を準備する
   const titleY = pageHeight - params.config.margin - titleSize;
   page.drawText(params.title, {
     x: params.config.margin,
@@ -74,8 +61,6 @@ const createPage = (params: {
     font: params.jpFont,
     color: rgb(0, 0, 0),
   });
-
-  // 処理で使う値を準備する
   const metaWidth = params.jpFont.widthOfTextAtSize(params.meta, metaSize);
   page.drawText(params.meta, {
     x: params.config.margin + contentWidth - metaWidth,
@@ -84,91 +69,60 @@ const createPage = (params: {
     font: params.jpFont,
     color: rgb(0, 0, 0),
   });
-
-  // 処理で使う値を準備する
   const cursorY = titleY - params.config.headerGap;
-  // 処理結果を呼び出し元へ返す
   return { page, contentWidth, cursorY };
 };
 
-// 内部で利用する補助処理を定義する
+// 日本語を文字単位で折り返し、指定幅内に収める。
 const wrapTextByChar = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string[] => {
-  // 処理で使う値を準備する
   const normalized = text.replaceAll('\r\n', '\n');
-  // 処理で使う値を準備する
   const paragraphs = normalized.split('\n');
   const lines: string[] = [];
-
-  // 対象データを順番に処理する
   for (const paragraph of paragraphs) {
-    // 条件に応じて処理を分岐する
     if (paragraph.length === 0) {
       lines.push('');
       continue;
     }
-
-    // 後続処理で更新する値を初期化する
     let current = '';
-    // 対象データを順番に処理する
     for (const ch of Array.from(paragraph)) {
-      // 処理で使う値を準備する
       const candidate = current + ch;
-      // 処理で使う値を準備する
       const width = font.widthOfTextAtSize(candidate, fontSize);
-
-      // 条件に応じて処理を分岐する
       if (width <= maxWidth) {
-        // 値を代入する
         current = candidate;
         continue;
       }
-
-      // 条件に応じて処理を分岐する
       if (current.length === 0) {
         lines.push(candidate);
-        // 値を代入する
         current = '';
         continue;
       }
 
       lines.push(current);
-      // 値を代入する
       current = ch;
     }
-
-    // 条件に応じて処理を分岐する
     if (current.length > 0) {
       lines.push(current);
     }
   }
-
-  // 処理結果を呼び出し元へ返す
   return lines;
 };
 
-// 内部で利用する補助処理を定義する
+// 問題文候補から表示優先順に1つ選んで返す。
 const getQuestionText = (item: ExamDetail['items'][number]): string => {
-  // 処理結果を呼び出し元へ返す
   return item.questionText ?? item.displayLabel ?? item.canonicalKey ?? item.kanji ?? item.targetId ?? '';
 };
 
-// 内部で利用する補助処理を定義する
+// MATERIAL 用の教材補足行を構築する。
 const getMaterialLine = (item: ExamDetail['items'][number]): string => {
-  // 処理で使う値を準備する
   const name = item.materialName ?? '';
-  // 処理で使う値を準備する
   const date = item.materialDate ?? '';
-  // 処理で使う値を準備する
   const key = item.canonicalKey ?? '';
-  // 処理で使う値を準備する
   const parts = [name, date ? `(${date})` : '', key].filter((v) => v.length > 0);
-  // 条件に応じて処理を分岐する
   if (parts.length === 0) return '';
-  // 処理結果を呼び出し元へ返す
   return `教材: ${parts.join(' ')}`;
 };
 
-// 内部で利用する補助処理を定義する
+// 下線指定に合わせて設問を3分割で描画し、対象区間だけ下線を引く。
 const drawPromptWithUnderline = (params: {
   page: PDFPage;
   font: PDFFont;
@@ -181,74 +135,45 @@ const drawPromptWithUnderline = (params: {
   minFontSize: number;
   textMaxWidth: number;
 }): void => {
-  // 処理で使う値を準備する
   const start = params.underlineSpec.start;
-  // 処理で使う値を準備する
   const length = params.underlineSpec.length;
-  // 条件に応じて処理を分岐する
   if (start < 0 || length <= 0 || start + length > params.promptText.length) {
     throw new ApiError('underlineSpec out of range', 400, ['invalid_underline_spec']);
   }
-
-  // 処理で使う値を準備する
   const pre = params.promptText.slice(0, start);
-  // 処理で使う値を準備する
   const target = params.promptText.slice(start, start + length);
-  // 処理で使う値を準備する
   const post = params.promptText.slice(start + length);
-
-  // 後続処理で更新する値を初期化する
   let fontSize = params.baseFontSize;
-  // 処理で使う値を準備する
+
+  // 行全体が収まらないときは最小サイズまで縮小して描画する。
   const totalWidth = params.font.widthOfTextAtSize(params.indexText + params.promptText, fontSize);
-  // 条件に応じて処理を分岐する
   if (totalWidth > params.textMaxWidth) {
-    // 処理で使う値を準備する
     const scaled = (fontSize * params.textMaxWidth) / totalWidth;
-    // 値を代入する
     fontSize = Math.max(params.minFontSize, scaled);
   }
-
-  // 処理で使う値を準備する
   const prefixWidth = params.font.widthOfTextAtSize(params.indexText + pre, fontSize);
-  // 処理で使う値を準備する
   const targetWidth = params.font.widthOfTextAtSize(target, fontSize);
-  // 処理で使う値を準備する
   const remainingForPost = params.textMaxWidth - (prefixWidth + targetWidth);
-  // 条件に応じて処理を分岐する
   if (remainingForPost < 0) {
     throw new ApiError('promptText is too long to render', 400, ['prompt_too_long']);
   }
-
-  // 後続処理で更新する値を初期化する
   let postRendered = post;
-  // 後続処理で更新する値を初期化する
   let truncated = false;
-  // 対象データを順番に処理する
+
+  // 後半テキストのみ切り詰めて、下線区間は必ず表示する。
   while (postRendered.length > 0) {
-    // 処理で使う値を準備する
     const width = params.font.widthOfTextAtSize(postRendered, fontSize);
-    // 条件に応じて処理を分岐する
     if (width <= remainingForPost) break;
-    // 値を代入する
     truncated = true;
-    // 値を代入する
     postRendered = postRendered.slice(0, -1);
   }
-
-  // 条件に応じて処理を分岐する
   if (truncated && postRendered.length > 0) {
-    // 対象データを順番に処理する
     while (postRendered.length > 0) {
-      // 処理で使う値を準備する
       const width = params.font.widthOfTextAtSize(postRendered + '…', fontSize);
-      // 条件に応じて処理を分岐する
       if (width <= remainingForPost) {
-        // 値を代入する
         postRendered = postRendered + '…';
         break;
       }
-      // 値を代入する
       postRendered = postRendered.slice(0, -1);
     }
   }
@@ -283,7 +208,7 @@ const drawPromptWithUnderline = (params: {
   });
 };
 
-// 内部で利用する補助処理を定義する
+// 漢字モード専用: A4 横固定・2カラム60問ワークシートを描画する。
 const renderKanjiWorksheetLayout = (params: {
   pdfDoc: PDFDocument;
   jpFont: PDFFont;
@@ -292,27 +217,20 @@ const renderKanjiWorksheetLayout = (params: {
 }): void => {
   // A4横向き
   const pageWidth = 841.89;
-  // 処理で使う値を準備する
   const pageHeight = 595.28;
 
   // 1ページ60問（左右30問ずつ）固定
   const itemsPerPage = 60;
-  // 処理で使う値を準備する
   const rowsPerColumn = 30;
-  // 処理で使う値を準備する
   const columnGap = mmToPt(8);
 
   // 右端の漢字記入枠（固定幅）
   const answerBoxWidth = mmToPt(22);
-  // 処理で使う値を準備する
   const answerBoxGap = mmToPt(2.5);
 
   // 本文用フォントサイズ（行数固定のため小さめ）
   const baseFontSize = 9.5;
-  // 処理で使う値を準備する
   const minFontSize = 8;
-
-  // 処理で使う値を準備する
   const candidates = params.review.items.filter(
     (x) =>
       String(x.questionText ?? '').trim().length > 0 &&
@@ -320,65 +238,35 @@ const renderKanjiWorksheetLayout = (params: {
       String(x.readingHiragana ?? '').trim().length > 0 &&
       Boolean(x.underlineSpec),
   );
-  // 処理で使う値を準備する
   const items = candidates.slice(0, itemsPerPage);
-
-  // 条件に応じて処理を分岐する
   if (items.length === 0) {
     throw new ApiError('No printable kanji items (missing required fields)', 400, ['no_printable_items']);
   }
-
-  // 処理で使う値を準備する
   const page = params.pdfDoc.addPage([pageWidth, pageHeight]);
-  // 処理で使う値を準備する
   const contentWidth = pageWidth - params.margin * 2;
-  // 処理で使う値を準備する
   const columnWidth = (contentWidth - columnGap) / 2;
-  // 処理で使う値を準備する
   const leftX = params.margin;
-  // 処理で使う値を準備する
   const rightX = params.margin + columnWidth + columnGap;
-
-  // 処理で使う値を準備する
   const topY = pageHeight - params.margin;
-  // 処理で使う値を準備する
   const availableHeight = topY - params.margin;
-  // 処理で使う値を準備する
   const rowPitch = availableHeight / rowsPerColumn;
-  // 処理で使う値を準備する
   const textMaxWidth = columnWidth - answerBoxWidth - answerBoxGap;
-
-  // 対象データを順番に処理する
   for (let local = 0; local < items.length; local += 1) {
-    // 処理で使う値を準備する
     const col = local < rowsPerColumn ? 0 : 1;
-    // 処理で使う値を準備する
     const row = local % rowsPerColumn;
-
-    // 処理で使う値を準備する
     const baseX = col === 0 ? leftX : rightX;
-    // 処理で使う値を準備する
     const rowTopY = topY - rowPitch * row;
-    // 処理で使う値を準備する
     const rowBottomY = rowTopY - rowPitch;
-
-    // 処理で使う値を準備する
     const item = items[local];
-    // 処理で使う値を準備する
     const promptText = String((item as { questionText?: string }).questionText ?? '').trim();
-    // 処理で使う値を準備する
     const readingHiragana = String((item as { readingHiragana?: string }).readingHiragana ?? '').trim();
-    // 処理で使う値を準備する
     const underlineSpec = (item as { underlineSpec?: PromptUnderlineSpec }).underlineSpec;
-
-    // 条件に応じて処理を分岐する
     if (!promptText || !readingHiragana || !underlineSpec) {
       throw new ApiError('Missing questionText/readingHiragana/underlineSpec', 400, ['missing_kanji_fields']);
     }
 
-    // 処理で使う値を準備する
+    // 下線指定が「読み仮名の位置」と一致していることを厳密に検証する。
     const slice = promptText.slice(underlineSpec.start, underlineSpec.start + underlineSpec.length);
-    // 条件に応じて処理を分岐する
     if (slice !== readingHiragana) {
       throw new ApiError('underlineSpec does not match readingHiragana', 400, ['invalid_underline_spec']);
     }
@@ -398,9 +286,7 @@ const renderKanjiWorksheetLayout = (params: {
 
     // 右端: 漢字記入枠（枠のみ、解答は出さない）
     const boxHeight = rowPitch * 0.8;
-    // 処理で使う値を準備する
     const boxX = baseX + columnWidth - answerBoxWidth;
-    // 処理で使う値を準備する
     const boxY = rowBottomY + (rowPitch - boxHeight) / 2;
     page.drawRectangle({
       x: boxX,
@@ -414,7 +300,7 @@ const renderKanjiWorksheetLayout = (params: {
   }
 };
 
-// 内部で利用する補助処理を定義する
+// 試験モードに応じて PDF を生成してバッファで返す。
 const generatePdfBufferImpl = async (
   review: ExamDetail,
   options?: {
@@ -422,17 +308,10 @@ const generatePdfBufferImpl = async (
   },
 ): Promise<Buffer> => {
   void options;
-
-  // 処理で使う値を準備する
   const config = buildPdfRenderConfig();
-  // 処理で使う値を準備する
   const title = `復習テスト (${review.subject})`;
-  // 処理で使う値を準備する
   const meta = `作成日: ${review.createdDate}`;
-
-  // 非同期で必要な値を取得する
   const fontBytes = await loadJapaneseFontBytes();
-  // 非同期で必要な値を取得する
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
@@ -440,7 +319,7 @@ const generatePdfBufferImpl = async (
   // NOTE: 漢字PDFはサイズ削減のためサブセット化していたが、可変フォント/環境差で不安定になるため優先度を下げる。
   const jpFont = await pdfDoc.embedFont(fontBytes, { subset: false });
 
-  // 漢字復習テストはワークシートレイアウトで描画する
+  // 漢字は専用ワークシートレイアウトを使う。
   if (review.mode === 'KANJI') {
     renderKanjiWorksheetLayout({
       pdfDoc,
@@ -448,13 +327,9 @@ const generatePdfBufferImpl = async (
       review,
       margin: config.margin,
     });
-    // 非同期で必要な値を取得する
     const bytes = await pdfDoc.save();
-    // 処理結果を呼び出し元へ返す
     return Buffer.from(bytes);
   }
-
-  // 後続処理で更新する値を初期化する
   let pageContext = createPage({
     pdfDoc,
     jpFont,
@@ -462,34 +337,21 @@ const generatePdfBufferImpl = async (
     title,
     meta,
   });
-
-  // 処理で使う値を準備する
   const answerX = config.margin + config.numberColWidth + config.numberGap;
-  // 処理で使う値を準備する
   const answerRightX = config.margin + pageContext.contentWidth;
-  // 処理で使う値を準備する
   const questionWidth = pageContext.contentWidth - config.numberColWidth - config.numberGap;
 
-  // 対象データを順番に処理する
+  // MATERIAL は「問題文 + 補足行 + 解答ライン2本」を縦に積み上げる。
   for (let idx = 0; idx < review.items.length; idx += 1) {
-    // 処理で使う値を準備する
     const item = review.items[idx];
-    // 処理で使う値を準備する
     const questionText = getQuestionText(item);
-    // 処理で使う値を準備する
     const wrapped = wrapTextByChar(questionText, questionWidth, jpFont, config.questionFontSize);
-    // 処理で使う値を準備する
     const materialLine = getMaterialLine(item);
-    // 処理で使う値を準備する
     const materialWrapped = materialLine
       ? wrapTextByChar(materialLine, questionWidth, jpFont, config.metaLineFontSize)
       : [];
-
-    // 処理で使う値を準備する
     const questionHeight = wrapped.length * config.questionLineHeight;
-    // 処理で使う値を準備する
     const materialHeight = materialWrapped.length * config.metaLineHeight;
-    // 処理で使う値を準備する
     const requiredHeight =
       questionHeight +
       materialHeight +
@@ -498,9 +360,8 @@ const generatePdfBufferImpl = async (
       config.answerLineGap +
       config.itemGap;
 
-    // 条件に応じて処理を分岐する
+    // ブロックが収まらない場合は新ページを作成する。
     if (pageContext.cursorY - requiredHeight < config.margin) {
-      // 値を代入する
       pageContext = createPage({
         pdfDoc,
         jpFont,
@@ -509,10 +370,7 @@ const generatePdfBufferImpl = async (
         meta,
       });
     }
-
-    // 処理で使う値を準備する
     const noText = item.canonicalKey ? `${item.canonicalKey}` : `${idx + 1}.`;
-    // 処理で使う値を準備する
     const noWidth = jpFont.widthOfTextAtSize(noText, config.questionFontSize);
     pageContext.page.drawText(noText, {
       x: config.margin + config.numberColWidth - noWidth,
@@ -521,8 +379,6 @@ const generatePdfBufferImpl = async (
       font: jpFont,
       color: rgb(0, 0, 0),
     });
-
-    // 対象データを順番に処理する
     for (const line of wrapped) {
       pageContext.page.drawText(line, {
         x: answerX,
@@ -533,8 +389,6 @@ const generatePdfBufferImpl = async (
       });
       pageContext.cursorY -= config.questionLineHeight;
     }
-
-    // 対象データを順番に処理する
     for (const line of materialWrapped) {
       pageContext.page.drawText(line, {
         x: answerX,
@@ -547,8 +401,6 @@ const generatePdfBufferImpl = async (
     }
 
     pageContext.cursorY -= config.afterQuestionGap;
-
-    // 対象データを順番に処理する
     for (let i = 0; i < 2; i += 1) {
       pageContext.cursorY -= config.answerBoxHeight;
       pageContext.page.drawLine({
@@ -562,88 +414,61 @@ const generatePdfBufferImpl = async (
 
     pageContext.cursorY -= config.itemGap;
   }
-
-  // 非同期で必要な値を取得する
   const bytes = await pdfDoc.save();
-  // 処理結果を呼び出し元へ返す
   return Buffer.from(bytes);
 };
 
-/** ExamPdfService. */
+// 外部公開 API。
 export const ExamPdfService = {
   generatePdfBuffer: generatePdfBufferImpl,
 };
 
 let cachedJapaneseFontBytes: Uint8Array | null = null;
 
-// 内部で利用する補助処理を定義する
+// 日本語フォントを読み込み、初回のみメモリにキャッシュする。
 const loadJapaneseFontBytes = async (): Promise<Uint8Array> => {
-  // 条件に応じて処理を分岐する
   if (cachedJapaneseFontBytes) return cachedJapaneseFontBytes;
 
   const { readFile, stat } = await import('node:fs/promises');
-  // 非同期で必要な値を取得する
   const path = await import('node:path');
 
   // 1) 推奨: Google Fonts 由来の可変フォント（TTF）をそのまま同梱して使用
   const variableTtfRelativePath = path.join('assets', 'fonts', 'NotoSansJP-VariableFont_wght.ttf');
-  // 処理で使う値を準備する
   const variableCandidates = [
     path.join(process.cwd(), variableTtfRelativePath),
     path.join(process.cwd(), 'backend', variableTtfRelativePath),
   ];
-
-  // 対象データを順番に処理する
   for (const candidate of variableCandidates) {
-    // 例外が発生しうる処理を実行する
     try {
-      // 非同期で必要な値を取得する
       const s = await stat(candidate);
-      // 条件に応じて処理を分岐する
       if (!s.isFile()) continue;
-      // 非同期で必要な値を取得する
       const font = await readFile(candidate);
-      // 値を代入する
       cachedJapaneseFontBytes = new Uint8Array(font);
-      // 処理結果を呼び出し元へ返す
       return cachedJapaneseFontBytes;
     } catch {
-      // try next
+      // 次候補パスを試す。
     }
   }
 
   // 2) 後方互換: 既存の gzip 同梱（サイズ削減）
   const { gunzip } = await import('node:zlib');
   const { promisify } = await import('node:util');
-  // 処理で使う値を準備する
   const gunzipAsync = promisify(gunzip);
-
-  // 処理で使う値を準備する
   const fontGzRelativePath = path.join('assets', 'fonts', 'NotoSansJP-wght.ttf.gz');
-  // 処理で使う値を準備する
   const gzCandidates = [
     path.join(process.cwd(), fontGzRelativePath),
     path.join(process.cwd(), 'backend', fontGzRelativePath),
   ];
-
-  // 対象データを順番に処理する
   for (const candidate of gzCandidates) {
-    // 例外が発生しうる処理を実行する
     try {
-      // 非同期で必要な値を取得する
       const s = await stat(candidate);
-      // 条件に応じて処理を分岐する
       if (!s.isFile()) continue;
-      // 非同期で必要な値を取得する
       const gz = await readFile(candidate);
-      // 非同期で必要な値を取得する
       const font = (await gunzipAsync(gz)) as Buffer;
-      // 値を代入する
       cachedJapaneseFontBytes = new Uint8Array(font);
-      // 処理結果を呼び出し元へ返す
       return cachedJapaneseFontBytes;
     } catch {
-      // try next
+      // 次候補パスを試す。
     }
   }
 

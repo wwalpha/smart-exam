@@ -4,6 +4,8 @@ import type { Repositories } from '@/repositories/createRepositories';
 
 import type { ExamsService } from './index';
 
+// createExam 系ユースケースで共有する型定義。
+
 // 試験作成処理で扱う候補データ型
 export type ReviewCandidate = {
   // 候補の種別

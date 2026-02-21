@@ -1,5 +1,7 @@
 import type { SubjectId } from '@smart-exam/api-types';
 
+// internal.ts から参照される exam 共通型。
+
 // 復習対象の種別
 export type ReviewTargetType = 'MATERIAL' | 'KANJI';
 

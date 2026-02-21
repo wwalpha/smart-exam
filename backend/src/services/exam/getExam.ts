@@ -5,19 +5,16 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamsService } from './index';
 import { toApiExam } from './internal';
 
-// 公開するサービス処理を定義する
+// 試験本体・明細・マスタを結合して詳細レスポンスを構築する。
 export const createGetExam = (repositories: Repositories): ExamsService['getExam'] => {
-  // 処理結果を呼び出し元へ返す
   return async (examId: string): Promise<ExamDetail | null> => {
-    // 非同期で必要な値を取得する
     const test = await repositories.exams.get(examId);
-    // 条件に応じて処理を分岐する
     if (!test) return null;
 
     const details = await repositories.examDetails.listByExamId(examId);
     const targetIds = details.map((detail) => detail.targetId);
 
-    // 処理で使う値を準備する
+    // isCorrect は exam.results と examDetails の両経路に存在し得るためマージする。
     const resultByTargetId = new Map((test.results ?? []).map((r) => [r.id, r.isCorrect] as const));
     const detailResultByTargetId = new Map(
       details
@@ -25,24 +22,17 @@ export const createGetExam = (repositories: Repositories): ExamsService['getExam
         .map((detail) => [detail.targetId, detail.isCorrect as boolean] as const),
     );
 
-    // 条件に応じて処理を分岐する
+    // KANJI は漢字マスタを参照して設問情報を作る。
     if (test.mode === 'KANJI') {
-      // 非同期で必要な値を取得する
       const words = await Promise.all(targetIds.map((id) => repositories.kanji.get(id)));
-      // 処理で使う値を準備する
       const byId = new Map(
         words.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w.wordId, w] as const),
       );
-
-      // 処理結果を呼び出し元へ返す
       return {
         ...toApiExam(test),
         items: targetIds.map((targetId) => {
-          // 処理で使う値を準備する
           const w = byId.get(targetId);
-          // 処理で使う値を準備する
           const isCorrect = detailResultByTargetId.get(targetId) ?? resultByTargetId.get(targetId);
-          // 処理結果を呼び出し元へ返す
           return {
             id: targetId,
             itemId: targetId,
@@ -61,34 +51,22 @@ export const createGetExam = (repositories: Repositories): ExamsService['getExam
       };
     }
 
-    // 非同期で必要な値を取得する
+    // MATERIAL は設問 -> 教材の順に参照して表示情報を補完する。
     const questionRows = await Promise.all(targetIds.map((qid) => repositories.materialQuestions.get(qid)));
-    // 処理で使う値を準備する
     const qById = new Map(
       questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const),
     );
-
-    // 処理で使う値を準備する
     const materialIds = Array.from(new Set(Array.from(qById.values()).map((q) => q.materialId)));
-    // 非同期で必要な値を取得する
     const materialRows = await Promise.all(materialIds.map((mid) => repositories.materials.get(mid)));
-    // 処理で使う値を準備する
     const mById = new Map(
       materialRows.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m.materialId, m] as const),
     );
-
-    // 処理結果を呼び出し元へ返す
     return {
       ...toApiExam(test),
       items: targetIds.map((targetId) => {
-        // 処理で使う値を準備する
         const q = qById.get(targetId);
-        // 処理で使う値を準備する
         const m = q ? mById.get(q.materialId) : undefined;
-        // 処理で使う値を準備する
         const isCorrect = detailResultByTargetId.get(targetId) ?? resultByTargetId.get(targetId);
-
-        // 処理結果を呼び出し元へ返す
         return {
           id: targetId,
           itemId: targetId,

@@ -46,11 +46,12 @@
 | Exam (Kanji)    | PATCH    | `/api/exam/kanji/:examId`                                  | 指定した漢字テストのステータスを更新するAPI           | ✅           |
 | Exam (Kanji)    | DELETE   | `/api/exam/kanji/:examId`                                  | 指定した漢字テストを削除するAPI                       | ✅           |
 | Exam (Kanji)    | POST     | `/api/exam/kanji/:examId/results`                          | 指定した漢字テストの結果を登録するAPI                 | ✅           |
-| Exam (Question) | POST     | `/api/exam/question/search`                                | 条件を指定して問題テストを検索するAPI                 | ✅           |
-| Exam (Question) | POST     | `/api/exam/question`                                       | 問題テストを新規作成するAPI                           | ✅           |
-| Exam (Question) | GET      | `/api/exam/question/targets`                               | 問題テスト作成対象の候補一覧を取得するAPI             | ✅           |
-| Exam (Question) | GET      | `/api/exam/question/:examId`                               | 指定した問題テストの詳細を取得するAPI                 | ✅           |
-| Exam (Question) | GET      | `/api/exam/question/:examId/pdf`                           | 指定した問題テストのPDF情報を取得するAPI              | ✅           |
-| Exam (Question) | PATCH    | `/api/exam/question/:examId`                               | 指定した問題テストのステータスを更新するAPI           | ✅           |
-| Exam (Question) | DELETE   | `/api/exam/question/:examId`                               | 指定した問題テストを削除するAPI                       | ✅           |
-| Exam (Question) | POST     | `/api/exam/question/:examId/results`                       | 指定した問題テストの結果を登録するAPI                 | ✅           |
+| Exam (Material) | POST     | `/api/exam/material/search`                                | 条件を指定して問題テストを検索するAPI                 | ✅           |
+| Exam (Material) | POST     | `/api/exam/material`                                       | 問題テストを新規作成するAPI                           | ✅           |
+| Exam (Material) | GET      | `/api/exam/material/targets`                               | 問題テスト作成対象の候補一覧を取得するAPI             | ✅           |
+| Exam (Material) | GET      | `/api/exam/material/:examId`                               | 指定した問題テストの詳細を取得するAPI                 | ✅           |
+| Exam (Material) | GET      | `/api/exam/material/:examId/pdf`                           | 指定した問題テストのPDF情報を取得するAPI              | ✅           |
+| Exam (Material) | PATCH    | `/api/exam/material/:examId`                               | 指定した問題テストのステータスを更新するAPI           | ✅           |
+| Exam (Material) | DELETE   | `/api/exam/material/:examId`                               | 指定した問題テストを削除するAPI                       | ✅           |
+| Exam (Material) | POST     | `/api/exam/material/:examId/results`                       | 指定した問題テストの結果を登録するAPI                 | ✅           |
+| Exam            | POST     | `/api/exam/:examId/completion`                             | 採点結果を候補者テーブルへ反映してテストを完了するAPI | ✅           |

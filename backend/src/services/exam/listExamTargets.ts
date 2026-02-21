@@ -6,36 +6,27 @@ import type { ExamTable, KanjiTable } from '@/types/db';
 import type { ExamsService } from './index';
 import { sortTargets, toReviewTargetKey } from './internal';
 
+// 期間内の試験から「どの問題が何回含まれたか」を集計して返す。
 const listExamTargetsImpl: ExamsService['listExamTargets'] = async function listExamTargetsImpl(
   this: Repositories,
   params,
 ): Promise<ExamTarget[]> {
-  // 処理で使う値を準備する
   const repositories = this;
-  // 処理で使う値を準備する
   const from = params.fromYmd;
-  // 処理で使う値を準備する
   const to = params.toYmd;
 
   const rows: ExamTable[] = await repositories.exams.scanAll();
-
-  // 処理で使う値を準備する
+  // まず mode / subject / date の条件で試験行を絞り込む。
   const filteredRows = rows.filter((t) => {
-    // 条件に応じて処理を分岐する
     if (t.mode !== params.mode) return false;
-    // 条件に応じて処理を分岐する
     if (params.subject && String(t.subject) !== String(params.subject)) return false;
-    // 条件に応じて処理を分岐する
     if (t.createdDate < from) return false;
-    // 条件に応じて処理を分岐する
     if (t.createdDate > to) return false;
-    // 処理結果を呼び出し元へ返す
     return true;
   });
-
-  // 処理で使う値を準備する
   const byKey = new Map<string, ExamTarget>();
 
+  // 試験ごとの targetId 一覧を先に引いて、後段で重複問い合わせを減らす。
   const detailByExamId = new Map<string, string[]>();
   await Promise.all(
     filteredRows.map(async (test) => {
@@ -46,34 +37,21 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
       );
     }),
   );
-
-  // 処理で使う値を準備する
   const allTargetIds = new Set<string>();
-  // 対象データを順番に処理する
   for (const t of filteredRows) {
-    // 対象データを順番に処理する
     for (const id of detailByExamId.get(t.examId) ?? []) allTargetIds.add(id);
   }
-
-  // 処理で使う値を準備する
   const questionById = new Map<string, { canonicalKey?: string; materialId?: string }>();
-  // 処理で使う値を準備する
   const materialById = new Map<string, { title?: string; materialDate?: string }>();
-  // 処理で使う値を準備する
   const wordById = new Map<string, KanjiTable>();
 
-  // 条件に応じて処理を分岐する
+  // mode ごとに参照するマスタが異なるため、先に必要な情報をまとめてロードする。
   if (params.mode === 'MATERIAL') {
-    // 非同期で必要な値を取得する
     const qRows = await Promise.all(Array.from(allTargetIds).map((qid) => repositories.materialQuestions.get(qid)));
-    // 対象データを順番に処理する
     for (const q of qRows) {
-      // 条件に応じて処理を分岐する
       if (!q) continue;
       questionById.set(q.questionId, { canonicalKey: q.canonicalKey, materialId: q.materialId });
     }
-
-    // 処理で使う値を準備する
     const materialIds = Array.from(
       new Set(
         Array.from(questionById.values())
@@ -81,44 +59,28 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
           .filter((x): x is string => !!x),
       ),
     );
-    // 非同期で必要な値を取得する
     const mRows = await Promise.all(materialIds.map((mid) => repositories.materials.get(mid)));
-    // 対象データを順番に処理する
     for (const m of mRows) {
-      // 条件に応じて処理を分岐する
       if (!m) continue;
       materialById.set(m.materialId, { title: m.title, materialDate: m.materialDate });
     }
   } else {
-    // 非同期で必要な値を取得する
     const wRows = await Promise.all(Array.from(allTargetIds).map((wid) => repositories.kanji.get(wid)));
-    // 対象データを順番に処理する
     for (const w of wRows) {
-      // 条件に応じて処理を分岐する
       if (!w) continue;
       wordById.set(w.wordId, w as KanjiTable);
     }
   }
 
-  // 対象データを順番に処理する
+  // 同一対象(科目+targetId)を1レコードに畳み込み、出題回数や最終出題日を更新する。
   for (const t of filteredRows) {
-    // 対象データを順番に処理する
     for (const targetId of detailByExamId.get(t.examId) ?? []) {
-      // 処理で使う値を準備する
       const key = toReviewTargetKey(t.subject, targetId);
-      // 処理で使う値を準備する
       const current = byKey.get(key);
-
-      // 処理で使う値を準備する
       const q = questionById.get(targetId);
-      // 処理で使う値を準備する
       const m = q?.materialId ? materialById.get(q.materialId) : undefined;
-      // 処理で使う値を準備する
       const w = wordById.get(targetId);
-      // 処理で使う値を準備する
       const reading = (w as unknown as (KanjiTable & { reading?: string }) | undefined)?.answer;
-
-      // 条件に応じて処理を分岐する
       if (!current) {
         byKey.set(key, {
           targetType: params.mode,
@@ -136,8 +98,6 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
         });
         continue;
       }
-
-      // 処理で使う値を準備する
       const nextLast = current.lastTestCreatedDate < t.createdDate ? t.createdDate : current.lastTestCreatedDate;
 
       byKey.set(key, {
@@ -154,13 +114,10 @@ const listExamTargetsImpl: ExamsService['listExamTargets'] = async function list
       });
     }
   }
-
-  // 処理結果を呼び出し元へ返す
   return sortTargets(Array.from(byKey.values()));
 };
 
-// 公開するサービス処理を定義する
+// repositories を this に束縛してサービス関数として公開する。
 export const createListExamTargets = (repositories: Repositories): ExamsService['listExamTargets'] => {
-  // 処理結果を呼び出し元へ返す
   return listExamTargetsImpl.bind(repositories);
 };
