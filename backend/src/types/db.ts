@@ -29,7 +29,7 @@ export interface MaterialTable {
   /** 解答PDFパス（試験用紙の場合のみ） */
   answerPdfPath?: string;
   /** 教材セット完了フラグ */
-  isCompleted?: boolean;
+  isCompleted: boolean;
 }
 
 /**

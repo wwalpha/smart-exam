@@ -238,7 +238,7 @@ export type Material = {
   /** 初回実施日 (YYYY-MM-DD) */
   registeredDate: string;
   /** 完了状態 */
-  isCompleted?: boolean;
+  isCompleted: boolean;
 };
 /** 問題一覧取得レスポンス */
 export type QuestionListResponse = {

@@ -33,6 +33,7 @@ const createMaterialImpl = async (
   return {
     id,
     ...data,
+    isCompleted: false,
   };
 };
 

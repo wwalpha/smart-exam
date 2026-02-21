@@ -35,8 +35,7 @@
 | Questions       | GET      | `/api/materials/:materialId/questions`                              | 指定した教材に紐づく問題一覧を取得するAPI             | ✅           |
 | Questions       | POST     | `/api/materials/:materialId/questions`                              | 指定した教材に新しい問題を追加するAPI                 | ✅           |
 | Questions       | PATCH    | `/api/materials/:materialId/questions/:questionId`                  | 指定した問題を更新するAPI                             | ✅           |
-| Questions       | PUT      | `/api/materials/:materialId/questions/:questionId/review-candidate` | 指定した問題の復習候補を作成または更新するAPI         | ✅           |
-| Questions       | DELETE   | `/api/materials/:materialId/questions/:questionId/review-candidate` | 指定した問題の復習候補を削除するAPI                   | ✅           |
+| Questions       | PATCH    | `/api/materials/:materialId/questions/:questionId/choices`          | 指定した問題の正誤選択を更新するAPI                   | ✅           |
 | Questions       | DELETE   | `/api/materials/:materialId/questions/:questionId`                  | 指定した問題を削除するAPI                             | ✅           |
 | Exam (Kanji)    | POST     | `/api/exam/kanji/search`                                            | 条件を指定して漢字テストを検索するAPI                 | ✅           |
 | Exam (Kanji)    | POST     | `/api/exam/kanji`                                                   | 漢字テストを新規作成するAPI                           | ✅           |
