@@ -1,12 +1,3 @@
-import type {
-  ImportKanjiRequest,
-  ImportKanjiResponse,
-  Kanji,
-  RegistKanjiRequest,
-  SearchKanjiRequest,
-  SearchKanjiResponse,
-  UpdateKanjiRequest,
-} from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 
 import { registKanji } from './registKanji';
@@ -17,17 +8,7 @@ import { createImportKanji } from './importKanji';
 import { createListKanji } from './listKanji';
 import { createSearchKanji } from './searchKanji';
 import { createUpdateKanji } from './updateKanji';
-
-export type KanjiService = {
-  listKanji: () => Promise<Kanji[]>;
-  searchKanji: (params: SearchKanjiRequest) => Promise<SearchKanjiResponse>;
-  registKanji: (data: RegistKanjiRequest) => Promise<Kanji>;
-  getKanji: (id: string) => Promise<Kanji | null>;
-  updateKanji: (id: string, data: UpdateKanjiRequest) => Promise<Kanji | null>;
-  deleteKanji: (id: string) => Promise<boolean>;
-  deleteManyKanji: (ids: string[]) => Promise<void>;
-  importKanji: (data: ImportKanjiRequest) => Promise<ImportKanjiResponse>;
-};
+import type { KanjiService } from './kanji.types';
 
 // 公開するサービス処理を定義する
 export const createKanjiService = (repositories: Repositories): KanjiService => {
@@ -65,3 +46,4 @@ export const createKanjiService = (repositories: Repositories): KanjiService => 
 
 // 既存参照向けに別名のサービス生成関数を再エクスポートする
 export { createKanjiService as kanjiService };
+export type { KanjiService } from './kanji.types';

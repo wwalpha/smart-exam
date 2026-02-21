@@ -60,9 +60,9 @@ resource "aws_dynamodb_table" "material_details" {
 }
 
 # ----------------------------------------------------------------------------------------------
-# DynamoDB table for word master.
+# DynamoDB table for kanji.
 # ----------------------------------------------------------------------------------------------
-resource "aws_dynamodb_table" "word_master" {
+resource "aws_dynamodb_table" "kanji" {
   name         = "${var.project_name}_kanji"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "wordId"

@@ -2,7 +2,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 import { logger } from '@/lib/logger';
 import pLimit from 'p-limit';
 
-import type { KanjiService } from './index';
+import type { KanjiService } from './kanji.types';
 
 const MAX_CONCURRENCY = 50;
 

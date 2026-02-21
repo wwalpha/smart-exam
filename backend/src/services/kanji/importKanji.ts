@@ -7,36 +7,15 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable, ExamHistoryTable, WordMasterTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from './kanji.lib';
-import type { KanjiService } from './index';
-import type { BuildCandidateRowParams, BuildCandidatesFromHistoriesParams } from './importKanji.types';
+import type {
+  BatchBuildResult,
+  BuildCandidateRowParams,
+  BuildCandidatesFromHistoriesParams,
+  KanjiService,
+  ParseRowsResult,
+  ParsedImportRow,
+} from './kanji.types';
 import { parsePipeQuestionLine } from './importUtils';
-
-type ParsedImportRow = {
-  lineNumber: number;
-  content: string;
-  question: string;
-  answer: string;
-  histories: { submittedDate: string; isCorrect: boolean }[];
-  wordId: string;
-};
-
-type ParseRowsResult = {
-  rows: ParsedImportRow[];
-  duplicateCount: number;
-  errorCount: number;
-  errors: ImportKanjiResponse['errors'];
-};
-
-type BatchBuildResult = {
-  wordMasterItems: WordMasterTable[];
-  candidatesToCreate: ExamCandidateTable[];
-  historiesToCreate: ExamHistoryTable[];
-  candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }>;
-  successCount: number;
-  errorCount: number;
-  errors: ImportKanjiResponse['errors'];
-  questionIds: string[];
-};
 
 const toHistoryItem = (candidate: ExamCandidateTable): ExamHistoryTable => {
   return {
@@ -177,7 +156,7 @@ const parseValidRows = (params: {
     let parsed: {
       question: string;
       answer: string;
-      histories: { submittedDate: string; isCorrect: boolean }[];
+      histories: ParsedImportRow['histories'];
     };
     try {
       parsed = parsePipeQuestionLine(line);

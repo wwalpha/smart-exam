@@ -6,7 +6,7 @@ import { ExamCandidatesRepository } from '@/repositories/examCandidates';
 import { ExamDetailsRepository } from '@/repositories/examDetails';
 import { ExamHistoriesRepository } from '@/repositories/examHistories';
 import { ExamsRepository } from '@/repositories/exams';
-import { WordMasterRepository } from '@/repositories/wordMaster';
+import { WordMasterRepository } from '@/repositories/kanji';
 import { analyzeExamPaper, generateKanjiQuestionReadingsBulk } from '@/repositories/BedrockRepository';
 import { S3Repository } from '@/repositories/s3';
 

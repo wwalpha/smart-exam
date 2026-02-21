@@ -38,14 +38,14 @@ resource "aws_lambda_function" "api" {
     variables = {
       FILES_BUCKET_NAME = aws_s3_bucket.files.bucket
 
-      TABLE_MATERIALS          = aws_dynamodb_table.materials.name
-      TABLE_MATERIAL_DETAILS   = aws_dynamodb_table.material_details.name
-      TABLE_KANJI              = aws_dynamodb_table.kanji.name
-      TABLE_EXAM_CANDIDATES    = aws_dynamodb_table.exam_candidates.name
-      TABLE_EXAM_HISTORIES     = aws_dynamodb_table.exam_histories.name
-      TABLE_EXAMS              = aws_dynamodb_table.exam.name
-      TABLE_EXAM_DETAILS       = aws_dynamodb_table.exam_details.name
-      BEDROCK_REGION           = "us-east-1"
+      TABLE_MATERIALS        = aws_dynamodb_table.materials.name
+      TABLE_MATERIAL_DETAILS = aws_dynamodb_table.material_details.name
+      TABLE_KANJI            = aws_dynamodb_table.kanji.name
+      TABLE_EXAM_CANDIDATES  = aws_dynamodb_table.exam_candidates.name
+      TABLE_EXAM_HISTORIES   = aws_dynamodb_table.exam_histories.name
+      TABLE_EXAMS            = aws_dynamodb_table.exam.name
+      TABLE_EXAM_DETAILS     = aws_dynamodb_table.exam_details.name
+      BEDROCK_REGION         = "us-east-1"
     }
   }
 

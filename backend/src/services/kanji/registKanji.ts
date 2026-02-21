@@ -6,7 +6,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { WordMasterTable } from '@/types/db';
 
 import { computeKanjiQuestionFields } from './kanji.lib';
-import type { KanjiService } from './index';
+import type { KanjiService } from './kanji.types';
 
 const resolveKanjiQuestionFields = async (params: {
   repositories: Repositories;

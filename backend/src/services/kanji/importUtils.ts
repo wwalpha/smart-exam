@@ -1,9 +1,9 @@
 // Module: importUtils responsibilities.
 
 import { DateUtils } from '@/lib/dateUtils';
-import type { ImportedHistoryEntry } from './importUtils.types';
+import type { ImportedHistoryEntry } from './kanji.types';
 
-export type { ImportedHistoryEntry } from './importUtils.types';
+export type { ImportedHistoryEntry } from './kanji.types';
 
 // 内部で利用する補助処理を定義する
 const parseOkNg = (raw: string): boolean | null => {

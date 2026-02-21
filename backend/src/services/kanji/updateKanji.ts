@@ -3,8 +3,7 @@ import type { Kanji } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 
 import { computeKanjiQuestionFields } from './kanji.lib';
-import type { KanjiService } from './index';
-import type { UpdateKanjiData } from './updateKanji.types';
+import type { KanjiService, UpdateKanjiData } from './kanji.types';
 
 const resolveKanjiQuestionFields = (nextQuestion: string, nextAnswer: string): { question: string; answer: string } => {
   const question = String(nextQuestion ?? '').trim();

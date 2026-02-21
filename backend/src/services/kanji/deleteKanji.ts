@@ -1,6 +1,6 @@
 import type { Repositories } from '@/repositories/createRepositories';
 
-import type { KanjiService } from './index';
+import type { KanjiService } from './kanji.types';
 
 // 内部で利用する漢字削除処理
 const deleteKanjiImpl = async (repositories: Repositories, id: string): Promise<boolean> => {
