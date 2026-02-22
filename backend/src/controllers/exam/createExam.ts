@@ -9,14 +9,12 @@ import type { Services } from '@/services/createServices';
 
 import { CreateExamBodySchema } from './createExam.schema';
 
-/** Creates create review test controller. */
+/** Creates create exam controller. */
 export const createExamController = (services: Services) => {
-  const createExam: AsyncHandler<
-    ParamsDictionary,
-    CreateExamResponse,
-    CreateExamRequest,
-    ParsedQs
-  > = async (req, res) => {
+  const createExam: AsyncHandler<ParamsDictionary, CreateExamResponse, CreateExamRequest, ParsedQs> = async (
+    req,
+    res,
+  ) => {
     // バリデーション済みのリクエストボディを取得する
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateExamBodySchema>;
     // 指定条件で復習テストを新規作成する

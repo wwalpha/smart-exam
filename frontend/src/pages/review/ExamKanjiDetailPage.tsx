@@ -37,7 +37,7 @@ export const ExamKanjiDetailPage = () => {
             <Link to={basePath}>戻る</Link>
           </Button>
           <Button asChild className="w-[100px]">
-            <Link to={`${basePath}/${review.examId}/grading`}>結果入力</Link>
+            <Link to={`${basePath}/${review.examId}/grading`}>結果確認</Link>
           </Button>
           <Button asChild className="w-[100px]">
             <Link to={`${basePath}/${review.examId}/pdf`}>印刷</Link>
@@ -47,12 +47,14 @@ export const ExamKanjiDetailPage = () => {
               完了
             </Button>
           ) : null}
-          <Button
-            variant="outline"
-            className="w-[100px] text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={remove}>
-            削除
-          </Button>
+          {review.status !== 'COMPLETED' ? (
+            <Button
+              variant="outline"
+              className="w-[100px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={remove}>
+              削除
+            </Button>
+          ) : null}
         </div>
       </div>
 

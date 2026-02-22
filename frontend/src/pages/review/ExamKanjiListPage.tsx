@@ -106,15 +106,17 @@ export const ExamKanjiListPage = () => {
                         <FileText className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="削除"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => remove(test.examId)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {test.status !== 'COMPLETED' ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label="削除"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => remove(test.examId)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    ) : null}
                   </div>
                 </TableCell>
                 <TableCell>

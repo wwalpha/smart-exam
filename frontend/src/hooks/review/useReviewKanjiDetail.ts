@@ -16,12 +16,12 @@ export const useReviewKanjiDetail = () => {
   const { confirm, ConfirmDialog } = useConfirm();
 
   useEffect(() => {
-    if (id) fetchExam(id, 'KANJI');
+    if (id) fetchExam(id);
   }, [id, fetchExam]);
 
   const remove = async () => {
     if (detail && (await confirm('本当に削除しますか？', { variant: 'destructive' }))) {
-      await deleteExam(detail.examId, 'KANJI');
+      await deleteExam(detail.examId);
       navigate(BASE_PATH);
     }
   };

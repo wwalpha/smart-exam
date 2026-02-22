@@ -33,7 +33,7 @@ export const useReviewKanjiList = () => {
 
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
-      await deleteExam(id, 'KANJI');
+      await deleteExam(id);
       const current = form.getValues();
       fetchExams({
         mode: 'KANJI',

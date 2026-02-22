@@ -33,7 +33,7 @@ export const useReviewQuestionList = () => {
 
   const remove = async (id: string) => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
-      await deleteExam(id, 'MATERIAL');
+      await deleteExam(id);
       const current = form.getValues();
       fetchExams({
         mode: 'MATERIAL',

@@ -30,7 +30,7 @@ export const useReviewKanjiGrading = () => {
   const { fields } = useFieldArray({ control, name: 'items' });
 
   useEffect(() => {
-    if (id) fetchExam(id, 'KANJI');
+    if (id) fetchExam(id);
   }, [id, fetchExam]);
 
   useEffect(() => {
@@ -51,6 +51,7 @@ export const useReviewKanjiGrading = () => {
 
   const submit = async (data: GradingFormValues) => {
     if (!id) return;
+    if (reviewSnapshot?.status === 'COMPLETED') return;
     setIsSaving(true);
     try {
       await submitExam(
@@ -58,9 +59,8 @@ export const useReviewKanjiGrading = () => {
         {
           results: data.items.map((item) => ({ id: item.itemId, isCorrect: item.isCorrect })),
         },
-        'KANJI',
       );
-      await fetchExam(id, 'KANJI');
+      await fetchExam(id);
       toast.success('保存しました');
     } catch (e) {
       toast.error('保存に失敗しました');
@@ -71,6 +71,7 @@ export const useReviewKanjiGrading = () => {
   };
 
   const setAllCorrect = () => {
+    if (reviewSnapshot?.status === 'COMPLETED') return;
     const current = getValues('items');
     current.forEach((_, index) => {
       setValue(`items.${index}.isCorrect`, true, { shouldDirty: true });

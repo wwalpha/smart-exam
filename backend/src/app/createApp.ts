@@ -228,7 +228,7 @@ export const createApp = (): express.Express => {
     '/api/exam/:examId/results',
     validateParams(ExamIdParamsSchema),
     validateBody(controllers.exams.SubmitExamResultsBodySchema),
-    handleRequest(controllers.exams.submitExamResults),
+    handleRequest(controllers.exams.submitResults),
   );
 
   // 指定した問題テストを完了し候補テーブルへ反映するAPI

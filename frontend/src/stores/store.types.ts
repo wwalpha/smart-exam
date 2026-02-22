@@ -114,11 +114,11 @@ export type ExamSlice = {
   reviewTargets: ReviewTargetState;
   fetchExams: (params: SearchExamsRequest) => Promise<void>;
   createExam: (request: CreateExamRequest) => Promise<Exam>;
-  fetchExam: (id: string, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
-  updateExamStatus: (id: string, request: UpdateExamStatusRequest, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
+  fetchExam: (id: string) => Promise<void>;
+  updateExamStatus: (id: string, request: UpdateExamStatusRequest) => Promise<void>;
   completeExam: (id: string) => Promise<void>;
-  deleteExam: (id: string, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
-  submitExamResults: (id: string, request: SubmitExamResultsRequest, mode: 'MATERIAL' | 'KANJI') => Promise<void>;
+  deleteExam: (id: string) => Promise<void>;
+  submitExamResults: (id: string, request: SubmitExamResultsRequest) => Promise<void>;
   fetchExamTargets: (params: {
     mode: 'MATERIAL' | 'KANJI';
     from: string;

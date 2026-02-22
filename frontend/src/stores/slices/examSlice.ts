@@ -200,11 +200,11 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       );
     },
 
-    fetchExam: async (id, mode) => {
+    fetchExam: async (id) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.getExamByMode(id, mode);
+          const response = await REVIEW_API.getExam(id);
           updateReview({ detail: response });
         },
         '復習テスト詳細の取得に失敗しました。',
@@ -212,11 +212,11 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       );
     },
 
-    updateExamStatus: async (id, request, mode) => {
+    updateExamStatus: async (id, request) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.updateExamStatusByMode(id, request, mode);
+          const response = await REVIEW_API.updateExamStatus(id, request);
           const currentDetail = getReview().detail;
           const currentList = getReview().list;
           if (currentDetail && currentDetail.examId === id) {
@@ -257,11 +257,11 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       );
     },
 
-    deleteExam: async (id, mode) => {
+    deleteExam: async (id) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          await REVIEW_API.deleteExamByMode(id, mode);
+          await REVIEW_API.deleteExam(id);
 
           const current = getReview();
           const nextList = current.list.filter((x) => x.examId !== id);
@@ -274,11 +274,11 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       );
     },
 
-    submitExamResults: async (id, request, mode) => {
+    submitExamResults: async (id, request) => {
       await withStatus(
         setReviewStatus,
         async () => {
-          await REVIEW_API.submitExamResultsByMode(id, request, mode);
+          await REVIEW_API.submitExamResults(id, request);
         },
         'テスト結果の送信に失敗しました。',
         { rethrow: true },

@@ -8,6 +8,7 @@ import { useReviewKanjiGrading } from '@/hooks/review';
 export const ExamKanjiGradingPage = () => {
   const { review, isInitialLoading, isSaving, error, basePath, fields, watch, setValue, setAllCorrect, submit, id } =
     useReviewKanjiGrading();
+  const isReadOnly = review?.status === 'COMPLETED';
 
   if (isInitialLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
@@ -25,10 +26,10 @@ export const ExamKanjiGradingPage = () => {
         <CardContent>
           <form onSubmit={submit}>
             <div className="mb-4 flex items-center justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={setAllCorrect} disabled={isSaving}>
+              <Button type="button" variant="outline" onClick={setAllCorrect} disabled={isSaving || isReadOnly}>
                 全問正解
               </Button>
-              <Button type="submit" disabled={isSaving}>
+              <Button type="submit" disabled={isSaving || isReadOnly}>
                 保存
               </Button>
             </div>
@@ -57,9 +58,11 @@ export const ExamKanjiGradingPage = () => {
                     <RadioGroup
                       value={value}
                       onValueChange={(v) => {
+                        if (isReadOnly) return;
                         if (v === value) return;
                         setValue(`items.${index}.isCorrect`, v === 'correct', { shouldDirty: true });
                       }}
+                      disabled={isReadOnly || isSaving}
                       className="flex shrink-0 flex-nowrap items-center gap-4 whitespace-nowrap">
                       <div className="flex items-center gap-2 whitespace-nowrap">
                         <RadioGroupItem value="correct" id={`kanji-correct-${field.id}`} />

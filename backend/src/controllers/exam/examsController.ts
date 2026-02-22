@@ -41,7 +41,7 @@ export const examsController = (services: Services) => {
     completeExam: completeExam(services),
     SubmitExamResultsParamsSchema,
     SubmitExamResultsBodySchema,
-    submitExamResults: submitExamResults(services),
+    submitResults: submitExamResults(services),
     UpdateExamStatusParamsSchema,
     UpdateExamStatusBodySchema,
     updateExamStatus: updateExamStatus(services),
