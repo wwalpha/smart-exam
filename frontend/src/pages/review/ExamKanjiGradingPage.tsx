@@ -16,16 +16,13 @@ export const ExamKanjiGradingPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
-      <div className="flex items-center justify-end">
-        <Button asChild variant="outline">
-          <Link to={`${basePath}/${id}`}>戻る</Link>
-        </Button>
-      </div>
-
       <Card>
         <CardContent>
           <form onSubmit={submit}>
-            <div className="mb-4 flex items-center justify-end gap-2 pt-4">
+            <div className="mb-4 flex items-center justify-end gap-2">
+              <Button asChild variant="outline">
+                <Link to={`${basePath}/${id}`}>戻る</Link>
+              </Button>
               <Button type="button" variant="outline" onClick={setAllCorrect} disabled={isSaving || isReadOnly}>
                 全問正解
               </Button>

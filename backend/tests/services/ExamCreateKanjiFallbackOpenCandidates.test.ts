@@ -4,7 +4,7 @@ import type { ExamDetail } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 
 describe('createExam (KANJI) fallback open candidates', () => {
-  it('creates exam from OPEN candidates when due candidates are empty', async () => {
+  it('does not create questions from OPEN candidates when nextTime is in the future', async () => {
     process.env.FILES_BUCKET_NAME = 'dummy-bucket';
     vi.resetModules();
 
@@ -81,13 +81,13 @@ describe('createExam (KANJI) fallback open candidates', () => {
     const createExam = createCreateExam({ repositories, getExam, deleteExam });
 
     await expect(createExam({ subject: '1', mode: 'KANJI', count: 10 })).resolves.toEqual(
-      expect.objectContaining({ mode: 'KANJI', count: 1 }),
+      expect.objectContaining({ mode: 'KANJI', count: 0 }),
     );
 
     expect(repositories.examCandidates.listDueCandidates).toHaveBeenCalledTimes(1);
     expect(repositories.examCandidates.listCandidates).toHaveBeenCalledTimes(1);
-    expect(repositories.examCandidates.lockCandidateIfUnlocked).toHaveBeenCalledTimes(1);
+    expect(repositories.examCandidates.lockCandidateIfUnlocked).not.toHaveBeenCalled();
     expect(repositories.exams.put).toHaveBeenCalledTimes(1);
-    expect(repositories.s3.putObject).toHaveBeenCalledTimes(1);
+    expect(repositories.s3.putObject).not.toHaveBeenCalled();
   });
 });

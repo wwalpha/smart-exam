@@ -3,7 +3,7 @@ import orderBy from 'lodash/orderBy';
 import type { ExamSlice } from '@/stores/store.types';
 import type { GradingData } from '@smart-exam/api-types';
 import * as WORDTEST_API from '@/services/wordtestApi';
-import * as REVIEW_API from '@/services/reviewApi';
+import * as EXAM_API from '@/services/examApi';
 import { withStatus } from '../utils';
 
 export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set, get) => {
@@ -181,7 +181,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.listExams(params);
+          const response = await EXAM_API.listExams(params);
           updateReview({ list: response.items, total: response.total });
         },
         '復習テスト一覧の取得に失敗しました。',
@@ -193,7 +193,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       return await withStatus(
         setReviewStatus,
         async () => {
-          return await REVIEW_API.createExam(request);
+          return await EXAM_API.createExam(request);
         },
         '復習テストの作成に失敗しました。',
         { rethrow: true },
@@ -204,7 +204,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.getExam(id);
+          const response = await EXAM_API.getExam(id);
           updateReview({ detail: response });
         },
         '復習テスト詳細の取得に失敗しました。',
@@ -216,7 +216,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setReviewStatus,
         async () => {
-          const response = await REVIEW_API.updateExamStatus(id, request);
+          const response = await EXAM_API.updateExamStatus(id, request);
           const currentDetail = getReview().detail;
           const currentList = getReview().list;
           if (currentDetail && currentDetail.examId === id) {
@@ -238,7 +238,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setReviewStatus,
         async () => {
-          await REVIEW_API.completeExam(id);
+          await EXAM_API.completeExam(id);
 
           const currentDetail = getReview().detail;
           const currentList = getReview().list;
@@ -261,7 +261,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setReviewStatus,
         async () => {
-          await REVIEW_API.deleteExam(id);
+          await EXAM_API.deleteExam(id);
 
           const current = getReview();
           const nextList = current.list.filter((x) => x.examId !== id);
@@ -278,7 +278,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setReviewStatus,
         async () => {
-          await REVIEW_API.submitExamResults(id, request);
+          await EXAM_API.submitExamResults(id, request);
         },
         'テスト結果の送信に失敗しました。',
         { rethrow: true },
@@ -302,7 +302,7 @@ export const createExamSlice: StateCreator<ExamSlice, [], [], ExamSlice> = (set,
       await withStatus(
         setTargetsStatus,
         async () => {
-          const response = await REVIEW_API.listExamTargets(params);
+          const response = await EXAM_API.listExamTargets(params);
           set({
             reviewTargets: {
               items: response.items,

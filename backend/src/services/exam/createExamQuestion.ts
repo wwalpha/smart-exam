@@ -17,14 +17,6 @@ const listDueCandidates = async (deps: CreateExamDeps, params: CandidateListPara
   });
 };
 
-// 期限候補が足りない場合に OPEN 候補で補う。
-const listOpenCandidates = async (deps: CreateExamDeps, params: CandidateListParams): Promise<ExamCandidateTable[]> => {
-  return deps.repositories.examCandidates.listCandidates({
-    subject: params.subject,
-    mode: params.mode,
-  });
-};
-
 // 採用時点で候補をロックして重複出題を防ぐ。
 const lockCandidate = async (
   deps: CreateExamDeps,
@@ -41,9 +33,9 @@ export const buildQuestionCandidates = (
   sourceCandidates: ExamCandidateTable[],
   createdDate: string,
 ): ReviewCandidate[] => {
-  // nextTime が無い候補は出題対象にならないため除外する。
+  // 作成日より未来の nextTime は出題対象外にして、先取り出題を防止する。
   return sourceCandidates
-    .filter((candidate) => Boolean(candidate.nextTime))
+    .filter((candidate) => Boolean(candidate.nextTime) && String(candidate.nextTime) <= createdDate)
     .map((candidate) => ({
       targetType: 'MATERIAL',
       targetId: candidate.questionId,
@@ -58,11 +50,8 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
   const examId = createUuid();
   const createdDate = DateUtils.todayYmd();
 
-  // due 候補を優先し、0件なら OPEN 候補にフォールバックする。
+  // due 候補のみを対象にして、0件ならそのまま終了する。
   let sourceCandidates = await listDueCandidates(deps, { subject: req.subject, mode: req.mode });
-  if (sourceCandidates.length === 0) {
-    sourceCandidates = await listOpenCandidates(deps, { subject: req.subject, mode: req.mode });
-  }
   const candidates = buildQuestionCandidates(sourceCandidates, createdDate);
 
   // dueDate と targetId で出題順を固定する。

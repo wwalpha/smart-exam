@@ -21,14 +21,6 @@ const listDueCandidates = async (deps: CreateExamDeps, params: CandidateListPara
   });
 };
 
-// 期限到来候補が無い場合のフォールバックとして未ロック候補を取得する。
-const listOpenCandidates = async (deps: CreateExamDeps, params: CandidateListParams): Promise<ExamCandidateTable[]> => {
-  return deps.repositories.examCandidates.listCandidates({
-    subject: params.subject,
-    mode: params.mode,
-  });
-};
-
 // 同じ候補が複数テストで同時採用されないよう、採用時にロックする。
 const lockCandidate = async (
   deps: CreateExamDeps,
@@ -101,11 +93,8 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
   const examId = createUuid();
   const createdDate = DateUtils.todayYmd();
 
-  // 期限到来候補を優先し、なければ OPEN 候補で穴埋めする。
+  // due 候補のみを対象にして、0件ならそのまま終了する。
   let sourceCandidates = await listDueCandidates(deps, { subject: req.subject, mode: req.mode });
-  if (sourceCandidates.length === 0) {
-    sourceCandidates = await listOpenCandidates(deps, { subject: req.subject, mode: req.mode });
-  }
   const candidates = await buildKanjiCandidates(deps, sourceCandidates, createdDate);
 
   // dueDate -> 最終解答日 -> targetId の順で安定ソートする。
