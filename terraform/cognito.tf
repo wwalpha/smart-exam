@@ -43,6 +43,7 @@ resource "aws_cognito_user_pool_client" "auth" {
 # Cognito managed login domain for frontend.
 # ----------------------------------------------------------------------------------------------
 resource "aws_cognito_user_pool_domain" "auth" {
-  domain       = local.cognito_domain_prefix
-  user_pool_id = aws_cognito_user_pool.auth.id
+  domain                = local.cognito_domain_prefix
+  user_pool_id          = aws_cognito_user_pool.auth.id
+  managed_login_version = 2
 }
