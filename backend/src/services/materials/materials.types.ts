@@ -1,5 +1,6 @@
 import type {
   CreateMaterialRequest,
+  CreateMaterialResponse,
   Material,
   MaterialFile,
   SearchMaterialsRequest,
@@ -13,7 +14,7 @@ import type { MaterialTable } from '@/types/db';
 export type MaterialsService = {
   listMaterials: () => Promise<Material[]>;
   searchMaterials: (params: SearchMaterialsRequest) => Promise<SearchMaterialsResponse>;
-  createMaterial: (data: CreateMaterialRequest) => Promise<Material>;
+  createMaterial: (data: CreateMaterialRequest) => Promise<CreateMaterialResponse>;
   getMaterial: (materialId: string) => Promise<Material | null>;
   updateMaterial: (materialId: string, updates: Partial<MaterialTable>) => Promise<Material | null>;
   deleteMaterial: (materialId: string) => Promise<boolean>;

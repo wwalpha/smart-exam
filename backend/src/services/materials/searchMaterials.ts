@@ -6,53 +6,35 @@ import { toApiMaterial } from './materialMappers';
 
 import type { MaterialsService } from './materials.types';
 
-// 公開する処理を定義する
-export const createSearchMaterials = (repositories: Repositories): MaterialsService['searchMaterials'] => {
-  // 処理結果を呼び出し元へ返す
-  return async (params: Parameters<MaterialsService['searchMaterials']>[0]): Promise<SearchMaterialsResponse> => {
-    // 専用の検索クエリを発行して対象を取得する
-    const rows = await repositories.materials.search(params);
-    const items = rows.map(toApiMaterial);
+export const createSearchMaterials = async (
+  repositories: Repositories,
+  params: Parameters<MaterialsService['searchMaterials']>[0],
+): Promise<SearchMaterialsResponse> => {
+  const rows = await repositories.materials.search(params);
+  const items = rows.map(toApiMaterial);
 
-    // 内部で利用する処理を定義する
-    const subject = (params.subject ?? '').trim();
-    // 内部で利用する処理を定義する
-    const grade = (params.grade ?? '').trim();
-    // 内部で利用する処理を定義する
-    const provider = (params.provider ?? '').trim();
-    // 内部で利用する処理を定義する
-    const from = (params.from ?? '').trim();
-    // 内部で利用する処理を定義する
-    const to = (params.to ?? '').trim();
-    // 内部で利用する処理を定義する
-    const q = (params.q ?? '').trim();
+  const subject = (params.subject ?? '').trim().toLowerCase();
+  const grade = (params.grade ?? '').trim();
+  const provider = (params.provider ?? '').trim();
+  const from = (params.from ?? '').trim();
+  const to = (params.to ?? '').trim();
+  const q = (params.q ?? '').trim().toLowerCase();
 
-    // 内部で利用する処理を定義する
-    const subjectLower = subject.toLowerCase();
-    // 内部で利用する処理を定義する
-    const qLower = q.toLowerCase();
+  const filtered = items.filter((item) => {
+    if (subject && String(item.subject ?? '').toLowerCase() !== subject) return false;
+    if (grade && String(item.grade ?? '') !== grade) return false;
+    if (provider && String(item.provider ?? '') !== provider) return false;
+    if (from && String(item.materialDate ?? '') < from) return false;
+    if (to && String(item.materialDate ?? '') > to) return false;
+    if (!q) return true;
 
-    // `q` のみ大文字小文字を吸収するため、最終段で補完フィルタする
-    const filtered = items.filter((x) => {
-      if (subjectLower && String(x.subject ?? '').toLowerCase() !== subjectLower) return false;
-      if (grade && String(x.grade ?? '') !== grade) return false;
-      if (provider && String(x.provider ?? '') !== provider) return false;
-      if (from && String(x.materialDate ?? '') < from) return false;
-      if (to && String(x.materialDate ?? '') > to) return false;
-      // 条件に応じて処理を分岐する
-      if (!qLower) return true;
+    const haystack = [item.name, item.provider, item.materialDate]
+      .filter((value): value is string => typeof value === 'string' && value.length > 0)
+      .join(' ')
+      .toLowerCase();
 
-      // 内部で利用する処理を定義する
-      const haystack = [x.name, x.provider, x.materialDate]
-        .filter((v): v is string => typeof v === 'string' && v.length > 0)
-        .join(' ')
-        .toLowerCase();
+    return haystack.includes(q);
+  });
 
-      // 処理結果を呼び出し元へ返す
-      return haystack.includes(qLower);
-    });
-
-    // 処理結果を呼び出し元へ返す
-    return { items: filtered, total: filtered.length };
-  };
+  return { items: filtered, total: filtered.length };
 };

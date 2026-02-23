@@ -14,16 +14,21 @@ import type { MaterialsService } from './materials.types';
 export type { MaterialsService } from './materials.types';
 
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {
-  const listMaterials = createListMaterials(repositories);
-  const searchMaterials = createSearchMaterials(repositories);
-  const createMaterial = createCreateMaterial(repositories);
-  const uploadMaterialFile = createUploadMaterialFile(repositories);
-  const getMaterial = createGetMaterial(repositories);
-  const updateMaterial = createUpdateMaterial(repositories);
-  const deleteMaterial = createDeleteMaterial(repositories);
+  const listMaterials: MaterialsService['listMaterials'] = () => createListMaterials(repositories);
+  const searchMaterials: MaterialsService['searchMaterials'] = (params) => createSearchMaterials(repositories, params);
+  const createMaterial: MaterialsService['createMaterial'] = (data) => createCreateMaterial(repositories, data);
+  const uploadMaterialFile: MaterialsService['uploadMaterialFile'] = (materialId, request) =>
+    createUploadMaterialFile(repositories, materialId, request);
+  const getMaterial: MaterialsService['getMaterial'] = (materialId) => createGetMaterial(repositories, materialId);
+  const updateMaterial: MaterialsService['updateMaterial'] = (materialId, updates) =>
+    createUpdateMaterial(repositories, materialId, updates);
+  const deleteMaterial: MaterialsService['deleteMaterial'] = (materialId) =>
+    createDeleteMaterial(repositories, materialId);
 
-  const listMaterialFiles = createListMaterialFiles(repositories);
-  const getMaterialFile = createGetMaterialFile(repositories, { listMaterialFiles });
+  const listMaterialFiles: MaterialsService['listMaterialFiles'] = (materialId) =>
+    createListMaterialFiles(repositories, materialId);
+  const getMaterialFile: MaterialsService['getMaterialFile'] = (materialId, fileId) =>
+    createGetMaterialFile({ repositories, listMaterialFiles }, materialId, fileId);
 
   return {
     listMaterials,

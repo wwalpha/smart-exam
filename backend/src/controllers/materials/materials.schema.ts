@@ -6,7 +6,7 @@ import { SubjectIdSchema } from '@/lib/zodSchemas';
 /** CreateMaterialBodySchema validates input shape. */
 export const CreateMaterialBodySchema = z.object({
   name: z.string().min(1),
-  subject: SubjectIdSchema,
+  subject: z.array(SubjectIdSchema).min(1),
   materialDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
   registeredDate: z.string().refine((v) => DateUtils.isValidYmd(v), { message: 'Invalid YYYY-MM-DD' }),
   grade: z.string().min(1),

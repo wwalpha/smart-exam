@@ -10,6 +10,6 @@ export const createMaterial =
   (services: Services): AsyncHandler<ParamsDictionary, CreateMaterialResponse, CreateMaterialRequest, ParsedQs> =>
   async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CreateMaterialBodySchema>;
-    const item = await services.materials.createMaterial(body);
-    res.status(201).json(item);
+    const response = await services.materials.createMaterial(body);
+    res.status(201).json(response);
   };

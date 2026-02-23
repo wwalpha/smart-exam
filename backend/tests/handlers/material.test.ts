@@ -31,11 +31,11 @@ describe('material handler', () => {
   });
 
   it('createMaterial creates item', async () => {
-    const mockItem = { id: '1', name: 'Test Material' };
+    const mockResponse = { items: [{ id: '1', name: 'Test Material' }] };
 
     const services = {
       materials: {
-        createMaterial: vi.fn().mockResolvedValue(mockItem as unknown),
+        createMaterial: vi.fn().mockResolvedValue(mockResponse as unknown),
       },
     } as unknown as Services;
 
@@ -44,7 +44,7 @@ describe('material handler', () => {
     const req = {
       body: {
         name: 'Test Material',
-        subject: '4',
+        subject: ['4'],
         grade: '4年',
         provider: 'SAPIX',
         materialDate: '2025-01-01',
@@ -60,7 +60,7 @@ describe('material handler', () => {
     await controller.createMaterial(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(mockItem);
+    expect(res.json).toHaveBeenCalledWith(mockResponse);
   });
 
   it('getMaterial returns item', async () => {

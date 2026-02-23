@@ -3,15 +3,11 @@ import type { Repositories } from '@/repositories/createRepositories';
 import type { MaterialsService } from './materials.types';
 import { toApiMaterial } from './materialMappers';
 
-// 公開する処理を定義する
-export const createGetMaterial = (repositories: Repositories): MaterialsService['getMaterial'] => {
-  // 処理結果を呼び出し元へ返す
-  return async (materialId: string): ReturnType<MaterialsService['getMaterial']> => {
-    // 内部で利用する処理を定義する
-    const dbItem = await repositories.materials.get(materialId);
-    // 条件に応じて処理を分岐する
-    if (!dbItem) return null;
-    // 処理結果を呼び出し元へ返す
-    return toApiMaterial(dbItem);
-  };
+export const createGetMaterial = async (
+  repositories: Repositories,
+  materialId: string,
+): ReturnType<MaterialsService['getMaterial']> => {
+  const dbItem = await repositories.materials.get(materialId);
+  if (!dbItem) return null;
+  return toApiMaterial(dbItem);
 };
