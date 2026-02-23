@@ -13,10 +13,12 @@ import { MATERIAL_PROVIDER_OPTIONS, MATERIAL_STATUS_LABEL } from '@/lib/material
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const MaterialSetListPage = () => {
-  const { materials, form, search, remove, ConfirmDialog } = useMaterialList();
+  const { materials, form, search, clear, remove, ConfirmDialog } = useMaterialList();
   const { register, setValue, watch } = form;
+  const subject = watch('subject');
   const provider = watch('provider');
   const status = watch('status');
+  const grade = watch('grade');
   const infoBadgeClass = 'px-4 py-2 text-sm';
 
   const [page, setPage] = useState(1);
@@ -60,7 +62,7 @@ export const MaterialSetListPage = () => {
               </div>
               <div className="w-40">
                 <label className="text-sm font-medium">科目</label>
-                <Select onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)} defaultValue="ALL">
+                <Select value={subject} onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)}>
                   <SelectTrigger>
                     <SelectValue placeholder="科目" />
                   </SelectTrigger>
@@ -74,7 +76,7 @@ export const MaterialSetListPage = () => {
               </div>
               <div className="w-40">
                 <label className="text-sm font-medium">学年</label>
-                <Select onValueChange={(v) => setValue('grade', v)} defaultValue="ALL">
+                <Select value={grade} onValueChange={(v) => setValue('grade', v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="学年" />
                   </SelectTrigger>
@@ -119,6 +121,15 @@ export const MaterialSetListPage = () => {
             <div className="flex justify-end gap-2">
               <Button type="button" asChild>
                 <Link to="/materials/new">新規登録</Link>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setPage(1);
+                  void clear();
+                }}>
+                クリア
               </Button>
               <Button type="submit">検索</Button>
             </div>
@@ -195,7 +206,7 @@ export const MaterialSetListPage = () => {
                 <TableCell className="py-1 font-medium">{material.name}</TableCell>
                 <TableCell className="py-1">{material.questionCount}</TableCell>
                 <TableCell className="py-1">
-                  <Badge variant="outline" className={infoBadgeClass}>
+                  <Badge variant={material.isCompleted ? 'outline' : 'warning_soft'} className={infoBadgeClass}>
                     {material.isCompleted ? MATERIAL_STATUS_LABEL.COMPLETED : MATERIAL_STATUS_LABEL.IN_PROGRESS}
                   </Badge>
                 </TableCell>

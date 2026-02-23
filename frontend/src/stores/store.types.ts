@@ -134,6 +134,7 @@ export type ExamSlice = {
 export type MaterialSlice = {
   material: MaterialState;
   fetchMaterials: (params?: Record<string, unknown>) => Promise<void>;
+  resetMaterialDetail: () => void;
   createMaterial: (request: CreateMaterialRequest) => Promise<CreateMaterialResponse>;
   uploadMaterialPdf: (params: {
     materialId: string;

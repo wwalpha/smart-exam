@@ -13,7 +13,7 @@
 | 教材セット一覧               | `/materials`                  | materials/MaterialSetListPage.tsx    |
 | 教材セット登録               | `/materials/new`              | materials/MaterialSetCreatePage.tsx  |
 | 教材セット詳細               | `/materials/:id`              | materials/MaterialSetDetailPage.tsx  |
-| 問題管理                     | `/materials/:id/questions`    | materials/QuestionManagementPage.tsx |
+| 教材問題管理                 | `/materials/:id/questions`    | materials/QuestionManagementPage.tsx |
 | 問題復習テスト一覧           | `/exam/questions`             | review/ExamQuestionListPage.tsx      |
 | 問題復習テスト作成           | `/exam/questions/new`         | review/ExamQuestionCreatePage.tsx    |
 | 問題復習テスト詳細           | `/exam/questions/:id`         | review/ExamQuestionDetailPage.tsx    |

@@ -12,20 +12,23 @@ type SearchFormValues = {
   q: string;
 };
 
+const DEFAULT_SEARCH_VALUES: SearchFormValues = {
+  subject: 'ALL',
+  status: 'ALL',
+  grade: 'ALL',
+  provider: '',
+  date: '',
+  q: '',
+};
+
 export const useMaterialList = () => {
   const { list, total, status } = useWordTestStore((s) => s.material);
   const fetchMaterials = useWordTestStore((s) => s.fetchMaterials);
+  const resetMaterialDetail = useWordTestStore((s) => s.resetMaterialDetail);
   const deleteMaterial = useWordTestStore((s) => s.deleteMaterial);
   
   const form = useForm<SearchFormValues>({
-    defaultValues: {
-      subject: 'ALL',
-      status: 'ALL',
-      grade: 'ALL',
-      provider: '',
-      date: '',
-      q: '',
-    }
+    defaultValues: DEFAULT_SEARCH_VALUES,
   });
 
   const search = (data: SearchFormValues) => {
@@ -47,6 +50,11 @@ export const useMaterialList = () => {
     }
   };
 
+  const clear = async () => {
+    form.reset(DEFAULT_SEARCH_VALUES);
+    resetMaterialDetail();
+  };
+
   return {
     materials: list,
     total,
@@ -54,6 +62,7 @@ export const useMaterialList = () => {
     error: status.error,
     form,
     search: form.handleSubmit(search),
+    clear,
     remove,
     ConfirmDialog,
   };

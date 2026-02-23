@@ -1,5 +1,6 @@
 import type { Repositories } from '@/repositories/createRepositories';
 
+import { createAnalyzeMaterial } from './analyzeMaterial';
 import { createCreateMaterial } from './createMaterial';
 import { createDeleteMaterial } from './deleteMaterial';
 import { createGetMaterial } from './getMaterial';
@@ -19,6 +20,8 @@ export const createMaterialsService = (repositories: Repositories): MaterialsSer
   const createMaterial: MaterialsService['createMaterial'] = (data) => createCreateMaterial(repositories, data);
   const uploadMaterialFile: MaterialsService['uploadMaterialFile'] = (materialId, request) =>
     createUploadMaterialFile(repositories, materialId, request);
+  const analyzeMaterial: MaterialsService['analyzeMaterial'] = (materialId) =>
+    createAnalyzeMaterial(repositories, materialId);
   const getMaterial: MaterialsService['getMaterial'] = (materialId) => createGetMaterial(repositories, materialId);
   const updateMaterial: MaterialsService['updateMaterial'] = (materialId, updates) =>
     createUpdateMaterial(repositories, materialId, updates);
@@ -35,6 +38,7 @@ export const createMaterialsService = (repositories: Repositories): MaterialsSer
     searchMaterials,
     createMaterial,
     uploadMaterialFile,
+    analyzeMaterial,
     getMaterial,
     updateMaterial,
     deleteMaterial,

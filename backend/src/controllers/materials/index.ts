@@ -1,4 +1,5 @@
 import type { Services } from '@/services/createServices';
+import { analyzeMaterial } from './analyzeMaterial';
 import { completeMaterial } from './completeMaterial';
 import { createMaterial } from './createMaterial';
 import { deleteMaterial } from './deleteMaterial';
@@ -32,5 +33,6 @@ export const materialsController = (services: Services) => {
     listMaterialFiles: listMaterialFiles(services),
     getMaterialFile: getMaterialFile(services),
     uploadMaterialFile: uploadMaterialFile(services),
+    analyzeMaterial: analyzeMaterial(services),
   };
 };

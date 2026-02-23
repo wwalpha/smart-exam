@@ -18,6 +18,12 @@ export type CompleteMaterialParams = {
   materialId: string;
 };
 
+/** `POST /materials/:materialId/analyze` */
+export type AnalyzeMaterialParams = {
+  /** 教材ID */
+  materialId: string;
+};
+
 /** `GET /materials/:materialId/questions` */
 export type ListQuestionsParams = {
   /** 教材ID */
@@ -134,6 +140,12 @@ export type CompleteMaterialRequest = Record<string, never>;
 
 /** `POST /materials/:materialId/completion` */
 export type CompleteMaterialResponse = Material;
+
+/** `POST /materials/:materialId/analyze` */
+export type AnalyzeMaterialResponse = {
+  /** 抽出・再登録された問題番号一覧 */
+  questions: string[];
+};
 
 /** `PATCH /materials/:materialId` */
 export type UpdateMaterialParams = {

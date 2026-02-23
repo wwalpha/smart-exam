@@ -1,9 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { MaterialSlice } from '@/stores/store.types';
 import * as MATERIAL_API from '@/services/materialApi';
-import * as BEDROCK_API from '@/services/bedrockApi';
-import { compareQuestionNumber, normalizeQuestionNumber } from '@/utils/questionNumber';
-import { toBedrockPromptSubject } from '@/utils/bedrockSubject';
 import { withStatus } from '../utils';
 
 export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSlice> = (set, get) => {
@@ -61,6 +58,16 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         '教材セット一覧の取得に失敗しました。',
         { rethrow: true }
       );
+    },
+
+    resetMaterialDetail: () => {
+      updateMaterial({
+        list: [],
+        total: 0,
+        detail: null,
+        files: [],
+        questions: [],
+      });
     },
 
     createMaterial: async (request) => {
@@ -173,31 +180,13 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         async () => {
           const current = getMaterial();
           if (current.detail?.id !== materialId) return;
-          if (current.questions.length > 0) return;
 
           const graded = current.files.find(
             (f) => f.fileType === 'GRADED_ANSWER' && f.filename.toLowerCase().endsWith('.pdf')
           );
           if (!graded) return;
 
-          const response = await BEDROCK_API.analyzePaper({
-            s3Key: graded.s3Key,
-            subject: toBedrockPromptSubject(current.detail.subject),
-          });
-
-          const normalized = (response.questions ?? [])
-            .map(normalizeQuestionNumber)
-            .filter((x): x is string => typeof x === 'string');
-
-          const unique = Array.from(new Set(normalized)).sort(compareQuestionNumber);
-          if (unique.length === 0) return;
-
-          for (const key of unique) {
-            await MATERIAL_API.createQuestion(materialId, {
-              canonicalKey: key,
-              subject: current.detail.subject,
-            });
-          }
+          await MATERIAL_API.analyzeMaterial(materialId);
 
           const nextQuestions = await MATERIAL_API.listQuestions(materialId);
           updateMaterial({ questions: nextQuestions });

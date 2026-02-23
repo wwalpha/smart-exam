@@ -34,13 +34,6 @@ export const createApp = (): express.Express => {
     res.json({ status: 'ok' });
   });
 
-  // 試験用紙を解析して構造化データを生成するAPI
-  app.post(
-    '/api/analyze-paper',
-    validateBody(controllers.bedrock.AnalyzePaperBodySchema),
-    handleRequest(controllers.bedrock.analyzePaper),
-  );
-
   // ダッシュボード表示用の集計情報を取得するAPI
   app.get('/api/dashboard', handleRequest(controllers.dashboard.getDashboard));
 
@@ -101,6 +94,12 @@ export const createApp = (): express.Express => {
     validateParams(MaterialIdParamsSchema),
     validateBody(controllers.materials.UploadMaterialFileBodySchema),
     handleRequest(controllers.materials.uploadMaterialFile),
+  );
+  // 指定した教材の採点済み答案を解析し、問題明細を再生成するAPI
+  app.post(
+    '/api/materials/:materialId/analyze',
+    validateParams(MaterialIdParamsSchema),
+    handleRequest(controllers.materials.analyzeMaterial),
   );
 
   // 条件を指定して漢字データを検索するAPI

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,25 +18,19 @@ export const QuestionManagementPage = () => {
     isBusy,
     busyQuestionId,
     error,
-    isDialogOpen,
-    setIsDialogOpen,
     isBulkDialogOpen,
     setIsBulkDialogOpen,
     bulkInput,
     setBulkInput,
     optimisticResultByQuestionId,
-    form,
-    submit,
     submitBulk,
     remove,
     markCorrect,
     markIncorrect,
+    analyze,
+    canAnalyze,
     ConfirmDialog,
   } = useQuestionManagement();
-  const {
-    register,
-    formState: { errors },
-  } = form;
 
   if (isInitialLoading) {
     return <div className="p-8">Loading...</div>;
@@ -48,11 +41,11 @@ export const QuestionManagementPage = () => {
   }
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="mx-auto w-full max-w-5xl space-y-6 p-8">
       <ConfirmDialog />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">問題管理</h1>
+          <h1 className="text-2xl font-bold">教材問題管理</h1>
           <p className="text-muted-foreground">
             {material?.name}
             {material?.materialDate ? ` / ${material.materialDate}` : ''}
@@ -61,6 +54,9 @@ export const QuestionManagementPage = () => {
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link to={`/materials/${id}`}>詳細へ戻る</Link>
+          </Button>
+          <Button type="button" disabled={!canAnalyze} onClick={() => void analyze()}>
+            番号分析
           </Button>
           <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
             <DialogTrigger asChild>
@@ -97,54 +93,10 @@ export const QuestionManagementPage = () => {
               </div>
             </DialogContent>
           </Dialog>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button disabled={isBusy || !!material?.isCompleted}>手動追加</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>問題追加</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={submit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>問題番号 *</Label>
-                  <Input
-                    {...register('canonicalKey', {
-                      required: '必須です',
-                      pattern: {
-                        value: /^\d+(?:-\d+)*(?:-[^-\s]+)?$/,
-                        message: 'ハイフン区切りで入力してください (例: 1-1 / 1-8-A / 1-8-あ)',
-                      },
-                    })}
-                    aria-invalid={!!errors.canonicalKey}
-                    className={errors.canonicalKey ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                    placeholder="例: 1-1"
-                    disabled={isBusy || !!material?.isCompleted}
-                  />
-                  {errors.canonicalKey?.message ? (
-                    <p className="text-sm text-destructive">{String(errors.canonicalKey.message)}</p>
-                  ) : null}
-                  <p className="text-xs text-muted-foreground">階層はハイフン区切り (例: 1-1-1 / 1-8-A / 1-9-カナ)</p>
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                    disabled={isBusy || !!material?.isCompleted}>
-                    キャンセル
-                  </Button>
-                  <Button type="submit" disabled={isBusy || !!material?.isCompleted}>
-                    追加
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
 
-      <Card className="w-full max-w-5xl">
+      <Card className="w-full">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -164,23 +116,35 @@ export const QuestionManagementPage = () => {
                       if (optimistic === 'correct') {
                         return (
                           <div className="flex items-center gap-2">
-                            <Badge variant="secondary">正解</Badge>
+                            <Badge variant="success_soft" className="px-3 py-1 text-sm font-semibold">
+                              正解
+                            </Badge>
                           </div>
                         );
                       }
                       if (optimistic === 'incorrect') {
                         return (
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline">不正解</Badge>
+                            <Badge variant="danger_soft" className="px-3 py-1 text-sm font-semibold">
+                              不正解
+                            </Badge>
                           </div>
                         );
                       }
 
                       if (q.choice === 'CORRECT') {
-                        return <Badge variant="secondary">正解</Badge>;
+                        return (
+                          <Badge variant="success_soft" className="px-3 py-1 text-sm font-semibold">
+                            正解
+                          </Badge>
+                        );
                       }
                       if (q.choice === 'INCORRECT') {
-                        return <Badge variant="outline">不正解</Badge>;
+                        return (
+                          <Badge variant="danger_soft" className="px-3 py-1 text-sm font-semibold">
+                            不正解
+                          </Badge>
+                        );
                       }
                       return <span className="text-sm text-muted-foreground">未設定</span>;
                     })()}

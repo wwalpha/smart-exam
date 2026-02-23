@@ -24,6 +24,11 @@ export type KanjiQuestionReadingBulkResult = {
   readingHiragana: string;
 };
 
+export type AnalyzeExamPaperChoiceResult = {
+  canonicalKey: string;
+  isCorrect: boolean;
+};
+
 /** analyzeExamPaper. */
 export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'): Promise<string[]> => {
   // 1. Get file from S3
@@ -200,6 +205,82 @@ export const analyzeExamPaper = async (s3Key: string, subject: string = 'math'):
     const jsonString = jsonMatch ? jsonMatch[0] : textContent;
     const result = JSON.parse(jsonString);
     return result.questions || [];
+  } catch {
+    console.error('Failed to parse JSON from Bedrock:', textContent);
+    throw new Error('Failed to parse Bedrock response');
+  }
+};
+
+/** analyzeExamPaperChoices. */
+export const analyzeExamPaperChoices = async (
+  s3Key: string,
+  questions: string[],
+): Promise<AnalyzeExamPaperChoiceResult[]> => {
+  const bucket = ENV.FILES_BUCKET_NAME;
+  if (!bucket) {
+    throw new Error('FILES_BUCKET_NAME is not set');
+  }
+  const { buffer: fileBuffer } = await AwsUtils.getS3ObjectBuffer({ bucket, key: s3Key });
+
+  const modelId = BEDROCK_MODEL_ID;
+
+  const prompt = `
+You are an AI assistant that reads graded exam papers and determines correctness for each question.
+
+Rules:
+- Use ONLY the given question numbers.
+- Circle mark (○ / 丸) means correct.
+- Check mark (✓ / チェック) means incorrect.
+- If neither mark is visible, omit that question from output.
+- Return JSON only.
+
+Input question numbers:
+${JSON.stringify(questions)}
+
+Output schema:
+{
+  "results": [
+    { "canonicalKey": "1-1", "isCorrect": true },
+    { "canonicalKey": "1-2", "isCorrect": false }
+  ]
+}
+`;
+
+  const command = new ConverseCommand({
+    modelId,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          { text: prompt },
+          {
+            document: {
+              name: 'graded_answer_sheet',
+              format: 'pdf',
+              source: {
+                bytes: fileBuffer,
+              },
+            },
+          },
+        ],
+      },
+    ],
+    additionalModelRequestFields: {
+      max_tokens: 4096,
+    },
+  });
+
+  const response = await bedrockClient.send(command);
+  const textContent = response.output?.message?.content?.find((c) => c.text)?.text;
+  if (!textContent) {
+    throw new Error('No text content in Bedrock response');
+  }
+
+  try {
+    const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : textContent;
+    const result = JSON.parse(jsonString) as { results?: AnalyzeExamPaperChoiceResult[] };
+    return Array.isArray(result.results) ? result.results : [];
   } catch {
     console.error('Failed to parse JSON from Bedrock:', textContent);
     throw new Error('Failed to parse Bedrock response');

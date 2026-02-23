@@ -1,14 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
 import { compareQuestionNumber } from '@/utils/questionNumber';
 import { normalizeQuestionNumber } from '@/utils/questionNumber';
-
-type QuestionFormValues = {
-  canonicalKey: string;
-};
 
 export const useQuestionManagement = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,34 +11,32 @@ export const useQuestionManagement = () => {
   const fetchQuestions = useWordTestStore((s) => s.fetchQuestions);
   const fetchMaterial = useWordTestStore((s) => s.fetchMaterial);
   const fetchMaterialFiles = useWordTestStore((s) => s.fetchMaterialFiles);
-  const createQuestion = useWordTestStore((s) => s.createQuestion);
   const createQuestionsBulk = useWordTestStore((s) => s.createQuestionsBulk);
   const deleteQuestion = useWordTestStore((s) => s.deleteQuestion);
   const setQuestionChoice = useWordTestStore((s) => s.setQuestionChoice);
   const extractQuestionsFromGradedAnswer = useWordTestStore((s) => s.extractQuestionsFromGradedAnswer);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [bulkInput, setBulkInput] = useState('');
   const [busyQuestionId, setBusyQuestionId] = useState<string | null>(null);
   const [optimisticResultByQuestionId, setOptimisticResultByQuestionId] = useState<
     Record<string, 'correct' | 'incorrect' | undefined>
   >({});
-  const form = useForm<QuestionFormValues>();
-  const { reset } = form;
   const { confirm, ConfirmDialog } = useConfirm();
 
-  const extractedRef = useRef(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const sortedQuestions = useMemo(() => {
     return [...questions].sort((a, b) => compareQuestionNumber(a.canonicalKey, b.canonicalKey));
   }, [questions]);
 
+  const hasGradedAnswerPdf = useMemo(() => {
+    return files.some((file) => file.fileType === 'GRADED_ANSWER' && file.filename.toLowerCase().endsWith('.pdf'));
+  }, [files]);
+
   useEffect(() => {
     // 画面の対象IDが変わったら、関連データをまとめて再取得する
     if (id) {
-      extractedRef.current = false;
       fetchMaterial(id);
       fetchMaterialFiles(id);
       fetchQuestions(id);
@@ -56,34 +49,6 @@ export const useQuestionManagement = () => {
       setHasLoadedOnce(true);
     }
   }, [detail, id]);
-
-  useEffect(() => {
-    // 参照中の教材と一致している場合のみ自動抽出を許可する
-    if (!id || !detail || detail.id !== id) return;
-    // useEffectの再実行（StrictMode含む）でも二重抽出しない
-    if (extractedRef.current) return;
-    // 完了済み教材では問題の自動抽出を行わない
-    if (detail.isCompleted) return;
-    // 既に問題が登録済みなら自動抽出しない
-    if (questions.length > 0) return;
-    // 採点済み解答PDFがある場合のみ抽出対象とする
-    if (!files.some((f) => f.fileType === 'GRADED_ANSWER')) return;
-
-    extractedRef.current = true;
-    extractQuestionsFromGradedAnswer(id);
-  }, [id, detail, files, questions.length, extractQuestionsFromGradedAnswer]);
-
-  const submit = async (data: QuestionFormValues) => {
-    // URLが不正/教材未取得の状態で送信される可能性をガードする
-    if (!id || !detail) return;
-    if (detail.isCompleted) return;
-    await createQuestion(id, {
-      ...data,
-      subject: detail.subject,
-    });
-    reset();
-    setIsDialogOpen(false);
-  };
 
   const submitBulk = async () => {
     // URLが不正/教材未取得の状態で送信される可能性をガードする
@@ -149,6 +114,13 @@ export const useQuestionManagement = () => {
     }
   };
 
+  const analyze = async () => {
+    if (!id || !detail) return;
+    if (detail.isCompleted) return;
+    if (!hasGradedAnswerPdf) return;
+    await extractQuestionsFromGradedAnswer(id);
+  };
+
   return {
     id,
     material: detail,
@@ -157,19 +129,17 @@ export const useQuestionManagement = () => {
     isBusy: status.isLoading,
     busyQuestionId,
     error: status.error,
-    isDialogOpen,
-    setIsDialogOpen,
     isBulkDialogOpen,
     setIsBulkDialogOpen,
     bulkInput,
     setBulkInput,
     optimisticResultByQuestionId,
-    form,
-    submit: form.handleSubmit(submit),
     submitBulk,
     remove,
     markCorrect,
     markIncorrect,
+    analyze,
+    canAnalyze: !status.isLoading && !!detail && !detail.isCompleted && hasGradedAnswerPdf,
     ConfirmDialog,
   };
 };

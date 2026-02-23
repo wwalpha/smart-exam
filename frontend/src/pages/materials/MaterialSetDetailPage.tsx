@@ -51,7 +51,7 @@ export const MaterialSetDetailPage = () => {
             <Link to="/materials">一覧へ戻る</Link>
           </Button>
           <Button asChild>
-            <Link to={`/materials/${id}/questions`}>問題管理</Link>
+            <Link to={`/materials/${id}/questions`}>教材問題管理</Link>
           </Button>
         </div>
       </div>

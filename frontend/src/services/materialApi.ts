@@ -1,5 +1,6 @@
 import { apiRequest } from './apiClient';
 import type {
+  AnalyzeMaterialResponse,
   Material,
   MaterialListResponse,
   SearchMaterialsRequest,
@@ -85,6 +86,13 @@ export const uploadMaterialFile = async (
     method: 'POST',
     path: `/api/materials/${materialId}/upload`,
     body: request,
+  });
+};
+
+export const analyzeMaterial = async (materialId: string): Promise<AnalyzeMaterialResponse> => {
+  return apiRequest<AnalyzeMaterialResponse>({
+    method: 'POST',
+    path: `/api/materials/${materialId}/analyze`,
   });
 };
 

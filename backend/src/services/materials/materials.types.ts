@@ -1,4 +1,5 @@
 import type {
+  AnalyzeMaterialResponse,
   CreateMaterialRequest,
   CreateMaterialResponse,
   Material,
@@ -20,6 +21,7 @@ export type MaterialsService = {
   deleteMaterial: (materialId: string) => Promise<boolean>;
   listMaterialFiles: (materialId: string) => Promise<MaterialFile[]>;
   uploadMaterialFile: (materialId: string, request: UploadMaterialFileRequest) => Promise<UploadMaterialFileResponse>;
+  analyzeMaterial: (materialId: string) => Promise<AnalyzeMaterialResponse>;
   getMaterialFile: (
     materialId: string,
     fileId: string,
