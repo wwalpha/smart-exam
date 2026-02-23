@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useMaterialList } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
-import { MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
+import { MATERIAL_PROVIDER_OPTIONS, MATERIAL_STATUS_LABEL } from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const MaterialSetListPage = () => {
@@ -80,7 +80,7 @@ export const MaterialSetListPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">全て</SelectItem>
-                      {MATERIAL_PROVIDER_OPTIONS.map((p) => (
+                    {MATERIAL_PROVIDER_OPTIONS.map((p) => (
                       <SelectItem key={p} value={p}>
                         {p}
                       </SelectItem>
@@ -140,6 +140,7 @@ export const MaterialSetListPage = () => {
               <TableHead>科目</TableHead>
               <TableHead>教材年月日</TableHead>
               <TableHead>教材名</TableHead>
+              <TableHead>STATUS</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -152,14 +153,16 @@ export const MaterialSetListPage = () => {
                         <FileText className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="削除"
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => remove(material.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {!material.isCompleted && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="削除"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => remove(material.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="py-1">{material.grade}年</TableCell>
@@ -171,11 +174,16 @@ export const MaterialSetListPage = () => {
                 </TableCell>
                 <TableCell className="py-1">{material.materialDate}</TableCell>
                 <TableCell className="py-1 font-medium">{material.name}</TableCell>
+                <TableCell className="py-1">
+                  <Badge variant="outline" className={infoBadgeClass}>
+                    {material.isCompleted ? MATERIAL_STATUS_LABEL.COMPLETED : MATERIAL_STATUS_LABEL.IN_PROGRESS}
+                  </Badge>
+                </TableCell>
               </TableRow>
             ))}
             {materials.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

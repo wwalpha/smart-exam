@@ -21,3 +21,10 @@ export const MATERIAL_PDF_FILE_TYPE_LABEL: Record<MaterialPdfFileType, string> =
   ANSWER: '解答用紙',
   GRADED_ANSWER: '答案用紙',
 };
+
+export type MaterialStatus = 'COMPLETED' | 'IN_PROGRESS';
+
+export const MATERIAL_STATUS_LABEL: Record<MaterialStatus, string> = {
+  COMPLETED: '完了',
+  IN_PROGRESS: '進行中',
+};

@@ -39,7 +39,12 @@ resource "aws_s3_bucket_cors_configuration" "files" {
 
   cors_rule {
     allowed_methods = ["GET", "HEAD", "PUT"]
-    allowed_origins = ["http://127.0.0.1:5173", "http://localhost:5173"]
+    allowed_origins = [
+      "http://127.0.0.1:5173",
+      "http://localhost:5173",
+      "https://smartexam.aws-handson.com",
+      "https://www.smartexam.aws-handson.com",
+    ]
     allowed_headers = ["*"]
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
