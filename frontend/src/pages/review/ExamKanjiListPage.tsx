@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { useReviewKanjiList } from '@/hooks/review';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import { formatYmdSlash } from '@/utils/date';
@@ -25,7 +25,7 @@ export const ExamKanjiListPage = () => {
         );
       case 'IN_PROGRESS':
         return (
-          <Badge variant="secondary" className={infoBadgeClass}>
+          <Badge variant="default" className={infoBadgeClass}>
             実施中
           </Badge>
         );
@@ -62,7 +62,7 @@ export const ExamKanjiListPage = () => {
                 <label className="text-sm font-medium">ステータス</label>
                 <Select
                   onValueChange={(v) => setValue('status', v as 'ALL' | 'IN_PROGRESS' | 'COMPLETED')}
-                  defaultValue="ALL">
+                  defaultValue="IN_PROGRESS">
                   <SelectTrigger>
                     <SelectValue placeholder="ステータス" />
                   </SelectTrigger>
@@ -90,16 +90,16 @@ export const ExamKanjiListPage = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-24" />
-              <TableHead>科目</TableHead>
-              <TableHead>作成日時</TableHead>
-              <TableHead>問題数</TableHead>
-              <TableHead>ステータス</TableHead>
+              <TableHead className="text-base font-semibold">科目</TableHead>
+              <TableHead className="text-base font-semibold">作成日時</TableHead>
+              <TableHead className="text-base font-semibold">問題数</TableHead>
+              <TableHead className="text-base font-semibold">ステータス</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {reviews.map((test) => (
               <TableRow key={test.examId}>
-                <TableCell>
+                <TableCell className="text-base">
                   <div className="flex gap-2">
                     <Button asChild variant="ghost" size="icon" aria-label="詳細">
                       <Link to={`${basePath}/${test.examId}`}>
@@ -118,18 +118,18 @@ export const ExamKanjiListPage = () => {
                     ) : null}
                   </div>
                 </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={infoBadgeClass}>
+                <TableCell className="text-base">
+                  <Badge variant={getSubjectBadgeVariant(test.subject)} className={infoBadgeClass}>
                     {SUBJECT_LABEL[test.subject as keyof typeof SUBJECT_LABEL] ?? ''}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-base">
                   <Link to={`${basePath}/${test.examId}`} className="font-medium hover:underline">
                     {formatYmdSlash(test.createdDate)}
                   </Link>
                 </TableCell>
-                <TableCell>{test.count}問</TableCell>
-                <TableCell>{getStatusBadge(test.status)}</TableCell>
+                <TableCell className="text-base">{test.count}問</TableCell>
+                <TableCell className="text-base">{getStatusBadge(test.status)}</TableCell>
               </TableRow>
             ))}
             {reviews.length === 0 && (

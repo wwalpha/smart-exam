@@ -1,15 +1,15 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useReviewKanjiDetail } from '@/hooks/review';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 import { formatYmdSlash } from '@/utils/date';
+import { toast } from 'sonner';
 
 export const ExamKanjiDetailPage = () => {
   const { review, isLoading, error, basePath, remove, completeExam, ConfirmDialog } = useReviewKanjiDetail();
-  const navigate = useNavigate();
 
   const infoBadgeClass = 'px-4 py-2 text-sm';
 
@@ -21,8 +21,8 @@ export const ExamKanjiDetailPage = () => {
   const complete = useCallback(async () => {
     if (!review) return;
     await completeExam(review.examId);
-    navigate(basePath);
-  }, [review, completeExam, navigate, basePath]);
+    toast.success('復習テストを完了しました');
+  }, [review, completeExam]);
 
   if (isLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
@@ -65,7 +65,7 @@ export const ExamKanjiDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className={infoBadgeClass}>
+              <Badge variant={getSubjectBadgeVariant(review.subject)} className={infoBadgeClass}>
                 {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
               </Badge>
               <Badge variant="secondary" className={infoBadgeClass}>

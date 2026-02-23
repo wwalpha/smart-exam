@@ -19,7 +19,7 @@ export const useReviewKanjiList = () => {
   const form = useForm<SearchFormValues>({
     defaultValues: {
       subject: 'ALL',
-      status: 'ALL',
+      status: 'IN_PROGRESS',
     },
   });
 

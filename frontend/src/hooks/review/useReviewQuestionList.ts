@@ -19,7 +19,7 @@ export const useReviewQuestionList = () => {
   const form = useForm<SearchFormValues>({
     defaultValues: {
       subject: 'ALL',
-      status: 'ALL',
+      status: 'IN_PROGRESS',
     },
   });
 

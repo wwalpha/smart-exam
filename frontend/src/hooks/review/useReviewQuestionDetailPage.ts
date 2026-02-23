@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
 import { apiRequestBlob } from '@/services/apiClient';
@@ -25,7 +24,6 @@ const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']
 
 export const useReviewQuestionDetailPage = () => {
   const { review, isLoading, error, basePath, remove, completeExam, ConfirmDialog } = useReviewQuestionDetail();
-  const navigate = useNavigate();
 
   const sortedItems = useMemo(() => {
     if (!review) return [];
@@ -125,8 +123,8 @@ export const useReviewQuestionDetailPage = () => {
   const complete = useCallback(async () => {
     if (!review) return;
     await completeExam(review.examId);
-    navigate(basePath);
-  }, [review, completeExam, navigate, basePath]);
+    toast.success('復習テストを完了しました');
+  }, [review, completeExam]);
 
   const previewMaterialPdf = useCallback(async (materialId: string, fileType: MaterialFile['fileType']) => {
     try {

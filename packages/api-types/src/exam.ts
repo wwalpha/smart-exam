@@ -112,6 +112,8 @@ export type ExamItem = {
   questionText?: string;
   /** 解答 */
   answerText?: string;
+  /** 不正解時の正解値（教材問題の場合） */
+  correctAnswer?: string;
   /** 漢字問題: 読み（ひらがな、本文中で下線対象） */
   readingHiragana?: string;
   /** 漢字問題: 下線指定（本文内の部分範囲） */

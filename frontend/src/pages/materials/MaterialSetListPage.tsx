@@ -44,14 +44,14 @@ export const MaterialSetListPage = () => {
           <form onSubmit={onSearch} className="space-y-4 pt-4">
             <div className="flex flex-wrap gap-4 items-end">
               <div className="w-40">
-                <label className="text-sm font-medium">STATUS</label>
+                <label className="text-sm font-medium">ステータス</label>
                 <input type="hidden" {...register('status')} />
                 <Select
                   value={status}
                   onValueChange={(v) => setValue('status', v as 'ALL' | 'IN_PROGRESS' | 'COMPLETED')}
                   defaultValue="ALL">
                   <SelectTrigger>
-                    <SelectValue placeholder="STATUS" />
+                    <SelectValue placeholder="ステータス" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">全て</SelectItem>
@@ -170,7 +170,7 @@ export const MaterialSetListPage = () => {
               <TableHead>教材年月日</TableHead>
               <TableHead>教材名</TableHead>
               <TableHead>問題数</TableHead>
-              <TableHead>STATUS</TableHead>
+              <TableHead>ステータス</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -206,7 +206,7 @@ export const MaterialSetListPage = () => {
                 <TableCell className="py-1 font-medium">{material.name}</TableCell>
                 <TableCell className="py-1">{material.questionCount}</TableCell>
                 <TableCell className="py-1">
-                  <Badge variant={material.isCompleted ? 'outline' : 'warning_soft'} className={infoBadgeClass}>
+                  <Badge variant={material.isCompleted ? 'outline' : 'default'} className={infoBadgeClass}>
                     {material.isCompleted ? MATERIAL_STATUS_LABEL.COMPLETED : MATERIAL_STATUS_LABEL.IN_PROGRESS}
                   </Badge>
                 </TableCell>

@@ -6,7 +6,12 @@ import fontkit from '@pdf-lib/fontkit';
 import type { ExamDetail } from '@smart-exam/api-types';
 
 import { ApiError } from '@/lib/apiError';
-import type { PageContext, PdfRenderConfig, PromptUnderlineSpec } from './examPdfService.types';
+import type { PdfRenderConfig, PromptUnderlineSpec } from './examPdfService.types';
+
+type MaterialGroup = {
+  title: string;
+  items: ExamDetail['items'];
+};
 
 // mm 指定を PDF 座標系(pt)へ変換する。
 const mmToPt = (mm: number): number => (mm * 72) / 25.4;
@@ -35,91 +40,88 @@ const buildPdfRenderConfig = (): PdfRenderConfig => {
   };
 };
 
-// ヘッダーを描画し、新規ページの描画コンテキストを初期化する。
-const createPage = (params: {
-  pdfDoc: PDFDocument;
-  jpFont: PDFFont;
-  config: PdfRenderConfig;
-  title: string;
-  meta: string;
-  pageWidth?: number;
-  pageHeight?: number;
-  titleSize?: number;
-  metaSize?: number;
-}): PageContext => {
-  const pageWidth = params.pageWidth ?? params.config.a4Width;
-  const pageHeight = params.pageHeight ?? params.config.a4Height;
-  const titleSize = params.titleSize ?? params.config.titleFontSize;
-  const metaSize = params.metaSize ?? params.config.metaFontSize;
-  const page = params.pdfDoc.addPage([pageWidth, pageHeight]);
-  const contentWidth = pageWidth - params.config.margin * 2;
-  const titleY = pageHeight - params.config.margin - titleSize;
-  page.drawText(params.title, {
-    x: params.config.margin,
-    y: titleY,
-    size: titleSize,
-    font: params.jpFont,
-    color: rgb(0, 0, 0),
-  });
-  const metaWidth = params.jpFont.widthOfTextAtSize(params.meta, metaSize);
-  page.drawText(params.meta, {
-    x: params.config.margin + contentWidth - metaWidth,
-    y: titleY,
-    size: metaSize,
-    font: params.jpFont,
-    color: rgb(0, 0, 0),
-  });
-  const cursorY = titleY - params.config.headerGap;
-  return { page, contentWidth, cursorY };
+// YYYY-MM-DD を YYYY/MM/DD に変換する。
+const formatYmdSlash = (date?: string): string => {
+  if (!date) return '';
+  return date.replaceAll('-', '/');
 };
 
-// 日本語を文字単位で折り返し、指定幅内に収める。
-const wrapTextByChar = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string[] => {
-  const normalized = text.replaceAll('\r\n', '\n');
-  const paragraphs = normalized.split('\n');
-  const lines: string[] = [];
-  for (const paragraph of paragraphs) {
-    if (paragraph.length === 0) {
-      lines.push('');
+// MATERIAL のブロック見出し（提供元 + 教材名 + 日付）を組み立てる。
+const getMaterialBlockTitle = (item: ExamDetail['items'][number]): string => {
+  const provider = String(item.provider ?? '').trim();
+  const materialName = String(item.materialName ?? '').trim();
+  const materialDate = formatYmdSlash(item.materialDate);
+  const parts = [provider, materialName, materialDate].filter((value) => value.length > 0);
+  if (parts.length === 0) {
+    return '教材';
+  }
+  return parts.join('　');
+};
+
+// MATERIAL の問題行に表示するラベルを決定する。
+const getMaterialItemLabel = (item: ExamDetail['items'][number]): string => {
+  const candidate =
+    String(item.canonicalKey ?? '').trim() ||
+    String(item.questionText ?? '').trim() ||
+    String(item.displayLabel ?? '').trim() ||
+    String(item.targetId ?? '').trim();
+  return candidate.length > 0 ? candidate : '-';
+};
+
+// canonicalKey の自然順（例: 1-2 < 1-10）で安定ソートする。
+const compareMaterialItemOrder = (left: ExamDetail['items'][number], right: ExamDetail['items'][number]): number => {
+  const leftKey = String(left.canonicalKey ?? left.questionText ?? left.displayLabel ?? left.targetId ?? '');
+  const rightKey = String(right.canonicalKey ?? right.questionText ?? right.displayLabel ?? right.targetId ?? '');
+  return leftKey.localeCompare(rightKey, 'ja', { numeric: true, sensitivity: 'base' });
+};
+
+// 同一教材の問題をまとめて、PDF上で1セクションとして扱う。
+const buildMaterialGroups = (review: ExamDetail): MaterialGroup[] => {
+  const groups: MaterialGroup[] = [];
+  const groupByKey = new Map<string, MaterialGroup>();
+
+  for (const item of review.items) {
+    const key = String(
+      item.materialId ?? `${item.provider ?? ''}|${item.materialName ?? ''}|${item.materialDate ?? ''}`,
+    );
+    const existing = groupByKey.get(key);
+    if (existing) {
+      existing.items.push(item);
       continue;
     }
-    let current = '';
-    for (const ch of Array.from(paragraph)) {
-      const candidate = current + ch;
-      const width = font.widthOfTextAtSize(candidate, fontSize);
-      if (width <= maxWidth) {
-        current = candidate;
-        continue;
-      }
-      if (current.length === 0) {
-        lines.push(candidate);
-        current = '';
-        continue;
-      }
 
-      lines.push(current);
-      current = ch;
-    }
-    if (current.length > 0) {
-      lines.push(current);
-    }
+    const nextGroup: MaterialGroup = {
+      title: getMaterialBlockTitle(item),
+      items: [item],
+    };
+    groupByKey.set(key, nextGroup);
+    groups.push(nextGroup);
   }
-  return lines;
+
+  for (const group of groups) {
+    // 左列から右列へ流す順序を揃えるため、教材内の問題順を固定化する。
+    group.items.sort(compareMaterialItemOrder);
+  }
+
+  return groups;
 };
 
-// 問題文候補から表示優先順に1つ選んで返す。
-const getQuestionText = (item: ExamDetail['items'][number]): string => {
-  return item.questionText ?? item.displayLabel ?? item.canonicalKey ?? item.kanji ?? item.targetId ?? '';
-};
+// 指定幅に収まるよう末尾を省略しながらテキストを調整する。
+const fitTextWithEllipsis = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string => {
+  if (font.widthOfTextAtSize(text, fontSize) <= maxWidth) {
+    return text;
+  }
 
-// MATERIAL 用の教材補足行を構築する。
-const getMaterialLine = (item: ExamDetail['items'][number]): string => {
-  const name = item.materialName ?? '';
-  const date = item.materialDate ?? '';
-  const key = item.canonicalKey ?? '';
-  const parts = [name, date ? `(${date})` : '', key].filter((v) => v.length > 0);
-  if (parts.length === 0) return '';
-  return `教材: ${parts.join(' ')}`;
+  let trimmed = text;
+  while (trimmed.length > 0) {
+    const candidate = `${trimmed}…`;
+    if (font.widthOfTextAtSize(candidate, fontSize) <= maxWidth) {
+      return candidate;
+    }
+    trimmed = trimmed.slice(0, -1);
+  }
+
+  return '…';
 };
 
 // かな表記（ひらがな/カタカナ）差分を吸収するため、比較前にひらがなへ正規化する。
@@ -310,6 +312,81 @@ const renderKanjiWorksheetLayout = (params: {
   }
 };
 
+// MATERIAL モード専用: 教材ごとに見出しを出し、左右20問ずつの2カラムで描画する。
+const renderMaterialWorksheetLayout = (params: {
+  pdfDoc: PDFDocument;
+  jpFont: PDFFont;
+  review: ExamDetail;
+  margin: number;
+}): void => {
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
+  const rowsPerColumn = 20;
+  const itemsPerPage = rowsPerColumn * 2;
+  const columnGap = mmToPt(8);
+  const titleFontSize = 13;
+  const rowFontSize = 11;
+  const rowTextOffsetRatio = 0.72;
+  const titleToRowsGap = mmToPt(8);
+  const minLineWidth = mmToPt(12);
+  const lineGap = mmToPt(2);
+
+  const groups = buildMaterialGroups(params.review);
+
+  for (const group of groups) {
+    for (let pageStart = 0; pageStart < group.items.length; pageStart += itemsPerPage) {
+      const page = params.pdfDoc.addPage([pageWidth, pageHeight]);
+      const pageItems = group.items.slice(pageStart, pageStart + itemsPerPage);
+      const titleText = pageStart === 0 ? group.title : `${group.title}（続き）`;
+
+      const titleY = pageHeight - params.margin - titleFontSize;
+      page.drawText(titleText, {
+        x: params.margin,
+        y: titleY,
+        size: titleFontSize,
+        font: params.jpFont,
+        color: rgb(0, 0, 0),
+      });
+
+      const rowTopY = titleY - titleToRowsGap;
+      const contentWidth = pageWidth - params.margin * 2;
+      const columnWidth = (contentWidth - columnGap) / 2;
+      const rowAreaHeight = rowTopY - params.margin;
+      const rowPitch = rowAreaHeight / rowsPerColumn;
+      const leftColumnCount = Math.ceil(pageItems.length / 2);
+
+      for (let local = 0; local < pageItems.length; local += 1) {
+        const col = local < leftColumnCount ? 0 : 1;
+        const row = col === 0 ? local : local - leftColumnCount;
+        const item = pageItems[local];
+        const rawLabel = getMaterialItemLabel(item);
+        const textMaxWidth = columnWidth - minLineWidth - lineGap;
+        const label = fitTextWithEllipsis(rawLabel, textMaxWidth, params.jpFont, rowFontSize);
+
+        const baseX = params.margin + (col === 1 ? columnWidth + columnGap : 0);
+        const baselineY = rowTopY - rowPitch * row - rowPitch * rowTextOffsetRatio;
+        page.drawText(label, {
+          x: baseX,
+          y: baselineY,
+          size: rowFontSize,
+          font: params.jpFont,
+          color: rgb(0, 0, 0),
+        });
+
+        const textWidth = params.jpFont.widthOfTextAtSize(label, rowFontSize);
+        const lineEndX = baseX + columnWidth;
+        const lineStartX = Math.min(baseX + textWidth + lineGap, lineEndX - minLineWidth);
+        page.drawLine({
+          start: { x: lineStartX, y: baselineY - mmToPt(0.6) },
+          end: { x: lineEndX, y: baselineY - mmToPt(0.6) },
+          thickness: 1,
+          color: rgb(0, 0, 0),
+        });
+      }
+    }
+  }
+};
+
 // 試験モードに応じて PDF を生成してバッファで返す。
 const generatePdfBufferImpl = async (
   review: ExamDetail,
@@ -319,8 +396,6 @@ const generatePdfBufferImpl = async (
 ): Promise<Buffer> => {
   void options;
   const config = buildPdfRenderConfig();
-  const title = `復習テスト (${review.subject})`;
-  const meta = `作成日: ${review.createdDate}`;
   const fontBytes = await loadJapaneseFontBytes();
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
@@ -340,90 +415,12 @@ const generatePdfBufferImpl = async (
     const bytes = await pdfDoc.save();
     return Buffer.from(bytes);
   }
-  let pageContext = createPage({
+  renderMaterialWorksheetLayout({
     pdfDoc,
     jpFont,
-    config,
-    title,
-    meta,
+    review,
+    margin: config.margin,
   });
-  const answerX = config.margin + config.numberColWidth + config.numberGap;
-  const answerRightX = config.margin + pageContext.contentWidth;
-  const questionWidth = pageContext.contentWidth - config.numberColWidth - config.numberGap;
-
-  // MATERIAL は「問題文 + 補足行 + 解答ライン2本」を縦に積み上げる。
-  for (let idx = 0; idx < review.items.length; idx += 1) {
-    const item = review.items[idx];
-    const questionText = getQuestionText(item);
-    const wrapped = wrapTextByChar(questionText, questionWidth, jpFont, config.questionFontSize);
-    const materialLine = getMaterialLine(item);
-    const materialWrapped = materialLine
-      ? wrapTextByChar(materialLine, questionWidth, jpFont, config.metaLineFontSize)
-      : [];
-    const questionHeight = wrapped.length * config.questionLineHeight;
-    const materialHeight = materialWrapped.length * config.metaLineHeight;
-    const requiredHeight =
-      questionHeight +
-      materialHeight +
-      config.afterQuestionGap +
-      config.answerBoxHeight * 2 +
-      config.answerLineGap +
-      config.itemGap;
-
-    // ブロックが収まらない場合は新ページを作成する。
-    if (pageContext.cursorY - requiredHeight < config.margin) {
-      pageContext = createPage({
-        pdfDoc,
-        jpFont,
-        config,
-        title,
-        meta,
-      });
-    }
-    const noText = item.canonicalKey ? `${item.canonicalKey}` : `${idx + 1}.`;
-    const noWidth = jpFont.widthOfTextAtSize(noText, config.questionFontSize);
-    pageContext.page.drawText(noText, {
-      x: config.margin + config.numberColWidth - noWidth,
-      y: pageContext.cursorY - config.questionFontSize,
-      size: config.questionFontSize,
-      font: jpFont,
-      color: rgb(0, 0, 0),
-    });
-    for (const line of wrapped) {
-      pageContext.page.drawText(line, {
-        x: answerX,
-        y: pageContext.cursorY - config.questionFontSize,
-        size: config.questionFontSize,
-        font: jpFont,
-        color: rgb(0, 0, 0),
-      });
-      pageContext.cursorY -= config.questionLineHeight;
-    }
-    for (const line of materialWrapped) {
-      pageContext.page.drawText(line, {
-        x: answerX,
-        y: pageContext.cursorY - config.metaLineFontSize,
-        size: config.metaLineFontSize,
-        font: jpFont,
-        color: rgb(0, 0, 0),
-      });
-      pageContext.cursorY -= config.metaLineHeight;
-    }
-
-    pageContext.cursorY -= config.afterQuestionGap;
-    for (let i = 0; i < 2; i += 1) {
-      pageContext.cursorY -= config.answerBoxHeight;
-      pageContext.page.drawLine({
-        start: { x: answerX, y: pageContext.cursorY },
-        end: { x: answerRightX, y: pageContext.cursorY },
-        thickness: 1,
-        color: rgb(0, 0, 0),
-      });
-      pageContext.cursorY -= config.answerLineGap;
-    }
-
-    pageContext.cursorY -= config.itemGap;
-  }
   const bytes = await pdfDoc.save();
   return Buffer.from(bytes);
 };

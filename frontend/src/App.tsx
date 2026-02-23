@@ -51,7 +51,7 @@ export const App = () => {
     const rules: Array<{ pattern: string; title: string }> = [
       { pattern: '/', title: 'ダッシュボード' },
 
-      { pattern: '/materials', title: '教材セット一覧' },
+      { pattern: '/materials', title: '教材管理' },
       { pattern: '/materials/new', title: '教材セット登録' },
       { pattern: '/materials/:id/questions', title: '教材問題管理' },
       { pattern: '/materials/:id', title: '教材セット詳細' },
@@ -59,16 +59,16 @@ export const App = () => {
       { pattern: '/exam/questions', title: '復習テスト一覧' },
       { pattern: '/exam/questions/new', title: '復習テスト作成' },
       { pattern: '/exam/questions/:id/grading', title: '復習テスト採点' },
-      { pattern: '/exam/questions/:id/pdf', title: 'PDF' },
-      { pattern: '/exam/questions/:id', title: '詳細' },
+      { pattern: '/exam/questions/:id/pdf', title: '復習テスト印刷' },
+      { pattern: '/exam/questions/:id', title: '復習テスト詳細' },
 
       { pattern: '/exam/kanji', title: '漢字テスト一覧' },
       { pattern: '/exam/kanji/new', title: '漢字テスト作成' },
       { pattern: '/exam/kanji/:id/grading', title: '復習テスト採点' },
-      { pattern: '/exam/kanji/:id/pdf', title: 'PDF' },
-      { pattern: '/exam/kanji/:id', title: '詳細' },
+      { pattern: '/exam/kanji/:id/pdf', title: '復習テスト印刷' },
+      { pattern: '/exam/kanji/:id', title: '復習テスト詳細' },
 
-      { pattern: '/kanji', title: '漢字一覧' },
+      { pattern: '/kanji', title: '漢字管理' },
       { pattern: '/kanji/new', title: '漢字登録' },
       { pattern: '/kanji/import', title: '漢字一括登録' },
       { pattern: '/kanji/:id', title: '漢字編集' },

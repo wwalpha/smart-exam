@@ -79,6 +79,8 @@ export const createGetExam = async (repositories: Repositories, examId: string):
         materialName: m?.title,
         materialDate: m?.materialDate,
         questionText: q?.canonicalKey,
+        answerText: q?.correctAnswer,
+        correctAnswer: q?.correctAnswer,
         ...(typeof isCorrect === 'boolean' ? { isCorrect } : {}),
       };
     }),

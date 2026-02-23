@@ -176,7 +176,6 @@ export const useQuestionManagement = () => {
   const analyze = async () => {
     if (!id || !detail) return;
     if (detail.isCompleted) return;
-    if (!hasGradedAnswerPdf) return;
     await extractQuestionsFromGradedAnswer(id);
   };
 

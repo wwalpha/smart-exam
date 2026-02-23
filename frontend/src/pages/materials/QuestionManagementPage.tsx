@@ -30,6 +30,8 @@ export const QuestionManagementPage = () => {
     saveChoices,
     draftByQuestionId,
     hasUnsavedChanges,
+    validationErrorByQuestionId,
+    hasValidationErrors,
     analyze,
     canAnalyze,
     ConfirmDialog,
@@ -71,7 +73,7 @@ export const QuestionManagementPage = () => {
           <Button
             type="button"
             onClick={() => void saveChoices()}
-            disabled={isBusy || !!material?.isCompleted || !hasUnsavedChanges}>
+            disabled={isBusy || !!material?.isCompleted || !hasUnsavedChanges || hasValidationErrors}>
             保存
           </Button>
           <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
@@ -169,6 +171,7 @@ export const QuestionManagementPage = () => {
                         const draft = draftByQuestionId[q.id];
                         const value = draft?.choice === 'INCORRECT' ? 'incorrect' : 'correct';
                         const showCorrectAnswerInput = value === 'incorrect';
+                        const validationMessage = validationErrorByQuestionId[q.id];
 
                         return (
                           <div className="flex items-center gap-3">
@@ -195,15 +198,20 @@ export const QuestionManagementPage = () => {
                               </div>
                             </RadioGroup>
 
-                            {showCorrectAnswerInput ? (
-                              <Input
-                                value={draft?.correctAnswer ?? ''}
-                                onChange={(event) => setCorrectAnswer(q.id, event.target.value)}
-                                placeholder="正解値を入力"
-                                className="h-9 w-[180px]"
-                                disabled={isBusy || !!material?.isCompleted}
-                              />
-                            ) : null}
+                            <div className="space-y-1">
+                              {showCorrectAnswerInput ? (
+                                <Input
+                                  value={draft?.correctAnswer ?? ''}
+                                  onChange={(event) => setCorrectAnswer(q.id, event.target.value)}
+                                  placeholder="正解値を入力"
+                                  className="h-9 w-[180px]"
+                                  disabled={isBusy || !!material?.isCompleted}
+                                />
+                              ) : (
+                                <div className="h-9 w-[180px]" aria-hidden="true" />
+                              )}
+                              {validationMessage ? <p className="text-xs text-destructive">{validationMessage}</p> : null}
+                            </div>
                           </div>
                         );
                       })()}

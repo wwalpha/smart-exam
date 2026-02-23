@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
 
 type HeaderProps = {
   title: string;
@@ -15,10 +16,11 @@ export const Header = ({ title, pageTitle, onToggleSidebar }: HeaderProps) => {
             <Button
               type="button"
               variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-background/90 hover:bg-background/10 hover:text-background"
+              size="icon"
+              aria-label="メニュー"
+              className="h-8 w-8 text-background/90 hover:bg-background/10 hover:text-background"
               onClick={onToggleSidebar}>
-              メニュー
+              <Menu className="h-4 w-4" />
             </Button>
           ) : null}
           <div className="text-2xl font-semibold text-background/80">{title}</div>

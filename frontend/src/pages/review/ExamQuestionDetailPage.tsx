@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useReviewQuestionDetailPage } from '@/hooks/review';
 import { SUBJECT_LABEL } from '@/lib/Consts';
@@ -29,8 +29,7 @@ export const ExamQuestionDetailPage = () => {
   return (
     <div className="space-y-6 px-8">
       <ConfirmDialog />
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">復習テスト詳細</h1>
+      <div className="flex items-center justify-end">
         <div className="flex justify-end gap-2">
           <Button asChild variant="outline" className="w-[100px]">
             <Link to={basePath}>戻る</Link>
@@ -52,10 +51,7 @@ export const ExamQuestionDetailPage = () => {
               完了
             </Button>
           ) : null}
-          <Button
-            variant="destructive"
-            className="w-[100px]"
-            onClick={remove}>
+          <Button variant="destructive" className="w-[100px]" onClick={remove}>
             削除
           </Button>
         </div>
@@ -68,7 +64,7 @@ export const ExamQuestionDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className={infoBadgeClass}>
+              <Badge variant={getSubjectBadgeVariant(review.subject)} className={infoBadgeClass}>
                 {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
               </Badge>
               <Badge variant="secondary" className={infoBadgeClass}>
@@ -154,8 +150,11 @@ export const ExamQuestionDetailPage = () => {
                       <div className="p-3">
                         <div className="grid grid-cols-4 gap-2">
                           {b.items.map((item) => (
-                            <div key={item.id} className="rounded border px-3 py-2 text-center text-sm font-medium">
-                              {item.canonicalKey ?? '-'}
+                            <div key={item.id} className="rounded border px-3 py-2 text-left text-sm font-medium">
+                              <div className="flex items-center gap-1">
+                                <span className="inline-block w-[60px] shrink-0">{item.canonicalKey ?? '-'}：</span>
+                                <span>{item.answerText ?? '-'}</span>
+                              </div>
                             </div>
                           ))}
                         </div>
