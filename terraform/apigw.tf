@@ -73,6 +73,32 @@ resource "aws_apigatewayv2_stage" "default" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# API Gateway custom domain (prod only).
+# ----------------------------------------------------------------------------------------------
+resource "aws_apigatewayv2_domain_name" "api" {
+  count = local.deploy_environment == "prod" ? 1 : 0
+
+  domain_name = "api.smartexam.aws-handson.com"
+
+  domain_name_configuration {
+    certificate_arn = data.aws_acm_certificate.api_custom_domain[0].arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# API Gateway API mapping for custom domain (prod only).
+# ----------------------------------------------------------------------------------------------
+resource "aws_apigatewayv2_api_mapping" "api" {
+  count = local.deploy_environment == "prod" ? 1 : 0
+
+  api_id      = aws_apigatewayv2_api.http.id
+  domain_name = aws_apigatewayv2_domain_name.api[0].domain_name
+  stage       = aws_apigatewayv2_stage.default.id
+}
+
+# ----------------------------------------------------------------------------------------------
 # Lambda invoke permission for API Gateway.
 # ----------------------------------------------------------------------------------------------
 resource "aws_lambda_permission" "api_gateway" {

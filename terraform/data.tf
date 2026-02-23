@@ -7,3 +7,14 @@ data "aws_caller_identity" "current" {}
 # AWS region metadata.
 # ----------------------------------------------------------------------------------------------
 data "aws_region" "current" {}
+
+# ----------------------------------------------------------------------------------------------
+# ACM certificate for API custom domain (prod only).
+# ----------------------------------------------------------------------------------------------
+data "aws_acm_certificate" "api_custom_domain" {
+  count = local.deploy_environment == "prod" ? 1 : 0
+
+  domain      = "*.smartexam.aws-handson.com"
+  statuses    = ["ISSUED"]
+  most_recent = true
+}

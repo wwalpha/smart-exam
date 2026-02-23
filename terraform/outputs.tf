@@ -11,7 +11,31 @@ output "files_bucket_name" {
 # ----------------------------------------------------------------------------------------------
 output "http_api_endpoint" {
   description = "API Gateway HTTP API endpoint."
-  value       = aws_apigatewayv2_api.http.api_endpoint
+  value       = local.deploy_environment == "prod" ? "https://api.smartexam.aws-handson.com" : aws_apigatewayv2_api.http.api_endpoint
+}
+
+# ----------------------------------------------------------------------------------------------
+# API Gateway custom domain name (prod only).
+# ----------------------------------------------------------------------------------------------
+output "http_api_custom_domain_name" {
+  description = "API Gateway custom domain name for prod."
+  value       = local.deploy_environment == "prod" ? aws_apigatewayv2_domain_name.api[0].domain_name : ""
+}
+
+# ----------------------------------------------------------------------------------------------
+# API Gateway custom domain target (prod only).
+# ----------------------------------------------------------------------------------------------
+output "http_api_custom_domain_target" {
+  description = "API Gateway regional target domain for DNS alias (prod only)."
+  value       = local.deploy_environment == "prod" ? aws_apigatewayv2_domain_name.api[0].domain_name_configuration[0].target_domain_name : ""
+}
+
+# ----------------------------------------------------------------------------------------------
+# API Gateway custom domain hosted zone id (prod only).
+# ----------------------------------------------------------------------------------------------
+output "http_api_custom_domain_zone_id" {
+  description = "API Gateway regional hosted zone id for DNS alias (prod only)."
+  value       = local.deploy_environment == "prod" ? aws_apigatewayv2_domain_name.api[0].domain_name_configuration[0].hosted_zone_id : ""
 }
 
 # ----------------------------------------------------------------------------------------------
