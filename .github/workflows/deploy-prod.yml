@@ -18,10 +18,16 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     environment: prod
+    env:
+      TF_VAR_deploy_environment: prod
+      TF_VAR_cognito_domain_prefix: ${{ vars.COGNITO_DOMAIN_PREFIX }}
     outputs:
       http_api_endpoint: ${{ steps.outputs.outputs.http_api_endpoint }}
       cognito_user_pool_id: ${{ steps.outputs.outputs.cognito_user_pool_id }}
       cognito_user_pool_client_id: ${{ steps.outputs.outputs.cognito_user_pool_client_id }}
+      cognito_managed_login_domain: ${{ steps.outputs.outputs.cognito_managed_login_domain }}
+      cognito_redirect_uri: ${{ steps.outputs.outputs.cognito_redirect_uri }}
+      api_auth_enabled: ${{ steps.outputs.outputs.api_auth_enabled }}
       frontend_bucket_name: ${{ steps.outputs.outputs.frontend_bucket_name }}
       cloudfront_distribution_id: ${{ steps.outputs.outputs.cloudfront_distribution_id }}
       lambda_function_name: ${{ steps.outputs.outputs.lambda_function_name }}
@@ -55,6 +61,9 @@ jobs:
           echo "http_api_endpoint=$(terraform output -raw http_api_endpoint)" >> $GITHUB_OUTPUT
           echo "cognito_user_pool_id=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_OUTPUT
           echo "cognito_user_pool_client_id=$(terraform output -raw cognito_user_pool_client_id)" >> $GITHUB_OUTPUT
+          echo "cognito_managed_login_domain=$(terraform output -raw cognito_managed_login_domain)" >> $GITHUB_OUTPUT
+          echo "cognito_redirect_uri=$(terraform output -raw cognito_redirect_uri)" >> $GITHUB_OUTPUT
+          echo "api_auth_enabled=$(terraform output -raw api_auth_enabled)" >> $GITHUB_OUTPUT
           echo "frontend_bucket_name=$(terraform output -raw frontend_bucket_name)" >> $GITHUB_OUTPUT
           echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
           echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> $GITHUB_OUTPUT
@@ -128,8 +137,12 @@ jobs:
       - name: Build
         env:
           VITE_API_ENDPOINT: ${{ needs.terraform.outputs.http_api_endpoint }}
+          VITE_AWS_REGION: ${{ env.AWS_REGION }}
+          VITE_ENABLE_AUTH: ${{ needs.terraform.outputs.api_auth_enabled == 'true' && '1' || '0' }}
+          VITE_COGNITO_DOMAIN: ${{ needs.terraform.outputs.cognito_managed_login_domain }}
           VITE_COGNITO_USER_POOL_ID: ${{ needs.terraform.outputs.cognito_user_pool_id }}
           VITE_COGNITO_CLIENT_ID: ${{ needs.terraform.outputs.cognito_user_pool_client_id }}
+          VITE_COGNITO_REDIRECT_URI: ${{ needs.terraform.outputs.cognito_redirect_uri }}
         run: |
           yarn workspace @smart-exam/api-types build
           yarn workspace frontend build
