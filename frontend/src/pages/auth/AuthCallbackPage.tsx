@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from 'react-oidc-context';
 import { Button } from '@/components/ui/button';
-import { clearStoredAccessToken, isAuthEnabled, persistTokenFromCallbackHash } from '@/lib/auth';
+import { clearStoredAccessToken, isAuthEnabled, setStoredAccessToken } from '@/lib/auth';
 
 export const AuthCallbackPage = () => {
   const navigate = useNavigate();
-  const [isError, setIsError] = useState(false);
-
-  const loginUrl = useMemo(() => '/auth/login', []);
+  const auth = useAuth();
 
   useEffect(() => {
     if (!isAuthEnabled()) {
@@ -15,23 +14,24 @@ export const AuthCallbackPage = () => {
       return;
     }
 
-    const ok = persistTokenFromCallbackHash(window.location.hash);
-    if (!ok) {
+    if (auth.error) {
       clearStoredAccessToken();
-      setIsError(true);
       return;
     }
 
-    navigate('/', { replace: true });
-  }, [navigate]);
+    if (auth.user?.access_token) {
+      setStoredAccessToken(auth.user.access_token);
+      navigate('/', { replace: true });
+    }
+  }, [auth.error, auth.user, navigate]);
 
-  if (isError) {
+  if (auth.error) {
     return (
       <div className="mx-auto flex min-h-[60vh] w-full max-w-md items-center justify-center p-8">
         <div className="w-full space-y-4 rounded-md border p-6">
           <h1 className="text-xl font-semibold">ログインに失敗しました</h1>
           <p className="text-sm text-muted-foreground">再度ログインしてください。</p>
-          <Button type="button" className="w-full" onClick={() => navigate(loginUrl)}>
+          <Button type="button" className="w-full" onClick={() => navigate('/auth/login')}>
             ログイン画面へ
           </Button>
         </div>

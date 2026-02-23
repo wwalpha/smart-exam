@@ -10,13 +10,37 @@ const normalizeDomain = (domain: string): string => {
 };
 
 export const isAuthEnabled = (): boolean => {
-  if (!import.meta.env.PROD) return false;
   const enabledFlag = String(import.meta.env.VITE_ENABLE_AUTH ?? '').trim() === '1';
   if (!enabledFlag) return false;
-  const domain = normalizeDomain(String(import.meta.env.VITE_COGNITO_DOMAIN ?? ''));
+  const authority = getCognitoAuthority();
   const clientId = String(import.meta.env.VITE_COGNITO_CLIENT_ID ?? '').trim();
   const redirectUri = String(import.meta.env.VITE_COGNITO_REDIRECT_URI ?? '').trim();
-  return domain.length > 0 && clientId.length > 0 && redirectUri.length > 0;
+  return authority.length > 0 && clientId.length > 0 && redirectUri.length > 0;
+};
+
+export const getCognitoAuthority = (): string => {
+  const explicitAuthority = String(import.meta.env.VITE_COGNITO_AUTHORITY ?? '').trim();
+  if (explicitAuthority.length > 0) {
+    return explicitAuthority;
+  }
+
+  const userPoolId = String(import.meta.env.VITE_COGNITO_USER_POOL_ID ?? '').trim();
+  const region = String(import.meta.env.VITE_AWS_REGION ?? 'ap-northeast-1').trim();
+  if (userPoolId.length > 0 && region.length > 0) {
+    return `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`;
+  }
+
+  return normalizeDomain(String(import.meta.env.VITE_COGNITO_DOMAIN ?? ''));
+};
+
+export const getOidcClientConfig = () => {
+  return {
+    authority: getCognitoAuthority(),
+    client_id: String(import.meta.env.VITE_COGNITO_CLIENT_ID ?? '').trim(),
+    redirect_uri: String(import.meta.env.VITE_COGNITO_REDIRECT_URI ?? '').trim(),
+    response_type: 'code',
+    scope: 'openid profile email',
+  };
 };
 
 export const getStoredAccessToken = (): string | null => {
@@ -31,26 +55,15 @@ export const clearStoredAccessToken = (): void => {
   localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
 };
 
-export const buildManagedLoginUrl = (): string => {
+export const buildManagedLogoutUrl = (): string => {
   const domain = normalizeDomain(String(import.meta.env.VITE_COGNITO_DOMAIN ?? ''));
   const clientId = String(import.meta.env.VITE_COGNITO_CLIENT_ID ?? '').trim();
   const redirectUri = String(import.meta.env.VITE_COGNITO_REDIRECT_URI ?? '').trim();
 
   const query = new URLSearchParams({
-    response_type: 'token',
     client_id: clientId,
-    redirect_uri: redirectUri,
-    scope: 'openid email profile',
+    logout_uri: redirectUri,
   });
 
-  return `${domain}/oauth2/authorize?${query.toString()}`;
-};
-
-export const persistTokenFromCallbackHash = (hash: string): boolean => {
-  const raw = hash.startsWith('#') ? hash.slice(1) : hash;
-  const params = new URLSearchParams(raw);
-  const accessToken = params.get('access_token')?.trim() ?? '';
-  if (!accessToken) return false;
-  setStoredAccessToken(accessToken);
-  return true;
+  return `${domain}/logout?${query.toString()}`;
 };

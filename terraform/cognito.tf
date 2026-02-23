@@ -31,10 +31,11 @@ resource "aws_cognito_user_pool_client" "auth" {
   ]
 
   allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                  = ["implicit"]
+  allowed_oauth_flows                  = ["code"]
   allowed_oauth_scopes                 = ["openid", "email", "profile"]
   callback_urls                        = [local.cognito_redirect_uri]
   logout_urls                          = [local.frontend_base_url]
+  supported_identity_providers         = ["COGNITO"]
 
   prevent_user_existence_errors = "ENABLED"
 }

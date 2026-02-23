@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ vars.DEPLOY_ENV == 'prod' && 'production' || 'staging' }}
     env:
-      TF_VAR_deploy_environment: ${{ vars.DEPLOY_ENV }}
+      TF_VAR_deploy_environment: ${{ vars.DEPLOY_ENV != '' && vars.DEPLOY_ENV || 'dev' }}
       TF_VAR_cognito_domain_prefix: ${{ vars.COGNITO_DOMAIN_PREFIX }}
     outputs:
       http_api_endpoint: ${{ steps.outputs.outputs.http_api_endpoint }}

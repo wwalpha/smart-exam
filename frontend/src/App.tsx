@@ -40,12 +40,25 @@ import { getStoredAccessToken, isAuthEnabled } from '@/lib/auth';
 export const App = () => {
   const location = useLocation();
   const authEnabled = isAuthEnabled();
+  const isAuthRoute = location.pathname.startsWith('/auth/');
 
-  if (authEnabled && !location.pathname.startsWith('/auth/')) {
+  if (authEnabled && !isAuthRoute) {
     const token = getStoredAccessToken();
     if (!token) {
       return <Navigate to="/auth/login" replace />;
     }
+  }
+
+  if (isAuthRoute) {
+    return (
+      <>
+        <Toaster />
+        <Routes>
+          <Route path="/auth/login" element={authEnabled ? <AuthLoginPage /> : <Navigate to="/" replace />} />
+          <Route path="/auth/callback" element={authEnabled ? <AuthCallbackPage /> : <Navigate to="/" replace />} />
+        </Routes>
+      </>
+    );
   }
 
   const sidebarItems = [
@@ -132,10 +145,6 @@ export const App = () => {
 
         {/* Settings */}
         <Route path="/settings/pdf" element={<PdfSettingsPage />} />
-
-        {/* Auth */}
-        <Route path="/auth/login" element={<AuthLoginPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
       </Routes>
     </AppLayout>
   );
