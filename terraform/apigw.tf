@@ -64,6 +64,17 @@ resource "aws_apigatewayv2_route" "health" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# API Gateway OPTIONS route for CORS preflight (no auth).
+# ----------------------------------------------------------------------------------------------
+resource "aws_apigatewayv2_route" "options_proxy" {
+  api_id    = aws_apigatewayv2_api.http.id
+  route_key = "OPTIONS /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+
+  authorization_type = "NONE"
+}
+
+# ----------------------------------------------------------------------------------------------
 # API Gateway default stage.
 # ----------------------------------------------------------------------------------------------
 resource "aws_apigatewayv2_stage" "default" {
