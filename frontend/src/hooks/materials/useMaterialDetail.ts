@@ -17,7 +17,6 @@ const fileTypeOrder: Record<string, number> = {
   GRADED_ANSWER: 3,
 };
 
-
 const toMs = (iso: string | undefined): number => {
   if (!iso) return 0;
   const v = new Date(iso).getTime();
@@ -32,6 +31,20 @@ const fileTypeLabel = (fileType: string): string => {
   return fileType;
 };
 
+const isValidYmd = (value: string): boolean => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  const [year, month, day] = value.split('-').map(Number);
+  return date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day;
+};
+
 export const useMaterialDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { detail, files, questions, status } = useWordTestStore((s) => s.material);
@@ -43,6 +56,7 @@ export const useMaterialDetail = () => {
   const completeMaterial = useWordTestStore((s) => s.completeMaterial);
 
   const [registeredDate, setRegisteredDate] = useState<string>('');
+  const [isUpdatingRegisteredDate, setIsUpdatingRegisteredDate] = useState<boolean>(false);
 
   useEffect(() => {
     // IDがある場合のみ取得（URLが不正なときに無駄なAPIを叩かない）
@@ -89,16 +103,35 @@ export const useMaterialDetail = () => {
     });
   }, [latestFilesByType]);
 
-  const saveRegisteredDate = useCallback(async () => {
-    // IDが不正な状態では更新しない
-    if (!id) return;
-    try {
-      await updateMaterial(id, { registeredDate });
-      toast.success('更新しました');
-    } catch {
-      // store側でトーストを出す可能性があるため、ここでは追加表示しない
+  const onRegisteredDateInputChange = useCallback((nextRegisteredDate: string) => {
+    setRegisteredDate(nextRegisteredDate);
+  }, []);
+
+  const commitRegisteredDate = useCallback(() => {
+    const nextRegisteredDate = registeredDate;
+
+    // 不正な日付は更新対象にしない
+    if (!isValidYmd(nextRegisteredDate)) {
+      return;
     }
-  }, [id, registeredDate, updateMaterial]);
+
+    // 既存値と同じ日付は更新不要
+    if (!id || !detail || detail.registeredDate === nextRegisteredDate) {
+      return;
+    }
+
+    void (async () => {
+      setIsUpdatingRegisteredDate(true);
+      try {
+        await updateMaterial(id, { registeredDate: nextRegisteredDate });
+        await fetchMaterial(id);
+      } catch {
+        // store側でエラー表示されるため二重表示しない
+      } finally {
+        setIsUpdatingRegisteredDate(false);
+      }
+    })();
+  }, [registeredDate, id, detail, updateMaterial, fetchMaterial]);
 
   const complete = useCallback(async () => {
     if (!id || !detail) return;
@@ -116,28 +149,31 @@ export const useMaterialDetail = () => {
 
   const canComplete = !!detail && !detail.isCompleted && questions.length > 0;
 
-  const previewFile = useCallback(async (fileId: string) => {
-    try {
-      // IDが不正な状態ではプレビューできない
-      if (!id) return;
-      const blob = await apiRequestBlob({
-        method: 'GET',
-        path: `/api/materials/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}`,
-      });
+  const previewFile = useCallback(
+    async (fileId: string) => {
+      try {
+        // IDが不正な状態ではプレビューできない
+        if (!id) return;
+        const blob = await apiRequestBlob({
+          method: 'GET',
+          path: `/api/materials/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}`,
+        });
 
-      if (!(await isPdfBlob(blob))) {
-        const text = await blob.text().catch(() => '');
-        toast.error('PDFの取得に失敗しました', { description: text.slice(0, 200) });
-        return;
+        if (!(await isPdfBlob(blob))) {
+          const text = await blob.text().catch(() => '');
+          toast.error('PDFの取得に失敗しました', { description: text.slice(0, 200) });
+          return;
+        }
+
+        const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
+        const url = URL.createObjectURL(pdfBlob);
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch {
+        toast.error('PDFの取得に失敗しました');
       }
-
-      const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
-      const url = URL.createObjectURL(pdfBlob);
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch {
-      toast.error('PDFの取得に失敗しました');
-    }
-  }, [id]);
+    },
+    [id],
+  );
 
   const replacePdf = useCallback(
     async (fileType: MaterialPdfFileType, file: File) => {
@@ -156,7 +192,7 @@ export const useMaterialDetail = () => {
         // store側でエラートーストを出す可能性があるため、ここでは追加表示しない
       }
     },
-    [id, uploadMaterialPdf]
+    [id, uploadMaterialPdf],
   );
 
   return {
@@ -165,14 +201,15 @@ export const useMaterialDetail = () => {
     filesByType: latestFilesByType,
     isInitialLoading: status.isLoading && !detail,
     isBusy: status.isLoading,
+    isUpdatingRegisteredDate,
     error: status.error,
     id,
     fileTypeLabel,
     previewFile,
     replacePdf,
     registeredDate,
-    setRegisteredDate,
-    saveRegisteredDate,
+    onRegisteredDateInputChange,
+    commitRegisteredDate,
     complete,
     canComplete,
   };

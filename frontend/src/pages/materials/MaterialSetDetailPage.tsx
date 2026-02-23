@@ -23,8 +23,9 @@ export const MaterialSetDetailPage = () => {
     previewFile,
     replacePdf,
     registeredDate,
-    setRegisteredDate,
-    saveRegisteredDate,
+    onRegisteredDateInputChange,
+    commitRegisteredDate,
+    isUpdatingRegisteredDate,
     complete,
     canComplete,
   } = useMaterialDetail();
@@ -89,23 +90,16 @@ export const MaterialSetDetailPage = () => {
                 <Input
                   type="date"
                   value={registeredDate}
-                  onChange={(e) => setRegisteredDate(e.target.value)}
+                  onChange={(e) => onRegisteredDateInputChange(e.target.value)}
+                  onBlur={commitRegisteredDate}
                   className="w-[180px]"
                   disabled={isBusy || !!material.isCompleted}
                 />
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => void saveRegisteredDate()}
-                  disabled={isBusy || !!material.isCompleted}>
-                  更新
-                </Button>
-                <Button
-                  type="button"
                   size="sm"
                   onClick={() => void complete()}
-                  disabled={isBusy || !canComplete}>
+                  disabled={isBusy || isUpdatingRegisteredDate || !canComplete}>
                   完了
                 </Button>
               </div>
@@ -124,7 +118,9 @@ export const MaterialSetDetailPage = () => {
               const file = filesByType[fileType];
 
               return (
-                <div key={fileType} className="flex flex-col gap-2 border p-3 rounded-md sm:flex-row sm:items-center sm:justify-between">
+                <div
+                  key={fileType}
+                  className="flex flex-col gap-2 border p-3 rounded-md sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="font-medium">{fileTypeLabel(fileType)}</div>
                     <div className="text-sm text-muted-foreground truncate">{file?.filename ?? '未登録'}</div>
