@@ -25,7 +25,7 @@ variable "deploy_environment" {
   default     = "dev"
 
   validation {
-    condition     = contains(["dev", "prod"], var.deploy_environment)
+    condition     = contains(["", "dev", "prod"], trimspace(var.deploy_environment))
     error_message = "deploy_environment must be one of: dev, prod."
   }
 }
