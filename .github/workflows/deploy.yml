@@ -19,6 +19,7 @@ jobs:
     environment: ${{ vars.DEPLOY_ENV == 'prod' && 'production' || 'staging' }}
     env:
       TF_VAR_deploy_environment: ${{ vars.DEPLOY_ENV }}
+      TF_VAR_cognito_domain_prefix: ${{ vars.COGNITO_DOMAIN_PREFIX }}
     outputs:
       http_api_endpoint: ${{ steps.outputs.outputs.http_api_endpoint }}
       cognito_user_pool_id: ${{ steps.outputs.outputs.cognito_user_pool_id }}
@@ -135,8 +136,10 @@ jobs:
       - name: Build
         env:
           VITE_API_ENDPOINT: ${{ needs.terraform.outputs.http_api_endpoint }}
+          VITE_AWS_REGION: ${{ env.AWS_REGION }}
           VITE_ENABLE_AUTH: ${{ needs.terraform.outputs.api_auth_enabled == 'true' && '1' || '0' }}
           VITE_COGNITO_DOMAIN: ${{ needs.terraform.outputs.cognito_managed_login_domain }}
+          VITE_COGNITO_USER_POOL_ID: ${{ needs.terraform.outputs.cognito_user_pool_id }}
           VITE_COGNITO_CLIENT_ID: ${{ needs.terraform.outputs.cognito_user_pool_client_id }}
           VITE_COGNITO_REDIRECT_URI: ${{ needs.terraform.outputs.cognito_redirect_uri }}
         run: |
