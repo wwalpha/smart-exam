@@ -18,15 +18,12 @@ export const createGetMaterialFile = async (
   const target = files.find((file) => file.id === fileId);
   if (!target) return null;
 
-  const s3Key = target.s3Key;
-  const filename = target.filename || s3Key.split('/').pop() || 'file.pdf';
-
-  const { buffer, contentType: responseContentType } = await deps.repositories.s3.getObjectBuffer({
+  const downloadUrl = await deps.repositories.s3.getPresignedGetUrl({
     bucket,
-    key: s3Key,
+    key: target.s3Key,
+    expiresInSeconds: 300,
+    responseContentDisposition: 'inline',
   });
-  const contentType =
-    responseContentType || (filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
 
-  return { body: buffer, contentType, filename };
+  return { downloadUrl };
 };

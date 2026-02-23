@@ -28,5 +28,5 @@ export type MaterialsService = {
   getMaterialFile: (
     materialId: string,
     fileId: string,
-  ) => Promise<{ body: Buffer; contentType: string; filename: string } | null>;
+  ) => Promise<{ downloadUrl: string } | null>;
 };
