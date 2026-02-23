@@ -93,13 +93,6 @@ export type DeleteQuestionParams = {
   questionId: string;
 };
 
-/** `PATCH /materials/:materialId/questions/:questionId/choices` */
-export type SetQuestionChoiceParams = {
-  /** 教材ID */
-  materialId: string;
-  /** 問題ID */
-  questionId: string;
-};
 
 /** 教材セット作成リクエスト */
 export type CreateMaterialRequest = {
@@ -273,6 +266,8 @@ export type Question = {
   reviewCandidate?: QuestionReviewCandidateSummary;
   /** 正誤選択（画面入力値） */
   choice?: 'CORRECT' | 'INCORRECT';
+  /** 不正解時に入力する正解値 */
+  correctAnswer?: string;
 };
 
 /** 問題作成リクエスト */
@@ -356,14 +351,30 @@ export type SearchQuestionsResponse = {
   datas: QuestionSearchResult[];
 };
 
-/** `PATCH /materials/:materialId/questions/:questionId/choices` */
-export type SetQuestionChoiceRequest = {
-  /** 正解なら true */
-  isCorrect: boolean;
+/** `POST /materials/:materialId/choices` */
+export type SetMaterialChoicesParams = {
+  /** 教材ID */
+  materialId: string;
 };
 
-/** `PATCH /materials/:materialId/questions/:questionId/choices` */
-export type SetQuestionChoiceResponse = {
+/** `POST /materials/:materialId/choices` */
+export type SetMaterialChoiceItemRequest = {
+  /** 問題ID */
+  questionId: string;
+  /** 正解なら true */
+  isCorrect: boolean;
+  /** 不正解時に入力する正解値 */
+  correctAnswer?: string;
+};
+
+/** `POST /materials/:materialId/choices` */
+export type SetMaterialChoicesRequest = {
+  /** 一括更新対象 */
+  items: SetMaterialChoiceItemRequest[];
+};
+
+/** `POST /materials/:materialId/choices` */
+export type SetMaterialChoicesResponse = {
   /** 成功フラグ */
   ok: true;
 };

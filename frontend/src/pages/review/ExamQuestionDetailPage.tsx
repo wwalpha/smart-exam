@@ -53,8 +53,8 @@ export const ExamQuestionDetailPage = () => {
             </Button>
           ) : null}
           <Button
-            variant="outline"
-            className="w-[100px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+            variant="destructive"
+            className="w-[100px]"
             onClick={remove}>
             削除
           </Button>

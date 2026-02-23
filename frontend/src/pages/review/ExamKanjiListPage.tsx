@@ -109,10 +109,9 @@ export const ExamKanjiListPage = () => {
                     {test.status !== 'COMPLETED' ? (
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="destructive"
                         size="icon"
                         aria-label="削除"
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => remove(test.examId)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>

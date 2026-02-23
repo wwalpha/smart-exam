@@ -21,8 +21,11 @@ export type MaterialQuestionsService = {
   deleteQuestion: (materialId: string, questionId: string) => Promise<boolean>;
   // 条件に一致する設問を横断検索する。
   searchQuestions: (params: SearchQuestionsRequest) => Promise<QuestionSearchResult[]>;
-  // 設問の正誤選択（choice）を更新する。
-  setQuestionChoice: (params: { materialId: string; questionId: string; isCorrect: boolean }) => Promise<boolean>;
+  // 教材配下の設問に対する正誤選択を一括更新する。
+  setMaterialChoices: (params: {
+    materialId: string;
+    items: Array<{ questionId: string; isCorrect: boolean; correctAnswer?: string }>;
+  }) => Promise<boolean>;
   // 選択結果を復習候補へ反映する。
   applyChoices: (params: { materialId: string; baseDateYmd: string }) => Promise<void>;
 };

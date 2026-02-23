@@ -15,16 +15,17 @@ export const ExamQuestionGradingPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
-      <div className="flex items-center justify-end">
-        <Button asChild variant="outline">
-          <Link to={`${basePath}/${id}`}>戻る</Link>
-        </Button>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">復習テスト採点</h1>
       </div>
 
       <Card>
         <CardContent>
           <form onSubmit={submit}>
             <div className="mb-4 flex items-center justify-end gap-2 pt-4">
+              <Button asChild variant="outline">
+                <Link to={`${basePath}/${id}`}>戻る</Link>
+              </Button>
               <Button type="button" variant="outline" onClick={setAllCorrect} disabled={isSaving}>
                 全問正解
               </Button>
@@ -83,10 +84,14 @@ export const ExamQuestionGradingPage = () => {
                   {blocks.map((b) => (
                     <div key={b.key} className="rounded border">
                       <div className="border-b px-3 py-2">
-                        <div className="text-sm font-medium">
+                        <div className="flex flex-wrap gap-2">
                           {[b.grade, b.provider, b.materialDate ? formatYmdSlash(b.materialDate) : '', b.materialName]
                             .filter((v) => String(v).trim().length > 0)
-                            .join(' ')}
+                            .map((value) => (
+                              <Badge key={`${b.key}-${value}`} variant="secondary" className="px-3 py-1 text-sm">
+                                {value}
+                              </Badge>
+                            ))}
                         </div>
                       </div>
 
@@ -96,13 +101,15 @@ export const ExamQuestionGradingPage = () => {
                             <div
                               key={e.field.id}
                               className="flex items-center justify-between gap-3 rounded border px-3 py-2">
-                              <div className="text-sm font-medium">{e.item?.canonicalKey ?? e.item?.displayLabel ?? '-'}</div>
+                              <Badge variant="outline" className="px-3 py-1 text-sm">
+                                {e.item?.canonicalKey ?? e.item?.displayLabel ?? '-'}
+                              </Badge>
 
                               <div className="flex shrink-0 items-center gap-3">
                                 {e.isCorrect ? (
-                                  <Badge variant="default">正解</Badge>
+                                  <Badge variant="success_soft">正解</Badge>
                                 ) : (
-                                  <Badge variant="destructive">不正解</Badge>
+                                  <Badge variant="danger_soft">不正解</Badge>
                                 )}
                                 <label className="flex items-center gap-2 text-sm">
                                   <input

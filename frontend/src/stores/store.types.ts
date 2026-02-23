@@ -156,9 +156,10 @@ export type MaterialSlice = {
   createQuestionsBulk: (materialId: string, requests: CreateQuestionRequest[]) => Promise<void>;
   updateQuestion: (materialId: string, questionId: string, request: UpdateQuestionRequest) => Promise<void>;
   deleteQuestion: (materialId: string, questionId: string) => Promise<void>;
-  setQuestionChoice: (materialId: string, questionId: string, isCorrect: boolean) => Promise<void>;
-  markQuestionCorrect: (materialId: string, questionId: string) => Promise<void>;
-  markQuestionIncorrect: (materialId: string, questionId: string) => Promise<void>;
+  setQuestionChoices: (
+    materialId: string,
+    items: Array<{ questionId: string; isCorrect: boolean; correctAnswer?: string }>,
+  ) => Promise<void>;
   completeMaterial: (materialId: string) => Promise<void>;
 };
 

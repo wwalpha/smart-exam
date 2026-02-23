@@ -7,8 +7,8 @@ import type {
   CreateQuestionRequest,
   DeleteQuestionParams,
   ListQuestionsParams,
-  SetQuestionChoiceParams,
-  SetQuestionChoiceRequest,
+  SetMaterialChoicesParams,
+  SetMaterialChoicesRequest,
   SearchQuestionsResponse,
   UpdateQuestionParams,
   UpdateQuestionRequest,
@@ -153,31 +153,38 @@ describe('question handler', () => {
     expect(res.send).toHaveBeenCalled();
   });
 
-  it('setQuestionChoice returns ok', async () => {
+  it('setMaterialChoices returns ok', async () => {
     const services = {
       materialQuestions: {
-        setQuestionChoice: vi.fn().mockResolvedValue(true),
+        setMaterialChoices: vi.fn().mockResolvedValue(true),
       },
     } as unknown as Services;
 
     const controller = materialQuestionsController(services);
 
     const req = {
-      params: { materialId: 'mat1', questionId: 'q1' },
-      body: { isCorrect: false },
-    } as unknown as Request<SetQuestionChoiceParams, unknown, SetQuestionChoiceRequest>;
+      params: { materialId: 'mat1' },
+      body: {
+        items: [
+          { questionId: 'q1', isCorrect: false, correctAnswer: '答え1' },
+          { questionId: 'q2', isCorrect: true },
+        ],
+      },
+    } as unknown as Request<SetMaterialChoicesParams, unknown, SetMaterialChoicesRequest>;
     const res = {
       json: vi.fn(),
       status: vi.fn().mockReturnThis(),
     } as unknown as Response;
     const next = vi.fn();
 
-    await controller.setQuestionChoice(req, res, next);
+    await controller.setMaterialChoices(req, res, next);
 
-    expect(services.materialQuestions.setQuestionChoice).toHaveBeenCalledWith({
+    expect(services.materialQuestions.setMaterialChoices).toHaveBeenCalledWith({
       materialId: 'mat1',
-      questionId: 'q1',
-      isCorrect: false,
+      items: [
+        { questionId: 'q1', isCorrect: false, correctAnswer: '答え1' },
+        { questionId: 'q2', isCorrect: true, correctAnswer: undefined },
+      ],
     });
     expect(res.json).toHaveBeenCalledWith({ ok: true });
   });

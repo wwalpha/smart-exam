@@ -58,13 +58,13 @@ export const App = () => {
 
       { pattern: '/exam/questions', title: '復習テスト一覧' },
       { pattern: '/exam/questions/new', title: '復習テスト作成' },
-      { pattern: '/exam/questions/:id/grading', title: '採点' },
+      { pattern: '/exam/questions/:id/grading', title: '復習テスト採点' },
       { pattern: '/exam/questions/:id/pdf', title: 'PDF' },
       { pattern: '/exam/questions/:id', title: '詳細' },
 
       { pattern: '/exam/kanji', title: '漢字テスト一覧' },
       { pattern: '/exam/kanji/new', title: '漢字テスト作成' },
-      { pattern: '/exam/kanji/:id/grading', title: '採点' },
+      { pattern: '/exam/kanji/:id/grading', title: '復習テスト採点' },
       { pattern: '/exam/kanji/:id/pdf', title: 'PDF' },
       { pattern: '/exam/kanji/:id', title: '詳細' },
 

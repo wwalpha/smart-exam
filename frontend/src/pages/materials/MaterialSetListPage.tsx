@@ -185,10 +185,10 @@ export const MaterialSetListPage = () => {
                     </Button>
                     {!material.isCompleted && (
                       <Button
-                        variant="ghost"
+                        variant="destructive"
                         size="icon"
                         aria-label="削除"
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="h-8 w-8"
                         onClick={() => remove(material.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>

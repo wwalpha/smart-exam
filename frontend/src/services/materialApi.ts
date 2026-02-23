@@ -17,8 +17,8 @@ import type {
   QuestionListResponse,
   CreateQuestionRequest,
   UpdateQuestionRequest,
-  SetQuestionChoiceRequest,
-  SetQuestionChoiceResponse,
+  SetMaterialChoicesRequest,
+  SetMaterialChoicesResponse,
   CompleteMaterialRequest,
   CompleteMaterialResponse,
 } from '@smart-exam/api-types';
@@ -161,36 +161,13 @@ export const deleteQuestion = async (materialId: string, questionId: string): Pr
   });
 };
 
-export const markQuestionIncorrect = async (
+export const setMaterialChoices = async (
   materialId: string,
-  questionId: string,
-): Promise<SetQuestionChoiceResponse> => {
-  return apiRequest<SetQuestionChoiceResponse, SetQuestionChoiceRequest>({
-    method: 'PATCH',
-    path: `/api/materials/${materialId}/questions/${questionId}/choices`,
-    body: { isCorrect: false },
-  });
-};
-
-export const markQuestionCorrect = async (
-  materialId: string,
-  questionId: string,
-): Promise<SetQuestionChoiceResponse> => {
-  return apiRequest<SetQuestionChoiceResponse, SetQuestionChoiceRequest>({
-    method: 'PATCH',
-    path: `/api/materials/${materialId}/questions/${questionId}/choices`,
-    body: { isCorrect: true },
-  });
-};
-
-export const setQuestionChoice = async (
-  materialId: string,
-  questionId: string,
-  request: SetQuestionChoiceRequest
-): Promise<SetQuestionChoiceResponse> => {
-  return apiRequest<SetQuestionChoiceResponse, SetQuestionChoiceRequest>({
-    method: 'PATCH',
-    path: `/api/materials/${materialId}/questions/${questionId}/choices`,
+  request: SetMaterialChoicesRequest,
+): Promise<SetMaterialChoicesResponse> => {
+  return apiRequest<SetMaterialChoicesResponse, SetMaterialChoicesRequest>({
+    method: 'POST',
+    path: `/api/materials/${materialId}/choices`,
     body: request,
   });
 };

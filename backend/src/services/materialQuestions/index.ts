@@ -5,7 +5,7 @@ import { createCreateQuestion } from './createQuestion';
 import { createDeleteQuestion } from './deleteQuestion';
 import { createListQuestions } from './listQuestions';
 import { createSearchQuestions } from './searchQuestions';
-import { createSetQuestionChoice } from './setQuestionChoice';
+import { createSetMaterialChoices } from './setMaterialChoices';
 import { createUpdateQuestion } from './updateQuestion';
 import type { MaterialQuestionsService } from './materialQuestions.types';
 
@@ -18,7 +18,7 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
   const updateQuestion = createUpdateQuestion(repositories);
   const deleteQuestion = createDeleteQuestion(repositories);
   const searchQuestions = createSearchQuestions(repositories);
-  const setQuestionChoice = createSetQuestionChoice(repositories);
+  const setMaterialChoices = createSetMaterialChoices(repositories);
   const applyChoices = createApplyChoices(repositories);
 
   // サービスの公開APIを返す。
@@ -28,7 +28,7 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
     updateQuestion,
     deleteQuestion,
     searchQuestions,
-    setQuestionChoice,
+    setMaterialChoices,
     applyChoices,
   };
 };

@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@/components/ui/input';
 import { useQuestionManagement } from '@/hooks/materials';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 
@@ -17,17 +18,18 @@ export const QuestionManagementPage = () => {
     questions,
     isInitialLoading,
     isBusy,
-    busyQuestionId,
     error,
     isBulkDialogOpen,
     setIsBulkDialogOpen,
     bulkInput,
     setBulkInput,
-    optimisticResultByQuestionId,
     submitBulk,
     remove,
-    markCorrect,
-    markIncorrect,
+    setChoice,
+    setCorrectAnswer,
+    saveChoices,
+    draftByQuestionId,
+    hasUnsavedChanges,
     analyze,
     canAnalyze,
     ConfirmDialog,
@@ -65,6 +67,12 @@ export const QuestionManagementPage = () => {
           </Button>
           <Button type="button" disabled={!canAnalyze} onClick={() => void analyze()}>
             番号分析
+          </Button>
+          <Button
+            type="button"
+            onClick={() => void saveChoices()}
+            disabled={isBusy || !!material?.isCompleted || !hasUnsavedChanges}>
+            保存
           </Button>
           <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
             <DialogTrigger asChild>
@@ -109,19 +117,32 @@ export const QuestionManagementPage = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[100px] text-center">削除</TableHead>
                 <TableHead>問題番号</TableHead>
                 <TableHead>状態</TableHead>
-                <TableHead className="w-[176px]" />
+                <TableHead className="w-[300px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {questions.map((q) => (
                 <TableRow key={q.id} className="h-10">
+                  <TableCell className="py-2 text-center">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="h-8 px-3"
+                      disabled={isBusy || !!material?.isCompleted}
+                      onClick={() => remove(q.id)}>
+                      削除
+                    </Button>
+                  </TableCell>
                   <TableCell className="py-2">{q.canonicalKey}</TableCell>
                   <TableCell className="py-2">
                     {(() => {
-                      const optimistic = optimisticResultByQuestionId[q.id];
-                      if (optimistic === 'correct') {
+                      const draft = draftByQuestionId[q.id];
+                      const choice = draft?.choice ?? q.choice;
+
+                      if (choice === 'CORRECT') {
                         return (
                           <div className="flex items-center gap-2">
                             <Badge variant="success_soft" className="px-3 py-1 text-sm font-semibold">
@@ -130,7 +151,7 @@ export const QuestionManagementPage = () => {
                           </div>
                         );
                       }
-                      if (optimistic === 'incorrect') {
+                      if (choice === 'INCORRECT') {
                         return (
                           <div className="flex items-center gap-2">
                             <Badge variant="danger_soft" className="px-3 py-1 text-sm font-semibold">
@@ -139,48 +160,27 @@ export const QuestionManagementPage = () => {
                           </div>
                         );
                       }
-
-                      if (q.choice === 'CORRECT') {
-                        return (
-                          <Badge variant="success_soft" className="px-3 py-1 text-sm font-semibold">
-                            正解
-                          </Badge>
-                        );
-                      }
-                      if (q.choice === 'INCORRECT') {
-                        return (
-                          <Badge variant="danger_soft" className="px-3 py-1 text-sm font-semibold">
-                            不正解
-                          </Badge>
-                        );
-                      }
                       return <span className="text-sm text-muted-foreground">未設定</span>;
                     })()}
                   </TableCell>
                   <TableCell className="py-2">
                     <div className="flex justify-end">
                       {(() => {
-                        const isRowBusy = busyQuestionId === q.id;
-                        const optimistic = optimisticResultByQuestionId[q.id];
-
-                        const value = (() => {
-                          if (optimistic) return optimistic;
-                          if (q.choice === 'CORRECT') return 'correct';
-                          if (q.choice === 'INCORRECT') return 'incorrect';
-                          return '';
-                        })();
+                        const draft = draftByQuestionId[q.id];
+                        const value = draft?.choice === 'INCORRECT' ? 'incorrect' : 'correct';
+                        const showCorrectAnswerInput = value === 'incorrect';
 
                         return (
                           <div className="flex items-center gap-3">
                             <RadioGroup
                               value={value}
-                              disabled={isRowBusy || !!material?.isCompleted}
+                              disabled={isBusy || !!material?.isCompleted}
                               onValueChange={(v) => {
                                 if (v === value) return;
-                                if (v === 'correct') return markCorrect(q.id);
-                                if (v === 'incorrect') return markIncorrect(q.id);
+                                if (v === 'correct') return setChoice(q.id, true);
+                                if (v === 'incorrect') return setChoice(q.id, false);
                               }}
-                              className="flex min-w-[220px] items-center gap-4">
+                              className="flex min-w-[180px] items-center gap-4">
                               <div className="flex items-center gap-2 whitespace-nowrap">
                                 <RadioGroupItem value="correct" id={`correct-${q.id}`} />
                                 <Label className="whitespace-nowrap" htmlFor={`correct-${q.id}`}>
@@ -194,14 +194,16 @@ export const QuestionManagementPage = () => {
                                 </Label>
                               </div>
                             </RadioGroup>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                              disabled={isRowBusy || !!material?.isCompleted}
-                              onClick={() => remove(q.id)}>
-                              削除
-                            </Button>
+
+                            {showCorrectAnswerInput ? (
+                              <Input
+                                value={draft?.correctAnswer ?? ''}
+                                onChange={(event) => setCorrectAnswer(q.id, event.target.value)}
+                                placeholder="正解値を入力"
+                                className="h-9 w-[180px]"
+                                disabled={isBusy || !!material?.isCompleted}
+                              />
+                            ) : null}
                           </div>
                         );
                       })()}
@@ -211,7 +213,7 @@ export const QuestionManagementPage = () => {
               ))}
               {questions.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     問題が登録されていません
                   </TableCell>
                 </TableRow>

@@ -170,12 +170,12 @@ export const createApp = (): express.Express => {
     validateBody(controllers.materialQuestions.UpdateQuestionBodySchema),
     handleRequest(controllers.materialQuestions.updateQuestion),
   );
-  // 指定した問題の正誤選択を更新するAPI
-  app.patch(
-    '/api/materials/:materialId/questions/:questionId/choices',
-    validateParams(MaterialQuestionIdParamsSchema),
-    validateBody(controllers.materialQuestions.SetQuestionChoiceBodySchema),
-    handleRequest(controllers.materialQuestions.setQuestionChoice),
+  // 指定した教材配下の問題の正誤選択を一括更新するAPI
+  app.post(
+    '/api/materials/:materialId/choices',
+    validateParams(MaterialIdParamsSchema),
+    validateBody(controllers.materialQuestions.SetMaterialChoicesBodySchema),
+    handleRequest(controllers.materialQuestions.setMaterialChoices),
   );
   // 指定した問題を削除するAPI
   app.delete(

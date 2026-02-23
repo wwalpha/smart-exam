@@ -23,7 +23,13 @@ export const UpdateQuestionBodySchema = z.object({
   tags: z.array(z.string().min(1)).optional(),
 });
 
-/** SetQuestionChoiceBodySchema validates input shape. */
-export const SetQuestionChoiceBodySchema = z.object({
-  isCorrect: BooleanFromUnknownSchema,
+/** SetMaterialChoicesBodySchema validates input shape. */
+export const SetMaterialChoicesBodySchema = z.object({
+  items: z.array(
+    z.object({
+      questionId: z.string().min(1),
+      isCorrect: BooleanFromUnknownSchema,
+      correctAnswer: z.string().trim().optional(),
+    }),
+  ),
 });

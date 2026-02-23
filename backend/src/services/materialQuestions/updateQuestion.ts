@@ -40,6 +40,7 @@ export const createUpdateQuestion = (repositories: Repositories): MaterialQuesti
       subject: next.subjectId,
       materialId: next.materialId,
       choice: next.choice,
+      correctAnswer: next.correctAnswer,
       tags: updates.tags ?? [],
     };
   };

@@ -13,6 +13,7 @@ export const createListQuestions = (repositories: Repositories): MaterialQuestio
       subject: row.subjectId,
       materialId: row.materialId,
       choice: row.choice,
+      correctAnswer: row.correctAnswer,
       tags: [],
     }));
   };

@@ -45,6 +45,7 @@ export const createCreateQuestion = (repositories: Repositories): MaterialQuesti
       materialId: data.materialId,
       tags: data.tags,
       choice: 'CORRECT',
+      correctAnswer: '',
     };
   };
 };

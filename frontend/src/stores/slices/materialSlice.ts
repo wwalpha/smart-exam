@@ -270,35 +270,13 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       );
     },
 
-    markQuestionCorrect: async (materialId, questionId) => {
+    setQuestionChoices: async (materialId, items) => {
       await withStatus(
         setStatus,
         async () => {
-          await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect: true });
+          await MATERIAL_API.setMaterialChoices(materialId, { items });
         },
-        '採点結果（正解）の登録に失敗しました。',
-        { rethrow: true },
-      );
-    },
-
-    markQuestionIncorrect: async (materialId, questionId) => {
-      await withStatus(
-        setStatus,
-        async () => {
-          await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect: false });
-        },
-        '採点結果（不正解）の登録に失敗しました。',
-        { rethrow: true },
-      );
-    },
-
-    setQuestionChoice: async (materialId, questionId, isCorrect) => {
-      await withStatus(
-        setStatus,
-        async () => {
-          await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect });
-        },
-        '採点結果の登録に失敗しました。',
+        '採点結果の保存に失敗しました。',
         { rethrow: true },
       );
     },

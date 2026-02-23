@@ -124,9 +124,8 @@ export const KanjiListPage = () => {
           </Button>
           <Button
             type="button"
-            variant="outline"
+            variant="destructive"
             size="sm"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={bulkDelete}
             disabled={selectedIds.size === 0}>
             一括削除
@@ -220,10 +219,10 @@ export const KanjiListPage = () => {
                       </Link>
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive"
                       size="icon"
                       aria-label="削除"
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="h-8 w-8"
                       onClick={() => remove(kanji.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
