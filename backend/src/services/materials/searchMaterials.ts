@@ -14,6 +14,7 @@ export const createSearchMaterials = async (
   const items = rows.map(toApiMaterial);
 
   const subject = (params.subject ?? '').trim().toLowerCase();
+  const status = (params.status ?? '').trim().toUpperCase();
   const grade = (params.grade ?? '').trim();
   const provider = (params.provider ?? '').trim();
   const from = (params.from ?? '').trim();
@@ -22,6 +23,8 @@ export const createSearchMaterials = async (
 
   const filtered = items.filter((item) => {
     if (subject && String(item.subject ?? '').toLowerCase() !== subject) return false;
+    if (status === 'COMPLETED' && !item.isCompleted) return false;
+    if (status === 'IN_PROGRESS' && item.isCompleted) return false;
     if (grade && String(item.grade ?? '') !== grade) return false;
     if (provider && String(item.provider ?? '') !== provider) return false;
     if (from && String(item.materialDate ?? '') < from) return false;

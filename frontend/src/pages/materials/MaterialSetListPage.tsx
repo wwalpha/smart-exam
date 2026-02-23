@@ -16,6 +16,7 @@ export const MaterialSetListPage = () => {
   const { materials, form, search, remove, ConfirmDialog } = useMaterialList();
   const { register, setValue, watch } = form;
   const provider = watch('provider');
+  const status = watch('status');
   const infoBadgeClass = 'px-4 py-2 text-sm';
 
   const [page, setPage] = useState(1);
@@ -40,6 +41,23 @@ export const MaterialSetListPage = () => {
         <CardContent>
           <form onSubmit={onSearch} className="space-y-4 pt-4">
             <div className="flex flex-wrap gap-4 items-end">
+              <div className="w-40">
+                <label className="text-sm font-medium">STATUS</label>
+                <input type="hidden" {...register('status')} />
+                <Select
+                  value={status}
+                  onValueChange={(v) => setValue('status', v as 'ALL' | 'IN_PROGRESS' | 'COMPLETED')}
+                  defaultValue="ALL">
+                  <SelectTrigger>
+                    <SelectValue placeholder="STATUS" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">全て</SelectItem>
+                    <SelectItem value="IN_PROGRESS">{MATERIAL_STATUS_LABEL.IN_PROGRESS}</SelectItem>
+                    <SelectItem value="COMPLETED">{MATERIAL_STATUS_LABEL.COMPLETED}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="w-40">
                 <label className="text-sm font-medium">科目</label>
                 <Select onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)} defaultValue="ALL">
@@ -140,6 +158,7 @@ export const MaterialSetListPage = () => {
               <TableHead>科目</TableHead>
               <TableHead>教材年月日</TableHead>
               <TableHead>教材名</TableHead>
+              <TableHead>問題数</TableHead>
               <TableHead>STATUS</TableHead>
             </TableRow>
           </TableHeader>
@@ -174,6 +193,7 @@ export const MaterialSetListPage = () => {
                 </TableCell>
                 <TableCell className="py-1">{material.materialDate}</TableCell>
                 <TableCell className="py-1 font-medium">{material.name}</TableCell>
+                <TableCell className="py-1">{material.questionCount}</TableCell>
                 <TableCell className="py-1">
                   <Badge variant="outline" className={infoBadgeClass}>
                     {material.isCompleted ? MATERIAL_STATUS_LABEL.COMPLETED : MATERIAL_STATUS_LABEL.IN_PROGRESS}
@@ -183,7 +203,7 @@ export const MaterialSetListPage = () => {
             ))}
             {materials.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>

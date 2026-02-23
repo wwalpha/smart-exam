@@ -5,6 +5,7 @@ import type { WordTestSubject } from '@typings/wordtest';
 
 type SearchFormValues = {
   subject: 'ALL' | WordTestSubject;
+  status: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
   grade: string;
   provider: string;
   date: string;
@@ -19,6 +20,7 @@ export const useMaterialList = () => {
   const form = useForm<SearchFormValues>({
     defaultValues: {
       subject: 'ALL',
+      status: 'ALL',
       grade: 'ALL',
       provider: '',
       date: '',
@@ -29,6 +31,7 @@ export const useMaterialList = () => {
   const search = (data: SearchFormValues) => {
     fetchMaterials({
       subject: data.subject === 'ALL' ? undefined : data.subject,
+      status: data.status === 'ALL' ? undefined : data.status,
       grade: data.grade === 'ALL' ? undefined : data.grade,
       provider: data.provider.trim() ? data.provider.trim() : undefined,
       ...(data.date ? { from: data.date, to: data.date } : {}),

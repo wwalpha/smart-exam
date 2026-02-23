@@ -164,6 +164,8 @@ export type MaterialListResponse = {
 export type SearchMaterialsRequest = {
   /** 科目での絞り込み */
   subject?: SubjectId;
+  /** 状態での絞り込み */
+  status?: 'IN_PROGRESS' | 'COMPLETED';
   /** 学年での絞り込み */
   grade?: string;
   /** 提供元での絞り込み */
@@ -279,6 +281,8 @@ export type Material = {
   materialDate: string;
   /** 初回実施日 (YYYY-MM-DD) */
   registeredDate: string;
+  /** 問題数 */
+  questionCount: number;
   /** 完了状態 */
   isCompleted: boolean;
 };

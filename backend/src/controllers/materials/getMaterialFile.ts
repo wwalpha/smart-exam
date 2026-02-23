@@ -8,6 +8,20 @@ type GetMaterialFileParams = {
   fileId: string;
 };
 
+const toAsciiFallbackFilename = (filename: string): string => {
+  const sanitized = filename.replace(/[\r\n"]/g, '_').trim();
+  const asciiOnly = sanitized.replace(/[^\x20-\x7E]/g, '_');
+  return asciiOnly.length > 0 ? asciiOnly : 'file.pdf';
+};
+
+const toContentDisposition = (filename: string): string => {
+  const fallback = toAsciiFallbackFilename(filename);
+  const encoded = encodeURIComponent(filename)
+    .replace(/['()]/g, escape)
+    .replace(/\*/g, '%2A');
+  return `inline; filename="${fallback}"; filename*=UTF-8''${encoded}`;
+};
+
 export const getMaterialFile = (services: Services): AsyncHandler<
   GetMaterialFileParams,
   unknown,
@@ -23,6 +37,7 @@ export const getMaterialFile = (services: Services): AsyncHandler<
 
   res.status(200);
   res.setHeader('content-type', file.contentType);
-  res.setHeader('content-disposition', `inline; filename="${file.filename}"`);
+  // 日本語を含むファイル名でもHTTPヘッダーが壊れないようRFC 5987形式で付与する
+  res.setHeader('content-disposition', toContentDisposition(file.filename));
   res.send(file.body);
 };

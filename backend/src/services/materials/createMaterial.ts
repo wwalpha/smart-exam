@@ -36,6 +36,7 @@ export const createCreateMaterial = async (
         registeredDate: data.registeredDate,
         grade: data.grade,
         provider: data.provider,
+        questionCount: 0,
         isCompleted: false,
       };
     }),

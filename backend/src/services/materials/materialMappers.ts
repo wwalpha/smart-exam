@@ -38,6 +38,7 @@ export const toApiMaterial = (dbItem: MaterialTable): Material => {
     provider,
     materialDate,
     registeredDate,
+    questionCount: typeof dbItem.questionCount === 'number' ? dbItem.questionCount : 0,
     isCompleted: dbItem.isCompleted ?? false,
   };
 };

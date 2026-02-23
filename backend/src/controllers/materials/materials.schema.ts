@@ -16,6 +16,7 @@ export const CreateMaterialBodySchema = z.object({
 /** SearchMaterialsBodySchema validates input shape. */
 export const SearchMaterialsBodySchema = z.object({
   subject: SubjectIdSchema.optional(),
+  status: z.enum(['IN_PROGRESS', 'COMPLETED']).optional(),
   grade: z.string().optional(),
   provider: z.string().optional(),
   from: z

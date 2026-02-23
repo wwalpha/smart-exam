@@ -56,14 +56,6 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         setStatus,
         async () => {
           const response = await MATERIAL_API.listMaterials(params);
-
-          const hasSearchParams =
-            !!params && Object.values(params).some((v) => v !== undefined && v !== null && String(v).trim().length > 0);
-
-          if (hasSearchParams && response.items.length === 0) {
-            return;
-          }
-
           updateMaterial({ list: response.items, total: response.total });
         },
         '教材セット一覧の取得に失敗しました。',
