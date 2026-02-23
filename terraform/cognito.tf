@@ -52,3 +52,21 @@ resource "aws_cognito_user_pool_domain" "auth" {
   user_pool_id          = aws_cognito_user_pool.auth.id
   managed_login_version = 2
 }
+
+# ----------------------------------------------------------------------------------------------
+# Cognito user group for administrators.
+# ----------------------------------------------------------------------------------------------
+resource "aws_cognito_user_group" "admin" {
+  name         = "ADMIN"
+  user_pool_id = aws_cognito_user_pool.auth.id
+  precedence   = 1
+}
+
+# ----------------------------------------------------------------------------------------------
+# Cognito user group for standard users.
+# ----------------------------------------------------------------------------------------------
+resource "aws_cognito_user_group" "user" {
+  name         = "USER"
+  user_pool_id = aws_cognito_user_pool.auth.id
+  precedence   = 10
+}

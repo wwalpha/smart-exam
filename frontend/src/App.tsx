@@ -35,12 +35,14 @@ import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
 import { PdfSettingsPage } from '@/pages/settings/PdfSettingsPage';
 import { AuthLoginPage } from '@/pages/auth/AuthLoginPage';
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage';
-import { getStoredAccessToken, isAuthEnabled } from '@/lib/auth';
+import { getCurrentUserRole, getStoredAccessToken, isAuthEnabled } from '@/lib/auth';
 
 export const App = () => {
   const location = useLocation();
   const authEnabled = isAuthEnabled();
   const isAuthRoute = location.pathname.startsWith('/auth/');
+  const userRole = getCurrentUserRole();
+  const appVersion = String(import.meta.env.VITE_APP_VERSION ?? '').trim();
 
   if (authEnabled && !isAuthRoute) {
     const token = getStoredAccessToken();
@@ -69,7 +71,11 @@ export const App = () => {
     { label: '漢字管理', to: '/kanji' },
     { label: '問題検索', to: '/search/questions' },
     { label: '設定', to: '/settings/pdf' },
-  ];
+  ].filter((item) => {
+    if (userRole === 'ADMIN') return true;
+    if (item.to === '/materials' || item.to === '/kanji') return false;
+    return true;
+  });
 
   const pageTitle = (() => {
     const rules: Array<{ pattern: string; title: string }> = [
@@ -108,7 +114,7 @@ export const App = () => {
   })();
 
   return (
-    <AppLayout title="Smart Exam" pageTitle={pageTitle} sidebarItems={sidebarItems}>
+    <AppLayout title="Smart Exam" pageTitle={pageTitle} version={appVersion} sidebarItems={sidebarItems}>
       <Toaster />
       <Routes>
         {/* Dashboard */}

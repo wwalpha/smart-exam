@@ -1,5 +1,7 @@
 const AUTH_TOKEN_STORAGE_KEY = 'smart_exam_access_token';
 
+export type CognitoUserRole = 'ADMIN' | 'USER';
+
 const normalizeDomain = (domain: string): string => {
   const trimmed = domain.trim();
   if (trimmed.length === 0) return '';
@@ -45,6 +47,45 @@ export const getOidcClientConfig = () => {
 
 export const getStoredAccessToken = (): string | null => {
   return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+};
+
+const parseJwtPayload = (token: string): Record<string, unknown> | null => {
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const decoded = atob(padded);
+    const payload = JSON.parse(decoded);
+    if (payload && typeof payload === 'object') {
+      return payload as Record<string, unknown>;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
+const toRoleFromClaims = (payload: Record<string, unknown>): CognitoUserRole => {
+  const groupsClaim = payload['cognito:groups'];
+  const groups = Array.isArray(groupsClaim)
+    ? groupsClaim.filter((item): item is string => typeof item === 'string')
+    : typeof groupsClaim === 'string'
+      ? [groupsClaim]
+      : [];
+
+  return groups.some((group) => group.toUpperCase() === 'ADMIN') ? 'ADMIN' : 'USER';
+};
+
+export const getCurrentUserRole = (): CognitoUserRole => {
+  if (!isAuthEnabled()) return 'ADMIN';
+  const token = getStoredAccessToken();
+  if (!token) return 'USER';
+  const payload = parseJwtPayload(token);
+  if (!payload) return 'USER';
+  return toRoleFromClaims(payload);
 };
 
 export const setStoredAccessToken = (token: string): void => {

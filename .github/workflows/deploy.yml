@@ -136,6 +136,7 @@ jobs:
       - name: Build
         env:
           VITE_API_ENDPOINT: ${{ needs.terraform.outputs.http_api_endpoint }}
+          VITE_APP_VERSION: ${{ github.event.release.tag_name || github.ref_name }}
           VITE_AWS_REGION: ${{ env.AWS_REGION }}
           VITE_ENABLE_AUTH: ${{ needs.terraform.outputs.api_auth_enabled == 'true' && '1' || '0' }}
           VITE_COGNITO_DOMAIN: ${{ needs.terraform.outputs.cognito_managed_login_domain }}

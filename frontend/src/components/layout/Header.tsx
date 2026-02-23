@@ -4,10 +4,11 @@ import { Menu } from 'lucide-react';
 type HeaderProps = {
   title: string;
   pageTitle?: string;
+  version?: string;
   onToggleSidebar?: () => void;
 };
 
-export const Header = ({ title, pageTitle, onToggleSidebar }: HeaderProps) => {
+export const Header = ({ title, pageTitle, version, onToggleSidebar }: HeaderProps) => {
   return (
     <header className="h-14 shrink-0 border-b border-border bg-foreground text-background">
       <div className="mx-auto grid h-full w-full grid-cols-3 items-center px-4">
@@ -26,7 +27,7 @@ export const Header = ({ title, pageTitle, onToggleSidebar }: HeaderProps) => {
           <div className="text-2xl font-semibold text-background/80">{title}</div>
         </div>
         <div className="text-center text-2xl font-semibold text-background">{pageTitle ?? ''}</div>
-        <div />
+        <div className="text-right text-sm font-medium text-background/80">{version ?? ''}</div>
       </div>
     </header>
   );

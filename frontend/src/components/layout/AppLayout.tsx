@@ -5,17 +5,18 @@ import { Sidebar, type SidebarItem } from '@/components/layout/Sidebar'
 type AppLayoutProps = {
   title: string
   pageTitle?: string
+  version?: string
   sidebarItems: SidebarItem[]
   children: ReactNode
 }
 
-export const AppLayout = ({ title, pageTitle, sidebarItems, children }: AppLayoutProps) => {
+export const AppLayout = ({ title, pageTitle, version, sidebarItems, children }: AppLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   return (
     <div className="min-h-screen w-full">
       <div className="flex min-h-screen w-full flex-col">
-        <Header title={title} pageTitle={pageTitle} onToggleSidebar={() => setIsSidebarOpen((v) => !v)} />
+        <Header title={title} pageTitle={pageTitle} version={version} onToggleSidebar={() => setIsSidebarOpen((v) => !v)} />
 
         <div className="flex min-h-0 flex-1">
           <Sidebar items={sidebarItems} isOpen={isSidebarOpen} />
