@@ -18,8 +18,8 @@ export const MATERIAL_PDF_FILE_TYPES: MaterialPdfFileType[] = ['QUESTION', 'ANSW
 
 export const MATERIAL_PDF_FILE_TYPE_LABEL: Record<MaterialPdfFileType, string> = {
   QUESTION: '問題用紙',
-  ANSWER: '解答用紙',
-  GRADED_ANSWER: '答案用紙',
+  ANSWER: '解答・解説',
+  GRADED_ANSWER: '採点後',
 };
 
 export type MaterialStatus = 'COMPLETED' | 'IN_PROGRESS';

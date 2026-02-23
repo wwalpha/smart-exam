@@ -5,9 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useQuestionManagement } from '@/hooks/materials';
+import { SUBJECT_LABEL } from '@/lib/Consts';
 
 export const QuestionManagementPage = () => {
   const {
@@ -50,6 +51,13 @@ export const QuestionManagementPage = () => {
             {material?.name}
             {material?.materialDate ? ` / ${material.materialDate}` : ''}
           </p>
+          {material?.subject ? (
+            <div className="mt-2">
+              <Badge variant={getSubjectBadgeVariant(material.subject)} className="px-3 py-1 text-sm font-semibold">
+                {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL]}
+              </Badge>
+            </div>
+          ) : null}
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
@@ -174,15 +182,15 @@ export const QuestionManagementPage = () => {
                               }}
                               className="flex min-w-[220px] items-center gap-4">
                               <div className="flex items-center gap-2 whitespace-nowrap">
-                                <RadioGroupItem value="incorrect" id={`incorrect-${q.id}`} />
-                                <Label className="whitespace-nowrap" htmlFor={`incorrect-${q.id}`}>
-                                  不正解
-                                </Label>
-                              </div>
-                              <div className="flex items-center gap-2 whitespace-nowrap">
                                 <RadioGroupItem value="correct" id={`correct-${q.id}`} />
                                 <Label className="whitespace-nowrap" htmlFor={`correct-${q.id}`}>
                                   正解
+                                </Label>
+                              </div>
+                              <div className="flex items-center gap-2 whitespace-nowrap">
+                                <RadioGroupItem value="incorrect" id={`incorrect-${q.id}`} />
+                                <Label className="whitespace-nowrap" htmlFor={`incorrect-${q.id}`}>
+                                  不正解
                                 </Label>
                               </div>
                             </RadioGroup>

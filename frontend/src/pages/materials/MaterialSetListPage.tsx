@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { useMaterialList } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import { MATERIAL_PROVIDER_OPTIONS, MATERIAL_STATUS_LABEL } from '@/lib/materialConsts';
@@ -198,7 +198,7 @@ export const MaterialSetListPage = () => {
                 <TableCell className="py-1">{material.grade}年</TableCell>
                 <TableCell className="py-1">{material.provider ?? ''}</TableCell>
                 <TableCell className="py-1">
-                  <Badge variant="outline" className={infoBadgeClass}>
+                  <Badge variant={getSubjectBadgeVariant(material.subject)} className={infoBadgeClass}>
                     {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}
                   </Badge>
                 </TableCell>

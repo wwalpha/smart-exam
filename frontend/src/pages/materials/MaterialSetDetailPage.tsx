@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { useMaterialDetail } from '@/hooks/materials';
 import { SUBJECT_LABEL } from '@/lib/Consts';
 import { MATERIAL_PDF_FILE_TYPES } from '@/lib/materialConsts';
@@ -68,7 +68,7 @@ export const MaterialSetDetailPage = () => {
             <Badge variant="outline" className="px-4 py-2 text-sm">
               {material.provider}
             </Badge>
-            <Badge variant="outline" className="px-4 py-2 text-sm">
+            <Badge variant={getSubjectBadgeVariant(material.subject)} className="px-4 py-2 text-sm">
               {SUBJECT_LABEL[material.subject as keyof typeof SUBJECT_LABEL] ?? ''}
             </Badge>
             <Badge variant="outline" className="px-4 py-2 text-sm">
