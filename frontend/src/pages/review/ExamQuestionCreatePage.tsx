@@ -79,7 +79,7 @@ export const ExamQuestionCreatePage = () => {
                 disabled={!subject || openCandidateList.length === 0}>
                 {openCandidateList.map((material) => (
                   <option key={material.id} value={material.id}>
-                    {`${material.name}（${material.materialDate} / 候補${material.openCandidateCount}件）`}
+                    {`${material.provider}_${material.name}（${material.materialDate} / 候補${material.openCandidateCount}件）`}
                   </option>
                 ))}
               </select>
