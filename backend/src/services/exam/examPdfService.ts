@@ -122,6 +122,13 @@ const getMaterialLine = (item: ExamDetail['items'][number]): string => {
   return `教材: ${parts.join(' ')}`;
 };
 
+// かな表記（ひらがな/カタカナ）差分を吸収するため、比較前にひらがなへ正規化する。
+const normalizeKanaToHiragana = (s: string): string => {
+  return s.replace(/[ァ-ヶ]/g, (char) => {
+    return String.fromCharCode(char.charCodeAt(0) - 0x60);
+  });
+};
+
 // 下線指定に合わせて設問を3分割で描画し、対象区間だけ下線を引く。
 const drawPromptWithUnderline = (params: {
   page: PDFPage;
@@ -273,7 +280,7 @@ const renderKanjiWorksheetLayout = (params: {
 
       // 下線指定が「読み仮名の位置」と一致していることを厳密に検証する。
       const slice = promptText.slice(underlineSpec.start, underlineSpec.start + underlineSpec.length);
-      if (slice !== readingHiragana) {
+      if (normalizeKanaToHiragana(slice) !== normalizeKanaToHiragana(readingHiragana)) {
         throw new ApiError('underlineSpec does not match readingHiragana', 400, ['invalid_underline_spec']);
       }
 

@@ -20,18 +20,64 @@ export const ExamKanjiPdfPage = () => {
   }, [presignedUrl, id]);
 
   const handlePrint = useCallback(() => {
-    const frame = iframeRef.current;
-    if (!frame) return;
+    if (!presignedUrl) return;
 
-    try {
-      frame.contentWindow?.focus();
-      frame.contentWindow?.print();
-    } catch (e) {
-      toast.error('PDFの印刷に失敗しました', {
-        description: e instanceof Error ? e.message : undefined,
-      });
-    }
-  }, []);
+    void (async () => {
+      let objectUrl = '';
+      let printFrame: HTMLIFrameElement | null = null;
+
+      try {
+        const response = await fetch(presignedUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        printFrame = document.createElement('iframe');
+        printFrame.style.position = 'fixed';
+        printFrame.style.right = '0';
+        printFrame.style.bottom = '0';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = '0';
+        printFrame.src = objectUrl;
+        document.body.appendChild(printFrame);
+
+        await new Promise<void>((resolve, reject) => {
+          if (!printFrame) {
+            reject(new Error('印刷フレームの初期化に失敗しました'));
+            return;
+          }
+
+          printFrame.onload = () => {
+            try {
+              printFrame?.contentWindow?.focus();
+              printFrame?.contentWindow?.print();
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          };
+
+          printFrame.onerror = () => {
+            reject(new Error('PDFの読み込みに失敗しました'));
+          };
+        });
+      } catch (e) {
+        toast.error('PDFの印刷に失敗しました', {
+          description: e instanceof Error ? e.message : undefined,
+        });
+      } finally {
+        if (printFrame && printFrame.parentNode) {
+          printFrame.parentNode.removeChild(printFrame);
+        }
+        if (objectUrl) {
+          URL.revokeObjectURL(objectUrl);
+        }
+      }
+    })();
+  }, [presignedUrl]);
 
   if (isLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;

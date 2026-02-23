@@ -83,6 +83,92 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     ]);
   });
 
+  it('accepts katakana generated reading and stores hiragana reading', async () => {
+    const repositories = {
+      kanji: {
+        listKanji: vi.fn().mockResolvedValue([] as unknown),
+        bulkCreate: vi.fn().mockResolvedValue(undefined),
+      },
+      examCandidates: {
+        bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
+      },
+      bedrock: {
+        generateKanjiQuestionReadingsBulk: vi
+          .fn()
+          .mockImplementation(async (params: { items: Array<{ id: string }> }) => {
+            return {
+              items: params.items.map((x) => ({
+                id: x.id,
+                readingHiragana: 'マッタク',
+              })),
+            };
+          }),
+      },
+    } as unknown as Repositories;
+
+    const service = createKanjiService(repositories);
+
+    const res = await service.importKanji({
+      subject: '1',
+      fileContent: 'マッタクわからない|全く\n',
+    });
+
+    expect(res.successCount).toBe(1);
+    expect(res.errorCount).toBe(0);
+
+    expect(repositories.kanji.bulkCreate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        question: 'マッタクわからない',
+        answer: '全く',
+        readingHiragana: 'まったく',
+        underlineSpec: { type: 'promptSpan', start: 0, length: 4 },
+      }),
+    ]);
+  });
+
+  it('accepts hiragana generated reading when question text uses katakana', async () => {
+    const repositories = {
+      kanji: {
+        listKanji: vi.fn().mockResolvedValue([] as unknown),
+        bulkCreate: vi.fn().mockResolvedValue(undefined),
+      },
+      examCandidates: {
+        bulkCreateCandidates: vi.fn().mockResolvedValue(undefined),
+      },
+      bedrock: {
+        generateKanjiQuestionReadingsBulk: vi
+          .fn()
+          .mockImplementation(async (params: { items: Array<{ id: string }> }) => {
+            return {
+              items: params.items.map((x) => ({
+                id: x.id,
+                readingHiragana: 'いしゃ',
+              })),
+            };
+          }),
+      },
+    } as unknown as Repositories;
+
+    const service = createKanjiService(repositories);
+
+    const res = await service.importKanji({
+      subject: '1',
+      fileContent: 'イシャにのどをみてもらう|医者\n',
+    });
+
+    expect(res.successCount).toBe(1);
+    expect(res.errorCount).toBe(0);
+
+    expect(repositories.kanji.bulkCreate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        question: 'イシャにのどをみてもらう',
+        answer: '医者',
+        readingHiragana: 'いしゃ',
+        underlineSpec: { type: 'promptSpan', start: 0, length: 3 },
+      }),
+    ]);
+  });
+
   it('counts duplicates within file and existing', async () => {
     const repositories = {
       kanji: {
@@ -180,7 +266,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
       repositories.examCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
     ).mock.calls[0][0] as Array<{ status: string }>;
     const historyPutCalls = (
-      repositories.examHistories.putHistory as unknown as { mock: { calls: Array<[ { status: string } ]> } }
+      repositories.examHistories.putHistory as unknown as { mock: { calls: Array<[{ status: string }]> } }
     ).mock.calls;
 
     expect(historyPutCalls.length).toBeGreaterThan(0);

@@ -9,7 +9,7 @@ import type { WordTestSubject } from '@typings/wordtest';
 import { useRef } from 'react';
 
 export const KanjiImportPage = () => {
-  const { form, submit, isSubmitting, error, validationErrors, resetUploadErrors } = useKanjiImport();
+  const { form, submit, isSubmitting, error, validationErrors, result, resetUploadErrors } = useKanjiImport();
   const { register, setValue, watch } = form;
   const subject = watch('subject');
   const fileList = watch('file');
@@ -96,6 +96,22 @@ export const KanjiImportPage = () => {
                       {message}
                     </p>
                   ))}
+                </div>
+              ) : null}
+              {result && result.errorCount > 0 ? (
+                <div className="space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                  <p className="text-sm text-destructive font-medium">
+                    取込結果: 成功 {result.successCount} 件 / 重複 {result.duplicateCount} 件 / エラー {result.errorCount} 件
+                  </p>
+                  <div className="max-h-64 space-y-1 overflow-y-auto pr-1">
+                    {result.errors.map((entry, index) => (
+                      <p key={`${entry.line}-${index}`} className="text-sm text-destructive break-words">
+                        {entry.line}行目: {entry.reason}
+                        <br />
+                        <span className="text-destructive/80">{entry.content}</span>
+                      </p>
+                    ))}
+                  </div>
                 </div>
               ) : null}
               {error ? <p className="text-sm text-destructive">{error}</p> : null}

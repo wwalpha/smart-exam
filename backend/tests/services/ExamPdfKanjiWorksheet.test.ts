@@ -5,7 +5,7 @@ import { ExamPdfService } from '@/services/exam/examPdfService';
 import type { ExamDetail } from '@smart-exam/api-types';
 
 describe('ExamPdfService (KANJI worksheet) smoke', () => {
-  it('generates a 1-page PDF for 60 printable items without throwing', async () => {
+  it('generates a 2-page PDF for 60 printable items without throwing', async () => {
     const promptText = 'チームのけいせいが不利なまま試合が進む。';
     const review: ExamDetail = {
       examId: 't1',
@@ -27,6 +27,39 @@ describe('ExamPdfService (KANJI worksheet) smoke', () => {
         readingHiragana: 'けいせい',
         underlineSpec: { type: 'promptSpan', start: 4, length: 4 },
       })),
+    };
+
+    const pdf = await ExamPdfService.generatePdfBuffer(review);
+    expect(pdf.length).toBeGreaterThan(100);
+
+    const doc = await PDFDocument.load(pdf);
+    expect(doc.getPageCount()).toBe(2);
+  });
+
+  it('generates PDF when prompt text uses katakana and reading is hiragana', async () => {
+    const promptText = 'イシャにのどをみてもらう。';
+    const review: ExamDetail = {
+      examId: 't2',
+      subject: '1',
+      mode: 'KANJI',
+      createdDate: '2026-02-14',
+      status: 'IN_PROGRESS',
+      pdf: { url: '/api/exam/t2/pdf', downloadUrl: '/api/exam/t2/pdf?download=1' },
+      count: 1,
+      results: [],
+      items: [
+        {
+          id: 'item-1',
+          itemId: 'item-1',
+          examId: 't2',
+          targetType: 'KANJI',
+          targetId: 'w-1',
+          questionText: promptText,
+          answerText: '医者',
+          readingHiragana: 'いしゃ',
+          underlineSpec: { type: 'promptSpan', start: 0, length: 3 },
+        },
+      ],
     };
 
     const pdf = await ExamPdfService.generatePdfBuffer(review);
