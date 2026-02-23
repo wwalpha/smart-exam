@@ -55,6 +55,6 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   lifecycle {
-    ignore_changes = [aliases]
+    ignore_changes = [aliases, viewer_certificate]
   }
 }
