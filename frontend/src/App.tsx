@@ -54,7 +54,7 @@ export const App = () => {
       { pattern: '/materials', title: '教材管理' },
       { pattern: '/materials/new', title: '教材セット登録' },
       { pattern: '/materials/:id/questions', title: '教材問題管理' },
-      { pattern: '/materials/:id', title: '教材セット詳細' },
+      { pattern: '/materials/:id', title: '教材詳細管理' },
 
       { pattern: '/exam/questions', title: '復習テスト一覧' },
       { pattern: '/exam/questions/new', title: '復習テスト作成' },

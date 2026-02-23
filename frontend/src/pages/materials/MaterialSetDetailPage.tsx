@@ -45,8 +45,7 @@ export const MaterialSetDetailPage = () => {
 
   return (
     <div className="space-y-6 px-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">教材詳細</h1>
+      <div className="flex items-center justify-end">
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link to="/materials">一覧へ戻る</Link>

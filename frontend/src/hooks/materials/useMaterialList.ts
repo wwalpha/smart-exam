@@ -14,7 +14,7 @@ type SearchFormValues = {
 
 const DEFAULT_SEARCH_VALUES: SearchFormValues = {
   subject: 'ALL',
-  status: 'ALL',
+  status: 'IN_PROGRESS',
   grade: 'ALL',
   provider: '',
   date: '',

@@ -49,7 +49,7 @@ export const MaterialSetListPage = () => {
                 <Select
                   value={status}
                   onValueChange={(v) => setValue('status', v as 'ALL' | 'IN_PROGRESS' | 'COMPLETED')}
-                  defaultValue="ALL">
+                  defaultValue="IN_PROGRESS">
                   <SelectTrigger>
                     <SelectValue placeholder="ステータス" />
                   </SelectTrigger>
@@ -206,7 +206,7 @@ export const MaterialSetListPage = () => {
                 <TableCell className="py-1 font-medium">{material.name}</TableCell>
                 <TableCell className="py-1">{material.questionCount}</TableCell>
                 <TableCell className="py-1">
-                  <Badge variant={material.isCompleted ? 'outline' : 'default'} className={infoBadgeClass}>
+                  <Badge variant={material.isCompleted ? 'default' : 'warning_soft'} className={infoBadgeClass}>
                     {material.isCompleted ? MATERIAL_STATUS_LABEL.COMPLETED : MATERIAL_STATUS_LABEL.IN_PROGRESS}
                   </Badge>
                 </TableCell>

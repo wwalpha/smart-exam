@@ -70,17 +70,9 @@ export const QuestionManagementPage = () => {
           <Button type="button" disabled={!canAnalyze} onClick={() => void analyze()}>
             番号分析
           </Button>
-          <Button
-            type="button"
-            onClick={() => void saveChoices()}
-            disabled={isBusy || !!material?.isCompleted || !hasUnsavedChanges || hasValidationErrors}>
-            保存
-          </Button>
           <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
             <DialogTrigger asChild>
-              <Button disabled={isBusy || !!material?.isCompleted} variant="outline">
-                一括追加
-              </Button>
+              <Button disabled={isBusy || !!material?.isCompleted}>一括追加</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -111,6 +103,12 @@ export const QuestionManagementPage = () => {
               </div>
             </DialogContent>
           </Dialog>
+          <Button
+            type="button"
+            onClick={() => void saveChoices()}
+            disabled={isBusy || !!material?.isCompleted || !hasUnsavedChanges || hasValidationErrors}>
+            保存
+          </Button>
         </div>
       </div>
 
@@ -210,7 +208,9 @@ export const QuestionManagementPage = () => {
                               ) : (
                                 <div className="h-9 w-[180px]" aria-hidden="true" />
                               )}
-                              {validationMessage ? <p className="text-xs text-destructive">{validationMessage}</p> : null}
+                              {validationMessage ? (
+                                <p className="text-xs text-destructive">{validationMessage}</p>
+                              ) : null}
                             </div>
                           </div>
                         );
