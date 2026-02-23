@@ -31,6 +31,15 @@ variable "deploy_environment" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# Optional custom prefix for Cognito managed login domain.
+# ----------------------------------------------------------------------------------------------
+variable "cognito_domain_prefix" {
+  description = "Optional custom prefix for Cognito managed login domain. If empty, uses <project_name>-<deploy_environment>."
+  type        = string
+  default     = ""
+}
+
+# ----------------------------------------------------------------------------------------------
 # Whether to allow Lambda to call Bedrock runtime APIs.
 # ----------------------------------------------------------------------------------------------
 variable "enable_bedrock" {
