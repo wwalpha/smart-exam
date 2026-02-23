@@ -39,6 +39,8 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
     material: {
       list: [],
       total: 0,
+      openCandidateList: [],
+      openCandidateTotal: 0,
       detail: null,
       files: [],
       questions: [],
@@ -56,7 +58,23 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ list: response.items, total: response.total });
         },
         '教材セット一覧の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
+      );
+    },
+
+    fetchOpenCandidateMaterials: async (params) => {
+      await withStatus(
+        setStatus,
+        async () => {
+          const response = await MATERIAL_API.listOpenCandidateMaterials(params);
+          const openCandidateTotal = response.items.reduce(
+            (accumulator, material) => accumulator + material.openCandidateCount,
+            0,
+          );
+          updateMaterial({ openCandidateList: response.items, openCandidateTotal });
+        },
+        '復習候補教材の取得に失敗しました。',
+        { rethrow: true },
       );
     },
 
@@ -64,6 +82,8 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       updateMaterial({
         list: [],
         total: 0,
+        openCandidateList: [],
+        openCandidateTotal: 0,
         detail: null,
         files: [],
         questions: [],
@@ -78,7 +98,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           return response;
         },
         '教材セットの作成に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -101,7 +121,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ files });
         },
         'PDFのアップロードに失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -113,7 +133,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ detail: response });
         },
         '教材セット詳細の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -125,7 +145,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ detail: response });
         },
         '教材セットの更新に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -146,7 +166,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           });
         },
         '教材セットの削除に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -158,7 +178,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ files: response });
         },
         '教材ファイル一覧の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -170,7 +190,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ questions: response });
         },
         '問題一覧の取得に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -182,7 +202,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           if (current.detail?.id !== materialId) return;
 
           const graded = current.files.find(
-            (f) => f.fileType === 'GRADED_ANSWER' && f.filename.toLowerCase().endsWith('.pdf')
+            (f) => f.fileType === 'GRADED_ANSWER' && f.filename.toLowerCase().endsWith('.pdf'),
           );
           if (!graded) return;
 
@@ -192,7 +212,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ questions: nextQuestions });
         },
         '問題番号の抽出に失敗しました。',
-        { rethrow: false }
+        { rethrow: false },
       );
     },
 
@@ -206,7 +226,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ questions: response });
         },
         '問題の作成に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -222,7 +242,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ questions: response });
         },
         '問題の作成に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -235,7 +255,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           // But for simplicity, we might rely on refetching or just updating local state if we had the materialId
         },
         '問題の更新に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -246,7 +266,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           await MATERIAL_API.deleteQuestion(materialId, questionId);
         },
         '問題の削除に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -257,7 +277,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect: true });
         },
         '採点結果（正解）の登録に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -268,7 +288,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect: false });
         },
         '採点結果（不正解）の登録に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -279,7 +299,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           await MATERIAL_API.setQuestionChoice(materialId, questionId, { isCorrect });
         },
         '採点結果の登録に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
 
@@ -291,7 +311,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           updateMaterial({ detail: response });
         },
         '教材セットの完了処理に失敗しました。',
-        { rethrow: true }
+        { rethrow: true },
       );
     },
   };

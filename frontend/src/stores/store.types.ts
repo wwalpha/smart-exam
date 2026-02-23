@@ -8,6 +8,7 @@ import type {
   CreateKanjiGroupResponse,
   KanjiGroup,
   Material,
+  OpenCandidateMaterial,
   CreateMaterialRequest,
   CreateMaterialResponse,
   UpdateMaterialRequest,
@@ -28,6 +29,7 @@ import type {
   ImportKanjiResponse,
   DashboardData,
   SearchExamsRequest,
+  ListOpenCandidateMaterialsRequest,
 } from '@smart-exam/api-types';
 
 /**
@@ -68,6 +70,8 @@ export type KanjiGroupState = {
 export type MaterialState = {
   list: Material[];
   total: number;
+  openCandidateList: OpenCandidateMaterial[];
+  openCandidateTotal: number;
   detail: Material | null;
   files: MaterialFile[];
   questions: Question[];
@@ -134,6 +138,7 @@ export type ExamSlice = {
 export type MaterialSlice = {
   material: MaterialState;
   fetchMaterials: (params?: Record<string, unknown>) => Promise<void>;
+  fetchOpenCandidateMaterials: (params: ListOpenCandidateMaterialsRequest) => Promise<void>;
   resetMaterialDetail: () => void;
   createMaterial: (request: CreateMaterialRequest) => Promise<CreateMaterialResponse>;
   uploadMaterialPdf: (params: {

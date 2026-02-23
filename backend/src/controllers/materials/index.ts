@@ -13,6 +13,7 @@ import { uploadMaterialFile } from './uploadMaterialFile';
 import { updateMaterial } from './updateMaterial';
 import {
   CreateMaterialBodySchema,
+  ListOpenCandidateMaterialsBodySchema,
   SearchMaterialsBodySchema,
   UpdateMaterialBodySchema,
   UploadMaterialFileBodySchema,
@@ -21,6 +22,7 @@ import {
 export const materialsController = (services: Services) => {
   return {
     CreateMaterialBodySchema,
+    ListOpenCandidateMaterialsBodySchema,
     SearchMaterialsBodySchema,
     UpdateMaterialBodySchema,
     UploadMaterialFileBodySchema,

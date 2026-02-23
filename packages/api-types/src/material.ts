@@ -197,8 +197,27 @@ export type SearchMaterialsRequest = {
 /** `POST /materials/search` */
 export type SearchMaterialsResponse = MaterialListResponse;
 
-/** `GET /materials/open-candidates` */
-export type ListOpenCandidateMaterialsResponse = MaterialListResponse;
+/** `POST /materials/open-candidates` */
+export type ListOpenCandidateMaterialsRequest = {
+  /** 科目での絞り込み */
+  subject: SubjectId;
+};
+
+/** `POST /materials/open-candidates` */
+export type OpenCandidateMaterial = Material & {
+  /** 未来日付を含まない候補者件数 */
+  openCandidateCount: number;
+};
+
+/** `POST /materials/open-candidates` */
+export type ListOpenCandidateMaterialsResponse = {
+  /** 教材セットリスト */
+  items: OpenCandidateMaterial[];
+  /** 総件数 */
+  total: number;
+  /** 件数 */
+  count: number;
+};
 
 /**
  * 教材に関連するファイル

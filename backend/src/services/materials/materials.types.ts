@@ -2,8 +2,10 @@ import type {
   AnalyzeMaterialResponse,
   CreateMaterialRequest,
   CreateMaterialResponse,
+  ListOpenCandidateMaterialsRequest,
   Material,
   MaterialFile,
+  OpenCandidateMaterial,
   SearchMaterialsRequest,
   SearchMaterialsResponse,
   UploadMaterialFileRequest,
@@ -14,7 +16,7 @@ import type { MaterialTable } from '@/types/db';
 
 export type MaterialsService = {
   listMaterials: () => Promise<Material[]>;
-  listOpenCandidateMaterials: () => Promise<Material[]>;
+  listOpenCandidateMaterials: (params: ListOpenCandidateMaterialsRequest) => Promise<OpenCandidateMaterial[]>;
   searchMaterials: (params: SearchMaterialsRequest) => Promise<SearchMaterialsResponse>;
   createMaterial: (data: CreateMaterialRequest) => Promise<CreateMaterialResponse>;
   getMaterial: (materialId: string) => Promise<Material | null>;

@@ -1,6 +1,5 @@
 // Module: createControllers responsibilities.
 
-import { analyzePaperController } from '@/controllers/bedrock';
 import { getDashboardController } from '@/controllers/dashboard';
 import { kanjiController } from '@/controllers/kanji';
 import { materialsController } from '@/controllers/materials';
@@ -11,7 +10,6 @@ import type { Services } from '@/services/createServices';
 
 /** Type definition for Controllers. */
 export type Controllers = {
-  bedrock: ReturnType<typeof analyzePaperController>;
   dashboard: ReturnType<typeof getDashboardController>;
   kanji: ReturnType<typeof kanjiController>;
   materials: ReturnType<typeof materialsController>;
@@ -22,7 +20,6 @@ export type Controllers = {
 /** Creates controllers. */
 export const createControllers = (services: Services): Controllers => {
   return {
-    bedrock: analyzePaperController(services),
     dashboard: getDashboardController(services),
     kanji: kanjiController(services),
     materials: materialsController(services),

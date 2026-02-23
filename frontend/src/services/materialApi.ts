@@ -1,6 +1,8 @@
 import { apiRequest } from './apiClient';
 import type {
   AnalyzeMaterialResponse,
+  ListOpenCandidateMaterialsRequest,
+  ListOpenCandidateMaterialsResponse,
   Material,
   MaterialListResponse,
   SearchMaterialsRequest,
@@ -28,6 +30,16 @@ export const listMaterials = async (params?: SearchMaterialsRequest): Promise<Ma
     method: 'POST',
     path: '/api/materials/search',
     body: params ?? {},
+  });
+};
+
+export const listOpenCandidateMaterials = async (
+  params: ListOpenCandidateMaterialsRequest,
+): Promise<ListOpenCandidateMaterialsResponse> => {
+  return apiRequest<ListOpenCandidateMaterialsResponse, ListOpenCandidateMaterialsRequest>({
+    method: 'POST',
+    path: '/api/materials/open-candidates',
+    body: params,
   });
 };
 

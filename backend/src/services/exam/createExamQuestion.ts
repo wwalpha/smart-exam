@@ -7,6 +7,62 @@ import type { ExamCandidateTable, ExamTable } from '@/types/db';
 import type { CandidateListParams, CreateExamDeps, ExamCandidate } from './createExam.types';
 import { toApiExam } from './internal';
 
+const toMaterialOrderMap = (materialIds?: string[]): Map<string, number> => {
+  const map = new Map<string, number>();
+  if (!materialIds) {
+    return map;
+  }
+
+  for (const [index, materialId] of materialIds.entries()) {
+    if (!map.has(materialId)) {
+      map.set(materialId, index);
+    }
+  }
+
+  return map;
+};
+
+const filterCandidatesByMaterialIds = (
+  candidates: ExamCandidate[],
+  materialOrderMap: Map<string, number>,
+): ExamCandidate[] => {
+  if (materialOrderMap.size === 0) {
+    return candidates;
+  }
+
+  return candidates.filter((candidate) => {
+    if (!candidate.materialId) {
+      return false;
+    }
+    return materialOrderMap.has(candidate.materialId);
+  });
+};
+
+const compareQuestionCandidates = (
+  left: ExamCandidate,
+  right: ExamCandidate,
+  materialOrderMap: Map<string, number>,
+): number => {
+  const leftMaterialOrder = left.materialId ? (materialOrderMap.get(left.materialId) ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER;
+  const rightMaterialOrder = right.materialId
+    ? (materialOrderMap.get(right.materialId) ?? Number.MAX_SAFE_INTEGER)
+    : Number.MAX_SAFE_INTEGER;
+
+  if (leftMaterialOrder !== rightMaterialOrder) {
+    return leftMaterialOrder - rightMaterialOrder;
+  }
+
+  if (left.dueDate !== right.dueDate) {
+    return (left.dueDate ?? '') < (right.dueDate ?? '') ? -1 : 1;
+  }
+
+  if (left.targetId !== right.targetId) {
+    return left.targetId < right.targetId ? -1 : 1;
+  }
+
+  return 0;
+};
+
 // 期限到来の候補を優先して取得する。
 const listDueCandidates = async (deps: CreateExamDeps, params: CandidateListParams): Promise<ExamCandidateTable[]> => {
   const today = params.todayYmd ?? DateUtils.todayYmd();
@@ -50,17 +106,15 @@ export const buildQuestionCandidates = (
 export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRequest): Promise<Exam> => {
   const examId = createUuid();
   const createdDate = DateUtils.todayYmd();
+  const materialOrderMap = toMaterialOrderMap(req.materialIds);
 
   // due 候補のみを対象にして、0件ならそのまま終了する。
   let sourceCandidates = await listDueCandidates(deps, { subject: req.subject, mode: req.mode });
-  const candidates = buildQuestionCandidates(sourceCandidates, createdDate);
+  let candidates = buildQuestionCandidates(sourceCandidates, createdDate);
+  candidates = filterCandidatesByMaterialIds(candidates, materialOrderMap);
 
-  // dueDate と targetId で出題順を固定する。
-  candidates.sort((a, b) => {
-    if (a.dueDate !== b.dueDate) return (a.dueDate ?? '') < (b.dueDate ?? '') ? -1 : 1;
-    if (a.targetId !== b.targetId) return a.targetId < b.targetId ? -1 : 1;
-    return 0;
-  });
+  // 教材指定がある場合は選択順を最優先にし、同一教材内では dueDate と targetId で固定する。
+  candidates.sort((left, right) => compareQuestionCandidates(left, right, materialOrderMap));
 
   const lockResults = await Promise.all(
     candidates.map(async (candidate, index) => {

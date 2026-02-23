@@ -30,6 +30,10 @@ export const SearchMaterialsBodySchema = z.object({
   q: z.string().optional(),
 });
 
+export const ListOpenCandidateMaterialsBodySchema = z.object({
+  subject: SubjectIdSchema,
+});
+
 /** UpdateMaterialBodySchema validates input shape. */
 export const UpdateMaterialBodySchema = z.object({
   name: z.string().min(1).optional(),

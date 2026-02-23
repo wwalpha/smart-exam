@@ -40,7 +40,11 @@ export const createApp = (): express.Express => {
   // 教材一覧を取得するAPI
   app.get('/api/materials', handleRequest(controllers.materials.listMaterials));
   // 復習候補が1件以上ある教材一覧を取得するAPI
-  app.get('/api/materials/open-candidates', handleRequest(controllers.materials.listOpenCandidateMaterials));
+  app.post(
+    '/api/materials/open-candidates',
+    validateBody(controllers.materials.ListOpenCandidateMaterialsBodySchema),
+    handleRequest(controllers.materials.listOpenCandidateMaterials),
+  );
   // 条件を指定して教材を検索するAPI
   app.post(
     '/api/materials/search',
@@ -199,11 +203,7 @@ export const createApp = (): express.Express => {
     handleRequest(controllers.exams.listExamTargets),
   );
   // 指定した復習テストの詳細を取得するAPI
-  app.get(
-    '/api/exam/:examId',
-    validateParams(ExamIdParamsSchema),
-    handleRequest(controllers.exams.getExam),
-  );
+  app.get('/api/exam/:examId', validateParams(ExamIdParamsSchema), handleRequest(controllers.exams.getExam));
   // 指定した復習テストのPDF情報を取得するAPI
   app.get(
     '/api/exam/:examId/pdf',

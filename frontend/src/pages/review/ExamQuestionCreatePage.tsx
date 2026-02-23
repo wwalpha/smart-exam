@@ -8,14 +8,12 @@ import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const ExamQuestionCreatePage = () => {
-  const { form, submit } = useReviewQuestionCreate();
+  const { form, submit, subject, openCandidateList, openCandidateTotal } = useReviewQuestionCreate();
   const {
     register,
     setValue,
-    watch,
     formState: { errors },
   } = form;
-  const subject = watch('subject');
 
   return (
     <div className="max-w-2xl mx-auto p-8 space-y-6">
@@ -46,7 +44,9 @@ export const ExamQuestionCreatePage = () => {
                   <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.subject?.message ? <p className="text-sm text-destructive">{String(errors.subject.message)}</p> : null}
+              {errors.subject?.message ? (
+                <p className="text-sm text-destructive">{String(errors.subject.message)}</p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -64,7 +64,30 @@ export const ExamQuestionCreatePage = () => {
                 aria-invalid={!!errors.count}
                 className={errors.count ? 'border-destructive focus-visible:ring-destructive' : undefined}
               />
-              {errors.count?.message ? <p className="text-sm text-destructive">{String(errors.count.message)}</p> : null}
+              {errors.count?.message ? (
+                <p className="text-sm text-destructive">{String(errors.count.message)}</p>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <Label>出題対象教材（複数選択可）</Label>
+              <select
+                multiple
+                size={Math.min(8, Math.max(4, openCandidateList.length || 4))}
+                {...register('materialIds')}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                disabled={!subject || openCandidateList.length === 0}>
+                {openCandidateList.map((material) => (
+                  <option key={material.id} value={material.id}>
+                    {`${material.name}（${material.materialDate} / 候補${material.openCandidateCount}件）`}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-muted-foreground">候補件数: {openCandidateTotal}件</p>
+              {!subject ? <p className="text-sm text-muted-foreground">先に科目を選択してください。</p> : null}
+              {subject && openCandidateList.length === 0 ? (
+                <p className="text-sm text-muted-foreground">候補教材がありません。</p>
+              ) : null}
             </div>
 
             <div className="flex justify-end gap-4 pt-4">

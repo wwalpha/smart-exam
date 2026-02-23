@@ -17,8 +17,8 @@ export type { MaterialsService } from './materials.types';
 
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {
   const listMaterials: MaterialsService['listMaterials'] = () => createListMaterials(repositories);
-  const listOpenCandidateMaterials: MaterialsService['listOpenCandidateMaterials'] = () =>
-    createListOpenCandidateMaterials(repositories);
+  const listOpenCandidateMaterials: MaterialsService['listOpenCandidateMaterials'] = (params) =>
+    createListOpenCandidateMaterials(repositories, params);
   const searchMaterials: MaterialsService['searchMaterials'] = (params) => createSearchMaterials(repositories, params);
   const createMaterial: MaterialsService['createMaterial'] = (data) => createCreateMaterial(repositories, data);
   const uploadMaterialFile: MaterialsService['uploadMaterialFile'] = (materialId, request) =>

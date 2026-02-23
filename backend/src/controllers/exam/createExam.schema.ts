@@ -15,4 +15,6 @@ export const CreateExamBodySchema = z.object({
   count: PositiveIntFromUnknownSchema,
   // 復習モード
   mode: ExamModeSchema,
+  // 出題対象に含める教材ID（指定順）
+  materialIds: z.array(z.string().min(1)).optional(),
 });
