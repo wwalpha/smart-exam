@@ -105,9 +105,9 @@ export const KanjiListPage = () => {
 
             <div className="flex flex-wrap justify-end gap-2">
               <Button asChild variant="outline">
-                <Link to="/kanji/import">一括インポート</Link>
+                <Link to="/kanji/import">一括登録</Link>
               </Button>
-              <Button asChild variant="outline">
+              <Button asChild>
                 <Link to="/kanji/new">新規登録</Link>
               </Button>
               <Button type="submit">検索</Button>

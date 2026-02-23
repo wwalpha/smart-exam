@@ -1,6 +1,6 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Toaster } from '@/components/ui/sonner';
-import { matchPath, Route, Routes, useLocation } from 'react-router-dom';
+import { matchPath, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 // Dashboard
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -33,9 +33,20 @@ import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
 
 // Settings
 import { PdfSettingsPage } from '@/pages/settings/PdfSettingsPage';
+import { AuthLoginPage } from '@/pages/auth/AuthLoginPage';
+import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage';
+import { getStoredAccessToken, isAuthEnabled } from '@/lib/auth';
 
 export const App = () => {
   const location = useLocation();
+  const authEnabled = isAuthEnabled();
+
+  if (authEnabled && !location.pathname.startsWith('/auth/')) {
+    const token = getStoredAccessToken();
+    if (!token) {
+      return <Navigate to="/auth/login" replace />;
+    }
+  }
 
   const sidebarItems = [
     { label: 'ダッシュボード', to: '/' },
@@ -75,6 +86,8 @@ export const App = () => {
 
       { pattern: '/search/questions', title: '問題検索' },
       { pattern: '/settings/pdf', title: 'PDF設定' },
+      { pattern: '/auth/login', title: 'ログイン' },
+      { pattern: '/auth/callback', title: 'ログイン' },
     ];
 
     const matched = rules.find((rule) => matchPath({ path: rule.pattern, end: true }, location.pathname));
@@ -119,6 +132,10 @@ export const App = () => {
 
         {/* Settings */}
         <Route path="/settings/pdf" element={<PdfSettingsPage />} />
+
+        {/* Auth */}
+        <Route path="/auth/login" element={<AuthLoginPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
       </Routes>
     </AppLayout>
   );

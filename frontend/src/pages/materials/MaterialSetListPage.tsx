@@ -119,9 +119,6 @@ export const MaterialSetListPage = () => {
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button type="button" asChild>
-                <Link to="/materials/new">新規登録</Link>
-              </Button>
               <Button
                 type="button"
                 variant="outline"
@@ -130,6 +127,9 @@ export const MaterialSetListPage = () => {
                   void clear();
                 }}>
                 クリア
+              </Button>
+              <Button type="button" asChild>
+                <Link to="/materials/new">新規登録</Link>
               </Button>
               <Button type="submit">検索</Button>
             </div>

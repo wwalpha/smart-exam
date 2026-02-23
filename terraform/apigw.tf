@@ -24,6 +24,23 @@ resource "aws_apigatewayv2_integration" "lambda" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# API Gateway Cognito JWT authorizer (enabled outside dev workspace).
+# ----------------------------------------------------------------------------------------------
+resource "aws_apigatewayv2_authorizer" "cognito" {
+  count = local.enable_api_auth ? 1 : 0
+
+  api_id           = aws_apigatewayv2_api.http.id
+  authorizer_type  = "JWT"
+  name             = "cognito-jwt-authorizer"
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.auth.id]
+    issuer   = "https://cognito-idp.${var.region}.amazonaws.com/${aws_cognito_user_pool.auth.id}"
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
 # API Gateway default route.
 # ----------------------------------------------------------------------------------------------
 resource "aws_apigatewayv2_route" "default" {
@@ -31,7 +48,8 @@ resource "aws_apigatewayv2_route" "default" {
   route_key = "$default"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 
-  authorization_type = "NONE"
+  authorization_type = local.enable_api_auth ? "JWT" : "NONE"
+  authorizer_id      = local.enable_api_auth ? aws_apigatewayv2_authorizer.cognito[0].id : null
 }
 
 # ----------------------------------------------------------------------------------------------

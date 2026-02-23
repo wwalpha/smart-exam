@@ -30,5 +30,19 @@ resource "aws_cognito_user_pool_client" "auth" {
     "ALLOW_USER_SRP_AUTH",
   ]
 
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["implicit"]
+  allowed_oauth_scopes                 = ["openid", "email", "profile"]
+  callback_urls                        = [local.cognito_redirect_uri]
+  logout_urls                          = [local.frontend_base_url]
+
   prevent_user_existence_errors = "ENABLED"
+}
+
+# ----------------------------------------------------------------------------------------------
+# Cognito managed login domain for frontend.
+# ----------------------------------------------------------------------------------------------
+resource "aws_cognito_user_pool_domain" "auth" {
+  domain       = local.cognito_domain_prefix
+  user_pool_id = aws_cognito_user_pool.auth.id
 }

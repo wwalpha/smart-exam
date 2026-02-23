@@ -17,6 +17,20 @@ variable "region" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# Deployment environment decided by CI template.
+# ----------------------------------------------------------------------------------------------
+variable "deploy_environment" {
+  description = "Deployment environment (dev or prod), provided by CI template."
+  type        = string
+  default     = "dev"
+
+  validation {
+    condition     = contains(["dev", "prod"], var.deploy_environment)
+    error_message = "deploy_environment must be one of: dev, prod."
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
 # Whether to allow Lambda to call Bedrock runtime APIs.
 # ----------------------------------------------------------------------------------------------
 variable "enable_bedrock" {

@@ -47,6 +47,30 @@ output "cognito_user_pool_client_id" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# Cognito managed login domain URL.
+# ----------------------------------------------------------------------------------------------
+output "cognito_managed_login_domain" {
+  description = "Cognito managed login base domain URL."
+  value       = "https://${aws_cognito_user_pool_domain.auth.domain}.auth.${var.region}.amazoncognito.com"
+}
+
+# ----------------------------------------------------------------------------------------------
+# Cognito redirect URI used by frontend auth callback.
+# ----------------------------------------------------------------------------------------------
+output "cognito_redirect_uri" {
+  description = "Cognito redirect URI for frontend auth callback."
+  value       = local.cognito_redirect_uri
+}
+
+# ----------------------------------------------------------------------------------------------
+# Whether API auth is enabled for current deployment environment.
+# ----------------------------------------------------------------------------------------------
+output "api_auth_enabled" {
+  description = "Whether API Gateway Cognito JWT auth is enabled (true in prod)."
+  value       = local.enable_api_auth
+}
+
+# ----------------------------------------------------------------------------------------------
 # Frontend S3 bucket name.
 # ----------------------------------------------------------------------------------------------
 output "frontend_bucket_name" {

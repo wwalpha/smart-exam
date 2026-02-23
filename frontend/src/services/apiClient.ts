@@ -1,4 +1,5 @@
 import axios, { isAxiosError } from 'axios';
+import { getStoredAccessToken, isAuthEnabled } from '@/lib/auth';
 
 export type ApiClientRequestParams<TBody> = {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -19,6 +20,13 @@ const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APIGW_URL ?? import.meta.env.VITE_API_ENDPOINT,
 });
 
+const appendAuthHeaderIfNeeded = (headers: Record<string, string>) => {
+  if (!isAuthEnabled()) return;
+  const token = getStoredAccessToken();
+  if (!token) return;
+  headers.Authorization = `Bearer ${token}`;
+};
+
 export async function apiRequest<TResponse, TBody = undefined>(
   params: ApiClientRequestParams<TBody>
 ): Promise<TResponse> {
@@ -28,6 +36,7 @@ export async function apiRequest<TResponse, TBody = undefined>(
   if (params.body !== undefined && !(params.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
+  appendAuthHeaderIfNeeded(headers);
 
   const response = await axiosInstance.request<TResponse>({
     method: params.method,
@@ -44,9 +53,12 @@ export async function apiRequest<TResponse, TBody = undefined>(
 }
 
 export async function apiRequestBlob(params: ApiClientBlobRequestParams): Promise<Blob> {
+  const headers: Record<string, string> = {};
+  appendAuthHeaderIfNeeded(headers);
   const response = await axiosInstance.request<Blob>({
     method: params.method,
     url: params.path,
+    headers,
     responseType: 'blob',
   });
 

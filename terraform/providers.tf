@@ -4,7 +4,7 @@ provider "aws" {
   default_tags {
     tags = {
       project     = var.project_name
-      environment = terraform.workspace
+      environment = var.deploy_environment
     }
   }
 }
