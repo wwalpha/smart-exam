@@ -23,7 +23,7 @@ export const Sidebar = ({ items, isOpen = true }: SidebarProps) => {
                 to={item.to}
                 className={({ isActive }) => {
                   return [
-                    'block w-full rounded-md px-3 py-2 text-left text-sm',
+                    'block w-full rounded-md px-3 py-2 text-left text-base',
                     isActive
                       ? 'bg-primary-foreground/15 font-semibold text-primary-foreground'
                       : 'text-primary-foreground hover:bg-primary/90',

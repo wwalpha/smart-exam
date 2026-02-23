@@ -208,7 +208,7 @@ const drawPromptWithUnderline = (params: {
   });
 };
 
-// 漢字モード専用: A4 横固定・2カラム60問ワークシートを描画する。
+// 漢字モード専用: A4 横固定・2カラム（左右15問）ワークシートを描画する。
 const renderKanjiWorksheetLayout = (params: {
   pdfDoc: PDFDocument;
   jpFont: PDFFont;
@@ -219,18 +219,20 @@ const renderKanjiWorksheetLayout = (params: {
   const pageWidth = 841.89;
   const pageHeight = 595.28;
 
-  // 1ページ60問（左右30問ずつ）固定
-  const itemsPerPage = 60;
-  const rowsPerColumn = 30;
+  // 1ページ30問（左右15問ずつ）固定
+  const rowsPerColumn = 15;
+  const itemsPerPage = rowsPerColumn * 2;
   const columnGap = mmToPt(8);
 
   // 右端の漢字記入枠（固定幅）
   const answerBoxWidth = mmToPt(22);
   const answerBoxGap = mmToPt(2.5);
 
-  // 本文用フォントサイズ（行数固定のため小さめ）
-  const baseFontSize = 9.5;
-  const minFontSize = 8;
+  // 15行固定での可読性を優先し、本文は少し大きめにする。
+  const baseFontSize = 10.5;
+  const minFontSize = 8.8;
+  const promptBaselineOffsetRatio = 0.34;
+  const answerLineOffsetRatio = 0.32;
   const candidates = params.review.items.filter(
     (x) =>
       String(x.questionText ?? '').trim().length > 0 &&
@@ -238,11 +240,10 @@ const renderKanjiWorksheetLayout = (params: {
       String(x.readingHiragana ?? '').trim().length > 0 &&
       Boolean(x.underlineSpec),
   );
-  const items = candidates.slice(0, itemsPerPage);
-  if (items.length === 0) {
+  if (candidates.length === 0) {
     throw new ApiError('No printable kanji items (missing required fields)', 400, ['no_printable_items']);
   }
-  const page = params.pdfDoc.addPage([pageWidth, pageHeight]);
+
   const contentWidth = pageWidth - params.margin * 2;
   const columnWidth = (contentWidth - columnGap) / 2;
   const leftX = params.margin;
@@ -251,52 +252,54 @@ const renderKanjiWorksheetLayout = (params: {
   const availableHeight = topY - params.margin;
   const rowPitch = availableHeight / rowsPerColumn;
   const textMaxWidth = columnWidth - answerBoxWidth - answerBoxGap;
-  for (let local = 0; local < items.length; local += 1) {
-    const col = local < rowsPerColumn ? 0 : 1;
-    const row = local % rowsPerColumn;
-    const baseX = col === 0 ? leftX : rightX;
-    const rowTopY = topY - rowPitch * row;
-    const rowBottomY = rowTopY - rowPitch;
-    const item = items[local];
-    const promptText = String((item as { questionText?: string }).questionText ?? '').trim();
-    const readingHiragana = String((item as { readingHiragana?: string }).readingHiragana ?? '').trim();
-    const underlineSpec = (item as { underlineSpec?: PromptUnderlineSpec }).underlineSpec;
-    if (!promptText || !readingHiragana || !underlineSpec) {
-      throw new ApiError('Missing questionText/readingHiragana/underlineSpec', 400, ['missing_kanji_fields']);
+
+  for (let pageStart = 0; pageStart < candidates.length; pageStart += itemsPerPage) {
+    const page = params.pdfDoc.addPage([pageWidth, pageHeight]);
+    const pageItems = candidates.slice(pageStart, pageStart + itemsPerPage);
+
+    for (let local = 0; local < pageItems.length; local += 1) {
+      const col = local < rowsPerColumn ? 0 : 1;
+      const row = local % rowsPerColumn;
+      const baseX = col === 0 ? leftX : rightX;
+      const rowTopY = topY - rowPitch * row;
+      const rowBottomY = rowTopY - rowPitch;
+      const item = pageItems[local];
+      const promptText = String((item as { questionText?: string }).questionText ?? '').trim();
+      const readingHiragana = String((item as { readingHiragana?: string }).readingHiragana ?? '').trim();
+      const underlineSpec = (item as { underlineSpec?: PromptUnderlineSpec }).underlineSpec;
+      if (!promptText || !readingHiragana || !underlineSpec) {
+        throw new ApiError('Missing questionText/readingHiragana/underlineSpec', 400, ['missing_kanji_fields']);
+      }
+
+      // 下線指定が「読み仮名の位置」と一致していることを厳密に検証する。
+      const slice = promptText.slice(underlineSpec.start, underlineSpec.start + underlineSpec.length);
+      if (slice !== readingHiragana) {
+        throw new ApiError('underlineSpec does not match readingHiragana', 400, ['invalid_underline_spec']);
+      }
+
+      drawPromptWithUnderline({
+        page,
+        font: params.jpFont,
+        x: baseX,
+        y: rowTopY - rowPitch * promptBaselineOffsetRatio,
+        indexText: `${pageStart + local + 1}. `,
+        promptText,
+        underlineSpec,
+        baseFontSize,
+        minFontSize,
+        textMaxWidth,
+      });
+
+      // 右端: 漢字記入欄は長方形ではなく下線で表現する。
+      const boxX = baseX + columnWidth - answerBoxWidth;
+      const lineY = rowBottomY + rowPitch * answerLineOffsetRatio;
+      page.drawLine({
+        start: { x: boxX, y: lineY },
+        end: { x: boxX + answerBoxWidth, y: lineY },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
     }
-
-    // 下線指定が「読み仮名の位置」と一致していることを厳密に検証する。
-    const slice = promptText.slice(underlineSpec.start, underlineSpec.start + underlineSpec.length);
-    if (slice !== readingHiragana) {
-      throw new ApiError('underlineSpec does not match readingHiragana', 400, ['invalid_underline_spec']);
-    }
-
-    drawPromptWithUnderline({
-      page,
-      font: params.jpFont,
-      x: baseX,
-      y: rowTopY - baseFontSize,
-      indexText: `${local + 1}. `,
-      promptText,
-      underlineSpec,
-      baseFontSize,
-      minFontSize,
-      textMaxWidth,
-    });
-
-    // 右端: 漢字記入枠（枠のみ、解答は出さない）
-    const boxHeight = rowPitch * 0.8;
-    const boxX = baseX + columnWidth - answerBoxWidth;
-    const boxY = rowBottomY + (rowPitch - boxHeight) / 2;
-    page.drawRectangle({
-      x: boxX,
-      y: boxY,
-      width: answerBoxWidth,
-      height: boxHeight,
-      borderWidth: 1,
-      borderColor: rgb(0, 0, 0),
-      color: undefined,
-    });
   }
 };
 
