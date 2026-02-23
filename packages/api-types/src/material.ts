@@ -100,7 +100,7 @@ export type CreateMaterialRequest = {
   /** 教材名 */
   name: string;
   /** 科目 */
-  subject: SubjectId;
+  subject: SubjectId[];
   /** 教材年月日 (YYYY-MM-DD) */
   materialDate: string;
   /** 初回実施日 (YYYY-MM-DD) */
@@ -112,10 +112,15 @@ export type CreateMaterialRequest = {
 };
 
 /** 教材セット作成レスポンス */
-export type CreateMaterialResponse = Material;
+export type CreateMaterialResponse = {
+  /** 作成された教材セット一覧 */
+  items: Material[];
+};
 
 /** 教材セット更新リクエスト */
-export type UpdateMaterialRequest = Partial<CreateMaterialRequest> & {
+export type UpdateMaterialRequest = Partial<Omit<CreateMaterialRequest, 'subject'>> & {
+  /** 科目 */
+  subject?: SubjectId;
   /** 問題PDFのS3キー */
   questionPdfPath?: string;
   /** 解答PDFのS3キー */

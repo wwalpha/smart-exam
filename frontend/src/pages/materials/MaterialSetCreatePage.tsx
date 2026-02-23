@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useMaterialCreate } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
-import { MATERIAL_NAME_OPTIONS_BY_PROVIDER, MATERIAL_PDF_FILE_TYPE_LABEL, MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
+import { MATERIAL_NAME_OPTIONS_BY_PROVIDER, MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const MaterialSetCreatePage = () => {
@@ -18,7 +19,14 @@ export const MaterialSetCreatePage = () => {
   } = form;
 
   const provider = watch('provider');
+  const subjects = watch('subject') ?? [];
   const nameOptions = provider ? MATERIAL_NAME_OPTIONS_BY_PROVIDER[provider as keyof typeof MATERIAL_NAME_OPTIONS_BY_PROVIDER] : null;
+
+  const toggleSubject = (subject: WordTestSubject, checked: boolean) => {
+    const current = watch('subject') ?? [];
+    const next = checked ? Array.from(new Set([...current, subject])) : current.filter((item) => item !== subject);
+    setValue('subject', next, { shouldValidate: true });
+  };
 
   return (
     <div className="space-y-6 p-0 max-w-3xl mx-auto">
@@ -74,52 +82,6 @@ export const MaterialSetCreatePage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>科目 *</Label>
-                <input type="hidden" {...register('subject', { required: '必須です' })} />
-                <Select onValueChange={(v) => setValue('subject', v as WordTestSubject, { shouldValidate: true })}>
-                  <SelectTrigger
-                    aria-invalid={!!errors.subject}
-                    className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}>
-                    <SelectValue placeholder="選択してください" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
-                    <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
-                    <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.subject?.message ? (
-                  <p className="text-sm text-destructive">{String(errors.subject.message)}</p>
-                ) : null}
-              </div>
-
-              <div className="space-y-2">
-                <Label>教材年月日 *</Label>
-                <Input
-                  type="date"
-                  {...register('materialDate', { required: '必須です' })}
-                  aria-invalid={!!errors.materialDate}
-                  className={errors.materialDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                />
-                {errors.materialDate?.message ? (
-                  <p className="text-sm text-destructive">{String(errors.materialDate.message)}</p>
-                ) : null}
-              </div>
-
-              <div className="space-y-2">
-                <Label>初回実施日 *</Label>
-                <Input
-                  type="date"
-                  {...register('registeredDate', { required: '必須です' })}
-                  aria-invalid={!!errors.registeredDate}
-                  className={errors.registeredDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
-                />
-                {errors.registeredDate?.message ? (
-                  <p className="text-sm text-destructive">{String(errors.registeredDate.message)}</p>
-                ) : null}
-              </div>
-
-              <div className="space-y-2">
                 <Label>教材名 *</Label>
                 <input type="hidden" {...register('name', { required: '必須です' })} />
                 <Select
@@ -143,23 +105,73 @@ export const MaterialSetCreatePage = () => {
                   <p className="text-sm text-destructive">{String(errors.name.message)}</p>
                 ) : null}
               </div>
-            </div>
 
-            <div className="space-y-4 pt-4 border-t">
-              <h3 className="font-medium">ファイルアップロード</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-2">
-                  <Label>{MATERIAL_PDF_FILE_TYPE_LABEL.QUESTION}</Label>
-                  <Input type="file" accept=".pdf" {...register('questionFile')} />
+              <div className="space-y-2 col-span-2">
+                <Label>教材年月日 *</Label>
+                <Input
+                  type="date"
+                  {...register('materialDate', {
+                    required: '必須です',
+                    onChange: (event) => {
+                      const selectedDate = event.target.value;
+                      setValue('registeredDate', selectedDate, { shouldValidate: true });
+                    },
+                  })}
+                  aria-invalid={!!errors.materialDate}
+                  className={errors.materialDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                />
+                {errors.materialDate?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.materialDate.message)}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <Label>初回実施日 *</Label>
+                <Input
+                  type="date"
+                  {...register('registeredDate', { required: '必須です' })}
+                  aria-invalid={!!errors.registeredDate}
+                  className={errors.registeredDate ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                />
+                {errors.registeredDate?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.registeredDate.message)}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2 col-span-4">
+                <Label>科目 *</Label>
+                <input
+                  type="hidden"
+                  {...register('subject', {
+                    validate: (value) => (Array.isArray(value) && value.length > 0 ? true : '必須です'),
+                  })}
+                />
+                <div className="flex flex-wrap gap-6 rounded-md border p-3">
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={subjects.includes(SUBJECT.math)}
+                      onCheckedChange={(checked) => toggleSubject(SUBJECT.math, Boolean(checked))}
+                    />
+                    <span>{SUBJECT_LABEL[SUBJECT.math]}</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={subjects.includes(SUBJECT.science)}
+                      onCheckedChange={(checked) => toggleSubject(SUBJECT.science, Boolean(checked))}
+                    />
+                    <span>{SUBJECT_LABEL[SUBJECT.science]}</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={subjects.includes(SUBJECT.society)}
+                      onCheckedChange={(checked) => toggleSubject(SUBJECT.society, Boolean(checked))}
+                    />
+                    <span>{SUBJECT_LABEL[SUBJECT.society]}</span>
+                  </label>
                 </div>
-                <div className="space-y-2">
-                  <Label>{MATERIAL_PDF_FILE_TYPE_LABEL.ANSWER}</Label>
-                  <Input type="file" accept=".pdf" {...register('answerFile')} />
-                </div>
-                <div className="space-y-2">
-                  <Label>{MATERIAL_PDF_FILE_TYPE_LABEL.GRADED_ANSWER}</Label>
-                  <Input type="file" accept=".pdf" {...register('gradedFile')} />
-                </div>
+                {errors.subject?.message ? (
+                  <p className="text-sm text-destructive">{String(errors.subject.message)}</p>
+                ) : null}
               </div>
             </div>
 

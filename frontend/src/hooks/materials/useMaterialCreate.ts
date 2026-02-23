@@ -3,36 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import type { CreateMaterialRequest } from '@smart-exam/api-types';
 
-type FormValues = CreateMaterialRequest & {
-  questionFile?: FileList;
-  answerFile?: FileList;
-  gradedFile?: FileList;
-};
+type FormValues = CreateMaterialRequest;
 
 export const useMaterialCreate = () => {
   const navigate = useNavigate();
-  const createMaterialWithUpload = useWordTestStore((s) => s.createMaterialWithUpload);
+  const createMaterial = useWordTestStore((s) => s.createMaterial);
   const status = useWordTestStore((s) => s.material.status);
 
-  const form = useForm<FormValues>();
+  const form = useForm<FormValues>({
+    defaultValues: {
+      subject: [],
+    },
+  });
 
   const submit = async (data: FormValues) => {
-    const material = await createMaterialWithUpload({
-      request: {
-        name: data.name,
-        subject: data.subject,
-        materialDate: data.materialDate,
-        registeredDate: data.registeredDate,
-        grade: data.grade,
-        provider: data.provider,
-      },
-      questionFile: data.questionFile?.[0],
-      answerFile: data.answerFile?.[0],
-      gradedFile: data.gradedFile?.[0],
+    const response = await createMaterial({
+      name: data.name,
+      subject: data.subject,
+      materialDate: data.materialDate,
+      registeredDate: data.registeredDate,
+      grade: data.grade,
+      provider: data.provider,
     });
 
-    if (material) {
-      navigate(`/materials/${material.id}`);
+    if (response.items.length > 0) {
+      navigate('/materials');
     }
   };
 

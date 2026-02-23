@@ -76,39 +76,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         setStatus,
         async () => {
           const response = await MATERIAL_API.createMaterial(request);
-          // Optionally refresh list or add to list
           return response;
-        },
-        '教材セットの作成に失敗しました。',
-        { rethrow: true }
-      );
-    },
-
-    createMaterialWithUpload: async (params) => {
-      return await withStatus(
-        setStatus,
-        async () => {
-          const material = await MATERIAL_API.createMaterial(params.request);
-
-          const uploads: Array<{ fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER'; file: File }> = [];
-          if (params.questionFile) uploads.push({ fileType: 'QUESTION', file: params.questionFile });
-          if (params.answerFile) uploads.push({ fileType: 'ANSWER', file: params.answerFile });
-          if (params.gradedFile) uploads.push({ fileType: 'GRADED_ANSWER', file: params.gradedFile });
-
-          for (const upload of uploads) {
-            const presigned = await MATERIAL_API.uploadMaterialFile(material.id, {
-              contentType: upload.file.type,
-              fileName: upload.file.name,
-              filetype: upload.fileType,
-            });
-            await MATERIAL_API.uploadFileToS3(presigned.uploadUrl, upload.file);
-          }
-
-          // ファイル一覧を即時反映
-          const files = await MATERIAL_API.listMaterialFiles(material.id);
-          updateMaterial({ files });
-
-          return material;
         },
         '教材セットの作成に失敗しました。',
         { rethrow: true }

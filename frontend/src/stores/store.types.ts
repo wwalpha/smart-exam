@@ -9,6 +9,7 @@ import type {
   KanjiGroup,
   Material,
   CreateMaterialRequest,
+  CreateMaterialResponse,
   UpdateMaterialRequest,
   MaterialFile,
   Question,
@@ -133,13 +134,7 @@ export type ExamSlice = {
 export type MaterialSlice = {
   material: MaterialState;
   fetchMaterials: (params?: Record<string, unknown>) => Promise<void>;
-  createMaterial: (request: CreateMaterialRequest) => Promise<Material>;
-  createMaterialWithUpload: (params: {
-    request: CreateMaterialRequest;
-    questionFile?: File;
-    answerFile?: File;
-    gradedFile?: File;
-  }) => Promise<Material>;
+  createMaterial: (request: CreateMaterialRequest) => Promise<CreateMaterialResponse>;
   uploadMaterialPdf: (params: {
     materialId: string;
     fileType: 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';

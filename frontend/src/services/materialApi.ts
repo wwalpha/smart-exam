@@ -4,6 +4,7 @@ import type {
   MaterialListResponse,
   SearchMaterialsRequest,
   CreateMaterialRequest,
+  CreateMaterialResponse,
   UpdateMaterialRequest,
   MaterialFile,
   ListMaterialFilesResponse,
@@ -29,8 +30,8 @@ export const listMaterials = async (params?: SearchMaterialsRequest): Promise<Ma
   });
 };
 
-export const createMaterial = async (request: CreateMaterialRequest): Promise<Material> => {
-  return apiRequest<Material, CreateMaterialRequest>({
+export const createMaterial = async (request: CreateMaterialRequest): Promise<CreateMaterialResponse> => {
+  return apiRequest<CreateMaterialResponse, CreateMaterialRequest>({
     method: 'POST',
     path: '/api/materials',
     body: request,
