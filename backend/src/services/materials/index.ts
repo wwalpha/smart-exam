@@ -7,6 +7,7 @@ import { createGetMaterial } from './getMaterial';
 import { createGetMaterialFile } from './getMaterialFile';
 import { createListMaterialFiles } from './listMaterialFiles';
 import { createListMaterials } from './listMaterials';
+import { createListOpenCandidateMaterials } from './listOpenCandidateMaterials';
 import { createSearchMaterials } from './searchMaterials';
 import { createUploadMaterialFile } from './uploadMaterialFile';
 import { createUpdateMaterial } from './updateMaterial';
@@ -16,6 +17,8 @@ export type { MaterialsService } from './materials.types';
 
 export const createMaterialsService = (repositories: Repositories): MaterialsService => {
   const listMaterials: MaterialsService['listMaterials'] = () => createListMaterials(repositories);
+  const listOpenCandidateMaterials: MaterialsService['listOpenCandidateMaterials'] = () =>
+    createListOpenCandidateMaterials(repositories);
   const searchMaterials: MaterialsService['searchMaterials'] = (params) => createSearchMaterials(repositories, params);
   const createMaterial: MaterialsService['createMaterial'] = (data) => createCreateMaterial(repositories, data);
   const uploadMaterialFile: MaterialsService['uploadMaterialFile'] = (materialId, request) =>
@@ -35,6 +38,7 @@ export const createMaterialsService = (repositories: Repositories): MaterialsSer
 
   return {
     listMaterials,
+    listOpenCandidateMaterials,
     searchMaterials,
     createMaterial,
     uploadMaterialFile,

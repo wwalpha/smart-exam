@@ -62,26 +62,55 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
     return 0;
   });
 
-  const selected: ExamCandidate[] = [];
-  const materialIdsToSync = new Set<string>();
-  for (const candidate of candidates) {
-    if (selected.length >= req.count) break;
-    if (!candidate.dueDate) continue;
-    if (candidate.candidateKey) {
+  const lockResults = await Promise.all(
+    candidates.map(async (candidate, index) => {
+      if (!candidate.dueDate) {
+        return { candidate, index, locked: false, selectable: false };
+      }
+      if (!candidate.candidateKey) {
+        return { candidate, index, locked: false, selectable: true };
+      }
+
       const locked = await lockCandidate(deps, {
         subject: candidate.subject,
         candidateKey: candidate.candidateKey,
         examId,
       });
-      if (!locked) continue;
 
-      if (candidate.materialId) {
-        // OPEN→LOCKED の遷移後に更新が必要な教材IDを収集する。
-        materialIdsToSync.add(candidate.materialId);
-      }
-    }
-    selected.push(candidate);
-  }
+      return { candidate, index, locked, selectable: locked };
+    }),
+  );
+
+  const selectedResultIndices = new Set(
+    lockResults
+      .filter((result) => result.selectable)
+      .slice(0, req.count)
+      .map((result) => result.index),
+  );
+
+  const selected: ExamCandidate[] = lockResults
+    .filter((result) => selectedResultIndices.has(result.index))
+    .map((result) => result.candidate);
+
+  const lockedButUnselected = lockResults.filter(
+    (result) => result.locked && !selectedResultIndices.has(result.index) && Boolean(result.candidate.candidateKey),
+  );
+
+  await Promise.all(
+    lockedButUnselected.map((result) =>
+      deps.repositories.examCandidates.releaseLockIfMatch({
+        subject: result.candidate.subject,
+        candidateKey: result.candidate.candidateKey as string,
+        examId,
+      }),
+    ),
+  );
+
+  const materialIdsToSync = new Set(
+    lockResults
+      .filter((result) => result.locked && Boolean(result.candidate.materialId))
+      .map((result) => result.candidate.materialId as string),
+  );
 
   // 候補の採用処理が完了してから教材側件数を一括で追随させる。
   await Promise.all(

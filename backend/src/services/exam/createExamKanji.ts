@@ -105,20 +105,50 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
     return 0;
   });
 
-  const selected: ExamCandidate[] = [];
-  for (const candidate of candidates) {
-    if (selected.length >= req.count) break;
-    if (!candidate.dueDate) continue;
-    if (candidate.candidateKey) {
+  const lockResults = await Promise.all(
+    candidates.map(async (candidate, index) => {
+      if (!candidate.dueDate) {
+        return { candidate, index, locked: false, selectable: false };
+      }
+      if (!candidate.candidateKey) {
+        return { candidate, index, locked: false, selectable: true };
+      }
+
       const locked = await lockCandidate(deps, {
         subject: candidate.subject,
         candidateKey: candidate.candidateKey,
         examId,
       });
-      if (!locked) continue;
-    }
-    selected.push(candidate);
-  }
+
+      return { candidate, index, locked, selectable: locked };
+    }),
+  );
+
+  const selectedResultIndices = new Set(
+    lockResults
+      .filter((result) => result.selectable)
+      .slice(0, req.count)
+      .map((result) => result.index),
+  );
+
+  const selected: ExamCandidate[] = lockResults
+    .filter((result) => selectedResultIndices.has(result.index))
+    .map((result) => result.candidate);
+
+  const lockedButUnselected = lockResults.filter(
+    (result) => result.locked && !selectedResultIndices.has(result.index) && Boolean(result.candidate.candidateKey),
+  );
+
+  await Promise.all(
+    lockedButUnselected.map((result) =>
+      deps.repositories.examCandidates.releaseLockIfMatch({
+        subject: result.candidate.subject,
+        candidateKey: result.candidate.candidateKey as string,
+        examId,
+      }),
+    ),
+  );
+
   const targetIds = selected.map((candidate) => candidate.targetId);
   const pdfS3Key = targetIds.length > 0 ? `exams/${examId}.pdf` : undefined;
 

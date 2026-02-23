@@ -3,7 +3,7 @@ import type { SearchMaterialsResponse } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 
 import { toApiMaterial } from './materialMappers';
-import { sortMaterialsForList } from './materialSort';
+import { sortMaterialsForList } from './material.lib';
 
 import type { MaterialsService } from './materials.types';
 

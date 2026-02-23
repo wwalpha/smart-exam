@@ -19,7 +19,7 @@ export const ExamQuestionCreatePage = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-8 space-y-6">
-      <h1 className="text-2xl font-bold">問題復習テスト作成</h1>
+      <h1 className="text-2xl font-bold">復習テスト作成</h1>
 
       <Card>
         <CardHeader>

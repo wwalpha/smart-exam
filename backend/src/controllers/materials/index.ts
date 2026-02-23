@@ -7,6 +7,7 @@ import { getMaterial } from './getMaterial';
 import { getMaterialFile } from './getMaterialFile';
 import { listMaterialFiles } from './listMaterialFiles';
 import { listMaterials } from './listMaterials';
+import { listOpenCandidateMaterials } from './listOpenCandidateMaterials';
 import { searchMaterials } from './searchMaterials';
 import { uploadMaterialFile } from './uploadMaterialFile';
 import { updateMaterial } from './updateMaterial';
@@ -24,6 +25,7 @@ export const materialsController = (services: Services) => {
     UpdateMaterialBodySchema,
     UploadMaterialFileBodySchema,
     listMaterials: listMaterials(services),
+    listOpenCandidateMaterials: listOpenCandidateMaterials(services),
     searchMaterials: searchMaterials(services),
     createMaterial: createMaterial(services),
     completeMaterial: completeMaterial(services),

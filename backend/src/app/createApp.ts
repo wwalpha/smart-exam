@@ -39,6 +39,8 @@ export const createApp = (): express.Express => {
 
   // 教材一覧を取得するAPI
   app.get('/api/materials', handleRequest(controllers.materials.listMaterials));
+  // 復習候補が1件以上ある教材一覧を取得するAPI
+  app.get('/api/materials/open-candidates', handleRequest(controllers.materials.listOpenCandidateMaterials));
   // 条件を指定して教材を検索するAPI
   app.post(
     '/api/materials/search',

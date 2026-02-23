@@ -39,8 +39,8 @@ export const App = () => {
 
   const sidebarItems = [
     { label: 'ダッシュボード', to: '/' },
-    { label: '問題復習テスト', to: '/exam/questions' },
-    { label: '漢字復習テスト', to: '/exam/kanji' },
+    { label: '復習テスト', to: '/exam/questions' },
+    { label: '漢字テスト', to: '/exam/kanji' },
     { label: '教材管理', to: '/materials' },
     { label: '漢字管理', to: '/kanji' },
     { label: '問題検索', to: '/search/questions' },
@@ -56,14 +56,14 @@ export const App = () => {
       { pattern: '/materials/:id/questions', title: '教材問題管理' },
       { pattern: '/materials/:id', title: '教材セット詳細' },
 
-      { pattern: '/exam/questions', title: '問題復習テスト一覧' },
-      { pattern: '/exam/questions/new', title: '問題復習テスト作成' },
+      { pattern: '/exam/questions', title: '復習テスト一覧' },
+      { pattern: '/exam/questions/new', title: '復習テスト作成' },
       { pattern: '/exam/questions/:id/grading', title: '採点' },
       { pattern: '/exam/questions/:id/pdf', title: 'PDF' },
       { pattern: '/exam/questions/:id', title: '詳細' },
 
-      { pattern: '/exam/kanji', title: '漢字復習テスト一覧' },
-      { pattern: '/exam/kanji/new', title: '漢字復習テスト作成' },
+      { pattern: '/exam/kanji', title: '漢字テスト一覧' },
+      { pattern: '/exam/kanji/new', title: '漢字テスト作成' },
       { pattern: '/exam/kanji/:id/grading', title: '採点' },
       { pattern: '/exam/kanji/:id/pdf', title: 'PDF' },
       { pattern: '/exam/kanji/:id', title: '詳細' },

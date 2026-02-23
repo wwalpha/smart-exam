@@ -14,6 +14,7 @@ import type { MaterialTable } from '@/types/db';
 
 export type MaterialsService = {
   listMaterials: () => Promise<Material[]>;
+  listOpenCandidateMaterials: () => Promise<Material[]>;
   searchMaterials: (params: SearchMaterialsRequest) => Promise<SearchMaterialsResponse>;
   createMaterial: (data: CreateMaterialRequest) => Promise<CreateMaterialResponse>;
   getMaterial: (materialId: string) => Promise<Material | null>;

@@ -197,6 +197,9 @@ export type SearchMaterialsRequest = {
 /** `POST /materials/search` */
 export type SearchMaterialsResponse = MaterialListResponse;
 
+/** `GET /materials/open-candidates` */
+export type ListOpenCandidateMaterialsResponse = MaterialListResponse;
+
 /**
  * 教材に関連するファイル
  */
