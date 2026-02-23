@@ -28,6 +28,7 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
 
   const dateYmd = test.submittedDate ?? DateUtils.todayYmd();
   const closedAt = DateUtils.now();
+  const materialIdsToSync = new Set<string>();
 
   await Promise.all(
     lockedCandidates.map(async (candidate) => {
@@ -51,6 +52,11 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
           subject: candidate.subject,
           candidateKey: candidate.candidateKey,
         });
+
+        if (candidate.mode === 'MATERIAL' && candidate.materialId) {
+          // LOCKED候補の削除後に更新対象の教材IDを収集する。
+          materialIdsToSync.add(candidate.materialId);
+        }
       }
 
       // 採点済みのみ次回候補を再作成する。
@@ -84,12 +90,25 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
           subject: test.subject,
           questionId: candidate.questionId,
           mode: test.mode,
+          materialId: candidate.materialId,
           nextTime: computed.nextTime,
           correctCount: computed.nextCorrectCount,
           status: 'OPEN',
         });
+
+        if (test.mode === 'MATERIAL') {
+          // OPEN候補の再作成後に更新対象の教材IDを収集する。
+          materialIdsToSync.add(candidate.materialId!);
+        }
       }
     }),
+  );
+
+  // 候補更新処理が完了してから教材側件数を一括で追随させる。
+  await Promise.all(
+    Array.from(materialIdsToSync).map((materialId) =>
+      repositories.examCandidates.syncMaterialOpenCandidateCount(materialId),
+    ),
   );
 
   await repositories.exams.put({

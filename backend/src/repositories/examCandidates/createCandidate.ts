@@ -11,6 +11,7 @@ export const createCandidate = async (params: {
   subject: SubjectId;
   questionId: string;
   mode: ExamMode;
+  materialId?: string;
   nextTime: string;
   correctCount: number;
   status: 'OPEN' | 'EXCLUDED' | 'CLOSED';
@@ -26,6 +27,7 @@ export const createCandidate = async (params: {
     id,
     questionId: params.questionId,
     mode: params.mode,
+    materialId: params.materialId,
     status: params.status,
     correctCount: Math.max(0, Math.trunc(params.correctCount)),
     nextTime: params.nextTime,

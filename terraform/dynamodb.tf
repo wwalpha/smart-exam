@@ -114,6 +114,16 @@ resource "aws_dynamodb_table" "exam_candidates" {
     type = "S"
   }
 
+  attribute {
+    name = "materialId"
+    type = "S"
+  }
+
+  attribute {
+    name = "status"
+    type = "S"
+  }
+
   global_secondary_index {
     name            = "gsi_subject_next_time"
     hash_key        = "subject"
@@ -126,6 +136,13 @@ resource "aws_dynamodb_table" "exam_candidates" {
     hash_key        = "questionId"
     range_key       = "createdAt"
     projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = "gsi_material_id_status"
+    hash_key        = "materialId"
+    range_key       = "status"
+    projection_type = "KEYS_ONLY"
   }
 }
 

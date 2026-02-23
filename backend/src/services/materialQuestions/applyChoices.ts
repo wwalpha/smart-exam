@@ -1,11 +1,16 @@
 import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
+import { ApiError } from '@/lib/apiError';
 import type { Repositories } from '@/repositories/createRepositories';
 
 import type { MaterialQuestionsService } from './materialQuestions.types';
 
 export const createApplyChoices = (repositories: Repositories): MaterialQuestionsService['applyChoices'] => {
   return async (params) => {
+    if (!params.materialId) {
+      throw new ApiError('materialId is required when mode is MATERIAL', 400, ['invalid_material_id']);
+    }
+
     // 教材が存在しない場合は何もしない。
     const material = await repositories.materials.get(params.materialId);
     if (!material) return;
@@ -33,11 +38,15 @@ export const createApplyChoices = (repositories: Repositories): MaterialQuestion
           subject: question.subjectId,
           questionId: question.questionId,
           mode: 'MATERIAL',
+          materialId: params.materialId,
           nextTime: computed.nextTime,
           correctCount: computed.nextCorrectCount,
           status: 'OPEN',
         });
       }),
     );
+
+    // MATERIAL候補の追加後に教材側件数を追随させる。
+    await repositories.examCandidates.syncMaterialOpenCandidateCount(params.materialId);
   };
 };

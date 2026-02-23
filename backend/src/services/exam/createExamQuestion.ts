@@ -4,7 +4,7 @@ import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
 import type { ExamCandidateTable, ExamTable } from '@/types/db';
 
-import type { CandidateListParams, CreateExamDeps, ReviewCandidate } from './createExam.types';
+import type { CandidateListParams, CreateExamDeps, ExamCandidate } from './createExam.types';
 import { toApiExam } from './internal';
 
 // 期限到来の候補を優先して取得する。
@@ -32,7 +32,7 @@ const lockCandidate = async (
 export const buildQuestionCandidates = (
   sourceCandidates: ExamCandidateTable[],
   createdDate: string,
-): ReviewCandidate[] => {
+): ExamCandidate[] => {
   // 作成日より未来の nextTime は出題対象外にして、先取り出題を防止する。
   return sourceCandidates
     .filter((candidate) => Boolean(candidate.nextTime) && String(candidate.nextTime) <= createdDate)
@@ -44,6 +44,7 @@ export const buildQuestionCandidates = (
       dueDate: candidate.nextTime,
       lastAttemptDate: '',
       candidateKey: candidate.candidateKey,
+      materialId: candidate.materialId,
     }));
 };
 export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRequest): Promise<Exam> => {
@@ -61,7 +62,8 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
     return 0;
   });
 
-  const selected: ReviewCandidate[] = [];
+  const selected: ExamCandidate[] = [];
+  const materialIdsToSync = new Set<string>();
   for (const candidate of candidates) {
     if (selected.length >= req.count) break;
     if (!candidate.dueDate) continue;
@@ -72,9 +74,22 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
         examId,
       });
       if (!locked) continue;
+
+      if (candidate.materialId) {
+        // OPEN→LOCKED の遷移後に更新が必要な教材IDを収集する。
+        materialIdsToSync.add(candidate.materialId);
+      }
     }
     selected.push(candidate);
   }
+
+  // 候補の採用処理が完了してから教材側件数を一括で追随させる。
+  await Promise.all(
+    Array.from(materialIdsToSync).map((materialId) =>
+      deps.repositories.examCandidates.syncMaterialOpenCandidateCount(materialId),
+    ),
+  );
+
   const targetIds = selected.map((candidate) => candidate.targetId);
   const testRow: ExamTable = {
     examId,

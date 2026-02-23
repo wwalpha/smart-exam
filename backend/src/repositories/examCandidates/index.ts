@@ -13,6 +13,7 @@ import { listDueCandidates } from './listDueCandidates';
 import { listLockedCandidatesByExamId } from './listLockedCandidatesByExamId';
 import { lockCandidateIfUnlocked } from './lockCandidateIfUnlocked';
 import { releaseLockIfMatch } from './releaseLockIfMatch';
+import { syncMaterialOpenCandidateCount } from './syncMaterialOpenCandidateCount';
 
 export {
   bulkCreateCandidates,
@@ -30,6 +31,7 @@ export {
   listLockedCandidatesByExamId,
   lockCandidateIfUnlocked,
   releaseLockIfMatch,
+  syncMaterialOpenCandidateCount,
 };
 
 export const ExamCandidatesRepository = {
@@ -48,4 +50,5 @@ export const ExamCandidatesRepository = {
   listCandidates,
   listLockedCandidatesByExamId,
   deleteOpenCandidatesByTargetId,
+  syncMaterialOpenCandidateCount,
 };

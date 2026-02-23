@@ -7,7 +7,7 @@ import type { ExamsService } from './index';
 // createExam 系ユースケースで共有する型定義。
 
 // 試験作成処理で扱う候補データ型
-export type ReviewCandidate = {
+export type ExamCandidate = {
   // 候補の種別
   targetType: 'MATERIAL' | 'KANJI';
   // 対象ID
@@ -22,6 +22,8 @@ export type ReviewCandidate = {
   lastAttemptDate: string;
   // 候補キー（存在する場合のみ）
   candidateKey?: string;
+  // MATERIAL候補に紐づく教材ID
+  materialId?: string;
 };
 
 // 試験作成処理に必要な依存関係

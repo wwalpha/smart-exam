@@ -7,7 +7,7 @@ import { createUuid } from '@/lib/uuid';
 import type { ExamCandidateTable, KanjiTable } from '@/types/db';
 import type { ExamTable } from '@/types/db';
 
-import type { CandidateListParams, CreateExamDeps, ReviewCandidate } from './createExam.types';
+import type { CandidateListParams, CreateExamDeps, ExamCandidate } from './createExam.types';
 import { ExamPdfService } from './examPdfService';
 import { toApiExam } from './internal';
 
@@ -59,7 +59,7 @@ const printableWordIds = (byId: Map<string, KanjiTable>): Set<string> => {
 };
 
 // 候補テーブル形式を試験作成で使う共通形式に正規化する。
-const toKanjiExamCandidates = (sourceCandidates: ExamCandidateTable[], createdDate: string): ReviewCandidate[] => {
+const toKanjiExamCandidates = (sourceCandidates: ExamCandidateTable[], createdDate: string): ExamCandidate[] => {
   return sourceCandidates
     .filter((candidate) => Boolean(candidate.nextTime))
     .map((candidate) => ({
@@ -76,7 +76,7 @@ export const buildKanjiCandidates = async (
   deps: CreateExamDeps,
   sourceCandidates: ExamCandidateTable[],
   createdDate: string,
-): Promise<ReviewCandidate[]> => {
+): Promise<ExamCandidate[]> => {
   const candidates = toKanjiExamCandidates(sourceCandidates, createdDate);
   if (candidates.length === 0) return candidates;
 
@@ -105,7 +105,7 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
     return 0;
   });
 
-  const selected: ReviewCandidate[] = [];
+  const selected: ExamCandidate[] = [];
   for (const candidate of candidates) {
     if (selected.length >= req.count) break;
     if (!candidate.dueDate) continue;

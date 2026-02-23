@@ -9,13 +9,25 @@ export const createDeleteExam = async (repositories: Repositories, examId: strin
     subject: existing.subject,
     examId,
   });
+  const materialIdsToSync = new Set<string>();
   await Promise.all(
-    lockedCandidates.map((candidate) =>
-      repositories.examCandidates.releaseLockIfMatch({
+    lockedCandidates.map(async (candidate) => {
+      const released = await repositories.examCandidates.releaseLockIfMatch({
         subject: existing.subject,
         candidateKey: candidate.candidateKey,
         examId,
-      }),
+      });
+      if (released && candidate.mode === 'MATERIAL' && candidate.materialId) {
+        // LOCKED→OPEN の遷移後に更新対象の教材IDを収集する。
+        materialIdsToSync.add(candidate.materialId);
+      }
+    }),
+  );
+
+  // ロック解除処理が完了してから教材側件数を一括で追随させる。
+  await Promise.all(
+    Array.from(materialIdsToSync).map((materialId) =>
+      repositories.examCandidates.syncMaterialOpenCandidateCount(materialId),
     ),
   );
 

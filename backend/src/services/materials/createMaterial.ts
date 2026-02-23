@@ -19,6 +19,7 @@ export const createCreateMaterial = async (
         subjectId: subject,
         title: data.name,
         questionCount: 0,
+        openCandidateCount: 0,
         grade: data.grade,
         provider: data.provider,
         materialDate: data.materialDate,

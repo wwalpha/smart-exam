@@ -3,6 +3,7 @@ import type { SearchMaterialsResponse } from '@smart-exam/api-types';
 import type { Repositories } from '@/repositories/createRepositories';
 
 import { toApiMaterial } from './materialMappers';
+import { sortMaterialsForList } from './materialSort';
 
 import type { MaterialsService } from './materials.types';
 
@@ -39,5 +40,6 @@ export const createSearchMaterials = async (
     return haystack.includes(q);
   });
 
-  return { items: filtered, total: filtered.length };
+  const sorted = sortMaterialsForList(filtered);
+  return { items: sorted, total: sorted.length };
 };

@@ -36,6 +36,8 @@ export interface MaterialTable {
   answerSheetFilename?: string;
   /** 教材セット完了フラグ */
   isCompleted: boolean;
+  /** 復習候補のOPEN件数（MATERIALモードのみ集計） */
+  openCandidateCount?: number;
 }
 
 /**
@@ -132,6 +134,8 @@ export interface ExamCandidateTable {
   questionId: string;
   /** モード */
   mode: ExamMode;
+  /** 教材ID（MATERIALモード時のみ設定） */
+  materialId?: string;
   /** 状態 */
   status: 'OPEN' | 'CLOSED' | 'EXCLUDED' | 'LOCKED';
   /** 連続正解回数（必須、default 0） */
