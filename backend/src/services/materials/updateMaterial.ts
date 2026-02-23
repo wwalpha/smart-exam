@@ -16,7 +16,14 @@ export const createUpdateMaterial = (repositories: Repositories): MaterialsServi
     if (!existing) return null;
 
     if (existing.isCompleted === true) {
-      const allowedOnCompleted = new Set(['questionPdfPath', 'answerPdfPath', 'answerSheetPath']);
+      const allowedOnCompleted = new Set([
+        'questionPdfPath',
+        'answerPdfPath',
+        'answerSheetPath',
+        'questionPdfFilename',
+        'answerPdfFilename',
+        'answerSheetFilename',
+      ]);
       const requestedKeys = Object.keys(updates).filter((key) => updates[key as keyof MaterialTable] !== undefined);
       const hasDisallowedUpdate = requestedKeys.some((key) => !allowedOnCompleted.has(key));
       if (hasDisallowedUpdate) {

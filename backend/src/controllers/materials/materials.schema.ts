@@ -47,3 +47,9 @@ export const UpdateMaterialBodySchema = z.object({
   answerPdfPath: z.string().min(1).optional(),
   answerSheetPath: z.string().min(1).optional(),
 });
+
+export const UploadMaterialFileBodySchema = z.object({
+  contentType: z.string().min(1),
+  fileName: z.string().min(1),
+  filetype: z.enum(['QUESTION', 'ANSWER', 'GRADED_ANSWER']),
+});

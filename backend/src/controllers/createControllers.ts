@@ -5,7 +5,6 @@ import { getDashboardController } from '@/controllers/dashboard';
 import { kanjiController } from '@/controllers/kanji';
 import { materialsController } from '@/controllers/materials';
 import { materialQuestionsController } from '@/controllers/materialQuestions';
-import { getUploadUrlController } from '@/controllers/s3';
 import { examsController } from '@/controllers/exam';
 
 import type { Services } from '@/services/createServices';
@@ -18,7 +17,6 @@ export type Controllers = {
   materials: ReturnType<typeof materialsController>;
   materialQuestions: ReturnType<typeof materialQuestionsController>;
   exams: ReturnType<typeof examsController>;
-  s3: ReturnType<typeof getUploadUrlController>;
 };
 
 /** Creates controllers. */
@@ -30,6 +28,5 @@ export const createControllers = (services: Services): Controllers => {
     materials: materialsController(services),
     materialQuestions: materialQuestionsController(services),
     exams: examsController(services),
-    s3: getUploadUrlController(services),
   };
 };

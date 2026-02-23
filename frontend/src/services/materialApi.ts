@@ -7,6 +7,8 @@ import type {
   UpdateMaterialRequest,
   MaterialFile,
   ListMaterialFilesResponse,
+  UploadMaterialFileRequest,
+  UploadMaterialFileResponse,
   Question,
   QuestionListResponse,
   CreateQuestionRequest,
@@ -16,6 +18,8 @@ import type {
   CompleteMaterialRequest,
   CompleteMaterialResponse,
 } from '@smart-exam/api-types';
+
+type UploadMaterialFileBody = UploadMaterialFileRequest;
 
 export const listMaterials = async (params?: SearchMaterialsRequest): Promise<MaterialListResponse> => {
   return apiRequest<MaterialListResponse, SearchMaterialsRequest>({
@@ -70,6 +74,31 @@ export const listMaterialFiles = async (materialId: string): Promise<MaterialFil
   });
 
   return response.datas;
+};
+
+export const uploadMaterialFile = async (
+  materialId: string,
+  request: UploadMaterialFileBody,
+): Promise<UploadMaterialFileResponse> => {
+  return apiRequest<UploadMaterialFileResponse, UploadMaterialFileBody>({
+    method: 'POST',
+    path: `/api/materials/${materialId}/upload`,
+    body: request,
+  });
+};
+
+export const uploadFileToS3 = async (uploadUrl: string, file: File): Promise<void> => {
+  const response = await fetch(uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('S3 upload failed');
+  }
 };
 
 export const listQuestions = async (materialId: string): Promise<Question[]> => {

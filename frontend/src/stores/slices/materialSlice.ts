@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { MaterialSlice } from '@/stores/store.types';
 import * as MATERIAL_API from '@/services/materialApi';
-import * as S3_API from '@/services/s3Api';
 import * as BEDROCK_API from '@/services/bedrockApi';
 import { compareQuestionNumber, normalizeQuestionNumber } from '@/utils/questionNumber';
 import { toBedrockPromptSubject } from '@/utils/bedrockSubject';
@@ -97,15 +96,12 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
           if (params.gradedFile) uploads.push({ fileType: 'GRADED_ANSWER', file: params.gradedFile });
 
           for (const upload of uploads) {
-            const prefix = `materials/${material.id}/${upload.fileType}`;
-            const presigned = await S3_API.getUploadUrl(upload.file.name, upload.file.type, prefix);
-            await S3_API.uploadFileToS3(presigned.uploadUrl, upload.file);
-
-            await MATERIAL_API.updateMaterial(material.id, {
-              ...(upload.fileType === 'QUESTION' ? { questionPdfPath: presigned.fileKey } : {}),
-              ...(upload.fileType === 'ANSWER' ? { answerPdfPath: presigned.fileKey } : {}),
-              ...(upload.fileType === 'GRADED_ANSWER' ? { answerSheetPath: presigned.fileKey } : {}),
+            const presigned = await MATERIAL_API.uploadMaterialFile(material.id, {
+              contentType: upload.file.type,
+              fileName: upload.file.name,
+              filetype: upload.fileType,
             });
+            await MATERIAL_API.uploadFileToS3(presigned.uploadUrl, upload.file);
           }
 
           // ファイル一覧を即時反映
@@ -127,15 +123,12 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       await withStatus(
         setStatus,
         async () => {
-          const prefix = `materials/${params.materialId}/${params.fileType}`;
-          const presigned = await S3_API.getUploadUrl(params.file.name, params.file.type, prefix);
-          await S3_API.uploadFileToS3(presigned.uploadUrl, params.file);
-
-          await MATERIAL_API.updateMaterial(params.materialId, {
-            ...(params.fileType === 'QUESTION' ? { questionPdfPath: presigned.fileKey } : {}),
-            ...(params.fileType === 'ANSWER' ? { answerPdfPath: presigned.fileKey } : {}),
-            ...(params.fileType === 'GRADED_ANSWER' ? { answerSheetPath: presigned.fileKey } : {}),
+          const presigned = await MATERIAL_API.uploadMaterialFile(params.materialId, {
+            contentType: params.file.type,
+            fileName: params.file.name,
+            filetype: params.fileType,
           });
+          await MATERIAL_API.uploadFileToS3(presigned.uploadUrl, params.file);
 
           const files = await MATERIAL_API.listMaterialFiles(params.materialId);
           updateMaterial({ files });

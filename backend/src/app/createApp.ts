@@ -34,13 +34,6 @@ export const createApp = (): express.Express => {
     res.json({ status: 'ok' });
   });
 
-  // S3へアップロードするための署名付きURLを発行するAPI
-  app.post(
-    '/api/upload-url',
-    validateBody(controllers.s3.GetUploadUrlBodySchema),
-    handleRequest(controllers.s3.getUploadUrl),
-  );
-
   // 試験用紙を解析して構造化データを生成するAPI
   app.post(
     '/api/analyze-paper',
@@ -101,6 +94,13 @@ export const createApp = (): express.Express => {
     '/api/materials/:materialId/files/:fileId',
     validateParams(MaterialFileParamsSchema),
     handleRequest(controllers.materials.getMaterialFile),
+  );
+  // 指定した教材へPDFアップロード用の署名付きURLを発行するAPI
+  app.post(
+    '/api/materials/:materialId/upload',
+    validateParams(MaterialIdParamsSchema),
+    validateBody(controllers.materials.UploadMaterialFileBodySchema),
+    handleRequest(controllers.materials.uploadMaterialFile),
   );
 
   // 条件を指定して漢字データを検索するAPI

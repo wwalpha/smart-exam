@@ -4,7 +4,6 @@ import type { ExamsService } from '@/services/exam';
 import type { KanjiService } from '@/services/kanji';
 import type { MaterialQuestionsService } from '@/services/materialQuestions';
 import type { MaterialsService } from '@/services/materials';
-import type { S3Service } from '@/services/s3';
 
 export type Services = {
   bedrock: BedrockService;
@@ -13,5 +12,4 @@ export type Services = {
   materialQuestions: MaterialQuestionsService;
   materials: MaterialsService;
   exams: ExamsService;
-  s3: S3Service;
 };

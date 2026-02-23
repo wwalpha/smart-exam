@@ -7,14 +7,21 @@ import { getMaterialFile } from './getMaterialFile';
 import { listMaterialFiles } from './listMaterialFiles';
 import { listMaterials } from './listMaterials';
 import { searchMaterials } from './searchMaterials';
+import { uploadMaterialFile } from './uploadMaterialFile';
 import { updateMaterial } from './updateMaterial';
-import { CreateMaterialBodySchema, SearchMaterialsBodySchema, UpdateMaterialBodySchema } from './materials.schema';
+import {
+  CreateMaterialBodySchema,
+  SearchMaterialsBodySchema,
+  UpdateMaterialBodySchema,
+  UploadMaterialFileBodySchema,
+} from './materials.schema';
 
 export const materialsController = (services: Services) => {
   return {
     CreateMaterialBodySchema,
     SearchMaterialsBodySchema,
     UpdateMaterialBodySchema,
+    UploadMaterialFileBodySchema,
     listMaterials: listMaterials(services),
     searchMaterials: searchMaterials(services),
     createMaterial: createMaterial(services),
@@ -24,5 +31,6 @@ export const materialsController = (services: Services) => {
     deleteMaterial: deleteMaterial(services),
     listMaterialFiles: listMaterialFiles(services),
     getMaterialFile: getMaterialFile(services),
+    uploadMaterialFile: uploadMaterialFile(services),
   };
 };

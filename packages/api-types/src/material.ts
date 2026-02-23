@@ -38,6 +38,33 @@ export type GetMaterialFileParams = {
   fileId: string;
 };
 
+/** `POST /materials/:materialId/upload` */
+export type UploadMaterialFileParams = {
+  /** 教材ID */
+  materialId: string;
+};
+
+/** 教材PDFのファイル種別 */
+export type MaterialUploadFileType = 'QUESTION' | 'ANSWER' | 'GRADED_ANSWER';
+
+/** 教材PDFアップロードURL発行リクエスト */
+export type UploadMaterialFileRequest = {
+  /** ファイルのContent-Type */
+  contentType: string;
+  /** 元ファイル名 */
+  fileName: string;
+  /** ファイル種別 */
+  filetype: MaterialUploadFileType;
+};
+
+/** 教材PDFアップロードURL発行レスポンス */
+export type UploadMaterialFileResponse = {
+  /** 署名付きアップロードURL */
+  uploadUrl: string;
+  /** アップロード先S3キー */
+  fileKey: string;
+};
+
 /** `POST /materials/:materialId/questions` */
 export type CreateQuestionParams = {
   /** 教材ID */

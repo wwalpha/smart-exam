@@ -19,6 +19,19 @@ export const createListMaterialFiles = (repositories: Repositories): MaterialsSe
     const prefix = `materials/${materialId}/`;
     // 内部で利用する処理を定義する
     const objects = await repositories.s3.listObjectsByPrefix({ bucket, prefix });
+    const material = await repositories.materials.get(materialId);
+
+    const filePathByType: Partial<Record<MaterialFile['fileType'], string>> = {
+      QUESTION: material?.questionPdfPath,
+      ANSWER: material?.answerPdfPath,
+      GRADED_ANSWER: material?.answerSheetPath,
+    };
+
+    const fileNameByType: Partial<Record<MaterialFile['fileType'], string>> = {
+      QUESTION: material?.questionPdfFilename,
+      ANSWER: material?.answerPdfFilename,
+      GRADED_ANSWER: material?.answerSheetFilename,
+    };
 
     // 内部で利用する処理を定義する
     const now = DateUtils.now();
@@ -48,8 +61,15 @@ export const createListMaterialFiles = (repositories: Repositories): MaterialsSe
         const dashIndex = baseName.indexOf('-');
         // 内部で利用する処理を定義する
         const id = dashIndex > 0 ? baseName.slice(0, dashIndex) : baseName;
-        // 内部で利用する処理を定義する
-        const filename = dashIndex > 0 ? baseName.slice(dashIndex + 1) : baseName;
+        const mappedPath = filePathByType[fileTypeRaw];
+        const mappedName = fileNameByType[fileTypeRaw];
+        // ファイル名をS3キーへ含めない新フォーマットでも表示名を復元できるようにする
+        const filename =
+          dashIndex > 0
+            ? baseName.slice(dashIndex + 1)
+            : mappedPath === key && typeof mappedName === 'string' && mappedName.length > 0
+              ? mappedName
+              : baseName;
 
         // 内部で利用する処理を定義する
         const contentType = filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';

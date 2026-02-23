@@ -26,8 +26,14 @@ export interface MaterialTable {
   registeredDate?: string;
   /** 問題PDFパス（試験用紙の場合のみ） */
   questionPdfPath?: string;
+  /** 問題PDFファイル名（試験用紙の場合のみ） */
+  questionPdfFilename?: string;
   /** 解答PDFパス（試験用紙の場合のみ） */
   answerPdfPath?: string;
+  /** 解答PDFファイル名（試験用紙の場合のみ） */
+  answerPdfFilename?: string;
+  /** 採点済み答案PDFファイル名（試験用紙の場合のみ） */
+  answerSheetFilename?: string;
   /** 教材セット完了フラグ */
   isCompleted: boolean;
 }

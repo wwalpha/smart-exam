@@ -7,6 +7,7 @@ import { createGetMaterialFile } from './getMaterialFile';
 import { createListMaterialFiles } from './listMaterialFiles';
 import { createListMaterials } from './listMaterials';
 import { createSearchMaterials } from './searchMaterials';
+import { createUploadMaterialFile } from './uploadMaterialFile';
 import { createUpdateMaterial } from './updateMaterial';
 import type { MaterialsService } from './materials.types';
 
@@ -16,6 +17,7 @@ export const createMaterialsService = (repositories: Repositories): MaterialsSer
   const listMaterials = createListMaterials(repositories);
   const searchMaterials = createSearchMaterials(repositories);
   const createMaterial = createCreateMaterial(repositories);
+  const uploadMaterialFile = createUploadMaterialFile(repositories);
   const getMaterial = createGetMaterial(repositories);
   const updateMaterial = createUpdateMaterial(repositories);
   const deleteMaterial = createDeleteMaterial(repositories);
@@ -27,6 +29,7 @@ export const createMaterialsService = (repositories: Repositories): MaterialsSer
     listMaterials,
     searchMaterials,
     createMaterial,
+    uploadMaterialFile,
     getMaterial,
     updateMaterial,
     deleteMaterial,

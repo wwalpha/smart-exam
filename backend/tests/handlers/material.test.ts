@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { materialsController } from '@/controllers/materials';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
-import type { CreateMaterialRequest, GetMaterialParams } from '@smart-exam/api-types';
+import type { CreateMaterialRequest, GetMaterialParams, UploadMaterialFileRequest } from '@smart-exam/api-types';
 
 // repository methods are spied per-test
 
@@ -86,5 +86,44 @@ describe('material handler', () => {
     await controller.getMaterial(req, res, next);
 
     expect(res.json).toHaveBeenCalledWith(mockItem);
+  });
+
+  it('uploadMaterialFile returns presigned url', async () => {
+    const mockResponse = {
+      uploadUrl: 'https://example.com/presigned',
+      fileKey: 'materials/m1/QUESTION/f1',
+    };
+
+    const services = {
+      materials: {
+        uploadMaterialFile: vi.fn().mockResolvedValue(mockResponse),
+      },
+    } as unknown as Services;
+
+    const controller = materialsController(services);
+
+    const req = {
+      params: { materialId: 'm1' },
+      body: {
+        contentType: 'application/pdf',
+        fileName: 'sample.pdf',
+        filetype: 'QUESTION',
+      },
+    } as unknown as Request<{ materialId: string }, unknown, UploadMaterialFileRequest>;
+    const res = {
+      json: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+    } as unknown as Response;
+    const next = vi.fn();
+
+    await controller.uploadMaterialFile(req, res, next);
+
+    expect(services.materials.uploadMaterialFile).toHaveBeenCalledWith('m1', {
+      contentType: 'application/pdf',
+      fileName: 'sample.pdf',
+      filetype: 'QUESTION',
+    });
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(mockResponse);
   });
 });
