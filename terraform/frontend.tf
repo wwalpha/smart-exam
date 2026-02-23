@@ -53,4 +53,8 @@ resource "aws_cloudfront_distribution" "frontend" {
   viewer_certificate {
     cloudfront_default_certificate = true
   }
+
+  lifecycle {
+    ignore_changes = [aliases]
+  }
 }
