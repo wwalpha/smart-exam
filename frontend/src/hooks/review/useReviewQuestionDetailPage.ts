@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
-import { apiRequestBlob } from '@/services/apiClient';
+import { buildApiUrl } from '@/services/apiClient';
 import * as MATERIAL_API from '@/services/materialApi';
 import { compareQuestionNumber } from '@/utils/questionNumber';
 import { useReviewQuestionDetail } from './useReviewQuestionDetail';
@@ -9,11 +9,6 @@ import { useReviewQuestionDetail } from './useReviewQuestionDetail';
 type PdfAvailability = {
   QUESTION: boolean;
   ANSWER: boolean;
-};
-
-const isPdfBlob = async (blob: Blob): Promise<boolean> => {
-  const prefix = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
-  return String.fromCharCode(...prefix) === '%PDF-';
 };
 
 const pickLatestPdf = (files: MaterialFile[], fileType: MaterialFile['fileType']): MaterialFile | null => {
@@ -135,19 +130,10 @@ export const useReviewQuestionDetailPage = () => {
         return;
       }
 
-      const blob = await apiRequestBlob({
-        method: 'GET',
-        path: `/api/materials/${encodeURIComponent(materialId)}/files/${encodeURIComponent(target.id)}`,
-      });
-
-      if (!(await isPdfBlob(blob))) {
-        const text = await blob.text().catch(() => '');
-        toast.error('PDFの取得に失敗しました', { description: text.slice(0, 200) });
-        return;
-      }
-
-      const pdfBlob = blob.slice(0, blob.size, 'application/pdf');
-      const url = URL.createObjectURL(pdfBlob);
+      // S3 へのリダイレクトをXHRで辿るとCORS制約にかかるため、ブラウザ遷移で直接開く
+      const url = buildApiUrl(
+        `/api/materials/${encodeURIComponent(materialId)}/files/${encodeURIComponent(target.id)}`,
+      );
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch {
       toast.error('PDFの取得に失敗しました');

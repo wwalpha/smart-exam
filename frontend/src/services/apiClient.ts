@@ -20,6 +20,12 @@ const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APIGW_URL ?? import.meta.env.VITE_API_ENDPOINT,
 });
 
+export const buildApiUrl = (path: string): string => {
+  const baseUrl = import.meta.env.VITE_APIGW_URL ?? import.meta.env.VITE_API_ENDPOINT;
+  if (!baseUrl) return path;
+  return new URL(path, baseUrl).toString();
+};
+
 const appendAuthHeaderIfNeeded = (headers: Record<string, string>) => {
   if (!isAuthEnabled()) return;
   const token = getStoredAccessToken();
@@ -28,7 +34,7 @@ const appendAuthHeaderIfNeeded = (headers: Record<string, string>) => {
 };
 
 export async function apiRequest<TResponse, TBody = undefined>(
-  params: ApiClientRequestParams<TBody>
+  params: ApiClientRequestParams<TBody>,
 ): Promise<TResponse> {
   const headers: Record<string, string> = {};
   // GET等で不要な Content-Type を付けるとブラウザが preflight(OPTIONS) を発行しやすくなる。
