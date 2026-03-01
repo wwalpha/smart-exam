@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { getStoredAccessToken, isAuthEnabled, setStoredAccessToken } from '@/lib/auth';
+import { getStoredAccessToken, isAuthEnabled, setStoredAccessToken, setStoredRefreshToken } from '@/lib/auth';
 
 export const AuthLoginPage = () => {
   const navigate = useNavigate();
@@ -15,6 +15,9 @@ export const AuthLoginPage = () => {
 
     if (auth.user?.access_token) {
       setStoredAccessToken(auth.user.access_token);
+      if (auth.user.refresh_token) {
+        setStoredRefreshToken(auth.user.refresh_token);
+      }
       navigate('/', { replace: true });
       return;
     }
