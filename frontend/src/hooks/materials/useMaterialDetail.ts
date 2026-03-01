@@ -11,6 +11,7 @@ const fileTypeOrder: Record<string, number> = {
   ANSWER: 2,
   GRADED_ANSWER: 3,
 };
+const BLOB_URL_CLEANUP_TIMEOUT_MS = 5 * 60 * 1000;
 
 const toMs = (iso: string | undefined): number => {
   if (!iso) return 0;
@@ -160,8 +161,17 @@ export const useMaterialDetail = () => {
           toast.error('プレビューを開けませんでした');
           return;
         }
-        // 新規タブで読み込みが終わる前に解放すると表示に失敗することがあるため遅延させる
-        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        // loadイベントがブラウザ実装差で発火しない場合の解放漏れを防ぐため、フォールバックを併用する
+        const fallbackTimer = window.setTimeout(() => URL.revokeObjectURL(blobUrl), BLOB_URL_CLEANUP_TIMEOUT_MS);
+        // プレビュー表示に必要な読み込み完了まではURLを保持し、完了後すぐに解放してメモリ滞留を防ぐ
+        opened.addEventListener(
+          'load',
+          () => {
+            window.clearTimeout(fallbackTimer);
+            URL.revokeObjectURL(blobUrl);
+          },
+          { once: true },
+        );
       } catch {
         toast.error('PDFの取得に失敗しました');
       }
