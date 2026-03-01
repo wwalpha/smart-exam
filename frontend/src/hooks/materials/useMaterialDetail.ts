@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
-import { buildApiUrl } from '@/services/apiClient';
+import { apiRequestBlob } from '@/services/apiClient';
 import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
 import { MATERIAL_PDF_FILE_TYPE_LABEL, MATERIAL_PDF_FILE_TYPES, type MaterialPdfFileType } from '@/lib/materialConsts';
@@ -11,6 +11,7 @@ const fileTypeOrder: Record<string, number> = {
   ANSWER: 2,
   GRADED_ANSWER: 3,
 };
+const BLOB_URL_CLEANUP_TIMEOUT_MS = 5 * 60 * 1000;
 
 const toMs = (iso: string | undefined): number => {
   if (!iso) return 0;
@@ -145,12 +146,35 @@ export const useMaterialDetail = () => {
   const canComplete = !!detail && !detail.isCompleted && questions.length > 0;
 
   const previewFile = useCallback(
-    (fileId: string) => {
+    async (fileId: string) => {
       // IDが不正な状態ではプレビューできない
       if (!id) return;
-      // S3 へのリダイレクトをXHRで辿るとCORS制約にかかるため、ブラウザ遷移で直接開く
-      const url = buildApiUrl(`/api/materials/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}`);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      try {
+        const blob = await apiRequestBlob({
+          method: 'GET',
+          path: `/api/materials/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}`,
+        });
+        const blobUrl = URL.createObjectURL(blob);
+        const opened = window.open(blobUrl, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+          URL.revokeObjectURL(blobUrl);
+          toast.error('プレビューを開けませんでした');
+          return;
+        }
+        // loadイベントがブラウザ実装差で発火しない場合の解放漏れを防ぐため、フォールバックを併用する
+        const fallbackTimer = window.setTimeout(() => URL.revokeObjectURL(blobUrl), BLOB_URL_CLEANUP_TIMEOUT_MS);
+        // プレビュー表示に必要な読み込み完了まではURLを保持し、完了後すぐに解放してメモリ滞留を防ぐ
+        opened.addEventListener(
+          'load',
+          () => {
+            window.clearTimeout(fallbackTimer);
+            URL.revokeObjectURL(blobUrl);
+          },
+          { once: true },
+        );
+      } catch {
+        toast.error('PDFの取得に失敗しました');
+      }
     },
     [id],
   );
