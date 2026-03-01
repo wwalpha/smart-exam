@@ -124,7 +124,12 @@ const refreshAccessTokenInternal = async (): Promise<string | null> => {
   const domain = normalizeDomain(String(import.meta.env.VITE_COGNITO_DOMAIN ?? ''));
   const clientId = String(import.meta.env.VITE_COGNITO_CLIENT_ID ?? '').trim();
   const refreshToken = getStoredRefreshToken();
-  if (!isAuthEnabled() || !domain || !clientId || !refreshToken) return null;
+  if (!isAuthEnabled()) return null;
+  if (!refreshToken) {
+    clearStoredAuthTokens();
+    return null;
+  }
+  if (!domain || !clientId) return null;
 
   const body = new URLSearchParams({
     grant_type: 'refresh_token',
@@ -132,27 +137,36 @@ const refreshAccessTokenInternal = async (): Promise<string | null> => {
     refresh_token: refreshToken,
   });
 
-  const response = await fetch(`${domain}/oauth2/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  });
-  if (!response.ok) {
-    clearStoredAuthTokens();
+  try {
+    const response = await fetch(`${domain}/oauth2/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+    if (!response.ok) {
+      console.warn('Access token refresh failed with non-OK response.', { status: response.status });
+      if (response.status === 400 || response.status === 401) {
+        clearStoredAuthTokens();
+      }
+      return null;
+    }
+
+    const data = (await response.json()) as RefreshTokenResponse;
+    if (typeof data.access_token !== 'string' || data.access_token.length === 0) {
+      console.warn('Access token refresh response did not include access_token.');
+      clearStoredAuthTokens();
+      return null;
+    }
+
+    setStoredAccessToken(data.access_token);
+    if (typeof data.refresh_token === 'string' && data.refresh_token.length > 0) {
+      setStoredRefreshToken(data.refresh_token);
+    }
+    return data.access_token;
+  } catch (error) {
+    console.warn('Access token refresh failed due to network or parsing error.', error);
     return null;
   }
-
-  const data = (await response.json()) as RefreshTokenResponse;
-  if (typeof data.access_token !== 'string' || data.access_token.length === 0) {
-    clearStoredAuthTokens();
-    return null;
-  }
-
-  setStoredAccessToken(data.access_token);
-  if (typeof data.refresh_token === 'string' && data.refresh_token.length > 0) {
-    setStoredRefreshToken(data.refresh_token);
-  }
-  return data.access_token;
 };
 
 export const refreshStoredAccessToken = async (): Promise<string | null> => {

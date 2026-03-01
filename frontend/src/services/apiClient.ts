@@ -44,7 +44,7 @@ const requestWithAuthRetry = async <T>(request: () => Promise<T>): Promise<T> =>
     if (!isAuthEnabled() || !isUnauthorizedError(error)) throw error;
     const refreshedToken = await refreshStoredAccessToken();
     if (!refreshedToken) throw error;
-    return request();
+    return await request();
   }
 };
 
