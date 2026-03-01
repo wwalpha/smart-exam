@@ -1,5 +1,5 @@
 import axios, { isAxiosError } from 'axios';
-import { getStoredAccessToken, isAuthEnabled } from '@/lib/auth';
+import { getStoredAccessToken, isAuthEnabled, refreshStoredAccessToken } from '@/lib/auth';
 
 export type ApiClientRequestParams<TBody> = {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -33,22 +33,38 @@ const appendAuthHeaderIfNeeded = (headers: Record<string, string>) => {
   headers.Authorization = `Bearer ${token}`;
 };
 
+const isUnauthorizedError = (error: unknown): boolean => {
+  return isAxiosError(error) && error.response?.status === 401;
+};
+
+const requestWithAuthRetry = async <T>(request: () => Promise<T>): Promise<T> => {
+  try {
+    return await request();
+  } catch (error) {
+    if (!isAuthEnabled() || !isUnauthorizedError(error)) throw error;
+    const refreshedToken = await refreshStoredAccessToken();
+    if (!refreshedToken) throw error;
+    return request();
+  }
+};
+
 export async function apiRequest<TResponse, TBody = undefined>(
   params: ApiClientRequestParams<TBody>,
 ): Promise<TResponse> {
-  const headers: Record<string, string> = {};
-  // GET等で不要な Content-Type を付けるとブラウザが preflight(OPTIONS) を発行しやすくなる。
-  // API 側の互換性/安定性のため、JSON body を送る場合のみ明示する。
-  if (params.body !== undefined && !(params.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
-  }
-  appendAuthHeaderIfNeeded(headers);
-
-  const response = await axiosInstance.request<TResponse>({
-    method: params.method,
-    url: params.path,
-    data: params.body,
-    headers,
+  const response = await requestWithAuthRetry(() => {
+    const headers: Record<string, string> = {};
+    // GET等で不要な Content-Type を付けるとブラウザが preflight(OPTIONS) を発行しやすくなる。
+    // API 側の互換性/安定性のため、JSON body を送る場合のみ明示する。
+    if (params.body !== undefined && !(params.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+    appendAuthHeaderIfNeeded(headers);
+    return axiosInstance.request<TResponse>({
+      method: params.method,
+      url: params.path,
+      data: params.body,
+      headers,
+    });
   });
 
   if (response.status === 204) {
@@ -59,13 +75,15 @@ export async function apiRequest<TResponse, TBody = undefined>(
 }
 
 export async function apiRequestBlob(params: ApiClientBlobRequestParams): Promise<Blob> {
-  const headers: Record<string, string> = {};
-  appendAuthHeaderIfNeeded(headers);
-  const response = await axiosInstance.request<Blob>({
-    method: params.method,
-    url: params.path,
-    headers,
-    responseType: 'blob',
+  const response = await requestWithAuthRetry(() => {
+    const headers: Record<string, string> = {};
+    appendAuthHeaderIfNeeded(headers);
+    return axiosInstance.request<Blob>({
+      method: params.method,
+      url: params.path,
+      headers,
+      responseType: 'blob',
+    });
   });
 
   return response.data;

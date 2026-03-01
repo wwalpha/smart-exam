@@ -1,4 +1,6 @@
 const AUTH_TOKEN_STORAGE_KEY = 'smart_exam_access_token';
+const REFRESH_TOKEN_STORAGE_KEY = 'smart_exam_refresh_token';
+let refreshAccessTokenPromise: Promise<string | null> | null = null;
 
 export type CognitoUserRole = 'ADMIN' | 'USER';
 
@@ -49,6 +51,10 @@ export const getStoredAccessToken = (): string | null => {
   return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
 };
 
+export const getStoredRefreshToken = (): string | null => {
+  return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+};
+
 const parseJwtPayload = (token: string): Record<string, unknown> | null => {
   const parts = token.split('.');
   if (parts.length < 2) return null;
@@ -92,8 +98,71 @@ export const setStoredAccessToken = (token: string): void => {
   localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
 };
 
+export const setStoredRefreshToken = (token: string): void => {
+  localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, token);
+};
+
 export const clearStoredAccessToken = (): void => {
   localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+};
+
+export const clearStoredRefreshToken = (): void => {
+  localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+};
+
+export const clearStoredAuthTokens = (): void => {
+  clearStoredAccessToken();
+  clearStoredRefreshToken();
+};
+
+type RefreshTokenResponse = {
+  access_token?: unknown;
+  refresh_token?: unknown;
+};
+
+const refreshAccessTokenInternal = async (): Promise<string | null> => {
+  const domain = normalizeDomain(String(import.meta.env.VITE_COGNITO_DOMAIN ?? ''));
+  const clientId = String(import.meta.env.VITE_COGNITO_CLIENT_ID ?? '').trim();
+  const refreshToken = getStoredRefreshToken();
+  if (!isAuthEnabled() || !domain || !clientId || !refreshToken) return null;
+
+  const body = new URLSearchParams({
+    grant_type: 'refresh_token',
+    client_id: clientId,
+    refresh_token: refreshToken,
+  });
+
+  const response = await fetch(`${domain}/oauth2/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  if (!response.ok) {
+    clearStoredAuthTokens();
+    return null;
+  }
+
+  const data = (await response.json()) as RefreshTokenResponse;
+  if (typeof data.access_token !== 'string' || data.access_token.length === 0) {
+    clearStoredAuthTokens();
+    return null;
+  }
+
+  setStoredAccessToken(data.access_token);
+  if (typeof data.refresh_token === 'string' && data.refresh_token.length > 0) {
+    setStoredRefreshToken(data.refresh_token);
+  }
+  return data.access_token;
+};
+
+export const refreshStoredAccessToken = async (): Promise<string | null> => {
+  if (!refreshAccessTokenPromise) {
+    // 複数 API が同時に 401 を返したときでも refresh API 呼び出しは 1 回に抑える。
+    refreshAccessTokenPromise = refreshAccessTokenInternal().finally(() => {
+      refreshAccessTokenPromise = null;
+    });
+  }
+  return refreshAccessTokenPromise;
 };
 
 export const buildManagedLogoutUrl = (): string => {

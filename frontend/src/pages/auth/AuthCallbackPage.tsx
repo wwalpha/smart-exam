@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 import { Button } from '@/components/ui/button';
-import { clearStoredAccessToken, isAuthEnabled, setStoredAccessToken } from '@/lib/auth';
+import { clearStoredAuthTokens, isAuthEnabled, setStoredAccessToken, setStoredRefreshToken } from '@/lib/auth';
 
 export const AuthCallbackPage = () => {
   const navigate = useNavigate();
@@ -15,12 +15,15 @@ export const AuthCallbackPage = () => {
     }
 
     if (auth.error) {
-      clearStoredAccessToken();
+      clearStoredAuthTokens();
       return;
     }
 
     if (auth.user?.access_token) {
       setStoredAccessToken(auth.user.access_token);
+      if (auth.user.refresh_token) {
+        setStoredRefreshToken(auth.user.refresh_token);
+      }
       navigate('/', { replace: true });
     }
   }, [auth.error, auth.user, navigate]);
