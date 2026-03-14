@@ -179,14 +179,23 @@ export const refreshStoredAccessToken = async (): Promise<string | null> => {
   return refreshAccessTokenPromise;
 };
 
+const getManagedLogoutUri = (): string => {
+  const explicitLogoutUri = String(import.meta.env.VITE_COGNITO_LOGOUT_URI ?? '').trim();
+  if (explicitLogoutUri.length > 0) {
+    return explicitLogoutUri;
+  }
+
+  return window.location.origin;
+};
+
 export const buildManagedLogoutUrl = (): string => {
   const domain = normalizeDomain(String(import.meta.env.VITE_COGNITO_DOMAIN ?? ''));
   const clientId = String(import.meta.env.VITE_COGNITO_CLIENT_ID ?? '').trim();
-  const redirectUri = String(import.meta.env.VITE_COGNITO_REDIRECT_URI ?? '').trim();
+  const logoutUri = getManagedLogoutUri();
 
   const query = new URLSearchParams({
     client_id: clientId,
-    logout_uri: redirectUri,
+    logout_uri: logoutUri,
   });
 
   return `${domain}/logout?${query.toString()}`;

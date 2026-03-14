@@ -35,6 +35,7 @@ import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
 import { PdfSettingsPage } from '@/pages/settings/PdfSettingsPage';
 import { AuthLoginPage } from '@/pages/auth/AuthLoginPage';
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage';
+import { AuthLogoutPage } from '@/pages/auth/AuthLogoutPage';
 import { getCurrentUserRole, getStoredAccessToken, isAuthEnabled } from '@/lib/auth';
 
 export const App = () => {
@@ -58,6 +59,7 @@ export const App = () => {
         <Routes>
           <Route path="/auth/login" element={authEnabled ? <AuthLoginPage /> : <Navigate to="/" replace />} />
           <Route path="/auth/callback" element={authEnabled ? <AuthCallbackPage /> : <Navigate to="/" replace />} />
+          <Route path="/auth/logout" element={authEnabled ? <AuthLogoutPage /> : <Navigate to="/" replace />} />
         </Routes>
       </>
     );
@@ -71,6 +73,7 @@ export const App = () => {
     { label: '漢字管理', to: '/kanji' },
     { label: '問題検索', to: '/search/questions' },
     { label: '設定', to: '/settings/pdf' },
+    ...(authEnabled ? [{ label: 'ログアウト', to: '/auth/logout', isAction: true }] : []),
   ].filter((item) => {
     if (userRole === 'ADMIN') return true;
     if (item.to === '/materials' || item.to === '/kanji') return false;
@@ -107,6 +110,7 @@ export const App = () => {
       { pattern: '/settings/pdf', title: 'PDF設定' },
       { pattern: '/auth/login', title: 'ログイン' },
       { pattern: '/auth/callback', title: 'ログイン' },
+      { pattern: '/auth/logout', title: 'ログアウト' },
     ];
 
     const matched = rules.find((rule) => matchPath({ path: rule.pattern, end: true }, location.pathname));

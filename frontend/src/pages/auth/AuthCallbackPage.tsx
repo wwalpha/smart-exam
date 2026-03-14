@@ -25,8 +25,13 @@ export const AuthCallbackPage = () => {
         setStoredRefreshToken(auth.user.refresh_token);
       }
       navigate('/', { replace: true });
+      return;
     }
-  }, [auth.error, auth.user, navigate]);
+
+    if (!auth.isLoading) {
+      navigate('/auth/login', { replace: true });
+    }
+  }, [auth.error, auth.isLoading, auth.user, navigate]);
 
   if (auth.error) {
     return (
