@@ -42,13 +42,18 @@ resource "aws_s3_bucket_cors_configuration" "files" {
     allowed_origins = [
       "http://127.0.0.1:5173",
       "http://localhost:5173",
-      "https://*.cloudfront.net",
       "https://${aws_cloudfront_distribution.frontend.domain_name}",
       "https://smartexam.aws-handson.com",
       "https://www.smartexam.aws-handson.com",
     ]
     allowed_headers = ["*"]
-    expose_headers  = ["ETag"]
+    expose_headers = [
+      "Accept-Ranges",
+      "Content-Disposition",
+      "Content-Length",
+      "Content-Range",
+      "ETag",
+    ]
     max_age_seconds = 3000
   }
 }
