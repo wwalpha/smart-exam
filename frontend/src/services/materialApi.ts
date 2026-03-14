@@ -24,6 +24,9 @@ import type {
 } from '@smart-exam/api-types';
 
 type UploadMaterialFileBody = UploadMaterialFileRequest;
+type GetMaterialFileResponse = {
+  downloadUrl: string;
+};
 
 export const listMaterials = async (params?: SearchMaterialsRequest): Promise<MaterialListResponse> => {
   return apiRequest<MaterialListResponse, SearchMaterialsRequest>({
@@ -90,6 +93,15 @@ export const listMaterialFiles = async (materialId: string): Promise<MaterialFil
   return response.datas;
 };
 
+export const getMaterialFileDownloadUrl = async (materialId: string, fileId: string): Promise<string> => {
+  const response = await apiRequest<GetMaterialFileResponse>({
+    method: 'GET',
+    path: `/api/materials/${encodeURIComponent(materialId)}/files/${encodeURIComponent(fileId)}`,
+  });
+
+  return response.downloadUrl;
+};
+
 export const uploadMaterialFile = async (
   materialId: string,
   request: UploadMaterialFileBody,
@@ -131,10 +143,7 @@ export const listQuestions = async (materialId: string): Promise<Question[]> => 
   return response.datas;
 };
 
-export const createQuestion = async (
-  materialId: string,
-  request: CreateQuestionRequest
-): Promise<Question> => {
+export const createQuestion = async (materialId: string, request: CreateQuestionRequest): Promise<Question> => {
   return apiRequest<Question, CreateQuestionRequest>({
     method: 'POST',
     path: `/api/materials/${materialId}/questions`,
@@ -145,7 +154,7 @@ export const createQuestion = async (
 export const updateQuestion = async (
   materialId: string,
   questionId: string,
-  request: UpdateQuestionRequest
+  request: UpdateQuestionRequest,
 ): Promise<Question> => {
   return apiRequest<Question, UpdateQuestionRequest>({
     method: 'PATCH',

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
-import { buildApiUrl } from '@/services/apiClient';
+import { getMaterialFileDownloadUrl } from '@/services/materialApi';
 import * as MATERIAL_API from '@/services/materialApi';
 import { compareQuestionNumber } from '@/utils/questionNumber';
 import { useReviewQuestionDetail } from './useReviewQuestionDetail';
@@ -130,10 +130,7 @@ export const useReviewQuestionDetailPage = () => {
         return;
       }
 
-      // S3 へのリダイレクトをXHRで辿るとCORS制約にかかるため、ブラウザ遷移で直接開く
-      const url = buildApiUrl(
-        `/api/materials/${encodeURIComponent(materialId)}/files/${encodeURIComponent(target.id)}`,
-      );
+      const url = await getMaterialFileDownloadUrl(materialId, target.id);
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch {
       toast.error('PDFの取得に失敗しました');

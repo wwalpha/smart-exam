@@ -10,7 +10,7 @@ type GetMaterialFileParams = {
 
 export const getMaterialFile = (services: Services): AsyncHandler<
   GetMaterialFileParams,
-  unknown,
+  { downloadUrl: string },
   Record<string, never>,
   ParsedQs
 > => async (req, res) => {
@@ -21,6 +21,6 @@ export const getMaterialFile = (services: Services): AsyncHandler<
     throw new ApiError('not found', 404, ['not_found']);
   }
 
-  // Lambda/API Gateway のレスポンス上限を回避するため、実体は S3 から直接取得させる
-  res.redirect(302, file.downloadUrl);
+  // 認証付きAPI呼び出しで署名付きURLを取得し、クライアント側で直接S3を開かせる。
+  res.json(file);
 };

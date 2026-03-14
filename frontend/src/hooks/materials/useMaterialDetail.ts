@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
-import { buildApiUrl } from '@/services/apiClient';
+import { getMaterialFileDownloadUrl } from '@/services/materialApi';
 import { toast } from 'sonner';
 import type { MaterialFile } from '@smart-exam/api-types';
 import { MATERIAL_PDF_FILE_TYPE_LABEL, MATERIAL_PDF_FILE_TYPES, type MaterialPdfFileType } from '@/lib/materialConsts';
@@ -149,8 +149,7 @@ export const useMaterialDetail = () => {
       // IDが不正な状態ではプレビューできない
       if (!id) return;
       try {
-        // S3 へのリダイレクトをXHRで追従するとCORS制約にかかるため、ブラウザ遷移で直接開く。
-        const url = buildApiUrl(`/api/materials/${encodeURIComponent(id)}/files/${encodeURIComponent(fileId)}`);
+        const url = await getMaterialFileDownloadUrl(id, fileId);
         window.open(url, '_blank', 'noopener,noreferrer');
       } catch {
         toast.error('PDFの取得に失敗しました');
