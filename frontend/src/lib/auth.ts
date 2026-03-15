@@ -1,5 +1,5 @@
-const AUTH_TOKEN_STORAGE_KEY = 'smart_exam_access_token';
-const REFRESH_TOKEN_STORAGE_KEY = 'smart_exam_refresh_token';
+import { AUTH_TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '@/lib/Consts';
+
 let refreshAccessTokenPromise: Promise<string | null> | null = null;
 
 export type CognitoUserRole = 'ADMIN' | 'USER';

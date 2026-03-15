@@ -6,25 +6,26 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCandidateSearch } from '@/hooks/candidate';
-import { EXAM_MODE } from '@smart-exam/api-types';
-import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
-import type { WordTestSubject } from '@typings/wordtest';
-
-const SEARCH_SUBJECT_OPTION = {
-  all: 'ALL',
-  kanji: 'KANJI',
-} as const;
-
-const CANDIDATE_MODE_LABEL = {
-  [EXAM_MODE.MATERIAL]: '問題',
-  [EXAM_MODE.KANJI]: '漢字',
-} as const;
+import { CANDIDATE_MODE_LABEL, SEARCH_SUBJECT_OPTION, SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 
 export const CandidateSearchPage = () => {
-  const { results, isSearching, form, submit } = useCandidateSearch();
-  const { register, setValue, watch } = form;
-  const subject = watch('subject');
-  const isKanjiSelected = subject === SEARCH_SUBJECT_OPTION.kanji;
+  const {
+    results,
+    selectedSubject,
+    selectedKanjiSubject,
+    isKanjiSelected,
+    currentPage,
+    totalPages,
+    hasResults,
+    goToPreviousPage,
+    goToNextPage,
+    handleSubjectChange,
+    handleKanjiSubjectChange,
+    isSearching,
+    form,
+    submit,
+  } = useCandidateSearch();
+  const { register } = form;
 
   return (
     <div className="space-y-6 p-8">
@@ -34,9 +35,9 @@ export const CandidateSearchPage = () => {
             <div className="w-40 space-y-2">
               <Label>科目</Label>
               <Select
-                value={subject}
-                onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject | 'KANJI')}
-                defaultValue="ALL"
+                value={selectedSubject}
+                onValueChange={handleSubjectChange}
+                defaultValue={SEARCH_SUBJECT_OPTION.all}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="科目" />
@@ -54,7 +55,8 @@ export const CandidateSearchPage = () => {
               <div className="w-40 space-y-2">
                 <Label>漢字科目</Label>
                 <Select
-                  onValueChange={(v) => setValue('kanjiSubject', v as typeof SUBJECT.japanese | typeof SUBJECT.society)}
+                  value={selectedKanjiSubject}
+                  onValueChange={handleKanjiSubjectChange}
                   defaultValue={SUBJECT.japanese}
                 >
                   <SelectTrigger>
@@ -78,6 +80,20 @@ export const CandidateSearchPage = () => {
         </CardContent>
       </Card>
 
+      <div className="flex items-center justify-end">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={goToPreviousPage} disabled={currentPage <= 1}>
+            前へ
+          </Button>
+          <div className="text-sm">
+            {currentPage} / {totalPages}
+          </div>
+          <Button variant="outline" size="sm" onClick={goToNextPage} disabled={currentPage >= totalPages}>
+            次へ
+          </Button>
+        </div>
+      </div>
+
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
@@ -89,7 +105,7 @@ export const CandidateSearchPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {results.length === 0 ? (
+            {!hasResults ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
                   検索結果はありません

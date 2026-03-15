@@ -4,10 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import type { ImportKanjiResponse } from '@smart-exam/api-types';
 import { toast } from 'sonner';
-import { SUBJECT } from '@/lib/Consts';
+import { KANJI_IMPORT_SUCCESS_TOAST_STATE, SUBJECT } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
-
-const KANJI_IMPORT_SUCCESS_TOAST_STATE = 'kanji-import-success' as const;
 
 type FormValues = {
   mode: 'SKIP' | 'UPDATE';

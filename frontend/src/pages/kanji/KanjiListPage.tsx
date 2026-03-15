@@ -8,11 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useKanjiList } from '@/hooks/kanji';
-import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import { KANJI_IMPORT_SUCCESS_TOAST_STATE, SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 import { toast } from 'sonner';
-
-const KANJI_IMPORT_SUCCESS_TOAST_STATE = 'kanji-import-success' as const;
 
 export const KanjiListPage = () => {
   const location = useLocation();

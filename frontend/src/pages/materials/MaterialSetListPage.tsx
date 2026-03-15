@@ -8,11 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge, getSubjectBadgeVariant } from '@/components/ui/badge';
 import { useMaterialList } from '@/hooks/materials';
-import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
+import { REGISTERED_MARK, SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import { MATERIAL_PROVIDER_OPTIONS, MATERIAL_STATUS_LABEL } from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
-
-const REGISTERED_MARK = '〇';
 
 export const MaterialSetListPage = () => {
   const { materials, form, search, clear, remove, ConfirmDialog } = useMaterialList();
