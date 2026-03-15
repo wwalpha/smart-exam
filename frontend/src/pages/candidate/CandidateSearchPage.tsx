@@ -38,7 +38,7 @@ export const CandidateSearchPage = () => {
                 onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject | 'KANJI')}
                 defaultValue="ALL"
               >
-                <SelectTrigger className="m-0">
+                <SelectTrigger>
                   <SelectValue placeholder="科目" />
                 </SelectTrigger>
                 <SelectContent>
@@ -57,7 +57,7 @@ export const CandidateSearchPage = () => {
                   onValueChange={(v) => setValue('kanjiSubject', v as typeof SUBJECT.japanese | typeof SUBJECT.society)}
                   defaultValue={SUBJECT.japanese}
                 >
-                  <SelectTrigger className="m-0">
+                  <SelectTrigger>
                     <SelectValue placeholder="漢字科目" />
                   </SelectTrigger>
                   <SelectContent>

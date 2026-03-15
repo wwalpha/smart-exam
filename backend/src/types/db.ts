@@ -139,7 +139,7 @@ export interface ExamCandidateTable {
   /** 教材ID（MATERIALモード時のみ設定） */
   materialId?: string;
   /** 状態 */
-  status: 'OPEN' | 'CLOSED' | 'EXCLUDED' | 'LOCKED';
+  status: 'OPEN' | 'LOCKED';
   /** 連続正解回数（必須、default 0） */
   correctCount: number;
   /** 次回日付 (YYYY-MM-DD) */

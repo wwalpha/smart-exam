@@ -50,7 +50,6 @@ describe('KanjiService.importKanji (single pipe format)', () => {
     ).mock.calls[0][0] as unknown[];
     expect(createdCandidates.length).toBe(1);
     expect(repositories.examHistories.putHistory).toHaveBeenCalledTimes(3);
-    expect(repositories.examCandidates.deleteCandidatesByTargetId).toHaveBeenCalledTimes(1);
   });
 
   it('fails when subject is missing', async () => {

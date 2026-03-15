@@ -14,7 +14,7 @@ export const createCandidate = async (params: {
   materialId?: string;
   nextTime: string;
   correctCount: number;
-  status: 'OPEN' | 'EXCLUDED' | 'CLOSED';
+  status: 'OPEN' | 'LOCKED';
   createdAtIso?: string;
 }): Promise<ExamCandidateTable> => {
   const id = createUuid();

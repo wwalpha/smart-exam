@@ -8,6 +8,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     const repositories = {
       kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
+        findByQuestionAnswer: vi.fn().mockResolvedValue(null),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       examCandidates: {
@@ -54,6 +55,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     const repositories = {
       kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
+        findByQuestionAnswer: vi.fn().mockResolvedValue(null),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       examCandidates: {
@@ -87,6 +89,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     const repositories = {
       kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
+        findByQuestionAnswer: vi.fn().mockResolvedValue(null),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       examCandidates: {
@@ -130,6 +133,7 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     const repositories = {
       kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
+        findByQuestionAnswer: vi.fn().mockResolvedValue(null),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       examCandidates: {
@@ -172,14 +176,18 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
   it('counts duplicates within file and existing', async () => {
     const repositories = {
       kanji: {
-        listKanji: vi.fn().mockResolvedValue([
-          {
-            question: '彼はけいせいを説明した。',
-            answer: '形成',
-            // 既存データ扱いにするため（worksheet判定）
-            underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
-          },
-        ] as unknown),
+        listKanji: vi.fn().mockResolvedValue([] as unknown),
+        findByQuestionAnswer: vi.fn().mockImplementation(async (params: { question: string; answer: string }) => {
+          if (params.question === '彼はけいせいを説明した。' && params.answer === '形成') {
+            return {
+              question: '彼はけいせいを説明した。',
+              answer: '形成',
+              underlineSpec: { type: 'promptSpan', start: 2, length: 4 },
+            };
+          }
+
+          return null;
+        }),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       examCandidates: {
@@ -216,10 +224,11 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
     expect(repositories.kanji.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('rebuilds candidates from histories and creates a final candidate (OPEN/EXCLUDED)', async () => {
+  it('rebuilds only the latest three histories and skips candidate creation after exclusion', async () => {
     const repositories = {
       kanji: {
         listKanji: vi.fn().mockResolvedValue([] as unknown),
+        findByQuestionAnswer: vi.fn().mockResolvedValue(null),
         bulkCreate: vi.fn().mockResolvedValue(undefined),
       },
       examCandidates: {
@@ -247,31 +256,24 @@ describe('KanjiService.importKanji (QUESTIONS format)', () => {
 
     const res = await service.importKanji({
       subject: '1',
-      fileContent: '彼はけいせいを説明した。|形成|2026-02-01,OK|2026-02-05,NG\n',
+      fileContent: '彼はけいせいを説明した。|形成|2026-01-01,NG|2026-02-01,OK|2026-03-01,OK|2026-04-01,OK\n',
     });
 
     expect(res.successCount).toBe(1);
     expect(res.errorCount).toBe(0);
 
-    const created = (repositories.kanji.bulkCreate as unknown as { mock: { calls: unknown[][] } }).mock
-      .calls[0][0] as Array<{ wordId: string }>;
-    const id = created[0].wordId;
-
-    expect(repositories.examCandidates.deleteCandidatesByTargetId).toHaveBeenCalledWith({
-      subject: '1',
-      targetId: id,
-    });
-
     const createdCandidates = (
       repositories.examCandidates.bulkCreateCandidates as unknown as { mock: { calls: unknown[][] } }
     ).mock.calls[0][0] as Array<{ status: string }>;
     const historyPutCalls = (
-      repositories.examHistories.putHistory as unknown as { mock: { calls: Array<[{ status: string }]> } }
+      repositories.examHistories.putHistory as unknown as {
+        mock: { calls: Array<[{ status: string; nextTime: string }]> };
+      }
     ).mock.calls;
 
-    expect(historyPutCalls.length).toBeGreaterThan(0);
-    expect(historyPutCalls.every((call) => call[0].status === 'CLOSED')).toBe(true);
-    expect(createdCandidates.some((c) => c.status === 'OPEN' || c.status === 'EXCLUDED')).toBe(true);
-    expect(createdCandidates.every((c) => c.status !== 'CLOSED')).toBe(true);
+    expect(historyPutCalls).toHaveLength(3);
+    expect(historyPutCalls.map((call) => call[0].status)).toEqual(['CLOSED', 'CLOSED', 'EXCLUDED']);
+    expect(historyPutCalls.at(-1)?.[0].nextTime).toBe('2099-12-31');
+    expect(createdCandidates).toEqual([]);
   });
 });

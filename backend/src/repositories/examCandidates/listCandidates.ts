@@ -22,7 +22,7 @@ export const listCandidates = async (params: {
   };
   const expAttrValues: Record<string, unknown> = {
     ':open': 'OPEN',
-    ...(params.nextTime ? { ':upper': toCandidateKeyUpperBound(params.nextTime) } : {}),
+    ...(params.nextTime && params.subject ? { ':upper': toCandidateKeyUpperBound(params.nextTime) } : {}),
     ...(params.nextTime && !params.subject ? { ':nextTime': params.nextTime } : {}),
     ...(params.mode ? { ':mode': params.mode } : {}),
   };

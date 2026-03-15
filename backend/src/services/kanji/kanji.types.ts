@@ -61,7 +61,7 @@ export type BuildCandidateRowParams = {
   // 連続正解数。
   correctCount: number;
   // 候補状態。
-  status: 'OPEN' | 'CLOSED' | 'EXCLUDED';
+  status: 'OPEN' | 'LOCKED';
   // 作成日時ISO（省略時は現在時刻）。
   createdAtIso?: string;
 };
@@ -74,8 +74,6 @@ export type BuildCandidatesFromHistoriesParams = {
   targetWordId: string;
   // 履歴配列。
   histories: ImportedHistoryEntry[];
-  // 最終ステータス決定方針。
-  finalStatus: 'AUTO' | 'EXCLUDED';
 };
 
 // updateKanji のデータ型。
@@ -117,8 +115,8 @@ export type BatchBuildResult = {
   candidatesToCreate: ExamCandidateTable[];
   // exam_histories へ投入する履歴群。
   historiesToCreate: ExamHistoryTable[];
-  // 事前削除する候補ターゲット。
-  candidateTargetsToDelete: Array<{ subject: SubjectId; targetId: string }>;
+  // 重複として除外した件数。
+  duplicateCount: number;
   // 成功件数。
   successCount: number;
   // エラー件数。
