@@ -4,7 +4,7 @@ import type { ParsedQs } from 'qs';
 
 import type { Services } from '@/services/createServices';
 
-import { CompleteExamParamsSchema } from './completeExam.schema';
+import { CompleteExamParamsSchema } from './exam.schema';
 
 export const completeExam = (
   services: Services,

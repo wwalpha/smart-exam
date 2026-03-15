@@ -16,8 +16,7 @@ import type { AsyncHandler } from '@/lib/handler';
 import type { ValidatedBody, ValidatedQuery } from '@/types/express';
 import type { Services } from '@/services/createServices';
 
-import { CreateTestBodySchema, ListTestTargetsQuerySchema, SearchTestsBodySchema } from './modeScopedExam.schema';
-import { UpdateExamStatusBodySchema } from './updateExamStatus.schema';
+import { CreateTestBodySchema, ListTestTargetsQuerySchema, SearchTestsBodySchema, UpdateExamStatusBodySchema } from './exam.schema';
 
 export const createModeScopedExamsController = (services: Services, mode: ExamMode) => {
   const ensureModeMatched = async (examId: string): Promise<boolean> => {

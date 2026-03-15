@@ -29,7 +29,7 @@ import { KanjiCreatePage } from '@/pages/kanji/KanjiCreatePage';
 import { KanjiImportPage } from '@/pages/kanji/KanjiImportPage';
 
 // Search
-import { QuestionSearchPage } from '@/pages/search/QuestionSearchPage';
+import { CandidateSearchPage } from '@/pages/candidate/CandidateSearchPage';
 
 // Settings
 import { PdfSettingsPage } from '@/pages/settings/PdfSettingsPage';
@@ -71,7 +71,7 @@ export const App = () => {
     { label: '漢字テスト', to: '/exam/kanji' },
     { label: '教材管理', to: '/materials' },
     { label: '漢字管理', to: '/kanji' },
-    { label: '問題検索', to: '/search/questions' },
+    { label: '問題検索', to: '/candidates' },
     { label: '設定', to: '/settings/pdf' },
     ...(authEnabled ? [{ label: 'ログアウト', to: '/auth/logout', isAction: true }] : []),
   ].filter((item) => {
@@ -106,7 +106,7 @@ export const App = () => {
       { pattern: '/kanji/import', title: '漢字一括登録' },
       { pattern: '/kanji/:id', title: '漢字編集' },
 
-      { pattern: '/search/questions', title: '問題検索' },
+      { pattern: '/candidates', title: '問題検索' },
       { pattern: '/settings/pdf', title: 'PDF設定' },
       { pattern: '/auth/login', title: 'ログイン' },
       { pattern: '/auth/callback', title: 'ログイン' },
@@ -151,7 +151,7 @@ export const App = () => {
         <Route path="/kanji/:id" element={<KanjiCreatePage />} />
 
         {/* Search */}
-        <Route path="/search/questions" element={<QuestionSearchPage />} />
+        <Route path="/candidates" element={<CandidateSearchPage />} />
 
         {/* Settings */}
         <Route path="/settings/pdf" element={<PdfSettingsPage />} />

@@ -5,7 +5,7 @@ import type { ParsedQs } from 'qs';
 import type { GetExamParams, GetExamResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { GetExamParamsSchema } from './getExam.schema';
+import { GetExamParamsSchema } from './exam.schema';
 
 export const getExam = (
   services: Services,

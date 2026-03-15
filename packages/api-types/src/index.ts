@@ -1,5 +1,6 @@
 export * from './dashboard';
 export * from './bedrock';
+export * from './candidate';
 export * from './kanji';
 export * from './material';
 export * from './exam';

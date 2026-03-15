@@ -9,7 +9,6 @@ import type {
   ListQuestionsParams,
   SetMaterialChoicesParams,
   SetMaterialChoicesRequest,
-  SearchQuestionsResponse,
   UpdateQuestionParams,
   UpdateQuestionRequest,
 } from '@smart-exam/api-types';
@@ -91,40 +90,6 @@ describe('question handler', () => {
 
     expect(services.materialQuestions.updateQuestion).toHaveBeenCalledWith('mat1', '1', { canonicalKey: '1-2' });
     expect(res.json).toHaveBeenCalledWith(mockItem);
-  });
-
-  it('searchQuestions returns datas', async () => {
-    const mockItems: SearchQuestionsResponse['datas'] = [
-      {
-        id: 'q1',
-        subject: '4',
-        unit: '',
-        questionText: 'Q1',
-        sourceMaterialId: 'm1',
-        sourceMaterialName: '第1回',
-      },
-    ];
-
-    const services = {
-      materialQuestions: {
-        searchQuestions: vi.fn().mockResolvedValue(mockItems as unknown),
-      },
-    } as unknown as Services;
-
-    const controller = materialQuestionsController(services);
-
-    const req = {
-      body: { keyword: 'Q1', subject: '4' },
-    } as unknown as Request;
-    const res = {
-      json: vi.fn(),
-      status: vi.fn().mockReturnThis(),
-    } as unknown as Response;
-    const next = vi.fn();
-
-    await controller.searchQuestions(req, res, next);
-
-    expect(res.json).toHaveBeenCalledWith({ datas: mockItems } satisfies SearchQuestionsResponse);
   });
 
   it('deleteQuestion returns 204', async () => {

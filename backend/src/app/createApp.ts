@@ -1,5 +1,3 @@
-// Module: createApp responsibilities.
-
 import cors from 'cors';
 import express from 'express';
 import { z } from 'zod';
@@ -144,11 +142,11 @@ export const createApp = (): express.Express => {
     handleRequest(controllers.kanji.importKanji),
   );
 
-  // 条件を指定して問題を検索するAPI
+  // 条件を指定して候補を検索するAPI
   app.post(
-    '/api/questions/search',
-    validateBody(controllers.materialQuestions.SearchQuestionsBodySchema),
-    handleRequest(controllers.materialQuestions.searchQuestions),
+    '/api/candidates/search',
+    validateBody(controllers.candidates.CandidateSearchBodySchema),
+    handleRequest(controllers.candidates.candidateSearch),
   );
   // 指定した教材に紐づく問題一覧を取得するAPI
   app.get(

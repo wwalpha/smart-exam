@@ -28,7 +28,7 @@
 | 漢字登録                     | `/kanji/new`                  | kanji/KanjiCreatePage.tsx            |
 | 漢字編集                     | `/kanji/:id`                  | kanji/KanjiCreatePage.tsx            |
 | 漢字一括登録                 | `/kanji/import`               | kanji/KanjiImportPage.tsx            |
-| 問題検索                     | `/search/questions`           | search/QuestionSearchPage.tsx        |
+| 問題検索                     | `/candidates`                 | search/QuestionSearchPage.tsx        |
 | PDF設定                      | `/settings/pdf`               | settings/PdfSettingsPage.tsx         |
 
 ## ルーティング未登録（pages 配下だが App.tsx から直接参照されない）

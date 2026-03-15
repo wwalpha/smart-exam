@@ -1,35 +1,36 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { useQuestionSearch } from '@/hooks/search';
+import { useCandidateSearch } from '@/hooks/candidate';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
-export const QuestionSearchPage = () => {
-  const { results, isSearching, form, submit } = useQuestionSearch();
-  const { register, setValue } = form;
+const SEARCH_SUBJECT_OPTION = {
+  all: 'ALL',
+  kanji: 'KANJI',
+} as const;
+
+export const CandidateSearchPage = () => {
+  const { results, isSearching, form, submit } = useCandidateSearch();
+  const { setValue, watch } = form;
+  const subject = watch('subject');
+  const isKanjiSelected = subject === SEARCH_SUBJECT_OPTION.kanji;
 
   return (
     <div className="space-y-6 p-8">
-      <h1 className="text-2xl font-bold">問題検索</h1>
-
       <Card>
-        <CardHeader>
-          <CardTitle>検索条件</CardTitle>
-        </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="flex flex-wrap gap-4 items-end">
-            <div className="w-64 space-y-2">
-              <Label>キーワード</Label>
-              <Input {...register('keyword')} placeholder="問題文を検索..." />
-            </div>
             <div className="w-40 space-y-2">
               <Label>科目</Label>
-              <Select onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject)} defaultValue="ALL">
+              <Select
+                value={subject}
+                onValueChange={(v) => setValue('subject', v as 'ALL' | WordTestSubject | 'KANJI')}
+                defaultValue="ALL"
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="科目" />
                 </SelectTrigger>
@@ -38,9 +39,27 @@ export const QuestionSearchPage = () => {
                   <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
                   <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
                   <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
+                  <SelectItem value={SEARCH_SUBJECT_OPTION.kanji}>漢字</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            {isKanjiSelected ? (
+              <div className="w-40 space-y-2">
+                <Label>漢字科目</Label>
+                <Select
+                  onValueChange={(v) => setValue('kanjiSubject', v as typeof SUBJECT.japanese | typeof SUBJECT.society)}
+                  defaultValue={SUBJECT.japanese}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="漢字科目" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={SUBJECT.japanese}>{SUBJECT_LABEL[SUBJECT.japanese]}</SelectItem>
+                    <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
             <Button type="submit" disabled={isSearching}>
               {isSearching ? '検索中...' : '検索'}
             </Button>
@@ -53,9 +72,9 @@ export const QuestionSearchPage = () => {
           <TableHeader>
             <TableRow>
               <TableHead>科目</TableHead>
-              <TableHead>単元</TableHead>
-              <TableHead className="w-1/2">問題文</TableHead>
-              <TableHead>出典</TableHead>
+              <TableHead>種別</TableHead>
+              <TableHead className="w-1/2">候補内容</TableHead>
+              <TableHead>補足</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,9 +88,7 @@ export const QuestionSearchPage = () => {
               results.map((result) => (
                 <TableRow key={result.id}>
                   <TableCell>
-                    <Badge variant="outline">
-                      {SUBJECT_LABEL[result.subject as keyof typeof SUBJECT_LABEL] ?? ''}
-                    </Badge>
+                    <Badge variant="outline">{SUBJECT_LABEL[result.subject as keyof typeof SUBJECT_LABEL] ?? ''}</Badge>
                   </TableCell>
                   <TableCell>{result.unit}</TableCell>
                   <TableCell>{result.questionText}</TableCell>

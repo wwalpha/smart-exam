@@ -1,3 +1,4 @@
+import type { ExamMode } from './exam';
 import type { SubjectId } from './subject';
 
 /** `GET /materials/:materialId` */
@@ -323,36 +324,6 @@ export type Material = {
 export type QuestionListResponse = {
   /** 問題一覧 */
   datas: Question[];
-};
-
-/** 検索結果（問題検索） */
-export type QuestionSearchResult = {
-  /** 問題ID */
-  id: string;
-  /** 科目 */
-  subject: SubjectId;
-  /** 単元 */
-  unit?: string;
-  /** 問題文 */
-  questionText: string;
-  /** 出典教材ID */
-  sourceMaterialId: string;
-  /** 出典教材名 */
-  sourceMaterialName: string;
-};
-
-/** `POST /questions/search` */
-export type SearchQuestionsRequest = {
-  /** 検索キーワード */
-  keyword?: string;
-  /** 科目での絞り込み */
-  subject?: SubjectId;
-};
-
-/** `POST /questions/search` */
-export type SearchQuestionsResponse = {
-  /** 問題検索結果一覧 */
-  datas: QuestionSearchResult[];
 };
 
 /** `POST /materials/:materialId/choices` */

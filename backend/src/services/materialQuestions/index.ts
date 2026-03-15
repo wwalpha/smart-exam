@@ -4,7 +4,6 @@ import { createApplyChoices } from './applyChoices';
 import { createCreateQuestion } from './createQuestion';
 import { createDeleteQuestion } from './deleteQuestion';
 import { createListQuestions } from './listQuestions';
-import { createSearchQuestions } from './searchQuestions';
 import { createSetMaterialChoices } from './setMaterialChoices';
 import { createUpdateQuestion } from './updateQuestion';
 import type { MaterialQuestionsService } from './materialQuestions.types';
@@ -17,7 +16,6 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
   const createQuestion = createCreateQuestion(repositories);
   const updateQuestion = createUpdateQuestion(repositories);
   const deleteQuestion = createDeleteQuestion(repositories);
-  const searchQuestions = createSearchQuestions(repositories);
   const setMaterialChoices = createSetMaterialChoices(repositories);
   const applyChoices = createApplyChoices(repositories);
 
@@ -27,7 +25,6 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
     createQuestion,
     updateQuestion,
     deleteQuestion,
-    searchQuestions,
     setMaterialChoices,
     applyChoices,
   };

@@ -1,6 +1,7 @@
 // Module: createControllers responsibilities.
 
 import { getDashboardController } from '@/controllers/dashboard';
+import { candidateController } from '@/controllers/candidate';
 import { kanjiController } from '@/controllers/kanji';
 import { materialsController } from '@/controllers/materials';
 import { materialQuestionsController } from '@/controllers/materialQuestions';
@@ -10,6 +11,7 @@ import type { Services } from '@/services/createServices';
 
 /** Type definition for Controllers. */
 export type Controllers = {
+  candidates: ReturnType<typeof candidateController>;
   dashboard: ReturnType<typeof getDashboardController>;
   kanji: ReturnType<typeof kanjiController>;
   materials: ReturnType<typeof materialsController>;
@@ -20,6 +22,7 @@ export type Controllers = {
 /** Creates controllers. */
 export const createControllers = (services: Services): Controllers => {
   return {
+    candidates: candidateController(services),
     dashboard: getDashboardController(services),
     kanji: kanjiController(services),
     materials: materialsController(services),

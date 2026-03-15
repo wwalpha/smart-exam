@@ -3,12 +3,6 @@ import { z } from 'zod';
 import { SubjectIdSchema } from '@/lib/zodSchemas';
 import { BooleanFromUnknownSchema } from '@/lib/zodSchemas';
 
-/** SearchQuestionsBodySchema validates input shape. */
-export const SearchQuestionsBodySchema = z.object({
-  keyword: z.string().optional(),
-  subject: SubjectIdSchema.optional(),
-});
-
 /** CreateQuestionBodySchema validates input shape. */
 export const CreateQuestionBodySchema = z.object({
   canonicalKey: z.string().min(1),

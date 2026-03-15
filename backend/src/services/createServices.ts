@@ -1,5 +1,6 @@
 import type { Repositories } from '@/repositories/createRepositories';
 import { bedrockService } from '@/services/bedrock';
+import { candidatesService } from '@/services/candidates';
 import { dashboardService } from '@/services/dashboard';
 import { kanjiService } from '@/services/kanji';
 import { materialQuestionsService } from '@/services/materialQuestions';
@@ -14,6 +15,7 @@ export const createServices = (repositories: Repositories): Services => {
   // 処理結果を呼び出し元へ返す
   return {
     bedrock: bedrockService(repositories),
+    candidates: candidatesService(repositories),
     dashboard: dashboardService(),
     kanji: kanjiService(repositories),
     materialQuestions: materialQuestionsService(repositories),

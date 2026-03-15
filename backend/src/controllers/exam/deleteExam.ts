@@ -5,7 +5,7 @@ import type { ParsedQs } from 'qs';
 import type { DeleteExamParams } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { DeleteExamParamsSchema } from './deleteExam.schema';
+import { DeleteExamParamsSchema } from './exam.schema';
 
 export const deleteExam = (
   services: Services,

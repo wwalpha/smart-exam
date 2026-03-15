@@ -5,7 +5,7 @@ import type { ParsedQs } from 'qs';
 import type { UpdateExamStatusParams, UpdateExamStatusRequest, UpdateExamStatusResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { UpdateExamStatusBodySchema, UpdateExamStatusParamsSchema } from './updateExamStatus.schema';
+import { UpdateExamStatusBodySchema, UpdateExamStatusParamsSchema } from './exam.schema';
 
 export const updateExamStatus = (
   services: Services,

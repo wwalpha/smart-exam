@@ -2,20 +2,24 @@ import type { Services } from '@/services/createServices';
 
 import { createExamController } from './createExam';
 import { completeExam } from './completeExam';
-import { CompleteExamParamsSchema } from './completeExam.schema';
 import { deleteExam } from './deleteExam';
-import { DeleteExamParamsSchema } from './deleteExam.schema';
+import {
+  CompleteExamParamsSchema,
+  DeleteExamParamsSchema,
+  GetExamParamsSchema,
+  SubmitExamResultsBodySchema,
+  SubmitExamResultsParamsSchema,
+  UpdateExamStatusBodySchema,
+  UpdateExamStatusParamsSchema,
+} from './exam.schema';
 import { getExam } from './getExam';
 import { getExamPdfController } from './getExamPdf';
-import { GetExamParamsSchema } from './getExam.schema';
 import { kanjiTestsController } from './kanjiTestsController';
 import { listExamTargetsController } from './listExamTargets';
 import { materialsTestsController } from './materialsTestsController';
 import { searchExamsController } from './searchExams';
 import { submitExamResults } from './submitExamResults';
-import { SubmitExamResultsBodySchema, SubmitExamResultsParamsSchema } from './submitExamResults.schema';
 import { updateExamStatus } from './updateExamStatus';
-import { UpdateExamStatusBodySchema, UpdateExamStatusParamsSchema } from './updateExamStatus.schema';
 
 export const examsController = (services: Services) => {
   const searchExams = searchExamsController(services);

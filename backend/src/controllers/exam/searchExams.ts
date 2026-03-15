@@ -7,7 +7,7 @@ import type { ParsedQs } from 'qs';
 import type { SearchExamsRequest, SearchExamsResponse } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { SearchExamsBodySchema } from './searchExams.schema';
+import { SearchExamsBodySchema } from './exam.schema';
 
 /** Creates search review tests controller. */
 export const searchExamsController = (services: Services) => {

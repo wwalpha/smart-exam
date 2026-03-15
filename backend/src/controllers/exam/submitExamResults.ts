@@ -5,7 +5,7 @@ import type { ParsedQs } from 'qs';
 import type { SubmitExamResultsParams, SubmitExamResultsRequest } from '@smart-exam/api-types';
 import type { Services } from '@/services/createServices';
 
-import { SubmitExamResultsBodySchema, SubmitExamResultsParamsSchema } from './submitExamResults.schema';
+import { SubmitExamResultsBodySchema, SubmitExamResultsParamsSchema } from './exam.schema';
 
 export const submitExamResults = (
   services: Services,

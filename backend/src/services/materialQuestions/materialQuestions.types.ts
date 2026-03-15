@@ -2,8 +2,6 @@ import type {
   CreateQuestionRequest,
   Question,
   QuestionListResponse,
-  QuestionSearchResult,
-  SearchQuestionsRequest,
 } from '@smart-exam/api-types';
 
 export type MaterialQuestionsService = {
@@ -19,8 +17,6 @@ export type MaterialQuestionsService = {
   ) => Promise<Question | null>;
   // 指定設問を削除する。
   deleteQuestion: (materialId: string, questionId: string) => Promise<boolean>;
-  // 条件に一致する設問を横断検索する。
-  searchQuestions: (params: SearchQuestionsRequest) => Promise<QuestionSearchResult[]>;
   // 教材配下の設問に対する正誤選択を一括更新する。
   setMaterialChoices: (params: {
     materialId: string;
