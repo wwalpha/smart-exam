@@ -7,14 +7,12 @@ export type CandidateSearchResult = {
   id: string;
   /** 科目 */
   subject: SubjectId;
-  /** 種別 */
-  unit?: string;
+  /** 次回日付 */
+  nextTime: string;
+  /** モード */
+  mode: ExamMode;
   /** 候補表示文言 */
   questionText: string;
-  /** 出典教材ID */
-  sourceMaterialId: string;
-  /** 補足情報 */
-  sourceMaterialName: string;
 };
 
 /** `POST /candidates/search` */
@@ -23,6 +21,8 @@ export type CandidateSearchRequest = {
   subject?: SubjectId;
   /** 候補モードでの絞り込み */
   mode?: ExamMode;
+  /** 指定日以前の候補に絞り込む */
+  nextTime?: string;
 };
 
 /** `POST /candidates/search` */

@@ -13,7 +13,7 @@ export const candidateSearch = (
 ): AsyncHandler<ParamsDictionary, CandidateSearchResponse, CandidateSearchRequest, ParsedQs> => {
   return async (req, res) => {
     const body = (req.validated?.body ?? req.body) as ValidatedBody<typeof CandidateSearchBodySchema>;
-    const items = await services.candidates.candidateSearch({ subject: body.subject, mode: body.mode });
+    const items = await services.candidates.candidateSearch({ subject: body.subject, mode: body.mode, nextTime: body.nextTime });
     res.json({ datas: items });
   };
 };

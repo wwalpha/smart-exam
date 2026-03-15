@@ -10,10 +10,9 @@ describe('candidate handler', () => {
       {
         id: 'q1',
         subject: '4',
-        unit: '',
+        nextTime: '2026-03-15',
+        mode: 'MATERIAL',
         questionText: 'Q1',
-        sourceMaterialId: 'm1',
-        sourceMaterialName: '第1回',
       },
     ];
 
@@ -26,7 +25,7 @@ describe('candidate handler', () => {
     const controller = candidateController(services);
 
     const req = {
-      body: { subject: '4', mode: 'MATERIAL' },
+      body: { subject: '4', mode: 'MATERIAL', nextTime: '2026-03-15' },
     } as unknown as Request;
     const res = {
       json: vi.fn(),
