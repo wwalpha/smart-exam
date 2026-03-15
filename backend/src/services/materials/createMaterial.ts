@@ -4,6 +4,7 @@ import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { MaterialTable } from '@/types/db';
 
+import { toApiMaterial } from './materialMappers';
 import type { MaterialsService } from './materials.types';
 
 export const createCreateMaterial = async (
@@ -29,17 +30,7 @@ export const createCreateMaterial = async (
 
       await repositories.materials.create(dbItem);
 
-      return {
-        id,
-        name: data.name,
-        subject,
-        materialDate: data.materialDate,
-        registeredDate: data.registeredDate,
-        grade: data.grade,
-        provider: data.provider,
-        questionCount: 0,
-        isCompleted: false,
-      };
+      return toApiMaterial(dbItem);
     }),
   );
 

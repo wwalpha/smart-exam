@@ -39,6 +39,8 @@ export const toApiMaterial = (dbItem: MaterialTable): Material => {
     materialDate,
     registeredDate,
     questionCount: typeof dbItem.questionCount === 'number' ? dbItem.questionCount : 0,
+    hasQuestionPdf: optionalNonEmpty(dbItem.questionPdfPath).length > 0,
+    hasAnswerPdf: optionalNonEmpty(dbItem.answerPdfPath).length > 0,
     isCompleted: dbItem.isCompleted ?? false,
   };
 };

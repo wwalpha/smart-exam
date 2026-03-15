@@ -312,6 +312,10 @@ export type Material = {
   registeredDate: string;
   /** 問題数 */
   questionCount: number;
+  /** 問題PDF登録済みフラグ */
+  hasQuestionPdf: boolean;
+  /** 解答PDF登録済みフラグ */
+  hasAnswerPdf: boolean;
   /** 完了状態 */
   isCompleted: boolean;
 };

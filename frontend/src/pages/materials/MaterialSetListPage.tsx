@@ -12,6 +12,8 @@ import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import { MATERIAL_PROVIDER_OPTIONS, MATERIAL_STATUS_LABEL } from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
 
+const REGISTERED_MARK = '〇';
+
 export const MaterialSetListPage = () => {
   const { materials, form, search, clear, remove, ConfirmDialog } = useMaterialList();
   const { register, setValue, watch } = form;
@@ -49,7 +51,8 @@ export const MaterialSetListPage = () => {
                 <Select
                   value={status}
                   onValueChange={(v) => setValue('status', v as 'ALL' | 'IN_PROGRESS' | 'COMPLETED')}
-                  defaultValue="IN_PROGRESS">
+                  defaultValue="IN_PROGRESS"
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="ステータス" />
                   </SelectTrigger>
@@ -94,7 +97,8 @@ export const MaterialSetListPage = () => {
                 <Select
                   value={(provider?.trim() ? provider : 'ALL') as string}
                   onValueChange={(v) => setValue('provider', v === 'ALL' ? '' : v, { shouldDirty: true })}
-                  defaultValue="ALL">
+                  defaultValue="ALL"
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="教材種別" />
                   </SelectTrigger>
@@ -125,7 +129,8 @@ export const MaterialSetListPage = () => {
                 onClick={() => {
                   setPage(1);
                   void clear();
-                }}>
+                }}
+              >
                 クリア
               </Button>
               <Button type="button" asChild>
@@ -143,7 +148,8 @@ export const MaterialSetListPage = () => {
             variant="outline"
             size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage <= 1}>
+            disabled={currentPage <= 1}
+          >
             前へ
           </Button>
           <div className="text-sm">
@@ -153,7 +159,8 @@ export const MaterialSetListPage = () => {
             variant="outline"
             size="sm"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage >= totalPages}>
+            disabled={currentPage >= totalPages}
+          >
             次へ
           </Button>
         </div>
@@ -163,13 +170,15 @@ export const MaterialSetListPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px]">操作</TableHead>
+              <TableHead className="w-[120px]">操作</TableHead>
               <TableHead>学年</TableHead>
               <TableHead>教材種別</TableHead>
               <TableHead>科目</TableHead>
               <TableHead>教材年月日</TableHead>
               <TableHead>教材名</TableHead>
               <TableHead>問題数</TableHead>
+              <TableHead className="text-center">問題PDF</TableHead>
+              <TableHead className="text-center">解答PDF</TableHead>
               <TableHead>ステータス</TableHead>
             </TableRow>
           </TableHeader>
@@ -189,7 +198,8 @@ export const MaterialSetListPage = () => {
                         size="icon"
                         aria-label="削除"
                         className="h-8 w-8"
-                        onClick={() => remove(material.id)}>
+                        onClick={() => remove(material.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -205,6 +215,8 @@ export const MaterialSetListPage = () => {
                 <TableCell className="py-1">{material.materialDate}</TableCell>
                 <TableCell className="py-1 font-medium">{material.name}</TableCell>
                 <TableCell className="py-1">{material.questionCount}</TableCell>
+                <TableCell className="py-1 text-center">{material.hasQuestionPdf ? REGISTERED_MARK : ''}</TableCell>
+                <TableCell className="py-1 text-center">{material.hasAnswerPdf ? REGISTERED_MARK : ''}</TableCell>
                 <TableCell className="py-1">
                   <Badge variant={material.isCompleted ? 'default' : 'warning_soft'} className={infoBadgeClass}>
                     {material.isCompleted ? MATERIAL_STATUS_LABEL.COMPLETED : MATERIAL_STATUS_LABEL.IN_PROGRESS}
@@ -214,7 +226,7 @@ export const MaterialSetListPage = () => {
             ))}
             {materials.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   データがありません
                 </TableCell>
               </TableRow>
