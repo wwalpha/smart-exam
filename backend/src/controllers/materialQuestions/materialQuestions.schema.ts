@@ -10,6 +10,11 @@ export const CreateQuestionBodySchema = z.object({
   tags: z.array(z.string().min(1)).optional(),
 });
 
+/** CreateQuestionsBulkBodySchema validates bulk input shape. */
+export const CreateQuestionsBulkBodySchema = z.object({
+  items: z.array(CreateQuestionBodySchema).min(1),
+});
+
 /** UpdateQuestionBodySchema validates input shape. */
 export const UpdateQuestionBodySchema = z.object({
   canonicalKey: z.string().min(1).optional(),

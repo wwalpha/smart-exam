@@ -8,7 +8,8 @@ import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const ExamQuestionCreatePage = () => {
-  const { form, submit, subject, openCandidateList, openCandidateTotal } = useReviewQuestionCreate();
+  const { form, submit, subject, selectedMaterialIds, selectedCandidateTotal, openCandidateList, openCandidateTotal, isLoading } =
+    useReviewQuestionCreate();
   const {
     register,
     setValue,
@@ -16,9 +17,7 @@ export const ExamQuestionCreatePage = () => {
   } = form;
 
   return (
-    <div className="max-w-2xl mx-auto p-8 space-y-6">
-      <h1 className="text-2xl font-bold">復習テスト作成</h1>
-
+    <div className="max-w-2xl mx-auto space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>条件設定</CardTitle>
@@ -32,10 +31,12 @@ export const ExamQuestionCreatePage = () => {
                 value={subject}
                 onValueChange={(v) =>
                   setValue('subject', v as WordTestSubject | '', { shouldDirty: true, shouldValidate: true })
-                }>
+                }
+              >
                 <SelectTrigger
                   aria-invalid={!!errors.subject}
-                  className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}>
+                  className={errors.subject ? 'border-destructive focus:ring-destructive' : undefined}
+                >
                   <SelectValue placeholder="科目を選択" />
                 </SelectTrigger>
                 <SelectContent>
@@ -74,19 +75,33 @@ export const ExamQuestionCreatePage = () => {
               <select
                 multiple
                 size={Math.min(8, Math.max(4, openCandidateList.length || 4))}
-                {...register('materialIds')}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                disabled={!subject || openCandidateList.length === 0}>
+                {...register('materialIds', {
+                  validate: (value) => (value?.length ?? 0) > 0 || '出題対象教材を選択してください',
+                })}
+                aria-invalid={!!errors.materialIds}
+                className={
+                  errors.materialIds
+                    ? 'w-full rounded-md border border-destructive bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2'
+                    : 'w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                }
+                disabled={!subject || openCandidateList.length === 0}
+              >
                 {openCandidateList.map((material) => (
                   <option key={material.id} value={material.id}>
                     {`${material.materialDate}　${material.name}（${material.provider} / 候補${material.openCandidateCount}件）`}
                   </option>
                 ))}
               </select>
-              <p className="text-sm text-muted-foreground">候補件数: {openCandidateTotal}件</p>
+              <p className="text-sm text-muted-foreground">候補件数（全体）: {openCandidateTotal}件</p>
+              {selectedMaterialIds.length > 0 ? (
+                <p className="text-sm text-muted-foreground">候補件数（選択中）: {selectedCandidateTotal}件</p>
+              ) : null}
               {!subject ? <p className="text-sm text-muted-foreground">先に科目を選択してください。</p> : null}
               {subject && openCandidateList.length === 0 ? (
                 <p className="text-sm text-muted-foreground">候補教材がありません。</p>
+              ) : null}
+              {errors.materialIds?.message ? (
+                <p className="text-sm text-destructive">{String(errors.materialIds.message)}</p>
               ) : null}
             </div>
 
@@ -94,7 +109,9 @@ export const ExamQuestionCreatePage = () => {
               <Button type="button" variant="outline" onClick={() => window.history.back()}>
                 キャンセル
               </Button>
-              <Button type="submit">テスト生成</Button>
+              <Button type="submit" disabled={!subject || selectedMaterialIds.length === 0 || openCandidateList.length === 0 || isLoading}>
+                テスト生成
+              </Button>
             </div>
           </form>
         </CardContent>

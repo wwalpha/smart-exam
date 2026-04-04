@@ -94,7 +94,8 @@ export const QuestionManagementPage = () => {
                   type="button"
                   variant="outline"
                   onClick={() => setIsBulkDialogOpen(false)}
-                  disabled={isBusy || !!material?.isCompleted}>
+                  disabled={isBusy || !!material?.isCompleted}
+                >
                   キャンセル
                 </Button>
                 <Button type="button" onClick={submitBulk} disabled={isBusy || !!material?.isCompleted}>
@@ -106,7 +107,8 @@ export const QuestionManagementPage = () => {
           <Button
             type="button"
             onClick={() => void saveChoices()}
-            disabled={isBusy || !!material?.isCompleted || !hasUnsavedChanges || hasValidationErrors}>
+            disabled={isBusy || !!material?.isCompleted || !hasUnsavedChanges || hasValidationErrors}
+          >
             保存
           </Button>
         </div>
@@ -132,7 +134,8 @@ export const QuestionManagementPage = () => {
                       size="sm"
                       className="h-8 px-3"
                       disabled={isBusy || !!material?.isCompleted}
-                      onClick={() => remove(q.id)}>
+                      onClick={() => remove(q.id)}
+                    >
                       削除
                     </Button>
                   </TableCell>
@@ -181,7 +184,8 @@ export const QuestionManagementPage = () => {
                                 if (v === 'correct') return setChoice(q.id, true);
                                 if (v === 'incorrect') return setChoice(q.id, false);
                               }}
-                              className="flex min-w-[180px] items-center gap-4">
+                              className="flex min-w-[180px] items-center gap-4"
+                            >
                               <div className="flex items-center gap-2 whitespace-nowrap">
                                 <RadioGroupItem value="correct" id={`correct-${q.id}`} />
                                 <Label className="whitespace-nowrap" htmlFor={`correct-${q.id}`}>
@@ -202,15 +206,17 @@ export const QuestionManagementPage = () => {
                                   value={draft?.correctAnswer ?? ''}
                                   onChange={(event) => setCorrectAnswer(q.id, event.target.value)}
                                   placeholder="正解値を入力"
-                                  className="h-9 w-[180px]"
+                                  className={
+                                    validationMessage
+                                      ? 'h-9 w-[180px] border-destructive focus-visible:ring-destructive'
+                                      : 'h-9 w-[180px]'
+                                  }
+                                  aria-invalid={!!validationMessage}
                                   disabled={isBusy || !!material?.isCompleted}
                                 />
                               ) : (
                                 <div className="h-9 w-[180px]" aria-hidden="true" />
                               )}
-                              {validationMessage ? (
-                                <p className="text-xs text-destructive">{validationMessage}</p>
-                              ) : null}
                             </div>
                           </div>
                         );

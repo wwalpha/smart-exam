@@ -161,6 +161,13 @@ export const createApp = (): express.Express => {
     validateBody(controllers.materialQuestions.CreateQuestionBodySchema),
     handleRequest(controllers.materialQuestions.createQuestion),
   );
+  // 指定した教材に複数の問題をまとめて追加するAPI
+  app.post(
+    '/api/materials/:materialId/questions/bulk',
+    validateParams(MaterialIdParamsSchema),
+    validateBody(controllers.materialQuestions.CreateQuestionsBulkBodySchema),
+    handleRequest(controllers.materialQuestions.createQuestionsBulk),
+  );
   // 指定した問題を更新するAPI
   app.patch(
     '/api/materials/:materialId/questions/:questionId',

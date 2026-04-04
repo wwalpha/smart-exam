@@ -15,6 +15,8 @@ import type {
   UploadMaterialFileResponse,
   Question,
   QuestionListResponse,
+  CreateQuestionsBulkRequest,
+  CreateQuestionsBulkResponse,
   CreateQuestionRequest,
   UpdateQuestionRequest,
   SetMaterialChoicesRequest,
@@ -149,6 +151,19 @@ export const createQuestion = async (materialId: string, request: CreateQuestion
     path: `/api/materials/${materialId}/questions`,
     body: request,
   });
+};
+
+export const createQuestionsBulk = async (
+  materialId: string,
+  request: CreateQuestionsBulkRequest,
+): Promise<Question[]> => {
+  const response = await apiRequest<CreateQuestionsBulkResponse, CreateQuestionsBulkRequest>({
+    method: 'POST',
+    path: `/api/materials/${materialId}/questions/bulk`,
+    body: request,
+  });
+
+  return response.datas;
 };
 
 export const updateQuestion = async (

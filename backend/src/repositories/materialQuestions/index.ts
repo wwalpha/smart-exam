@@ -1,3 +1,4 @@
+import { bulkCreate } from './bulkCreate';
 import { create } from './create';
 import { remove } from './delete';
 import { bulkUpdateChoices } from './bulkUpdateChoices';
@@ -6,9 +7,10 @@ import { listByMaterialId } from './listByMaterialId';
 import { scanAll } from './scanAll';
 import { update } from './update';
 
-export { create, get, remove, scanAll, listByMaterialId, update, bulkUpdateChoices };
+export { bulkCreate, create, get, remove, scanAll, listByMaterialId, update, bulkUpdateChoices };
 
 export const MaterialQuestionsRepository = {
+  bulkCreate,
   create,
   get,
   delete: remove,

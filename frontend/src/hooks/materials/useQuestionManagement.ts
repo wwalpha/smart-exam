@@ -10,7 +10,9 @@ type DraftChoice = {
   correctAnswer: string;
 };
 
-const buildDraftFromQuestions = (questions: Array<{ id: string; choice?: 'CORRECT' | 'INCORRECT'; correctAnswer?: string }>) => {
+const buildDraftFromQuestions = (
+  questions: Array<{ id: string; choice?: 'CORRECT' | 'INCORRECT'; correctAnswer?: string }>,
+) => {
   const draft: Record<string, DraftChoice> = {};
   for (const question of questions) {
     draft[question.id] = {

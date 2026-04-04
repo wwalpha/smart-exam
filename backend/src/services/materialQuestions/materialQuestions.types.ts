@@ -1,4 +1,5 @@
 import type {
+  CreateQuestionsBulkRequest,
   CreateQuestionRequest,
   Question,
   QuestionListResponse,
@@ -9,6 +10,11 @@ export type MaterialQuestionsService = {
   listQuestions: (materialId: string) => Promise<QuestionListResponse['datas']>;
   // 指定教材に新しい設問を作成する。
   createQuestion: (data: CreateQuestionRequest & { materialId: string }) => Promise<Question>;
+  // 指定教材に新しい設問を一括作成する。
+  createQuestionsBulk: (params: {
+    materialId: string;
+    items: CreateQuestionsBulkRequest['items'];
+  }) => Promise<QuestionListResponse['datas']>;
   // 指定設問の内容を部分更新する。
   updateQuestion: (
     materialId: string,

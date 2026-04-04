@@ -30,6 +30,64 @@ const extractFilename = (baseName: string, mappedName: string | undefined): stri
   return typeof mappedName === 'string' && mappedName.length > 0 ? mappedName : baseName;
 };
 
+type ListedObject = {
+  key?: string;
+  lastModified?: Date;
+};
+
+type ObjectWithType = {
+  key: string;
+  fileType: MaterialFile['fileType'];
+  baseName: string;
+  lastModified?: Date;
+};
+
+const parseObjectWithType = (object: ListedObject): ObjectWithType | null => {
+  const key = object.key;
+  if (!key || key.endsWith('/')) return null;
+
+  const parts = key.split('/');
+  if (parts.length < 4) return null;
+
+  const fileType = parts[2] as MaterialFile['fileType'];
+  if (!MATERIAL_FILE_TYPES.includes(fileType)) return null;
+
+  return {
+    key,
+    fileType,
+    baseName: parts.slice(3).join('/'),
+    lastModified: object.lastModified,
+  };
+};
+
+const sortByLastModifiedDesc = (left: ObjectWithType, right: ObjectWithType): number => {
+  const leftTime = left.lastModified?.getTime() ?? 0;
+  const rightTime = right.lastModified?.getTime() ?? 0;
+  return rightTime - leftTime;
+};
+
+const toMaterialFile = (params: {
+  materialId: string;
+  object: ObjectWithType;
+  mappedPath?: string;
+  mappedName?: string;
+  now: string;
+}): MaterialFile => {
+  const { materialId, object, mappedPath, mappedName, now } = params;
+  const id = extractFileId(object.baseName);
+  const filename = mappedPath === object.key ? extractFilename(object.baseName, mappedName) : object.baseName;
+
+  return {
+    id,
+    materialId,
+    filename,
+    s3Key: object.key,
+    contentType: filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream',
+    fileType: object.fileType,
+    createdAt: object.lastModified ? DateUtils.format(object.lastModified) : now,
+  };
+};
+
 export const createListMaterialFiles = async (
   repositories: Repositories,
   materialId: string,
@@ -40,6 +98,7 @@ export const createListMaterialFiles = async (
   const prefix = `materials/${materialId}/`;
   const objects = await repositories.s3.listObjectsByPrefix({ bucket, prefix });
   const material = await repositories.materials.get(materialId);
+  const typedObjects = objects.map(parseObjectWithType).filter((object): object is ObjectWithType => object !== null);
 
   const filePathByType: Partial<Record<MaterialFile['fileType'], string>> = {
     QUESTION: material?.questionPdfPath,
@@ -53,44 +112,26 @@ export const createListMaterialFiles = async (
     GRADED_ANSWER: material?.answerSheetFilename,
   };
 
-  const currentPathSet = new Set<string>(
-    MATERIAL_FILE_TYPES.map((type) => filePathByType[type]).filter((path): path is string => !!path),
-  );
-
   const now = DateUtils.now();
-  const allowedTypes = new Set<MaterialFile['fileType']>(MATERIAL_FILE_TYPES);
 
-  return objects
-    .map((obj) => {
-      const key = obj.key;
-      if (!key || key.endsWith('/')) return null;
-      if (!currentPathSet.has(key)) return null;
+  return MATERIAL_FILE_TYPES.map((fileType) => {
+    const mappedPath = filePathByType[fileType];
+    const mappedName = fileNameByType[fileType];
+    const candidates = typedObjects.filter((object) => object.fileType === fileType).sort(sortByLastModifiedDesc);
+    const object = candidates.find((candidate) => candidate.key === mappedPath) ?? candidates[0];
 
-      const parts = key.split('/');
-      if (parts.length < 4) return null;
-      const fileType = parts[2] as MaterialFile['fileType'];
-      if (!allowedTypes.has(fileType)) return null;
+    if (!object) {
+      return null;
+    }
 
-      const baseName = parts.slice(3).join('/');
-      const mappedPath = filePathByType[fileType];
-      const mappedName = fileNameByType[fileType];
-
-      const id = extractFileId(baseName);
-      const filename = mappedPath === key ? extractFilename(baseName, mappedName) : baseName;
-
-      const contentType = filename.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';
-      const createdAt = obj.lastModified ? DateUtils.format(obj.lastModified) : now;
-
-      const item: MaterialFile = {
-        id,
-        materialId,
-        filename,
-        s3Key: key,
-        contentType,
-        fileType,
-        createdAt,
-      };
-      return item;
-    })
-    .filter((item): item is MaterialFile => item !== null);
+    // 旧データでは material テーブル側の path が未設定・不整合でも S3 に実体が残っている。
+    // 詳細画面から PDF を開けるよう、現在パスが見つからない場合は種別ごとの最新ファイルへフォールバックする。
+    return toMaterialFile({
+      materialId,
+      object,
+      mappedPath,
+      mappedName,
+      now,
+    });
+  }).filter((item): item is MaterialFile => item !== null);
 };

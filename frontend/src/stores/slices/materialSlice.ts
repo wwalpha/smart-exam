@@ -234,11 +234,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
       await withStatus(
         setStatus,
         async () => {
-          for (const request of requests) {
-            await MATERIAL_API.createQuestion(materialId, request);
-          }
-
-          const response = await MATERIAL_API.listQuestions(materialId);
+          const response = await MATERIAL_API.createQuestionsBulk(materialId, { items: requests });
           updateMaterial({ questions: response });
         },
         '問題の作成に失敗しました。',

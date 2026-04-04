@@ -51,10 +51,22 @@ export const createGetExam = async (repositories: Repositories, examId: string):
 
   // MATERIAL は設問 -> 教材の順に参照して表示情報を補完する。
   const questionRows = await Promise.all(targetIds.map((qid) => repositories.materialQuestions.get(qid)));
+  const candidateRows = await Promise.all(
+    targetIds.map((targetId) => repositories.examCandidates.getLatestCandidateByTargetId({ subject: test.subject, targetId })),
+  );
   const qById = new Map(
     questionRows.filter((q): q is NonNullable<typeof q> => q !== null).map((q) => [q.questionId, q] as const),
   );
-  const materialIds = Array.from(new Set(Array.from(qById.values()).map((q) => q.materialId)));
+  const candidateByTargetId = new Map(
+    candidateRows.filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null).map((candidate) => [candidate.questionId, candidate] as const),
+  );
+  const materialIds = Array.from(
+    new Set(
+      targetIds
+        .map((targetId) => qById.get(targetId)?.materialId ?? candidateByTargetId.get(targetId)?.materialId)
+        .filter((materialId): materialId is string => typeof materialId === 'string' && materialId.length > 0),
+    ),
+  );
   const materialRows = await Promise.all(materialIds.map((mid) => repositories.materials.get(mid)));
   const mById = new Map(
     materialRows.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m.materialId, m] as const),
@@ -63,7 +75,8 @@ export const createGetExam = async (repositories: Repositories, examId: string):
     ...toApiExam(test),
     items: targetIds.map((targetId) => {
       const q = qById.get(targetId);
-      const m = q ? mById.get(q.materialId) : undefined;
+      const materialId = q?.materialId ?? candidateByTargetId.get(targetId)?.materialId;
+      const m = materialId ? mById.get(materialId) : undefined;
       const isCorrect = detailResultByTargetId.get(targetId) ?? resultByTargetId.get(targetId);
       return {
         id: targetId,
@@ -73,7 +86,7 @@ export const createGetExam = async (repositories: Repositories, examId: string):
         targetId,
         displayLabel: q?.canonicalKey,
         canonicalKey: q?.canonicalKey,
-        materialId: q?.materialId,
+        materialId,
         grade: m?.grade,
         provider: m?.provider,
         materialName: m?.title,

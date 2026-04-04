@@ -3,6 +3,8 @@ import { materialQuestionsController } from '@/controllers/materialQuestions';
 import type { Services } from '@/services';
 import { Request, Response } from 'express';
 import type {
+  CreateQuestionsBulkParams,
+  CreateQuestionsBulkRequest,
   CreateQuestionParams,
   CreateQuestionRequest,
   DeleteQuestionParams,
@@ -64,6 +66,46 @@ describe('question handler', () => {
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(mockItem);
+  });
+
+  it('createQuestionsBulk creates items', async () => {
+    const mockItems = [
+      { id: '1', canonicalKey: '1-1' },
+      { id: '2', canonicalKey: '1-2' },
+    ];
+    const services = {
+      materialQuestions: {
+        createQuestionsBulk: vi.fn().mockResolvedValue(mockItems as unknown),
+      },
+    } as unknown as Services;
+
+    const controller = materialQuestionsController(services);
+
+    const req = {
+      params: { materialId: 'mat1' },
+      body: {
+        items: [
+          { canonicalKey: '1-1', subject: '4' },
+          { canonicalKey: '1-2', subject: '4' },
+        ],
+      },
+    } as unknown as Request<CreateQuestionsBulkParams, unknown, CreateQuestionsBulkRequest>;
+    const res = {
+      json: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+    } as unknown as Response;
+
+    await controller.createQuestionsBulk(req, res, vi.fn());
+
+    expect(services.materialQuestions.createQuestionsBulk).toHaveBeenCalledWith({
+      materialId: 'mat1',
+      items: [
+        { canonicalKey: '1-1', subject: '4' },
+        { canonicalKey: '1-2', subject: '4' },
+      ],
+    });
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ datas: mockItems });
   });
 
   it('updateQuestion updates item', async () => {

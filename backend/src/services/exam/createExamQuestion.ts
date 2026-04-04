@@ -1,5 +1,6 @@
 import type { CreateExamRequest, Exam, SubjectId } from '@smart-exam/api-types';
 
+import { ApiError } from '@/lib/apiError';
 import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
 import type { ExamCandidateTable, ExamTable } from '@/types/db';
@@ -43,7 +44,9 @@ const compareQuestionCandidates = (
   right: ExamCandidate,
   materialOrderMap: Map<string, number>,
 ): number => {
-  const leftMaterialOrder = left.materialId ? (materialOrderMap.get(left.materialId) ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER;
+  const leftMaterialOrder = left.materialId
+    ? (materialOrderMap.get(left.materialId) ?? Number.MAX_SAFE_INTEGER)
+    : Number.MAX_SAFE_INTEGER;
   const rightMaterialOrder = right.materialId
     ? (materialOrderMap.get(right.materialId) ?? Number.MAX_SAFE_INTEGER)
     : Number.MAX_SAFE_INTEGER;
@@ -104,6 +107,10 @@ export const buildQuestionCandidates = (
     }));
 };
 export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRequest): Promise<Exam> => {
+  if (!req.materialIds || req.materialIds.length === 0) {
+    throw new ApiError('materialIds are required', 400, ['material_ids_required']);
+  }
+
   const examId = createUuid();
   const createdDate = DateUtils.todayYmd();
   const materialOrderMap = toMaterialOrderMap(req.materialIds);

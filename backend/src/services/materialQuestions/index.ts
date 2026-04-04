@@ -2,6 +2,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 
 import { createApplyChoices } from './applyChoices';
 import { createCreateQuestion } from './createQuestion';
+import { createCreateQuestionsBulk } from './createQuestionsBulk';
 import { createDeleteQuestion } from './deleteQuestion';
 import { createListQuestions } from './listQuestions';
 import { createSetMaterialChoices } from './setMaterialChoices';
@@ -14,6 +15,7 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
   // 各ユースケースをリポジトリ依存込みで組み立てる。
   const listQuestions = createListQuestions(repositories);
   const createQuestion = createCreateQuestion(repositories);
+  const createQuestionsBulk = createCreateQuestionsBulk(repositories);
   const updateQuestion = createUpdateQuestion(repositories);
   const deleteQuestion = createDeleteQuestion(repositories);
   const setMaterialChoices = createSetMaterialChoices(repositories);
@@ -23,6 +25,7 @@ export const createMaterialQuestionsService = (repositories: Repositories): Mate
   return {
     listQuestions,
     createQuestion,
+    createQuestionsBulk,
     updateQuestion,
     deleteQuestion,
     setMaterialChoices,

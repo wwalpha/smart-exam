@@ -9,9 +9,20 @@ import { formatYmdSlash } from '@/utils/date';
 import { toast } from 'sonner';
 
 export const ExamKanjiDetailPage = () => {
-  const { review, isLoading, error, basePath, remove, completeExam, ConfirmDialog } = useReviewKanjiDetail();
+  const {
+    review,
+    isLoading,
+    error,
+    basePath,
+    remove,
+    completeExam,
+    ConfirmDialog,
+    isCorrectionView,
+    toggleCorrectionView,
+  } = useReviewKanjiDetail();
 
   const infoBadgeClass = 'px-4 py-2 text-sm';
+  const actionButtonClassName = 'w-[100px] min-w-[100px]';
 
   const isAllAnswered =
     review &&
@@ -33,25 +44,31 @@ export const ExamKanjiDetailPage = () => {
       <ConfirmDialog />
       <div className="flex items-center justify-end">
         <div className="flex justify-end gap-2">
-          <Button asChild variant="outline" className="w-[100px]">
+          <Button asChild variant="outline" className={actionButtonClassName}>
             <Link to={basePath}>戻る</Link>
           </Button>
-          <Button asChild className="w-[100px]">
+          <Button type="button" className={actionButtonClassName} onClick={toggleCorrectionView}>
+            訂正
+          </Button>
+          <Button asChild className={actionButtonClassName}>
             <Link to={`${basePath}/${review.examId}/grading`}>結果確認</Link>
           </Button>
-          <Button asChild className="w-[100px]">
+          <Button asChild className={actionButtonClassName}>
             <Link to={`${basePath}/${review.examId}/pdf`}>印刷</Link>
           </Button>
           {review.status !== 'COMPLETED' ? (
-            <Button type="button" variant="default" className="w-[100px]" onClick={complete} disabled={!isAllAnswered}>
+            <Button
+              type="button"
+              variant="default"
+              className={actionButtonClassName}
+              onClick={complete}
+              disabled={!isAllAnswered}
+            >
               完了
             </Button>
           ) : null}
           {review.status !== 'COMPLETED' ? (
-            <Button
-              variant="destructive"
-              className="w-[100px]"
-              onClick={remove}>
+            <Button variant="destructive" className={actionButtonClassName} onClick={remove}>
               削除
             </Button>
           ) : null}
@@ -59,41 +76,58 @@ export const ExamKanjiDetailPage = () => {
       </div>
 
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>基本情報</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant={getSubjectBadgeVariant(review.subject)} className={infoBadgeClass}>
-                {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
-              </Badge>
-              <Badge variant="secondary" className={infoBadgeClass}>
-                {formatYmdSlash(review.createdDate)}
-              </Badge>
-              <Badge variant="secondary" className={infoBadgeClass}>
-                {review.count}問
-              </Badge>
-              <Badge variant="secondary" className={infoBadgeClass}>
-                {review.status}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="max-h-[600px] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-2 pl-6">
-                {review.items.map((item) => (
-                  <div key={item.id} className="rounded border px-3 py-2 text-left text-sm font-medium">
-                    {item.questionText}
+        {isCorrectionView ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {review.items.map((item, index) => (
+                  <div key={item.id} className="rounded border px-6 py-5">
+                    <div className="text-xl font-semibold text-muted-foreground">{index + 1}</div>
+                    <div className="text-[72px] font-bold leading-tight">{item.answerText ?? '-'}</div>
                   </div>
                 ))}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>基本情報</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant={getSubjectBadgeVariant(review.subject)} className={infoBadgeClass}>
+                    {SUBJECT_LABEL[review.subject as keyof typeof SUBJECT_LABEL] ?? ''}
+                  </Badge>
+                  <Badge variant="secondary" className={infoBadgeClass}>
+                    {formatYmdSlash(review.createdDate)}
+                  </Badge>
+                  <Badge variant="secondary" className={infoBadgeClass}>
+                    {review.count}問
+                  </Badge>
+                  <Badge variant="secondary" className={infoBadgeClass}>
+                    {review.status}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="max-h-[600px] overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-2 pl-6">
+                    {review.items.map((item) => (
+                      <div key={item.id} className="rounded border px-3 py-2 text-left text-sm font-medium">
+                        {item.questionText}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );

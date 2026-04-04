@@ -88,10 +88,11 @@ export const ExamQuestionDetailPage = () => {
             <div className="max-h-[400px] overflow-y-auto">
               <div className="space-y-3">
                 {blocks.map((b) => {
-                  const materialId = b.materialId;
-                  const availability = materialId ? pdfAvailability[materialId] : undefined;
-                  const questionPdfOk = !!materialId && !!availability?.QUESTION;
-                  const answerPdfOk = !!materialId && !!availability?.ANSWER;
+                  const availability = pdfAvailability[b.key];
+                  const questionMaterialId = availability?.questionMaterialId;
+                  const answerMaterialId = availability?.answerMaterialId;
+                  const questionPdfOk = !!questionMaterialId && !!availability?.QUESTION;
+                  const answerPdfOk = !!answerMaterialId && !!availability?.ANSWER;
 
                   return (
                     <div key={b.key} className="rounded border">
@@ -128,9 +129,10 @@ export const ExamQuestionDetailPage = () => {
                             size="sm"
                             disabled={!questionPdfOk}
                             onClick={() => {
-                              if (!materialId) return;
-                              previewMaterialPdf(materialId, 'QUESTION');
-                            }}>
+                              if (!questionMaterialId) return;
+                              previewMaterialPdf(questionMaterialId, 'QUESTION');
+                            }}
+                          >
                             問題PDF
                           </Button>
                           <Button
@@ -139,9 +141,10 @@ export const ExamQuestionDetailPage = () => {
                             size="sm"
                             disabled={!answerPdfOk}
                             onClick={() => {
-                              if (!materialId) return;
-                              previewMaterialPdf(materialId, 'ANSWER');
-                            }}>
+                              if (!answerMaterialId) return;
+                              previewMaterialPdf(answerMaterialId, 'ANSWER');
+                            }}
+                          >
                             解答PDF
                           </Button>
                         </div>

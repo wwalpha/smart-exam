@@ -11,12 +11,22 @@ const queryStringOptional = () => z.preprocess((v) => (Array.isArray(v) ? v[0] :
 
 export const ListExamsQuerySchema = z.object({});
 
-export const CreateExamBodySchema = z.object({
-  subject: SubjectIdSchema,
-  count: PositiveIntFromUnknownSchema,
-  mode: ExamModeSchema,
-  materialIds: z.array(z.string().min(1)).optional(),
-});
+export const CreateExamBodySchema = z
+  .object({
+    subject: SubjectIdSchema,
+    count: PositiveIntFromUnknownSchema,
+    mode: ExamModeSchema,
+    materialIds: z.array(z.string().min(1)).optional(),
+  })
+  .superRefine((value, context) => {
+    if (value.mode === EXAM_MODE.MATERIAL && (!value.materialIds || value.materialIds.length === 0)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['materialIds'],
+        message: '教材を1件以上選択してください',
+      });
+    }
+  });
 
 export const DeleteExamParamsSchema = z.object({
   examId: z.string().min(1),

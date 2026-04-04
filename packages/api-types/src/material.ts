@@ -78,6 +78,12 @@ export type CreateQuestionParams = {
   materialId: string;
 };
 
+/** `POST /materials/:materialId/questions/bulk` */
+export type CreateQuestionsBulkParams = {
+  /** 教材ID */
+  materialId: string;
+};
+
 /** `PATCH /questions/:questionId` */
 export type UpdateQuestionParams = {
   /** 教材ID */
@@ -283,6 +289,15 @@ export type CreateQuestionRequest = {
 
 /** 問題作成レスポンス */
 export type CreateQuestionResponse = Question;
+
+/** 問題一括作成リクエスト */
+export type CreateQuestionsBulkRequest = {
+  /** 一括作成対象 */
+  items: CreateQuestionRequest[];
+};
+
+/** 問題一括作成レスポンス */
+export type CreateQuestionsBulkResponse = QuestionListResponse;
 
 /** 問題更新リクエスト */
 export type UpdateQuestionRequest = Partial<CreateQuestionRequest>;

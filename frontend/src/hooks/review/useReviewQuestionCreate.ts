@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
@@ -30,6 +30,17 @@ export const useReviewQuestionCreate = () => {
   });
 
   const subject = form.watch('subject');
+  const selectedMaterialIds = form.watch('materialIds') ?? [];
+
+  const selectedCandidateTotal = useMemo(() => {
+    if (selectedMaterialIds.length === 0) return 0;
+
+    const selectedIdSet = new Set(selectedMaterialIds);
+    return openCandidateList.reduce((total, material) => {
+      if (!selectedIdSet.has(material.id)) return total;
+      return total + material.openCandidateCount;
+    }, 0);
+  }, [openCandidateList, selectedMaterialIds]);
 
   useEffect(() => {
     if (!subject) {
@@ -45,6 +56,10 @@ export const useReviewQuestionCreate = () => {
   const submit = async (data: CreateFormValues) => {
     if (!data.subject) {
       form.setError('subject', { type: 'required', message: '必須です' });
+      return;
+    }
+    if (!data.materialIds || data.materialIds.length === 0) {
+      form.setError('materialIds', { type: 'required', message: '出題対象教材を選択してください' });
       return;
     }
 
@@ -63,6 +78,8 @@ export const useReviewQuestionCreate = () => {
   return {
     form,
     subject,
+    selectedMaterialIds,
+    selectedCandidateTotal,
     openCandidateList,
     openCandidateTotal,
     submit: form.handleSubmit(submit),

@@ -97,9 +97,9 @@ export const App = () => {
 
       { pattern: '/exam/kanji', title: '漢字テスト一覧' },
       { pattern: '/exam/kanji/new', title: '漢字テスト作成' },
-      { pattern: '/exam/kanji/:id/grading', title: '復習テスト採点' },
-      { pattern: '/exam/kanji/:id/pdf', title: '復習テスト印刷' },
-      { pattern: '/exam/kanji/:id', title: '復習テスト詳細' },
+      { pattern: '/exam/kanji/:id/grading', title: '漢字テスト採点' },
+      { pattern: '/exam/kanji/:id/pdf', title: '漢字テスト印刷' },
+      { pattern: '/exam/kanji/:id', title: '漢字テスト詳細' },
 
       { pattern: '/kanji', title: '漢字管理' },
       { pattern: '/kanji/new', title: '漢字登録' },

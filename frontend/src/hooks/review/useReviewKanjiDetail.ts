@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
@@ -8,6 +8,7 @@ const BASE_PATH = '/exam/kanji';
 export const useReviewKanjiDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isCorrectionView, setIsCorrectionView] = useState(false);
 
   const { detail, status } = useWordTestStore((s) => s.review);
   const fetchExam = useWordTestStore((s) => s.fetchExam);
@@ -18,6 +19,10 @@ export const useReviewKanjiDetail = () => {
   useEffect(() => {
     if (id) fetchExam(id);
   }, [id, fetchExam]);
+
+  useEffect(() => {
+    setIsCorrectionView(false);
+  }, [id]);
 
   const remove = async () => {
     if (detail && (await confirm('本当に削除しますか？', { variant: 'destructive' }))) {
@@ -32,6 +37,8 @@ export const useReviewKanjiDetail = () => {
     isLoading: status.isLoading,
     error: status.error,
     basePath: BASE_PATH,
+    isCorrectionView,
+    toggleCorrectionView: () => setIsCorrectionView((current) => !current),
     remove,
     completeExam,
     ConfirmDialog,
