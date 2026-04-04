@@ -1,0 +1,8 @@
+build/
+SourcePackages/
+Carthage/
+
+smart_exam/LocalOIDCConfig.plist
+
+smart_exam.xcodeproj/project.xcworkspace/xcuserdata/
+smart_exam.xcodeproj/xcuserdata/
