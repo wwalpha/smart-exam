@@ -5,11 +5,18 @@
     "outDir": "dist",
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["src"],
-  "exclude": ["dist", "node_modules", "tests"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "tests"
+  ]
 }
