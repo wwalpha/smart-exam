@@ -6,29 +6,18 @@ struct LoginScreen: View {
         case password
     }
 
-    let isSigningIn: Bool
-    let statusMessage: String?
-    let errorMessage: String?
-    let onSignIn: (String, String) -> Void
+    @StateObject private var viewModel: LoginViewModel
 
     @State private var email = ""
     @State private var password = ""
     @FocusState private var focusedField: FocusedField?
 
-    init(
-        isSigningIn: Bool = false,
-        statusMessage: String? = nil,
-        errorMessage: String? = nil,
-        onSignIn: @escaping (String, String) -> Void
-    ) {
-        self.isSigningIn = isSigningIn
-        self.statusMessage = statusMessage
-        self.errorMessage = errorMessage
-        self.onSignIn = onSignIn
+    init(viewModel: LoginViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
-        PrototypeBackground(style: .login) {
+        AppBackground(style: .login) {
             GeometryReader { geometry in
                 VStack {
                     Spacer(minLength: 0)
@@ -99,10 +88,10 @@ struct LoginScreen: View {
     private var signInButton: some View {
         Button {
             focusedField = nil
-            onSignIn(email, password)
+            viewModel.signIn(username: email, password: password)
         } label: {
             HStack {
-                Text(isSigningIn ? "ログイン中..." : "ログイン！")
+                Text(viewModel.state.isSigningIn ? "ログイン中..." : "ログイン！")
                     .font(AppFont.fredoka(20, weight: .bold))
 
                 Spacer()
@@ -123,21 +112,21 @@ struct LoginScreen: View {
             )
             .appShadow(.xl)
         }
-        .disabled(isSigningIn)
-        .opacity(isSigningIn ? 0.72 : 1)
+        .disabled(viewModel.state.isSigningIn)
+        .opacity(viewModel.state.isSigningIn ? 0.72 : 1)
         .buttonStyle(PressScaleButtonStyle(pressedScale: 0.98))
         .hoverEffect(.lift)
     }
 
     @ViewBuilder
     private var authStatus: some View {
-        if let errorMessage, !errorMessage.isEmpty {
+        if let errorMessage = viewModel.state.errorMessage, !errorMessage.isEmpty {
             Text(errorMessage)
                 .font(AppFont.nunito(14, weight: .bold))
                 .foregroundStyle(AppColor.pink600)
                 .fixedSize(horizontal: false, vertical: true)
-        } else if isSigningIn, let statusMessage, !statusMessage.isEmpty {
-            Text(statusMessage)
+        } else if viewModel.state.isSigningIn, !viewModel.state.statusMessage.isEmpty {
+            Text(viewModel.state.statusMessage)
                 .font(AppFont.nunito(14, weight: .bold))
                 .foregroundStyle(AppColor.purple600)
         }
@@ -197,5 +186,11 @@ struct LoginScreen: View {
 }
 
 #Preview {
-    LoginScreen { _, _ in }
+    LoginScreen(
+        viewModel: LoginViewModel(
+            signInUseCase: SignInUseCase(
+                repository: PreviewAuthSessionRepository()
+            )
+        )
+    )
 }

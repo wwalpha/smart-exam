@@ -372,12 +372,10 @@
 /* Begin XCLocalSwiftPackageReference section */
 		9AD595B22F80E100005A6E9B /* XCLocalSwiftPackageReference "SourcePackages/checkouts/Alamofire" */ = {
 			isa = XCLocalSwiftPackageReference;
-			path = "SourcePackages/checkouts/Alamofire";
-			relativePath = "SourcePackages/checkouts/Alamofire";
+			relativePath = SourcePackages/checkouts/Alamofire;
 		};
 		9AD595B32F80E100005A6E9B /* XCLocalSwiftPackageReference "SourcePackages/checkouts/AppAuth-iOS" */ = {
 			isa = XCLocalSwiftPackageReference;
-			path = "SourcePackages/checkouts/AppAuth-iOS";
 			relativePath = "SourcePackages/checkouts/AppAuth-iOS";
 		};
 /* End XCLocalSwiftPackageReference section */

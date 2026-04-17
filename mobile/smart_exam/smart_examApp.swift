@@ -10,19 +10,18 @@ import UIKit
 
 @main
 struct smart_examApp: App {
-    @StateObject private var authService = AuthService()
+    @StateObject private var container = AppContainer()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(authService)
+            RootView(viewModel: container.rootViewModel, container: container)
                 .background(LandscapeLaunchOrientationRequester())
                 .onOpenURL { url in
-                    _ = authService.resumeExternalUserAgentFlow(with: url)
+                    _ = container.resumeExternalUserAgentFlow(with: url)
                 }
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
                     guard let url = userActivity.webpageURL else { return }
-                    _ = authService.resumeExternalUserAgentFlow(with: url)
+                    _ = container.resumeExternalUserAgentFlow(with: url)
                 }
         }
     }

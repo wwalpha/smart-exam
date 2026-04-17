@@ -1,47 +1,40 @@
 import SwiftUI
 
 struct RootView: View {
-    @EnvironmentObject private var authService: AuthService
+    @ObservedObject var viewModel: RootViewModel
+    let container: AppContainer
     @State private var path = NavigationPath()
 
     var body: some View {
         NavigationStack(path: $path) {
-            LoginScreen(
-                isSigningIn: authService.isSigningIn,
-                statusMessage: authService.statusMessage,
-                errorMessage: authService.errorMessage
-            ) { username, password in
-                Task {
-                    await authService.signIn(username: username, password: password)
-                }
-            }
-            .navigationDestination(for: AppRoute.self) { route in
-                switch route {
-                case .projectList:
-                    ProjectListScreen { exam in
-                        path.append(AppRoute.projectDetail(id: exam.examId))
-                    }
-                case .projectDetail(let id):
-                    ProjectDetailScreen(
-                        projectId: id,
-                        onBack: { popToProjectList() },
-                        onOpenPDF: { materialId in
-                            path.append(AppRoute.pdfViewer(projectId: id, materialId: materialId))
+            LoginScreen(viewModel: container.makeLoginViewModel())
+                .navigationDestination(for: AppRoute.self) { route in
+                    switch route {
+                    case .examList:
+                        ExamListView(viewModel: container.makeExamListViewModel()) { exam in
+                            path.append(AppRoute.examDetail(id: exam.examId))
                         }
-                    )
-                case .pdfViewer(let projectId, let materialId):
-                    PDFViewerScreen(
-                        projectId: projectId,
-                        materialId: materialId,
-                        onBack: { popLast() }
-                    )
+                    case .examDetail(let id):
+                        ExamDetailView(
+                            viewModel: container.makeExamDetailViewModel(examId: id),
+                            onBack: { popToExamList() },
+                            onOpenPDF: { descriptor in
+                                path.append(AppRoute.pdfViewer(descriptor))
+                            }
+                        )
+                    case .pdfViewer(let descriptor):
+                        PDFViewerView(
+                            viewModel: container.makePDFViewerViewModel(descriptor: descriptor),
+                            onBack: { popLast() }
+                        )
+                    }
                 }
-            }
         }
         .onAppear {
-            routeForAuthenticationState(authService.isAuthenticated)
+            viewModel.start()
+            routeForAuthenticationState(viewModel.isAuthenticated)
         }
-        .onChange(of: authService.isAuthenticated) { _, isAuthenticated in
+        .onChange(of: viewModel.isAuthenticated) { _, isAuthenticated in
             routeForAuthenticationState(isAuthenticated)
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -51,7 +44,7 @@ struct RootView: View {
     private func routeForAuthenticationState(_ isAuthenticated: Bool) {
         if isAuthenticated {
             guard path.isEmpty else { return }
-            path.append(AppRoute.projectList)
+            path.append(AppRoute.examList)
         } else {
             path = NavigationPath()
         }
@@ -62,7 +55,7 @@ struct RootView: View {
         path.removeLast()
     }
 
-    private func popToProjectList() {
+    private func popToExamList() {
         guard path.count > 1 else {
             popLast()
             return

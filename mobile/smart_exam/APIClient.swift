@@ -2,9 +2,7 @@ import Alamofire
 import Foundation
 
 final class APIClient {
-    static let shared = APIClient()
-
-    private init() {}
+    init() {}
 
     func postJSON<Request: Encodable, Response: Decodable>(
         path: String,
