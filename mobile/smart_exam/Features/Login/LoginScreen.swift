@@ -6,11 +6,26 @@ struct LoginScreen: View {
         case password
     }
 
+    let isSigningIn: Bool
+    let statusMessage: String?
+    let errorMessage: String?
     let onSignIn: () -> Void
 
     @State private var email = ""
     @State private var password = ""
     @FocusState private var focusedField: FocusedField?
+
+    init(
+        isSigningIn: Bool = false,
+        statusMessage: String? = nil,
+        errorMessage: String? = nil,
+        onSignIn: @escaping () -> Void
+    ) {
+        self.isSigningIn = isSigningIn
+        self.statusMessage = statusMessage
+        self.errorMessage = errorMessage
+        self.onSignIn = onSignIn
+    }
 
     var body: some View {
         PrototypeBackground(style: .login) {
@@ -53,6 +68,8 @@ struct LoginScreen: View {
                             }
 
                             signInButton
+
+                            authStatus
                         }
                     }
                     .frame(maxWidth: 500)
@@ -82,7 +99,7 @@ struct LoginScreen: View {
     private var signInButton: some View {
         Button(action: onSignIn) {
             HStack {
-                Text("ログイン！")
+                Text(isSigningIn ? "ログイン中..." : "ログイン！")
                     .font(AppFont.fredoka(20, weight: .bold))
 
                 Spacer()
@@ -103,8 +120,24 @@ struct LoginScreen: View {
             )
             .appShadow(.xl)
         }
+        .disabled(isSigningIn)
+        .opacity(isSigningIn ? 0.72 : 1)
         .buttonStyle(PressScaleButtonStyle(pressedScale: 0.98))
         .hoverEffect(.lift)
+    }
+
+    @ViewBuilder
+    private var authStatus: some View {
+        if let errorMessage, !errorMessage.isEmpty {
+            Text(errorMessage)
+                .font(AppFont.nunito(14, weight: .bold))
+                .foregroundStyle(AppColor.pink600)
+                .fixedSize(horizontal: false, vertical: true)
+        } else if isSigningIn, let statusMessage, !statusMessage.isEmpty {
+            Text(statusMessage)
+                .font(AppFont.nunito(14, weight: .bold))
+                .foregroundStyle(AppColor.purple600)
+        }
     }
 
     private func loginField<Field: View>(

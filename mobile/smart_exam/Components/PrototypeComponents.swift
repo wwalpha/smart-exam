@@ -140,6 +140,20 @@ struct StatusChip: View {
     }
 }
 
+struct ExamStatusChip: View {
+    let status: ExamStatus
+
+    var body: some View {
+        Text(status.label)
+            .font(AppFont.nunito(14, weight: .bold))
+            .foregroundStyle(status.textColor)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 4)
+            .background(Capsule().fill(status.fillColor))
+            .overlay(Capsule().stroke(status.borderColor, lineWidth: 2))
+    }
+}
+
 struct ProblemChip: View {
     let number: Int
 

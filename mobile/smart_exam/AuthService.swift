@@ -5,11 +5,14 @@ import AppAuth
 
 @MainActor
 final class AuthService: NSObject, ObservableObject {
+    private static let authStateStorageKey = "cognitoAuthState"
+
     @Published var authState: OIDAuthState?
     @Published var userInfo: [String: Any] = [:]
     @Published var backendResponse: [String: Any] = [:]
     @Published var errorMessage: String?
     @Published var statusMessage = "未認証"
+    @Published var isSigningIn = false
 
     private var currentAuthorizationFlow: OIDExternalUserAgentSession?
 
@@ -17,24 +20,33 @@ final class AuthService: NSObject, ObservableObject {
         authState?.isAuthorized == true
     }
 
+    override init() {
+        super.init()
+        loadState()
+    }
+
     func discoverAndSignIn() {
         if let configurationError = OIDCConfig.configurationError {
             errorMessage = configurationError
             statusMessage = "認証設定エラー"
+            isSigningIn = false
             return
         }
 
         guard let presentingViewController = topViewController() else {
             errorMessage = "ログイン画面を表示する ViewController が見つかりません"
+            isSigningIn = false
             return
         }
 
         guard let issuerURL = URL(string: OIDCConfig.issuer) else {
             errorMessage = "Issuer URL が不正です"
+            isSigningIn = false
             return
         }
 
         errorMessage = nil
+        isSigningIn = true
         statusMessage = "Discovery を取得中"
 
         OIDAuthorizationService.discoverConfiguration(forIssuer: issuerURL) { [weak self] configuration, error in
@@ -44,12 +56,14 @@ final class AuthService: NSObject, ObservableObject {
                 guard let configuration else {
                     self.statusMessage = "Discovery 取得失敗"
                     self.errorMessage = "Discovery 取得失敗: \(error?.localizedDescription ?? "unknown")"
+                    self.isSigningIn = false
                     return
                 }
 
                 guard let redirectURL = URL(string: OIDCConfig.redirectURI) else {
                     self.statusMessage = "認証開始失敗"
                     self.errorMessage = "Redirect URI が不正です"
+                    self.isSigningIn = false
                     return
                 }
 
@@ -69,13 +83,14 @@ final class AuthService: NSObject, ObservableObject {
                 ) { authState, authError in
                     Task { @MainActor in
                         if let authState {
-                            self.authState = authState
+                            self.setAuthState(authState)
                             self.statusMessage = "認証済み"
                             self.errorMessage = nil
                         } else {
                             self.statusMessage = "認証失敗"
                             self.errorMessage = "認証失敗: \(authError?.localizedDescription ?? "unknown")"
                         }
+                        self.isSigningIn = false
                     }
                 }
             }
@@ -191,7 +206,7 @@ final class AuthService: NSObject, ObservableObject {
         }
 
         UIApplication.shared.open(logoutURL, options: [:], completionHandler: nil)
-        self.authState = nil
+        self.setAuthState(nil)
         self.userInfo = [:]
         self.backendResponse = [:]
         self.statusMessage = "ログアウト済み"
@@ -207,7 +222,7 @@ final class AuthService: NSObject, ObservableObject {
         return false
     }
 
-    private func validAccessToken() async throws -> String {
+    func validAccessToken() async throws -> String {
         guard let authState else {
             throw AuthServiceError.notAuthenticated
         }
@@ -226,6 +241,44 @@ final class AuthService: NSObject, ObservableObject {
 
                 continuation.resume(returning: accessToken)
             }
+        }
+    }
+
+    private func setAuthState(_ authState: OIDAuthState?) {
+        self.authState = authState
+        self.authState?.stateChangeDelegate = self
+        self.authState?.errorDelegate = self
+        saveState()
+    }
+
+    private func saveState() {
+        guard let authState else {
+            UserDefaults.standard.removeObject(forKey: Self.authStateStorageKey)
+            return
+        }
+
+        let archiver = NSKeyedArchiver(requiringSecureCoding: false)
+        archiver.encode(authState, forKey: NSKeyedArchiveRootObjectKey)
+        archiver.finishEncoding()
+        UserDefaults.standard.set(archiver.encodedData, forKey: Self.authStateStorageKey)
+    }
+
+    private func loadState() {
+        guard let data = UserDefaults.standard.data(forKey: Self.authStateStorageKey) else {
+            return
+        }
+
+        do {
+            let unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
+            unarchiver.requiresSecureCoding = false
+            let restoredState = unarchiver.decodeObject(forKey: NSKeyedArchiveRootObjectKey) as? OIDAuthState
+            unarchiver.finishDecoding()
+            setAuthState(restoredState)
+            statusMessage = restoredState?.isAuthorized == true ? "認証済み" : "未認証"
+        } catch {
+            UserDefaults.standard.removeObject(forKey: Self.authStateStorageKey)
+            statusMessage = "未認証"
+            errorMessage = "保存済み認証情報の復元に失敗しました"
         }
     }
 
@@ -251,6 +304,24 @@ final class AuthService: NSObject, ObservableObject {
         }
 
         return rootController
+    }
+}
+
+extension AuthService: OIDAuthStateChangeDelegate, OIDAuthStateErrorDelegate {
+    nonisolated func didChange(_ state: OIDAuthState) {
+        Task { @MainActor in
+            self.authState = state
+            self.saveState()
+        }
+    }
+
+    nonisolated func authState(_ state: OIDAuthState, didEncounterAuthorizationError error: Error) {
+        Task { @MainActor in
+            self.statusMessage = "認証エラー"
+            self.errorMessage = "認証エラー: \(error.localizedDescription)"
+            self.authState = state
+            self.saveState()
+        }
     }
 }
 

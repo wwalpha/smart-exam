@@ -1,6 +1,188 @@
 import Foundation
 import SwiftUI
 
+enum ExamMode: String, Codable, Hashable {
+    case material = "MATERIAL"
+    case kanji = "KANJI"
+
+    var label: String {
+        switch self {
+        case .material:
+            return "問題"
+        case .kanji:
+            return "漢字"
+        }
+    }
+}
+
+enum SubjectId: String, Codable, Hashable {
+    case japanese = "1"
+    case science = "2"
+    case society = "3"
+    case math = "4"
+
+    var label: String {
+        switch self {
+        case .japanese:
+            return "国語"
+        case .science:
+            return "理科"
+        case .society:
+            return "社会"
+        case .math:
+            return "算数"
+        }
+    }
+}
+
+enum ExamStatus: String, Codable, Hashable {
+    case inProgress = "IN_PROGRESS"
+    case completed = "COMPLETED"
+
+    var label: String {
+        switch self {
+        case .inProgress:
+            return "実施中"
+        case .completed:
+            return "完了"
+        }
+    }
+
+    var fillColor: Color {
+        switch self {
+        case .inProgress:
+            AppColor.yellow100
+        case .completed:
+            AppColor.green100
+        }
+    }
+
+    var textColor: Color {
+        switch self {
+        case .inProgress:
+            AppColor.yellow700
+        case .completed:
+            AppColor.green700
+        }
+    }
+
+    var borderColor: Color {
+        switch self {
+        case .inProgress:
+            AppColor.yellow400
+        case .completed:
+            AppColor.green400
+        }
+    }
+}
+
+struct ReviewExam: Identifiable, Codable, Hashable {
+    struct PDFInfo: Codable, Hashable {
+        let url: String
+        let downloadUrl: String
+    }
+
+    struct Result: Codable, Hashable {
+        let id: String
+        let isCorrect: Bool
+    }
+
+    let examId: String
+    let subject: SubjectId
+    let mode: ExamMode
+    let createdDate: String
+    let submittedDate: String?
+    let status: ExamStatus
+    let pdf: PDFInfo
+    let count: Int
+    let results: [Result]
+
+    var id: String {
+        examId
+    }
+
+    var correctCount: Int {
+        results.filter(\.isCorrect).count
+    }
+}
+
+struct ReviewExamDetail: Identifiable, Codable, Hashable {
+    let examId: String
+    let subject: SubjectId
+    let mode: ExamMode
+    let createdDate: String
+    let submittedDate: String?
+    let status: ExamStatus
+    let pdf: ReviewExam.PDFInfo
+    let count: Int
+    let results: [ReviewExam.Result]
+    let items: [ReviewExamItem]
+
+    var id: String {
+        examId
+    }
+
+    var correctCount: Int {
+        results.filter(\.isCorrect).count
+    }
+}
+
+struct ReviewExamItem: Identifiable, Codable, Hashable {
+    struct UnderlineSpec: Codable, Hashable {
+        let type: String?
+        let start: Int?
+        let length: Int?
+    }
+
+    let id: String
+    let examId: String?
+    let targetType: ExamMode?
+    let targetId: String?
+    let displayLabel: String?
+    let canonicalKey: String?
+    let kanji: String?
+    let materialId: String?
+    let grade: String?
+    let provider: String?
+    let materialName: String?
+    let materialDate: String?
+    let questionText: String?
+    let answerText: String?
+    let correctAnswer: String?
+    let readingHiragana: String?
+    let underlineSpec: UnderlineSpec?
+    let isCorrect: Bool?
+    let itemId: String?
+}
+
+struct ExamListResponse: Decodable {
+    let items: [ReviewExam]
+    let total: Int
+    let cursor: String?
+}
+
+struct SearchExamsRequest: Encodable {
+    let subject: String
+    let mode: ExamMode
+    let status: String?
+    let limit: Int?
+    let cursor: String?
+
+    init(
+        subject: String = "ALL",
+        mode: ExamMode,
+        status: String? = "ALL",
+        limit: Int? = nil,
+        cursor: String? = nil
+    ) {
+        self.subject = subject
+        self.mode = mode
+        self.status = status
+        self.limit = limit
+        self.cursor = cursor
+    }
+}
+
 struct Project: Identifiable, Hashable {
     let id: Int
     let title: String

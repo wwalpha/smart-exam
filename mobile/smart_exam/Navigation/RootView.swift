@@ -1,20 +1,23 @@
 import SwiftUI
 
 struct RootView: View {
+    @EnvironmentObject private var authService: AuthService
     @State private var path = NavigationPath()
-    @StateObject private var authSession = MockAuthSessionProvider()
 
     var body: some View {
         NavigationStack(path: $path) {
-            LoginScreen {
-                authSession.signIn()
-                path.append(AppRoute.projectList)
+            LoginScreen(
+                isSigningIn: authService.isSigningIn,
+                statusMessage: authService.statusMessage,
+                errorMessage: authService.errorMessage
+            ) {
+                authService.discoverAndSignIn()
             }
             .navigationDestination(for: AppRoute.self) { route in
                 switch route {
                 case .projectList:
-                    ProjectListScreen { project in
-                        path.append(AppRoute.projectDetail(id: project.id))
+                    ProjectListScreen { exam in
+                        path.append(AppRoute.projectDetail(id: exam.examId))
                     }
                 case .projectDetail(let id):
                     ProjectDetailScreen(
@@ -33,8 +36,23 @@ struct RootView: View {
                 }
             }
         }
+        .onAppear {
+            routeForAuthenticationState(authService.isAuthenticated)
+        }
+        .onChange(of: authService.isAuthenticated) { _, isAuthenticated in
+            routeForAuthenticationState(isAuthenticated)
+        }
         .toolbar(.hidden, for: .navigationBar)
         .preferredColorScheme(.light)
+    }
+
+    private func routeForAuthenticationState(_ isAuthenticated: Bool) {
+        if isAuthenticated {
+            guard path.isEmpty else { return }
+            path.append(AppRoute.projectList)
+        } else {
+            path = NavigationPath()
+        }
     }
 
     private func popLast() {

@@ -2,6 +2,6 @@ import Foundation
 
 enum AppRoute: Hashable {
     case projectList
-    case projectDetail(id: Int)
-    case pdfViewer(projectId: Int, materialId: Int)
+    case projectDetail(id: String)
+    case pdfViewer(projectId: String, materialId: Int)
 }

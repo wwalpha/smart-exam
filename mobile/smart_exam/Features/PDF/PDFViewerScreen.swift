@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PDFViewerScreen: View {
-    let projectId: Int
+    let projectId: String
     let materialId: Int
     let onBack: () -> Void
     private let pdfSourceProvider: any PDFSourceProviding
@@ -9,7 +9,7 @@ struct PDFViewerScreen: View {
     @State private var zoom = 100
 
     init(
-        projectId: Int,
+        projectId: String,
         materialId: Int,
         pdfSourceProvider: any PDFSourceProviding = MockRemotePDFSourceProvider(),
         onBack: @escaping () -> Void
@@ -177,5 +177,5 @@ private struct IconPillButton: View {
 }
 
 #Preview {
-    PDFViewerScreen(projectId: 1, materialId: 1, onBack: {})
+    PDFViewerScreen(projectId: "1", materialId: 1, onBack: {})
 }
