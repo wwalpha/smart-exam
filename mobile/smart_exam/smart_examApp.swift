@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 @main
 struct smart_examApp: App {
@@ -15,6 +16,7 @@ struct smart_examApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(authService)
+                .background(LandscapeLaunchOrientationRequester())
                 .onOpenURL { url in
                     _ = authService.resumeExternalUserAgentFlow(with: url)
                 }
@@ -22,6 +24,34 @@ struct smart_examApp: App {
                     guard let url = userActivity.webpageURL else { return }
                     _ = authService.resumeExternalUserAgentFlow(with: url)
                 }
+        }
+    }
+}
+
+private struct LandscapeLaunchOrientationRequester: UIViewRepresentable {
+    func makeUIView(context: Context) -> OrientationRequestingView {
+        OrientationRequestingView()
+    }
+
+    func updateUIView(_ uiView: OrientationRequestingView, context: Context) {
+        uiView.requestLandscapeIfPossible()
+    }
+
+    final class OrientationRequestingView: UIView {
+        private var didRequestLandscape = false
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            requestLandscapeIfPossible()
+        }
+
+        func requestLandscapeIfPossible() {
+            guard !didRequestLandscape, let windowScene = window?.windowScene else {
+                return
+            }
+
+            didRequestLandscape = true
+            windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscape))
         }
     }
 }
