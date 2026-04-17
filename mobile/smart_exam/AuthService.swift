@@ -1,13 +1,17 @@
 import Combine
 import Foundation
+import os
 import UIKit
 import AppAuth
 
 @MainActor
 final class AuthService: NSObject, ObservableObject {
     private static let authStateStorageKey = "cognitoAuthState"
+    private static let tokenSessionStorageKey = "cognitoTokenSession"
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "smart_exam", category: "AuthService")
 
     @Published var authState: OIDAuthState?
+    @Published private var tokenSession: CognitoTokenSession?
     @Published var userInfo: [String: Any] = [:]
     @Published var backendResponse: [String: Any] = [:]
     @Published var errorMessage: String?
@@ -17,12 +21,76 @@ final class AuthService: NSObject, ObservableObject {
     private var currentAuthorizationFlow: OIDExternalUserAgentSession?
 
     var isAuthenticated: Bool {
-        authState?.isAuthorized == true
+        tokenSession != nil || authState?.isAuthorized == true
     }
 
     override init() {
         super.init()
-        loadState()
+        loadStoredAuthentication()
+    }
+
+    func signIn(username: String, password: String) async {
+        if let configurationError = OIDCConfig.configurationError {
+            errorMessage = configurationError
+            statusMessage = "認証設定エラー"
+            isSigningIn = false
+            return
+        }
+
+        guard !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            errorMessage = "メールアドレスを入力してください"
+            statusMessage = "認証入力エラー"
+            return
+        }
+
+        guard !password.isEmpty else {
+            errorMessage = "パスワードを入力してください"
+            statusMessage = "認証入力エラー"
+            return
+        }
+
+        isSigningIn = true
+        errorMessage = nil
+        statusMessage = "Cognito へログイン中"
+        logAuthInfo("Cognito direct sign-in start. clientID=\(OIDCConfig.clientID)")
+
+        do {
+            let response = try await requestCognitoAuth(
+                body: CognitoInitiateAuthRequest(
+                    authFlow: "USER_PASSWORD_AUTH",
+                    clientId: OIDCConfig.clientID,
+                    authParameters: [
+                        "USERNAME": username.trimmingCharacters(in: .whitespacesAndNewlines),
+                        "PASSWORD": password
+                    ]
+                )
+            )
+
+            guard let result = response.authenticationResult else {
+                throw CognitoDirectAuthError.unsupportedChallenge(response.challengeName ?? "unknown")
+            }
+
+            setTokenSession(
+                CognitoTokenSession(
+                    accessToken: result.accessToken,
+                    idToken: result.idToken,
+                    refreshToken: result.refreshToken,
+                    expiresAt: Date().addingTimeInterval(TimeInterval(result.expiresIn)),
+                    tokenType: result.tokenType
+                )
+            )
+            setAuthState(nil)
+            statusMessage = "認証済み"
+            errorMessage = nil
+            logAuthInfo("Cognito direct sign-in succeeded")
+        } catch {
+            setTokenSession(nil)
+            statusMessage = "認証失敗"
+            errorMessage = "認証失敗: \(describeAuthError(error))"
+            logAuthError("Direct authorization failed", error: error)
+        }
+
+        isSigningIn = false
     }
 
     func discoverAndSignIn() {
@@ -48,6 +116,9 @@ final class AuthService: NSObject, ObservableObject {
         errorMessage = nil
         isSigningIn = true
         statusMessage = "Discovery を取得中"
+        logAuthInfo(
+            "Cognito sign-in start. issuer=\(OIDCConfig.issuer), clientID=\(OIDCConfig.clientID), redirectURI=\(OIDCConfig.redirectURI), scopes=\(OIDCConfig.scopes.joined(separator: " "))"
+        )
 
         OIDAuthorizationService.discoverConfiguration(forIssuer: issuerURL) { [weak self] configuration, error in
             guard let self else { return }
@@ -55,7 +126,9 @@ final class AuthService: NSObject, ObservableObject {
             Task { @MainActor in
                 guard let configuration else {
                     self.statusMessage = "Discovery 取得失敗"
-                    self.errorMessage = "Discovery 取得失敗: \(error?.localizedDescription ?? "unknown")"
+                    let details = self.describeAuthError(error)
+                    self.errorMessage = "Discovery 取得失敗: \(details)"
+                    self.logAuthError("Discovery failed", error: error)
                     self.isSigningIn = false
                     return
                 }
@@ -70,7 +143,7 @@ final class AuthService: NSObject, ObservableObject {
                 let request = OIDAuthorizationRequest(
                     configuration: configuration,
                     clientId: OIDCConfig.clientID,
-                    scopes: [OIDScopeOpenID, OIDScopeProfile],
+                    scopes: OIDCConfig.scopes,
                     redirectURL: redirectURL,
                     responseType: OIDResponseTypeCode,
                     additionalParameters: nil
@@ -86,9 +159,12 @@ final class AuthService: NSObject, ObservableObject {
                             self.setAuthState(authState)
                             self.statusMessage = "認証済み"
                             self.errorMessage = nil
+                            self.logAuthInfo("Cognito sign-in succeeded")
                         } else {
                             self.statusMessage = "認証失敗"
-                            self.errorMessage = "認証失敗: \(authError?.localizedDescription ?? "unknown")"
+                            let details = self.describeAuthError(authError)
+                            self.errorMessage = "認証失敗: \(details)"
+                            self.logAuthError("Authorization failed", error: authError)
                         }
                         self.isSigningIn = false
                     }
@@ -179,37 +255,13 @@ final class AuthService: NSObject, ObservableObject {
     }
 
     func logout() {
-        if let configurationError = OIDCConfig.configurationError {
-            errorMessage = configurationError
-            statusMessage = "認証設定エラー"
-            return
-        }
-
-        guard
-            let authState,
-            let endSessionEndpoint = authState.lastAuthorizationResponse
-                .request.configuration.discoveryDocument?.endSessionEndpoint
-        else {
-            errorMessage = "EndSession endpoint が見つかりません"
-            return
-        }
-
-        var components = URLComponents(url: endSessionEndpoint, resolvingAgainstBaseURL: false)
-        components?.queryItems = [
-            URLQueryItem(name: "client_id", value: OIDCConfig.clientID),
-            URLQueryItem(name: "logout_uri", value: OIDCConfig.logoutURL)
-        ]
-
-        guard let logoutURL = components?.url else {
-            errorMessage = "logout URL 生成失敗"
-            return
-        }
-
-        UIApplication.shared.open(logoutURL, options: [:], completionHandler: nil)
-        self.setAuthState(nil)
-        self.userInfo = [:]
-        self.backendResponse = [:]
-        self.statusMessage = "ログアウト済み"
+        setAuthState(nil)
+        setTokenSession(nil)
+        userInfo = [:]
+        backendResponse = [:]
+        errorMessage = nil
+        statusMessage = "ログアウト済み"
+        logAuthInfo("Local sign-out completed")
     }
 
     func resumeExternalUserAgentFlow(with url: URL) -> Bool {
@@ -223,6 +275,17 @@ final class AuthService: NSObject, ObservableObject {
     }
 
     func validAccessToken() async throws -> String {
+        if let tokenSession {
+            if tokenSession.expiresAt.timeIntervalSinceNow > 60 {
+                return tokenSession.accessToken
+            }
+
+            if let refreshedSession = try await refreshTokenSession(tokenSession) {
+                setTokenSession(refreshedSession)
+                return refreshedSession.accessToken
+            }
+        }
+
         guard let authState else {
             throw AuthServiceError.notAuthenticated
         }
@@ -244,11 +307,73 @@ final class AuthService: NSObject, ObservableObject {
         }
     }
 
+    private func refreshTokenSession(_ session: CognitoTokenSession) async throws -> CognitoTokenSession? {
+        guard let refreshToken = session.refreshToken, !refreshToken.isEmpty else {
+            return nil
+        }
+
+        statusMessage = "トークンを更新中"
+        let response = try await requestCognitoAuth(
+            body: CognitoInitiateAuthRequest(
+                authFlow: "REFRESH_TOKEN_AUTH",
+                clientId: OIDCConfig.clientID,
+                authParameters: [
+                    "REFRESH_TOKEN": refreshToken
+                ]
+            )
+        )
+
+        guard let result = response.authenticationResult else {
+            throw CognitoDirectAuthError.unsupportedChallenge(response.challengeName ?? "unknown")
+        }
+
+        return CognitoTokenSession(
+            accessToken: result.accessToken,
+            idToken: result.idToken ?? session.idToken,
+            refreshToken: result.refreshToken ?? refreshToken,
+            expiresAt: Date().addingTimeInterval(TimeInterval(result.expiresIn)),
+            tokenType: result.tokenType
+        )
+    }
+
+    private func requestCognitoAuth(body: CognitoInitiateAuthRequest) async throws -> CognitoInitiateAuthResponse {
+        guard let endpoint = OIDCConfig.cognitoIdentityProviderEndpoint else {
+            throw CognitoDirectAuthError.invalidIssuer
+        }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/x-amz-json-1.1", forHTTPHeaderField: "Content-Type")
+        request.setValue("AWSCognitoIdentityProviderService.InitiateAuth", forHTTPHeaderField: "X-Amz-Target")
+        request.httpBody = try JSONEncoder().encode(body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CognitoDirectAuthError.invalidResponse
+        }
+
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            let errorResponse = try? JSONDecoder().decode(CognitoErrorResponse.self, from: data)
+            throw CognitoDirectAuthError.service(
+                statusCode: httpResponse.statusCode,
+                type: errorResponse?.type,
+                message: errorResponse?.message ?? String(decoding: data, as: UTF8.self)
+            )
+        }
+
+        return try JSONDecoder().decode(CognitoInitiateAuthResponse.self, from: data)
+    }
+
     private func setAuthState(_ authState: OIDAuthState?) {
         self.authState = authState
         self.authState?.stateChangeDelegate = self
         self.authState?.errorDelegate = self
         saveState()
+    }
+
+    private func setTokenSession(_ tokenSession: CognitoTokenSession?) {
+        self.tokenSession = tokenSession
+        saveTokenSession()
     }
 
     private func saveState() {
@@ -261,6 +386,41 @@ final class AuthService: NSObject, ObservableObject {
         archiver.encode(authState, forKey: NSKeyedArchiveRootObjectKey)
         archiver.finishEncoding()
         UserDefaults.standard.set(archiver.encodedData, forKey: Self.authStateStorageKey)
+    }
+
+    private func saveTokenSession() {
+        guard let tokenSession else {
+            UserDefaults.standard.removeObject(forKey: Self.tokenSessionStorageKey)
+            return
+        }
+
+        do {
+            let data = try JSONEncoder().encode(tokenSession)
+            UserDefaults.standard.set(data, forKey: Self.tokenSessionStorageKey)
+        } catch {
+            logAuthError("Token session save failed", error: error)
+        }
+    }
+
+    private func loadStoredAuthentication() {
+        loadTokenSession()
+        loadState()
+    }
+
+    private func loadTokenSession() {
+        guard let data = UserDefaults.standard.data(forKey: Self.tokenSessionStorageKey) else {
+            return
+        }
+
+        do {
+            tokenSession = try JSONDecoder().decode(CognitoTokenSession.self, from: data)
+            statusMessage = "認証済み"
+        } catch {
+            UserDefaults.standard.removeObject(forKey: Self.tokenSessionStorageKey)
+            statusMessage = "未認証"
+            errorMessage = "保存済みトークンの復元に失敗しました"
+            logAuthError("Stored token restore failed", error: error)
+        }
     }
 
     private func loadState() {
@@ -280,6 +440,42 @@ final class AuthService: NSObject, ObservableObject {
             statusMessage = "未認証"
             errorMessage = "保存済み認証情報の復元に失敗しました"
         }
+    }
+
+    private func logAuthInfo(_ message: String) {
+        logger.info("\(message, privacy: .public)")
+        print("[AuthService] \(message)")
+    }
+
+    private func logAuthError(_ context: String, error: Error?) {
+        let message = "\(context): \(describeAuthError(error))"
+        logger.error("\(message, privacy: .public)")
+        print("[AuthService] \(message)")
+    }
+
+    private func describeAuthError(_ error: Error?) -> String {
+        guard let error else {
+            return "unknown"
+        }
+
+        let nsError = error as NSError
+        var parts = [
+            nsError.localizedDescription,
+            "domain=\(nsError.domain)",
+            "code=\(nsError.code)"
+        ]
+
+        let userInfo = nsError.userInfo
+            .sorted { String(describing: $0.key) < String(describing: $1.key) }
+            .map { key, value in
+                "\(key)=\(value)"
+            }
+
+        if !userInfo.isEmpty {
+            parts.append("userInfo={\(userInfo.joined(separator: ", "))}")
+        }
+
+        return parts.joined(separator: " | ")
     }
 
     private func topViewController(
@@ -335,6 +531,83 @@ enum AuthServiceError: LocalizedError {
             return "先に Cognito へログインしてください"
         case .missingAccessToken:
             return "アクセストークンが取得できませんでした"
+        }
+    }
+}
+
+private struct CognitoTokenSession: Codable {
+    let accessToken: String
+    let idToken: String?
+    let refreshToken: String?
+    let expiresAt: Date
+    let tokenType: String
+}
+
+private struct CognitoInitiateAuthRequest: Encodable {
+    let authFlow: String
+    let clientId: String
+    let authParameters: [String: String]
+
+    enum CodingKeys: String, CodingKey {
+        case authFlow = "AuthFlow"
+        case clientId = "ClientId"
+        case authParameters = "AuthParameters"
+    }
+}
+
+private struct CognitoInitiateAuthResponse: Decodable {
+    let authenticationResult: AuthenticationResult?
+    let challengeName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case authenticationResult = "AuthenticationResult"
+        case challengeName = "ChallengeName"
+    }
+
+    struct AuthenticationResult: Decodable {
+        let accessToken: String
+        let idToken: String?
+        let refreshToken: String?
+        let expiresIn: Int
+        let tokenType: String
+
+        enum CodingKeys: String, CodingKey {
+            case accessToken = "AccessToken"
+            case idToken = "IdToken"
+            case refreshToken = "RefreshToken"
+            case expiresIn = "ExpiresIn"
+            case tokenType = "TokenType"
+        }
+    }
+}
+
+private struct CognitoErrorResponse: Decodable {
+    let type: String?
+    let message: String?
+
+    enum CodingKeys: String, CodingKey {
+        case type = "__type"
+        case message
+    }
+}
+
+private enum CognitoDirectAuthError: LocalizedError {
+    case invalidIssuer
+    case invalidResponse
+    case unsupportedChallenge(String)
+    case service(statusCode: Int, type: String?, message: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidIssuer:
+            return "Cognito issuer から認証APIエンドポイントを作成できませんでした"
+        case .invalidResponse:
+            return "Cognito 認証APIのレスポンスが不正です"
+        case .unsupportedChallenge(let challenge):
+            return "追加認証チャレンジ \(challenge) はまだ画面内ログインで未対応です"
+        case .service(let statusCode, let type, let message):
+            let serviceType = type.map { " \($0)" } ?? ""
+            return "Cognito 認証APIエラー \(statusCode)\(serviceType): \(message)"
         }
     }
 }

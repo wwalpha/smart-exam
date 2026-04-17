@@ -10,8 +10,10 @@ struct RootView: View {
                 isSigningIn: authService.isSigningIn,
                 statusMessage: authService.statusMessage,
                 errorMessage: authService.errorMessage
-            ) {
-                authService.discoverAndSignIn()
+            ) { username, password in
+                Task {
+                    await authService.signIn(username: username, password: password)
+                }
             }
             .navigationDestination(for: AppRoute.self) { route in
                 switch route {

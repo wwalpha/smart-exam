@@ -26,6 +26,8 @@ enum OIDCConfig {
     static let redirectURI = stringValue(forKey: "redirectURI")
     static let logoutURL = stringValue(forKey: "logoutURL")
     static let backendBaseURL = stringValue(forKey: "backendBaseURL")
+    static let scopes = scopeValues()
+    static let cognitoIdentityProviderEndpoint = identityProviderEndpoint()
 
     static var configurationError: String? {
         guard fileURL != nil else {
@@ -42,5 +44,45 @@ enum OIDCConfig {
 
     private static func stringValue(forKey key: String) -> String {
         values[key] as? String ?? ""
+    }
+
+    private static func scopeValues() -> [String] {
+        if let array = values["scopes"] as? [String] {
+            let scopes = array
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+
+            if !scopes.isEmpty {
+                return scopes
+            }
+        }
+
+        if let string = values["scopes"] as? String {
+            let scopes = string
+                .components(separatedBy: CharacterSet(charactersIn: " ,\n\t"))
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+
+            if !scopes.isEmpty {
+                return scopes
+            }
+        }
+
+        return ["openid"]
+    }
+
+    private static func identityProviderEndpoint() -> URL? {
+        guard
+            let issuerURL = URL(string: issuer),
+            let scheme = issuerURL.scheme,
+            let host = issuerURL.host
+        else {
+            return nil
+        }
+
+        var components = URLComponents()
+        components.scheme = scheme
+        components.host = host
+        return components.url
     }
 }

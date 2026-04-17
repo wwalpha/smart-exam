@@ -9,7 +9,7 @@ struct LoginScreen: View {
     let isSigningIn: Bool
     let statusMessage: String?
     let errorMessage: String?
-    let onSignIn: () -> Void
+    let onSignIn: (String, String) -> Void
 
     @State private var email = ""
     @State private var password = ""
@@ -19,7 +19,7 @@ struct LoginScreen: View {
         isSigningIn: Bool = false,
         statusMessage: String? = nil,
         errorMessage: String? = nil,
-        onSignIn: @escaping () -> Void
+        onSignIn: @escaping (String, String) -> Void
     ) {
         self.isSigningIn = isSigningIn
         self.statusMessage = statusMessage
@@ -97,7 +97,10 @@ struct LoginScreen: View {
     }
 
     private var signInButton: some View {
-        Button(action: onSignIn) {
+        Button {
+            focusedField = nil
+            onSignIn(email, password)
+        } label: {
             HStack {
                 Text(isSigningIn ? "ログイン中..." : "ログイン！")
                     .font(AppFont.fredoka(20, weight: .bold))
@@ -194,5 +197,5 @@ struct LoginScreen: View {
 }
 
 #Preview {
-    LoginScreen {}
+    LoginScreen { _, _ in }
 }
