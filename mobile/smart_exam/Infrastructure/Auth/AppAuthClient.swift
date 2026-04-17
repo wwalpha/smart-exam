@@ -6,11 +6,13 @@ import UIKit
 @MainActor
 final class AppAuthClient {
     private let configProvider: any OIDCConfigProviding
+    private let urlSession: URLSession
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "smart_exam", category: "AppAuthClient")
     private var currentAuthorizationFlow: OIDExternalUserAgentSession?
 
-    init(configProvider: any OIDCConfigProviding) {
+    init(configProvider: any OIDCConfigProviding, urlSession: URLSession = URLSession(configuration: .default)) {
         self.configProvider = configProvider
+        self.urlSession = urlSession
     }
 
     func signIn(username: String, password: String) async throws -> AuthSession {
@@ -96,7 +98,7 @@ final class AppAuthClient {
         request.setValue("AWSCognitoIdentityProviderService.InitiateAuth", forHTTPHeaderField: "X-Amz-Target")
         request.httpBody = try JSONEncoder().encode(body)
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await urlSession.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw AppAuthClientError.invalidResponse
         }
