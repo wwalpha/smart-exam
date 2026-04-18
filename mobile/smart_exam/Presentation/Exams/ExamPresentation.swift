@@ -1,5 +1,19 @@
 import SwiftUI
 
+struct SubjectPalette {
+    let fill: Color
+    let border: Color
+    let accent: Color
+    let text: Color
+
+    static let neutral = SubjectPalette(
+        fill: AppColor.purple100,
+        border: AppColor.purple200,
+        accent: AppColor.purple500,
+        text: AppColor.purple700
+    )
+}
+
 extension ExamMode {
     var label: String {
         switch self {
@@ -22,6 +36,41 @@ extension SubjectId {
             return "社会"
         case .math:
             return "算数"
+        }
+    }
+}
+
+extension SubjectId {
+    var palette: SubjectPalette {
+        switch self {
+        case .japanese:
+            return SubjectPalette(
+                fill: AppColor.red100,
+                border: AppColor.red300,
+                accent: AppColor.red500,
+                text: AppColor.red700
+            )
+        case .science:
+            return SubjectPalette(
+                fill: AppColor.green100,
+                border: AppColor.green300,
+                accent: AppColor.green500,
+                text: AppColor.green700
+            )
+        case .society:
+            return SubjectPalette(
+                fill: AppColor.orange100,
+                border: AppColor.orange300,
+                accent: AppColor.orange500,
+                text: AppColor.orange700
+            )
+        case .math:
+            return SubjectPalette(
+                fill: AppColor.blue100,
+                border: AppColor.blue300,
+                accent: AppColor.blue500,
+                text: AppColor.blue700
+            )
         }
     }
 }
@@ -67,10 +116,6 @@ extension ExamStatus {
 extension ExamItem {
     var displayTitle: String {
         canonicalKey?.nilIfBlank ?? displayLabel?.nilIfBlank ?? questionText?.nilIfBlank ?? "問題"
-    }
-
-    var answerTitle: String {
-        answerText?.nilIfBlank ?? correctAnswer?.nilIfBlank ?? "答え未設定"
     }
 }
 

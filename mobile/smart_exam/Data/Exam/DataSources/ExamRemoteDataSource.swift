@@ -7,18 +7,18 @@ final class ExamRemoteDataSource {
         self.apiClient = apiClient
     }
 
-    func fetchExamList(request: SearchExamsRequestDTO, accessToken: String) async throws -> ExamListResponseDTO {
+    func fetchExamList(request: SearchExamsRequestDTO) async throws -> ExamListResponseDTO {
         try await apiClient.postJSON(
             path: "/api/exam/search",
             body: request,
-            accessToken: accessToken
+            requiresAuthorization: true
         )
     }
 
-    func fetchExamDetail(examId: String, accessToken: String) async throws -> ExamDetailDTO {
+    func fetchExamDetail(examId: String) async throws -> ExamDetailDTO {
         try await apiClient.getDecodable(
             path: "/api/exam/\(examId)",
-            accessToken: accessToken
+            requiresAuthorization: true
         )
     }
 }

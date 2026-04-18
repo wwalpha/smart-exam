@@ -5,6 +5,7 @@ final class AuthSessionRepositoryImpl: AuthSessionRepository {
     private let authClient: AppAuthClient
     private let store: any AuthStateStore
     private var continuation: AsyncStream<AuthSession?>.Continuation?
+    private var refreshAccessTokenTask: Task<String, Error>?
 
     private(set) var currentSession: AuthSession? {
         didSet {
@@ -54,13 +55,38 @@ final class AuthSessionRepositoryImpl: AuthSessionRepository {
             return session.accessToken
         }
 
-        guard let refreshed = try await authClient.refresh(session: session) else {
-            throw AuthRepositoryError.missingRefreshToken
+        return try await refreshAccessToken()
+    }
+
+    func refreshAccessToken() async throws -> String {
+        if let refreshAccessTokenTask {
+            return try await refreshAccessTokenTask.value
         }
 
-        currentSession = refreshed
-        try store.saveSession(refreshed)
-        return refreshed.accessToken
+        guard let session = currentSession else {
+            throw AuthRepositoryError.notAuthenticated
+        }
+
+        let task = Task { @MainActor [authClient, store] in
+            guard let refreshed = try await authClient.refresh(session: session) else {
+                throw AuthRepositoryError.missingRefreshToken
+            }
+
+            currentSession = refreshed
+            try store.saveSession(refreshed)
+            return refreshed.accessToken
+        }
+
+        refreshAccessTokenTask = task
+
+        do {
+            let accessToken = try await task.value
+            refreshAccessTokenTask = nil
+            return accessToken
+        } catch {
+            refreshAccessTokenTask = nil
+            throw error
+        }
     }
 
     func resumeExternalUserAgentFlow(with url: URL) -> Bool {

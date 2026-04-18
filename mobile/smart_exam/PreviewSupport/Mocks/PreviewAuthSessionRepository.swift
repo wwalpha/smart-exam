@@ -33,4 +33,8 @@ final class PreviewAuthSessionRepository: AuthSessionRepository {
     func accessToken() async throws -> String {
         "preview"
     }
+
+    func refreshAccessToken() async throws -> String {
+        "preview"
+    }
 }

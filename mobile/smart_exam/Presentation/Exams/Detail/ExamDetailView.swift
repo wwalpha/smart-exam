@@ -4,6 +4,12 @@ struct ExamDetailView: View {
     @StateObject private var viewModel: ExamDetailViewModel
     let onBack: () -> Void
     let onOpenPDF: (PDFDocumentDescriptor) -> Void
+    private let detailPalette = SubjectPalette(
+        fill: AppColor.blue100,
+        border: AppColor.blue200,
+        accent: AppColor.blue500,
+        text: AppColor.blue700
+    )
 
     init(
         viewModel: ExamDetailViewModel,
@@ -16,7 +22,7 @@ struct ExamDetailView: View {
     }
 
     var body: some View {
-        AppBackground(style: .detail) {
+        AppBackground(style: .list) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     BackButton(title: "戻る", action: onBack)
@@ -46,37 +52,20 @@ struct ExamDetailView: View {
 
     private func detailContent(_ detail: ExamDetail) -> some View {
         VStack(alignment: .leading, spacing: 24) {
-            header(detail)
             summaryCard(detail)
 
             if detail.mode == .material {
-                materialQuestionList(detail.items)
+                materialQuestionList(detail)
             } else {
-                kanjiQuestionList(detail.items)
+                kanjiQuestionList(detail)
             }
         }
     }
 
-    private func header(_ detail: ExamDetail) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("\(detail.subject.label) \(detail.mode.label)テスト")
-                .font(AppFont.fredoka(60, weight: .bold))
-                .foregroundStyle(AppColor.purple700)
-                .minimumScaleFactor(0.72)
-                .lineLimit(2)
-
-            Text("ID: \(detail.examId)")
-                .font(AppFont.nunito(18, weight: .semibold))
-                .foregroundStyle(AppColor.purple600)
-                .textSelection(.enabled)
-        }
-        .padding(.bottom, 16)
-    }
-
     private func summaryCard(_ detail: ExamDetail) -> some View {
-        GlassCard(
+        return GlassCard(
             cornerRadius: AppRadius.card,
-            borderColor: AppColor.purple200,
+            borderColor: detailPalette.border,
             borderWidth: 4,
             opacity: 0.90,
             shadow: .lg
@@ -86,11 +75,7 @@ struct ExamDetailView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("基本情報")
                             .font(AppFont.fredoka(30, weight: .bold))
-                            .foregroundStyle(AppColor.purple700)
-
-                        Text("API /api/exam/{examId} のレスポンス")
-                            .font(AppFont.nunito(16, weight: .semibold))
-                            .foregroundStyle(AppColor.purple600)
+                            .foregroundStyle(detailPalette.text)
                     }
 
                     Spacer(minLength: 16)
@@ -99,46 +84,42 @@ struct ExamDetailView: View {
                 }
 
                 FlowLayout(horizontalSpacing: 12, verticalSpacing: 12) {
-                    DetailPill(title: "科目", value: detail.subject.label)
-                    DetailPill(title: "モード", value: detail.mode.label)
-                    DetailPill(title: "作成日", value: formatDate(detail.createdDate))
-                    DetailPill(title: "問題数", value: "\(detail.count)問")
-                    DetailPill(title: "取得件数", value: "\(detail.items.count)問")
+                    DetailPill(title: "科目", value: detail.subject.label, palette: detailPalette)
+                    DetailPill(title: "モード", value: detail.mode.label, palette: detailPalette)
+                    DetailPill(title: "作成日", value: formatDate(detail.createdDate), palette: detailPalette)
+                    DetailPill(title: "問題数", value: "\(detail.count)問", palette: detailPalette)
+                    DetailPill(title: "取得件数", value: "\(detail.items.count)問", palette: detailPalette)
 
                     if detail.status == .completed {
-                        DetailPill(title: "正答", value: "\(detail.correctCount)/\(max(detail.results.count, detail.count))")
+                        DetailPill(title: "正答", value: "\(detail.correctCount)/\(max(detail.results.count, detail.count))", palette: detailPalette)
                     }
 
                     if let submittedDate = detail.submittedDate {
-                        DetailPill(title: "提出日", value: formatDate(submittedDate))
+                        DetailPill(title: "提出日", value: formatDate(submittedDate), palette: detailPalette)
                     }
-                }
-
-                if let descriptor = pdfDescriptor(for: detail) {
-                    Button {
-                        onOpenPDF(descriptor)
-                    } label: {
-                        PDFLinkRow(url: descriptor.url.absoluteString)
-                    }
-                    .buttonStyle(PressScaleButtonStyle(pressedScale: 0.98))
                 }
             }
             .padding(32)
         }
     }
 
-    private func materialQuestionList(_ items: [ExamItem]) -> some View {
+    private func materialQuestionList(_ detail: ExamDetail) -> some View {
         VStack(spacing: 24) {
-            ForEach(materialGroups(from: items)) { group in
-                MaterialQuestionCard(group: group)
+            ForEach(materialGroups(from: detail.items)) { group in
+                MaterialQuestionCard(
+                    group: group,
+                    palette: detailPalette,
+                    pdfDescriptor: pdfDescriptor(for: group, availability: viewModel.state.materialQuestionPDFAvailability),
+                    onOpenPDF: onOpenPDF
+                )
             }
         }
     }
 
-    private func kanjiQuestionList(_ items: [ExamItem]) -> some View {
+    private func kanjiQuestionList(_ detail: ExamDetail) -> some View {
         VStack(spacing: 16) {
-            ForEach(items) { item in
-                KanjiQuestionCard(item: item)
+            ForEach(detail.items) { item in
+                KanjiQuestionCard(item: item, palette: detailPalette)
             }
         }
     }
@@ -146,7 +127,7 @@ struct ExamDetailView: View {
     private func messageCard(_ message: String, showsProgress: Bool = false) -> some View {
         GlassCard(
             cornerRadius: AppRadius.card,
-            borderColor: AppColor.purple200,
+            borderColor: detailPalette.border,
             borderWidth: 4,
             opacity: 0.90,
             shadow: .lg
@@ -158,7 +139,7 @@ struct ExamDetailView: View {
 
                 Text(message)
                     .font(AppFont.nunito(16, weight: .bold))
-                    .foregroundStyle(AppColor.purple700)
+                    .foregroundStyle(detailPalette.text)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(24)
@@ -198,16 +179,23 @@ struct ExamDetailView: View {
         }
     }
 
-    private func pdfDescriptor(for detail: ExamDetail) -> PDFDocumentDescriptor? {
-        guard let url = URL(string: detail.pdf.url), !detail.pdf.url.isEmpty else {
+    private func pdfDescriptor(
+        for group: MaterialQuestionGroup,
+        availability: [String: Bool]
+    ) -> PDFDocumentDescriptor? {
+        guard let materialId = group.materialId?.nilIfBlank else {
+            return nil
+        }
+        guard availability[materialId] == true else {
             return nil
         }
 
         return PDFDocumentDescriptor(
-            id: detail.examId,
-            title: "\(detail.subject.label) \(detail.mode.label)テスト",
-            url: url,
-            sourceType: .remote
+            id: "\(materialId)-question-pdf",
+            title: "\(group.title) 問題PDF",
+            sourceType: .materialFile,
+            materialId: materialId,
+            materialFileType: .question
         )
     }
 
@@ -219,47 +207,55 @@ struct ExamDetailView: View {
 private struct DetailPill: View {
     let title: String
     let value: String
+    let palette: SubjectPalette
+
+    init(title: String, value: String, palette: SubjectPalette = .neutral) {
+        self.title = title
+        self.value = value
+        self.palette = palette
+    }
 
     var body: some View {
         HStack(spacing: 6) {
             Text(title)
                 .foregroundStyle(AppColor.gray500)
             Text(value)
-                .foregroundStyle(AppColor.purple700)
+                .foregroundStyle(palette.text)
         }
         .font(AppFont.nunito(14, weight: .bold))
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(Capsule().fill(AppColor.purple100.opacity(0.8)))
-        .overlay(Capsule().stroke(AppColor.purple200, lineWidth: 2))
+        .background(Capsule().fill(palette.fill.opacity(0.8)))
+        .overlay(Capsule().stroke(palette.border, lineWidth: 2))
     }
 }
 
-private struct PDFLinkRow: View {
-    let url: String
+private struct PDFButtonLabel: View {
+    let palette: SubjectPalette
+    let isEnabled: Bool
+
+    init(palette: SubjectPalette, isEnabled: Bool = true) {
+        self.palette = palette
+        self.isEnabled = isEnabled
+    }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            LucideIcon(kind: .fileText, size: 20, color: AppColor.purple600)
-                .padding(.top, 1)
+        HStack(spacing: 10) {
+            LucideIcon(kind: .fileText, size: 18, color: isEnabled ? .white : AppColor.gray500)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("PDF")
-                    .font(AppFont.nunito(14, weight: .bold))
-                    .foregroundStyle(AppColor.gray500)
-
-                Text(url)
-                    .font(AppFont.nunito(14, weight: .semibold))
-                    .foregroundStyle(AppColor.purple700)
-                    .lineLimit(2)
-                    .textSelection(.enabled)
-            }
+            Text("問題PDF")
+                .font(AppFont.nunito(15, weight: .bold))
+                .foregroundStyle(isEnabled ? .white : AppColor.gray500)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.control, style: .continuous)
-                .fill(AppColor.purple100.opacity(0.75))
+                .fill(isEnabled ? palette.accent : AppColor.gray100)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: AppRadius.control, style: .continuous)
+                .stroke(isEnabled ? palette.accent : AppColor.gray400, lineWidth: 2)
         )
     }
 }
@@ -291,11 +287,19 @@ private struct MaterialQuestionGroup: Identifiable {
 
 private struct MaterialQuestionCard: View {
     let group: MaterialQuestionGroup
+    let palette: SubjectPalette
+    let pdfDescriptor: PDFDocumentDescriptor?
+    let onOpenPDF: (PDFDocumentDescriptor) -> Void
+
+    private let columns = Array(
+        repeating: GridItem(.flexible(minimum: 0), spacing: 12, alignment: .top),
+        count: 3
+    )
 
     var body: some View {
         GlassCard(
             cornerRadius: AppRadius.card,
-            borderColor: AppColor.purple200,
+            borderColor: palette.border,
             borderWidth: 4,
             opacity: 0.90,
             shadow: .lg
@@ -305,38 +309,44 @@ private struct MaterialQuestionCard: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(group.title)
                             .font(AppFont.fredoka(30, weight: .bold))
-                            .foregroundStyle(AppColor.purple700)
+                            .foregroundStyle(palette.text)
                             .fixedSize(horizontal: false, vertical: true)
 
                         Text("全\(group.items.count)問")
                             .font(AppFont.nunito(16, weight: .semibold))
-                            .foregroundStyle(AppColor.purple600)
+                            .foregroundStyle(palette.text.opacity(0.82))
                     }
 
                     Spacer(minLength: 12)
+
+                    Button {
+                        if let pdfDescriptor {
+                            onOpenPDF(pdfDescriptor)
+                        }
+                    } label: {
+                        PDFButtonLabel(palette: palette, isEnabled: pdfDescriptor != nil)
+                    }
+                    .disabled(pdfDescriptor == nil)
+                    .buttonStyle(PressScaleButtonStyle(pressedScale: 0.98))
                 }
 
                 FlowLayout(horizontalSpacing: 10, verticalSpacing: 10) {
                     if let grade = group.grade?.nilIfBlank {
-                        DetailPill(title: "学年", value: grade)
+                        DetailPill(title: "学年", value: grade, palette: palette)
                     }
 
                     if let provider = group.provider?.nilIfBlank {
-                        DetailPill(title: "提供元", value: provider)
+                        DetailPill(title: "提供元", value: provider, palette: palette)
                     }
 
                     if let materialDate = group.materialDate?.nilIfBlank {
-                        DetailPill(title: "日付", value: materialDate)
-                    }
-
-                    if let materialId = group.materialId?.nilIfBlank {
-                        DetailPill(title: "教材ID", value: materialId)
+                        DetailPill(title: "日付", value: materialDate, palette: palette)
                     }
                 }
 
-                VStack(spacing: 12) {
+                LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(Array(group.items.enumerated()), id: \.element.id) { index, item in
-                        MaterialQuestionRow(number: index + 1, item: item)
+                        MaterialQuestionRow(number: index + 1, item: item, palette: palette)
                     }
                 }
             }
@@ -348,36 +358,30 @@ private struct MaterialQuestionCard: View {
 private struct MaterialQuestionRow: View {
     let number: Int
     let item: ExamItem
+    let palette: SubjectPalette
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 10) {
             Text("問\(number)")
                 .font(AppFont.nunito(14, weight: .bold))
-                .foregroundStyle(AppColor.blue700)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
+                .foregroundStyle(palette.text)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 5)
                 .background(
                     RoundedRectangle(cornerRadius: AppRadius.control, style: .continuous)
-                        .fill(AppGradient.problemChip)
+                        .fill(palette.fill)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: AppRadius.control, style: .continuous)
-                        .stroke(AppColor.blue300, lineWidth: 2)
+                        .stroke(palette.border, lineWidth: 2)
                 )
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(item.displayTitle)
-                    .font(AppFont.nunito(16, weight: .bold))
-                    .foregroundStyle(AppColor.purple700)
-                    .fixedSize(horizontal: false, vertical: true)
+            Text(item.displayTitle)
+                .font(AppFont.nunito(16, weight: .bold))
+                .foregroundStyle(palette.text)
+                .fixedSize(horizontal: false, vertical: true)
 
-                Text(item.answerTitle)
-                    .font(AppFont.nunito(15, weight: .semibold))
-                    .foregroundStyle(AppColor.gray600)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
             if let isCorrect = item.isCorrect {
                 Text(isCorrect ? "正解" : "未正解")
@@ -389,7 +393,8 @@ private struct MaterialQuestionRow: View {
                     .overlay(Capsule().stroke(isCorrect ? AppColor.green400 : AppColor.yellow400, lineWidth: 2))
             }
         }
-        .padding(16)
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.control, style: .continuous)
                 .fill(Color.white.opacity(0.72))
@@ -399,11 +404,12 @@ private struct MaterialQuestionRow: View {
 
 private struct KanjiQuestionCard: View {
     let item: ExamItem
+    let palette: SubjectPalette
 
     var body: some View {
         GlassCard(
             cornerRadius: AppRadius.card,
-            borderColor: AppColor.purple200,
+            borderColor: palette.border,
             borderWidth: 4,
             opacity: 0.90,
             shadow: .lg
@@ -411,20 +417,16 @@ private struct KanjiQuestionCard: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text(item.questionText?.nilIfBlank ?? "漢字問題")
                     .font(AppFont.fredoka(26, weight: .bold))
-                    .foregroundStyle(AppColor.purple700)
+                    .foregroundStyle(palette.text)
                     .fixedSize(horizontal: false, vertical: true)
 
                 FlowLayout(horizontalSpacing: 10, verticalSpacing: 10) {
                     if let kanji = item.kanji?.nilIfBlank {
-                        DetailPill(title: "漢字", value: kanji)
+                        DetailPill(title: "漢字", value: kanji, palette: palette)
                     }
 
                     if let reading = item.readingHiragana?.nilIfBlank {
-                        DetailPill(title: "読み", value: reading)
-                    }
-
-                    if let answer = item.answerText?.nilIfBlank {
-                        DetailPill(title: "答え", value: answer)
+                        DetailPill(title: "読み", value: reading, palette: palette)
                     }
                 }
             }

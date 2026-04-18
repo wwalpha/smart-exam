@@ -8,6 +8,10 @@ struct PDFRepositoryImpl: PDFRepository {
     }
 
     func resolve(descriptor: PDFDocumentDescriptor) async throws -> PDFDocumentDescriptor {
-        try remoteDataSource.resolve(descriptor: descriptor)
+        try await remoteDataSource.resolve(descriptor: descriptor)
+    }
+
+    func materialFileExists(materialId: String, fileType: PDFMaterialFileType) async throws -> Bool {
+        try await remoteDataSource.materialFileExists(materialId: materialId, fileType: fileType)
     }
 }

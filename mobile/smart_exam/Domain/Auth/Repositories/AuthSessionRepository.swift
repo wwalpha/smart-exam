@@ -8,4 +8,5 @@ protocol AuthSessionRepository {
     func signIn(username: String, password: String) async throws -> AuthSession
     func signOut()
     func accessToken() async throws -> String
+    func refreshAccessToken() async throws -> String
 }

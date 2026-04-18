@@ -178,15 +178,15 @@ struct BackButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                LucideIcon(kind: .arrowLeft, size: 20, color: AppColor.purple600)
+                LucideIcon(kind: .arrowLeft, size: 20, color: AppColor.blue600)
                 Text(title)
                     .font(AppFont.nunito(16, weight: .bold))
             }
-            .foregroundStyle(AppColor.purple600)
+            .foregroundStyle(AppColor.blue600)
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(Capsule().fill(Color.white.opacity(0.8)))
-            .overlay(Capsule().stroke(AppColor.purple300, lineWidth: 2))
+            .overlay(Capsule().stroke(AppColor.blue300, lineWidth: 2))
             .appShadow(.md)
         }
         .buttonStyle(PressScaleButtonStyle(pressedScale: 0.95))

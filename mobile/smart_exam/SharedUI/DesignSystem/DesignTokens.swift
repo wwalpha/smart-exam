@@ -44,6 +44,12 @@ enum AppColor {
     static let emerald400 = Color(hex: 0x34D399)
     static let emerald500 = Color(hex: 0x10B981)
 
+    static let red100 = Color(hex: 0xFEE2E2)
+    static let red200 = Color(hex: 0xFECACA)
+    static let red300 = Color(hex: 0xFCA5A5)
+    static let red500 = Color(hex: 0xEF4444)
+    static let red700 = Color(hex: 0xB91C1C)
+
     static let pink100 = Color(hex: 0xFCE7F3)
     static let pink200 = Color(hex: 0xFBCFE8)
     static let pink300 = Color(hex: 0xF9A8D4)
@@ -57,7 +63,11 @@ enum AppColor {
     static let yellow300 = Color(hex: 0xFDE047)
     static let yellow400 = Color(hex: 0xFACC15)
     static let yellow700 = Color(hex: 0xA16207)
+    static let orange100 = Color(hex: 0xFFEDD5)
+    static let orange200 = Color(hex: 0xFED7AA)
     static let orange300 = Color(hex: 0xFDBA74)
+    static let orange500 = Color(hex: 0xF97316)
+    static let orange700 = Color(hex: 0xC2410C)
 
     static let gray100 = Color(hex: 0xF3F4F6)
     static let gray400 = Color(hex: 0x9CA3AF)

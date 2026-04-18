@@ -55,10 +55,6 @@ struct ExamListView: View {
             Text("復習テスト")
                 .font(AppFont.fredoka(48, weight: .bold))
                 .foregroundStyle(AppColor.blue700)
-
-            Text("API /api/exam/search の検索結果 \(viewModel.state.total)件")
-                .font(AppFont.nunito(16, weight: .semibold))
-                .foregroundStyle(AppColor.blue600)
         }
     }
 
@@ -103,36 +99,33 @@ private struct ExamCard: View {
     let exam: Exam
 
     var body: some View {
+        let palette = exam.subject.palette
+
         GlassCard(
             cornerRadius: AppRadius.card,
-            borderColor: AppColor.blue200,
+            borderColor: palette.border,
             borderWidth: 4,
             opacity: 0.90,
             shadow: .lg
         ) {
             HStack(alignment: .top, spacing: 16) {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("\(exam.subject.label) \(exam.mode.label)テスト")
+                    Text(title)
                         .font(AppFont.fredoka(24, weight: .semibold))
-                        .foregroundStyle(AppColor.blue700)
-                        .padding(.bottom, 8)
-
-                    Text("ID: \(exam.examId)")
-                        .font(AppFont.nunito(16, weight: .semibold))
-                        .foregroundStyle(AppColor.gray600)
+                        .foregroundStyle(palette.text)
                         .padding(.bottom, 12)
 
                     FlowLayout(horizontalSpacing: 12, verticalSpacing: 10) {
-                        InfoPill(title: "科目", value: exam.subject.label)
-                        InfoPill(title: "作成日", value: formatDate(exam.createdDate))
-                        InfoPill(title: "問題数", value: "\(exam.count)問")
+                        InfoPill(title: "科目", value: exam.subject.label, palette: palette)
+                        InfoPill(title: "作成日", value: formatDate(exam.createdDate), palette: palette)
+                        InfoPill(title: "問題数", value: "\(exam.count)問", palette: palette)
 
                         if exam.status == .completed {
-                            InfoPill(title: "正答", value: "\(exam.correctCount)/\(max(exam.results.count, exam.count))")
+                            InfoPill(title: "正答", value: "\(exam.correctCount)/\(max(exam.results.count, exam.count))", palette: palette)
                         }
 
                         if let submittedDate = exam.submittedDate {
-                            InfoPill(title: "提出日", value: formatDate(submittedDate))
+                            InfoPill(title: "提出日", value: formatDate(submittedDate), palette: palette)
                         }
                     }
                 }
@@ -142,7 +135,7 @@ private struct ExamCard: View {
                 VStack(alignment: .trailing, spacing: 12) {
                     ExamStatusChip(status: exam.status)
 
-                    LucideIcon(kind: .moreVertical, size: 20, color: AppColor.blue400)
+                    LucideIcon(kind: .moreVertical, size: 20, color: palette.accent)
                         .frame(width: 28, height: 28)
                 }
             }
@@ -153,23 +146,33 @@ private struct ExamCard: View {
     private func formatDate(_ value: String) -> String {
         value.replacingOccurrences(of: "-", with: "/")
     }
+
+    private var title: String {
+        switch exam.mode {
+        case .material:
+            return exam.subject.label
+        case .kanji:
+            return "\(exam.subject.label) \(exam.mode.label)"
+        }
+    }
 }
 
 private struct InfoPill: View {
     let title: String
     let value: String
+    let palette: SubjectPalette
 
     var body: some View {
         HStack(spacing: 6) {
             Text(title)
                 .foregroundStyle(AppColor.gray500)
             Text(value)
-                .foregroundStyle(AppColor.blue700)
+                .foregroundStyle(palette.text)
         }
         .font(AppFont.nunito(14, weight: .bold))
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(Capsule().fill(AppColor.blue100.opacity(0.8)))
-        .overlay(Capsule().stroke(AppColor.blue200, lineWidth: 2))
+        .background(Capsule().fill(palette.fill.opacity(0.8)))
+        .overlay(Capsule().stroke(palette.border, lineWidth: 2))
     }
 }
