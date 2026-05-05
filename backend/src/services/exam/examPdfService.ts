@@ -13,6 +13,11 @@ type MaterialGroup = {
   items: ExamDetail['items'];
 };
 
+type MaterialWorksheetPageState = {
+  page: PDFPage;
+  nextTopY: number;
+};
+
 // mm 指定を PDF 座標系(pt)へ変換する。
 const mmToPt = (mm: number): number => (mm * 72) / 25.4;
 
@@ -106,6 +111,98 @@ const buildMaterialGroups = (review: ExamDetail): MaterialGroup[] => {
   return groups;
 };
 
+// MATERIAL の1セクションが縦方向に消費する高さを計算する。
+const getMaterialSectionHeight = (params: {
+  itemCount: number;
+  rowPitch: number;
+  titleFontSize: number;
+  titleToRowsGap: number;
+}): number => {
+  const usedRows = Math.ceil(params.itemCount / 2);
+  return params.titleFontSize + params.titleToRowsGap + params.rowPitch * usedRows;
+};
+
+// MATERIAL の描画先ページを確保し、必要なら改ページする。
+const ensureMaterialWorksheetPageState = (params: {
+  current: MaterialWorksheetPageState | null;
+  pdfDoc: PDFDocument;
+  requiredHeight: number;
+  pageWidth: number;
+  pageHeight: number;
+  margin: number;
+}): MaterialWorksheetPageState => {
+  if (params.current && params.current.nextTopY - params.requiredHeight >= params.margin) {
+    return params.current;
+  }
+
+  return {
+    page: params.pdfDoc.addPage([params.pageWidth, params.pageHeight]),
+    nextTopY: params.pageHeight - params.margin,
+  };
+};
+
+// MATERIAL の1セクションを指定位置から描画する。
+const drawMaterialSection = (params: {
+  page: PDFPage;
+  jpFont: PDFFont;
+  titleText: string;
+  items: ExamDetail['items'];
+  topY: number;
+  margin: number;
+  pageWidth: number;
+  columnGap: number;
+  titleFontSize: number;
+  rowFontSize: number;
+  rowPitch: number;
+  rowTextOffsetRatio: number;
+  titleToRowsGap: number;
+  minLineWidth: number;
+  lineGap: number;
+}): void => {
+  const titleY = params.topY - params.titleFontSize;
+  params.page.drawText(params.titleText, {
+    x: params.margin,
+    y: titleY,
+    size: params.titleFontSize,
+    font: params.jpFont,
+    color: rgb(0, 0, 0),
+  });
+
+  const rowTopY = titleY - params.titleToRowsGap;
+  const contentWidth = params.pageWidth - params.margin * 2;
+  const columnWidth = (contentWidth - params.columnGap) / 2;
+  const leftColumnCount = Math.ceil(params.items.length / 2);
+
+  for (let local = 0; local < params.items.length; local += 1) {
+    const col = local < leftColumnCount ? 0 : 1;
+    const row = col === 0 ? local : local - leftColumnCount;
+    const item = params.items[local];
+    const rawLabel = getMaterialItemLabel(item);
+    const textMaxWidth = columnWidth - params.minLineWidth - params.lineGap;
+    const label = fitTextWithEllipsis(rawLabel, textMaxWidth, params.jpFont, params.rowFontSize);
+
+    const baseX = params.margin + (col === 1 ? columnWidth + params.columnGap : 0);
+    const baselineY = rowTopY - params.rowPitch * row - params.rowPitch * params.rowTextOffsetRatio;
+    params.page.drawText(label, {
+      x: baseX,
+      y: baselineY,
+      size: params.rowFontSize,
+      font: params.jpFont,
+      color: rgb(0, 0, 0),
+    });
+
+    const textWidth = params.jpFont.widthOfTextAtSize(label, params.rowFontSize);
+    const lineEndX = baseX + columnWidth;
+    const lineStartX = Math.min(baseX + textWidth + params.lineGap, lineEndX - params.minLineWidth);
+    params.page.drawLine({
+      start: { x: lineStartX, y: baselineY - mmToPt(0.6) },
+      end: { x: lineEndX, y: baselineY - mmToPt(0.6) },
+      thickness: 1,
+      color: rgb(0, 0, 0),
+    });
+  }
+};
+
 // 指定幅に収まるよう末尾を省略しながらテキストを調整する。
 const fitTextWithEllipsis = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string => {
   if (font.widthOfTextAtSize(text, fontSize) <= maxWidth) {
@@ -166,6 +263,7 @@ const drawPromptWithUnderline = (params: {
   if (remainingForPost < 0) {
     throw new ApiError('promptText is too long to render', 400, ['prompt_too_long']);
   }
+  const underlineWidth = Math.min(targetWidth * 3, params.textMaxWidth - prefixWidth);
   let postRendered = post;
   let truncated = false;
 
@@ -211,7 +309,7 @@ const drawPromptWithUnderline = (params: {
 
   params.page.drawLine({
     start: { x: params.x + prefixWidth, y: params.y - mmToPt(0.6) },
-    end: { x: params.x + prefixWidth + targetWidth, y: params.y - mmToPt(0.6) },
+    end: { x: params.x + prefixWidth + underlineWidth, y: params.y - mmToPt(0.6) },
     thickness: 0.9,
     color: rgb(0, 0, 0),
   });
@@ -330,59 +428,52 @@ const renderMaterialWorksheetLayout = (params: {
   const titleToRowsGap = mmToPt(8);
   const minLineWidth = mmToPt(12);
   const lineGap = mmToPt(2);
+  const sectionGap = mmToPt(6);
 
   const groups = buildMaterialGroups(params.review);
+  const rowPitch = (pageHeight - params.margin * 2 - titleFontSize - titleToRowsGap) / rowsPerColumn;
+  let pageState: MaterialWorksheetPageState | null = null;
 
   for (const group of groups) {
     for (let pageStart = 0; pageStart < group.items.length; pageStart += itemsPerPage) {
-      const page = params.pdfDoc.addPage([pageWidth, pageHeight]);
       const pageItems = group.items.slice(pageStart, pageStart + itemsPerPage);
       const titleText = pageStart === 0 ? group.title : `${group.title}（続き）`;
 
-      const titleY = pageHeight - params.margin - titleFontSize;
-      page.drawText(titleText, {
-        x: params.margin,
-        y: titleY,
-        size: titleFontSize,
-        font: params.jpFont,
-        color: rgb(0, 0, 0),
+      const requiredHeight = getMaterialSectionHeight({
+        itemCount: pageItems.length,
+        rowPitch,
+        titleFontSize,
+        titleToRowsGap,
       });
 
-      const rowTopY = titleY - titleToRowsGap;
-      const contentWidth = pageWidth - params.margin * 2;
-      const columnWidth = (contentWidth - columnGap) / 2;
-      const rowAreaHeight = rowTopY - params.margin;
-      const rowPitch = rowAreaHeight / rowsPerColumn;
-      const leftColumnCount = Math.ceil(pageItems.length / 2);
+      // 問題数が少ない教材は同一ページへ続けて流し込み、教材単位の空白ページを作らない。
+      pageState = ensureMaterialWorksheetPageState({
+        current: pageState,
+        pdfDoc: params.pdfDoc,
+        requiredHeight,
+        pageWidth,
+        pageHeight,
+        margin: params.margin,
+      });
 
-      for (let local = 0; local < pageItems.length; local += 1) {
-        const col = local < leftColumnCount ? 0 : 1;
-        const row = col === 0 ? local : local - leftColumnCount;
-        const item = pageItems[local];
-        const rawLabel = getMaterialItemLabel(item);
-        const textMaxWidth = columnWidth - minLineWidth - lineGap;
-        const label = fitTextWithEllipsis(rawLabel, textMaxWidth, params.jpFont, rowFontSize);
-
-        const baseX = params.margin + (col === 1 ? columnWidth + columnGap : 0);
-        const baselineY = rowTopY - rowPitch * row - rowPitch * rowTextOffsetRatio;
-        page.drawText(label, {
-          x: baseX,
-          y: baselineY,
-          size: rowFontSize,
-          font: params.jpFont,
-          color: rgb(0, 0, 0),
-        });
-
-        const textWidth = params.jpFont.widthOfTextAtSize(label, rowFontSize);
-        const lineEndX = baseX + columnWidth;
-        const lineStartX = Math.min(baseX + textWidth + lineGap, lineEndX - minLineWidth);
-        page.drawLine({
-          start: { x: lineStartX, y: baselineY - mmToPt(0.6) },
-          end: { x: lineEndX, y: baselineY - mmToPt(0.6) },
-          thickness: 1,
-          color: rgb(0, 0, 0),
-        });
-      }
+      drawMaterialSection({
+        page: pageState.page,
+        jpFont: params.jpFont,
+        titleText,
+        items: pageItems,
+        topY: pageState.nextTopY,
+        margin: params.margin,
+        pageWidth,
+        columnGap,
+        titleFontSize,
+        rowFontSize,
+        rowPitch,
+        rowTextOffsetRatio,
+        titleToRowsGap,
+        minLineWidth,
+        lineGap,
+      });
+      pageState.nextTopY -= requiredHeight + sectionGap;
     }
   }
 };

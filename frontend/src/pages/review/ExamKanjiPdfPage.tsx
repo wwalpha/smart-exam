@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useReviewKanjiPdf } from '@/hooks/review';
 
 export const ExamKanjiPdfPage = () => {
@@ -35,19 +34,15 @@ export const ExamKanjiPdfPage = () => {
         </div>
       </div>
 
-      <Card>
-        <CardContent>
-          <div className="rounded-md border overflow-hidden">
-            {presignedUrl ? (
-              <iframe title="review-test-pdf" src={presignedUrl} className="h-[75vh] w-full bg-white" />
-            ) : (
-              <div className="flex h-[75vh] items-center justify-center text-sm text-muted-foreground">
-                {isFetchingPdfUrl ? 'PDFを読み込み中...' : 'PDFの読み込みに失敗しました。'}
-              </div>
-            )}
+      <div className="overflow-hidden bg-white">
+        {presignedUrl ? (
+          <iframe title="review-test-pdf" src={presignedUrl} className="h-[75vh] w-full bg-white" />
+        ) : (
+          <div className="flex h-[75vh] items-center justify-center text-sm text-muted-foreground">
+            {isFetchingPdfUrl ? 'PDFを読み込み中...' : 'PDFの読み込みに失敗しました。'}
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 };
