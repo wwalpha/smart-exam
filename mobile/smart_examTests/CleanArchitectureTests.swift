@@ -89,6 +89,74 @@ final class CleanArchitectureTests: XCTestCase {
         XCTAssertEqual(URLProtocolStub.requestCount, 1)
     }
 
+    func testExpiredRefreshTokenClearsSession() async throws {
+        URLProtocolStub.reset { _ in
+            Self.jsonResponse(
+                statusCode: 400,
+                body: #"{"__type":"NotAuthorizedException","message":"Refresh Token has expired"}"#
+            )
+        }
+
+        let expiredSession = AuthSession(
+            accessToken: "expired",
+            idToken: "id",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            tokenType: "Bearer"
+        )
+        let store = InMemoryAuthStateStore(session: expiredSession)
+        let repository = AuthSessionRepositoryImpl(
+            authClient: AppAuthClient(
+                configProvider: TestOIDCConfigProvider(),
+                urlSession: URLSession(configuration: Self.stubURLSessionConfiguration())
+            ),
+            store: store
+        )
+
+        do {
+            _ = try await repository.accessToken()
+            XCTFail("Expected refresh token expiry")
+        } catch {
+            XCTAssertNil(repository.currentSession)
+            XCTAssertNil(try store.loadSession())
+            XCTAssertEqual(URLProtocolStub.requestCount, 1)
+        }
+    }
+
+    func testRefreshServerFailureKeepsSession() async throws {
+        URLProtocolStub.reset { _ in
+            Self.jsonResponse(
+                statusCode: 500,
+                body: #"{"__type":"InternalErrorException","message":"temporary failure"}"#
+            )
+        }
+
+        let expiredSession = AuthSession(
+            accessToken: "expired",
+            idToken: "id",
+            refreshToken: "refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            tokenType: "Bearer"
+        )
+        let store = InMemoryAuthStateStore(session: expiredSession)
+        let repository = AuthSessionRepositoryImpl(
+            authClient: AppAuthClient(
+                configProvider: TestOIDCConfigProvider(),
+                urlSession: URLSession(configuration: Self.stubURLSessionConfiguration())
+            ),
+            store: store
+        )
+
+        do {
+            _ = try await repository.accessToken()
+            XCTFail("Expected refresh failure")
+        } catch {
+            XCTAssertEqual(repository.currentSession, expiredSession)
+            XCTAssertEqual(try store.loadSession(), expiredSession)
+            XCTAssertEqual(URLProtocolStub.requestCount, 1)
+        }
+    }
+
     func testAuthorizedAPIRequestRefreshesAndRetriesOnceAfter401() async throws {
         URLProtocolStub.reset { _ in
             if URLProtocolStub.requestCount == 1 {

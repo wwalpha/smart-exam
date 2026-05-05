@@ -42,8 +42,9 @@ final class AuthSessionRepositoryImpl: AuthSessionRepository {
     }
 
     func signOut() {
-        currentSession = nil
-        try? store.saveSession(nil)
+        refreshAccessTokenTask?.cancel()
+        refreshAccessTokenTask = nil
+        clearSession()
     }
 
     func accessToken() async throws -> String {
@@ -67,14 +68,27 @@ final class AuthSessionRepositoryImpl: AuthSessionRepository {
             throw AuthRepositoryError.notAuthenticated
         }
 
-        let task = Task { @MainActor [authClient, store] in
-            guard let refreshed = try await authClient.refresh(session: session) else {
-                throw AuthRepositoryError.missingRefreshToken
-            }
+        let task = Task { @MainActor in
+            do {
+                guard let refreshed = try await self.authClient.refresh(session: session) else {
+                    self.clearSessionIfCurrentSessionMatches(session)
+                    throw AuthRepositoryError.missingRefreshToken
+                }
 
-            currentSession = refreshed
-            try store.saveSession(refreshed)
-            return refreshed.accessToken
+                try Task.checkCancellation()
+                guard self.currentSession == session else {
+                    throw AuthRepositoryError.notAuthenticated
+                }
+
+                self.currentSession = refreshed
+                try self.store.saveSession(refreshed)
+                return refreshed.accessToken
+            } catch {
+                if Self.shouldClearSession(afterRefreshError: error) {
+                    self.clearSessionIfCurrentSessionMatches(session)
+                }
+                throw error
+            }
         }
 
         refreshAccessTokenTask = task
@@ -91,6 +105,36 @@ final class AuthSessionRepositoryImpl: AuthSessionRepository {
 
     func resumeExternalUserAgentFlow(with url: URL) -> Bool {
         authClient.resumeExternalUserAgentFlow(with: url)
+    }
+
+    private func clearSession() {
+        currentSession = nil
+        try? store.saveSession(nil)
+    }
+
+    private func clearSessionIfCurrentSessionMatches(_ session: AuthSession) {
+        guard currentSession == session else {
+            return
+        }
+
+        clearSession()
+    }
+
+    private static func shouldClearSession(afterRefreshError error: any Error) -> Bool {
+        if let repositoryError = error as? AuthRepositoryError {
+            switch repositoryError {
+            case .missingRefreshToken:
+                return true
+            case .emptyUsername, .emptyPassword, .notAuthenticated:
+                return false
+            }
+        }
+
+        if let authClientError = error as? AppAuthClientError {
+            return authClientError.invalidatesRefreshSession
+        }
+
+        return false
     }
 }
 

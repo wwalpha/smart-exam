@@ -174,6 +174,25 @@ enum AppAuthClientError: LocalizedError {
     case unsupportedChallenge(String)
     case service(statusCode: Int, type: String?, message: String)
 
+    var invalidatesRefreshSession: Bool {
+        switch self {
+        case .service(_, let type, let message):
+            if Self.normalizedServiceType(type) == "notauthorizedexception" {
+                return true
+            }
+
+            let normalizedMessage = message.lowercased()
+            return normalizedMessage.contains("refresh")
+                && (
+                    normalizedMessage.contains("expired")
+                    || normalizedMessage.contains("invalid")
+                    || normalizedMessage.contains("revoked")
+                )
+        case .invalidResponse, .unsupportedChallenge:
+            return false
+        }
+    }
+
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
@@ -184,5 +203,12 @@ enum AppAuthClientError: LocalizedError {
             let serviceType = type.map { " \($0)" } ?? ""
             return "Cognito 認証APIエラー \(statusCode)\(serviceType): \(message)"
         }
+    }
+
+    private static func normalizedServiceType(_ type: String?) -> String? {
+        type?
+            .split(separator: "#")
+            .last
+            .map { String($0).lowercased() }
     }
 }
