@@ -263,7 +263,6 @@ const drawPromptWithUnderline = (params: {
   if (remainingForPost < 0) {
     throw new ApiError('promptText is too long to render', 400, ['prompt_too_long']);
   }
-  const underlineWidth = Math.min(targetWidth * 3, params.textMaxWidth - prefixWidth);
   let postRendered = post;
   let truncated = false;
 
@@ -309,7 +308,7 @@ const drawPromptWithUnderline = (params: {
 
   params.page.drawLine({
     start: { x: params.x + prefixWidth, y: params.y - mmToPt(0.6) },
-    end: { x: params.x + prefixWidth + underlineWidth, y: params.y - mmToPt(0.6) },
+    end: { x: params.x + prefixWidth + targetWidth, y: params.y - mmToPt(0.6) },
     thickness: 0.9,
     color: rgb(0, 0, 0),
   });
@@ -331,8 +330,8 @@ const renderKanjiWorksheetLayout = (params: {
   const itemsPerPage = rowsPerColumn * 2;
   const columnGap = mmToPt(8);
 
-  // 右端の漢字記入枠（固定幅）
-  const answerBoxWidth = mmToPt(22);
+  // 右端の漢字記入欄は従来比3倍の長さを確保する。
+  const answerBoxWidth = mmToPt(22 * 3);
   const answerBoxGap = mmToPt(2.5);
 
   // 15行固定での可読性を優先し、本文は少し大きめにする。
