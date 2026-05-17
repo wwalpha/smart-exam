@@ -45,6 +45,42 @@ resource "aws_cognito_user_pool_client" "auth" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# Cognito user pool client for the mobile application.
+# ----------------------------------------------------------------------------------------------
+resource "aws_cognito_user_pool_client" "mobile" {
+  name         = "${var.project_name}_mobile_client"
+  user_pool_id = aws_cognito_user_pool.auth.id
+
+  generate_secret = false
+
+  explicit_auth_flows = [
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_USER_SRP_AUTH",
+  ]
+
+  access_token_validity  = 60
+  id_token_validity      = 60
+  refresh_token_validity = 365
+
+  token_validity_units {
+    access_token  = "minutes"
+    id_token      = "minutes"
+    refresh_token = "days"
+  }
+
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_scopes                 = ["openid", "email", "phone", "profile"]
+  callback_urls                        = ["myapp://"]
+  logout_urls                          = ["myapp://"]
+  supported_identity_providers         = ["COGNITO"]
+
+  prevent_user_existence_errors = "ENABLED"
+}
+
+# ----------------------------------------------------------------------------------------------
 # Cognito managed login domain for frontend.
 # ----------------------------------------------------------------------------------------------
 resource "aws_cognito_user_pool_domain" "auth" {

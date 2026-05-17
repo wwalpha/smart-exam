@@ -71,6 +71,14 @@ output "cognito_user_pool_client_id" {
 }
 
 # ----------------------------------------------------------------------------------------------
+# Cognito mobile user pool app client id.
+# ----------------------------------------------------------------------------------------------
+output "cognito_mobile_user_pool_client_id" {
+  description = "Cognito mobile user pool app client id."
+  value       = aws_cognito_user_pool_client.mobile.id
+}
+
+# ----------------------------------------------------------------------------------------------
 # Cognito managed login domain URL.
 # ----------------------------------------------------------------------------------------------
 output "cognito_managed_login_domain" {
