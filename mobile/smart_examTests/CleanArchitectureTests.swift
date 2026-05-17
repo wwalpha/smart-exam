@@ -255,6 +255,35 @@ final class CleanArchitectureTests: XCTestCase {
         }
     }
 
+    func testAuthorizedAPIRequestClearsSessionWhenRetryStillReturns401() async throws {
+        URLProtocolStub.reset { _ in
+            Self.jsonResponse(statusCode: 401, body: #"{"error":"unauthorized"}"#)
+        }
+
+        var didHandleAuthorizationFailure = false
+        let client = APIClient(
+            baseURL: URL(string: "https://example.com")!,
+            urlSessionConfiguration: Self.stubURLSessionConfiguration(),
+            accessTokenProvider: { "access" },
+            refreshAccessTokenProvider: { "refreshed" },
+            authorizationFailureHandler: {
+                didHandleAuthorizationFailure = true
+            }
+        )
+
+        do {
+            let _: OKResponse = try await client.getDecodable(
+                path: "/private",
+                requiresAuthorization: true
+            )
+            XCTFail("Expected final unauthorized response")
+        } catch {
+            try await waitForAsyncViewModelWork()
+            XCTAssertTrue(didHandleAuthorizationFailure)
+            XCTAssertEqual(URLProtocolStub.requestCount, 2)
+        }
+    }
+
     func testConcurrentForcedRefreshUsesSingleFlight() async throws {
         URLProtocolStub.reset { _ in
             Thread.sleep(forTimeInterval: 0.1)

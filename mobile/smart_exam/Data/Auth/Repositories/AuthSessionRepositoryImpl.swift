@@ -35,15 +35,16 @@ final class AuthSessionRepositoryImpl: AuthSessionRepository {
             throw AuthRepositoryError.emptyPassword
         }
 
+        cancelRefreshAccessTokenTask()
         let session = try await authClient.signIn(username: username, password: password)
+        cancelRefreshAccessTokenTask()
         currentSession = session
         try store.saveSession(session)
         return session
     }
 
     func signOut() {
-        refreshAccessTokenTask?.cancel()
-        refreshAccessTokenTask = nil
+        cancelRefreshAccessTokenTask()
         clearSession()
     }
 
@@ -110,6 +111,11 @@ final class AuthSessionRepositoryImpl: AuthSessionRepository {
     private func clearSession() {
         currentSession = nil
         try? store.saveSession(nil)
+    }
+
+    private func cancelRefreshAccessTokenTask() {
+        refreshAccessTokenTask?.cancel()
+        refreshAccessTokenTask = nil
     }
 
     private func clearSessionIfCurrentSessionMatches(_ session: AuthSession) {

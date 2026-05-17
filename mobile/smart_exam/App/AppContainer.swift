@@ -26,6 +26,9 @@ final class AppContainer: ObservableObject {
             },
             refreshAccessTokenProvider: {
                 try await refreshAccessTokenUseCase.execute()
+            },
+            authorizationFailureHandler: {
+                authRepository.signOut()
             }
         )
         let examRemoteDataSource = ExamRemoteDataSource(apiClient: apiClient)

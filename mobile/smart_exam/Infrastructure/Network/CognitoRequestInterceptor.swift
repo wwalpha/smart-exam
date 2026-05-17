@@ -4,6 +4,7 @@ import os
 
 final class CognitoRequestInterceptor: RequestInterceptor, @unchecked Sendable {
     typealias AccessTokenProvider = @MainActor @Sendable () async throws -> String
+    typealias AuthorizationFailureHandler = @MainActor @Sendable () -> Void
 
     static let requiresAuthorizationHeader = "X-Requires-Authorization"
     private static let requiresAuthorizationProperty = "smart_exam.requiresAuthorization"
@@ -14,15 +15,18 @@ final class CognitoRequestInterceptor: RequestInterceptor, @unchecked Sendable {
 
     private let accessTokenProvider: AccessTokenProvider
     private let refreshAccessTokenProvider: AccessTokenProvider
+    private let authorizationFailureHandler: AuthorizationFailureHandler?
     private let retryState = CognitoRetryState()
     private let refreshCoordinator = CognitoRefreshCoordinator()
 
     init(
         accessTokenProvider: @escaping AccessTokenProvider,
-        refreshAccessTokenProvider: @escaping AccessTokenProvider
+        refreshAccessTokenProvider: @escaping AccessTokenProvider,
+        authorizationFailureHandler: AuthorizationFailureHandler? = nil
     ) {
         self.accessTokenProvider = accessTokenProvider
         self.refreshAccessTokenProvider = refreshAccessTokenProvider
+        self.authorizationFailureHandler = authorizationFailureHandler
     }
 
     func adapt(
@@ -92,14 +96,16 @@ final class CognitoRequestInterceptor: RequestInterceptor, @unchecked Sendable {
         let requestURL = request.request?.url?.absoluteString ?? "unknown"
         log("retry received 401 url=\(requestURL) retryCount=\(request.retryCount)")
 
-        guard request.retryCount < 1 else {
-            log("retry skipped because retryCount limit reached url=\(requestURL)")
+        let isAuthorizedRequest = retryState.requiresAuthorization(request.id) || request.requests.contains(where: Self.requiresAuthorization)
+        guard isAuthorizedRequest else {
+            log("retry skipped because request is not marked as authorized url=\(requestURL)")
             completion(.doNotRetry)
             return
         }
 
-        guard retryState.requiresAuthorization(request.id) || request.requests.contains(where: Self.requiresAuthorization) else {
-            log("retry skipped because request is not marked as authorized url=\(requestURL)")
+        guard request.retryCount < 1 else {
+            log("retry skipped because retryCount limit reached url=\(requestURL)")
+            notifyAuthorizationFailure()
             completion(.doNotRetry)
             return
         }
@@ -241,6 +247,16 @@ final class CognitoRequestInterceptor: RequestInterceptor, @unchecked Sendable {
     private func log(_ message: String) {
         Self.logger.debug("\(message, privacy: .public)")
         print("[CognitoRequestInterceptor] \(message)")
+    }
+
+    private func notifyAuthorizationFailure() {
+        guard let authorizationFailureHandler else {
+            return
+        }
+
+        Task { @MainActor in
+            authorizationFailureHandler()
+        }
     }
 }
 

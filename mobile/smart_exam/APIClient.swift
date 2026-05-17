@@ -17,7 +17,8 @@ final class APIClient {
         session: Session? = nil,
         urlSessionConfiguration: URLSessionConfiguration? = nil,
         accessTokenProvider: @escaping CognitoRequestInterceptor.AccessTokenProvider = { "" },
-        refreshAccessTokenProvider: @escaping CognitoRequestInterceptor.AccessTokenProvider = { "" }
+        refreshAccessTokenProvider: @escaping CognitoRequestInterceptor.AccessTokenProvider = { "" },
+        authorizationFailureHandler: CognitoRequestInterceptor.AuthorizationFailureHandler? = nil
     ) {
         self.baseURL = baseURL
 
@@ -26,7 +27,8 @@ final class APIClient {
         } else {
             let interceptor = CognitoRequestInterceptor(
                 accessTokenProvider: accessTokenProvider,
-                refreshAccessTokenProvider: refreshAccessTokenProvider
+                refreshAccessTokenProvider: refreshAccessTokenProvider,
+                authorizationFailureHandler: authorizationFailureHandler
             )
 
             if let urlSessionConfiguration {
