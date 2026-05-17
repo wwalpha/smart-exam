@@ -15,10 +15,6 @@ export const ExamQuestionGradingPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">復習テスト採点</h1>
-      </div>
-
       <Card>
         <CardContent>
           <form onSubmit={submit}>
@@ -101,9 +97,16 @@ export const ExamQuestionGradingPage = () => {
                             <div
                               key={e.field.id}
                               className="flex items-center justify-between gap-3 rounded border px-3 py-2">
-                              <Badge variant="outline" className="px-3 py-1 text-sm">
-                                {e.item?.canonicalKey ?? e.item?.displayLabel ?? '-'}
-                              </Badge>
+                              <div className="flex min-w-0 flex-1 items-center gap-2">
+                                <Badge variant="outline" className="shrink-0 px-3 py-1 text-sm">
+                                  {e.item?.canonicalKey ?? e.item?.displayLabel ?? '-'}
+                                </Badge>
+                                {e.item?.answerText ? (
+                                  <span className="min-w-0 truncate text-sm font-medium" title={e.item.answerText}>
+                                    {e.item.answerText}
+                                  </span>
+                                ) : null}
+                              </div>
 
                               <div className="flex shrink-0 items-center gap-3">
                                 {e.isCorrect ? (
