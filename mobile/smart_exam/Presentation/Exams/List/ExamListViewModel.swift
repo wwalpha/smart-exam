@@ -21,9 +21,10 @@ final class ExamListViewModel: ObservableObject {
             state.errorMessage = nil
 
             do {
-                let result = try await fetchExamListUseCase.execute()
-                state.exams = result.items
-                state.total = result.total
+                let result = try await fetchExamListUseCase.execute(status: ExamStatus.inProgress.rawValue)
+                let visibleExams = result.items.filter { $0.status != .completed }
+                state.exams = visibleExams
+                state.total = visibleExams.count
             } catch {
                 state.exams = []
                 state.total = 0

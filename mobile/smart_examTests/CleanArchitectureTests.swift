@@ -466,7 +466,14 @@ final class CleanArchitectureTests: XCTestCase {
 
     func testExamListViewModelLoadsListState() async throws {
         let repository = ExamRepositorySpy()
-        repository.listResult = ExamListResult(items: [Self.exam(id: "exam-1")], total: 1, cursor: nil)
+        repository.listResult = ExamListResult(
+            items: [
+                Self.exam(id: "exam-1", status: .inProgress),
+                Self.exam(id: "exam-2", status: .completed)
+            ],
+            total: 2,
+            cursor: nil
+        )
         let viewModel = ExamListViewModel(fetchExamListUseCase: FetchExamListUseCase(repository: repository))
 
         viewModel.load()
@@ -475,6 +482,7 @@ final class CleanArchitectureTests: XCTestCase {
         XCTAssertFalse(viewModel.state.isLoading)
         XCTAssertEqual(viewModel.state.exams.map(\.examId), ["exam-1"])
         XCTAssertEqual(viewModel.state.total, 1)
+        XCTAssertEqual(repository.receivedListStatus, ExamStatus.inProgress.rawValue)
         XCTAssertNil(viewModel.state.errorMessage)
     }
 
@@ -558,14 +566,14 @@ final class CleanArchitectureTests: XCTestCase {
         XCTAssertEqual(detail.correctCount, 1)
     }
 
-    private static func exam(id: String) -> Exam {
+    private static func exam(id: String, status: ExamStatus = .completed) -> Exam {
         Exam(
             examId: id,
             subject: .japanese,
             mode: .material,
             createdDate: "2026-04-18",
             submittedDate: nil,
-            status: .completed,
+            status: status,
             pdf: Exam.PDFInfo(url: "https://example.com/\(id).pdf", downloadUrl: "https://example.com/\(id).pdf"),
             count: 1,
             results: [Exam.Result(id: "q1", isCorrect: true)]
