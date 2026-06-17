@@ -32,7 +32,6 @@ struct PDFViewerView: View {
         .task {
             viewModel.load()
         }
-        .highPriorityGesture(backSwipeGesture)
         .toolbar(.hidden, for: .navigationBar)
     }
 
@@ -135,13 +134,18 @@ struct PDFViewerView: View {
         PDFKitView(data: documentData, zoom: zoom)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.white)
+            .overlay(alignment: .leading) {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .frame(width: 44)
+                    .gesture(backSwipeGesture)
+            }
     }
 
     private var backSwipeGesture: some Gesture {
         DragGesture(minimumDistance: 24, coordinateSpace: .local)
             .onEnded { value in
-                guard value.startLocation.x < 64,
-                      value.translation.width > 80,
+                guard value.translation.width > 80,
                       abs(value.translation.height) < 70 else {
                     return
                 }

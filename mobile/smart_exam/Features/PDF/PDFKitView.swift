@@ -21,6 +21,7 @@ struct PDFKitView: UIViewRepresentable {
         if let firstPage = pdfView.document?.page(at: 0) {
             pdfView.go(to: firstPage)
         }
+        applyScrollSettings(to: pdfView)
         return pdfView
     }
 
@@ -37,6 +38,8 @@ struct PDFKitView: UIViewRepresentable {
         if abs(pdfView.scaleFactor - targetScale) > 0.01 {
             pdfView.scaleFactor = targetScale
         }
+
+        applyScrollSettings(to: pdfView)
     }
 
     func makeCoordinator() -> Coordinator {
@@ -45,5 +48,34 @@ struct PDFKitView: UIViewRepresentable {
 
     final class Coordinator {
         var documentData: Data?
+    }
+
+    private func applyScrollSettings(to pdfView: PDFView) {
+        pdfView.displayMode = .singlePageContinuous
+        pdfView.displayDirection = .vertical
+
+        guard let scrollView = pdfView.firstSubview(ofType: UIScrollView.self) else {
+            return
+        }
+
+        scrollView.isScrollEnabled = true
+        scrollView.alwaysBounceVertical = true
+        scrollView.panGestureRecognizer.minimumNumberOfTouches = 1
+    }
+}
+
+private extension UIView {
+    func firstSubview<T: UIView>(ofType type: T.Type) -> T? {
+        if let view = self as? T {
+            return view
+        }
+
+        for subview in subviews {
+            if let view = subview.firstSubview(ofType: type) {
+                return view
+            }
+        }
+
+        return nil
     }
 }

@@ -221,6 +221,28 @@ const fitTextWithEllipsis = (text: string, maxWidth: number, font: PDFFont, font
   return '…';
 };
 
+// 下線対象の直前文脈を残すため、先頭側を省略して指定幅へ収める。
+const fitTextWithLeadingEllipsis = (text: string, maxWidth: number, font: PDFFont, fontSize: number): string => {
+  if (maxWidth <= 0) return '';
+  if (font.widthOfTextAtSize(text, fontSize) <= maxWidth) {
+    return text;
+  }
+  if (font.widthOfTextAtSize('…', fontSize) > maxWidth) {
+    return '';
+  }
+
+  let trimmed = text;
+  while (trimmed.length > 0) {
+    const candidate = `…${trimmed}`;
+    if (font.widthOfTextAtSize(candidate, fontSize) <= maxWidth) {
+      return candidate;
+    }
+    trimmed = trimmed.slice(1);
+  }
+
+  return '…';
+};
+
 // かな表記（ひらがな/カタカナ）差分を吸収するため、比較前にひらがなへ正規化する。
 const normalizeKanaToHiragana = (s: string): string => {
   return s.replace(/[ァ-ヶ]/g, (char) => {
@@ -257,12 +279,24 @@ const drawPromptWithUnderline = (params: {
     const scaled = (fontSize * params.textMaxWidth) / totalWidth;
     fontSize = Math.max(params.minFontSize, scaled);
   }
-  const prefixWidth = params.font.widthOfTextAtSize(params.indexText + pre, fontSize);
-  const targetWidth = params.font.widthOfTextAtSize(target, fontSize);
-  const remainingForPost = params.textMaxWidth - (prefixWidth + targetWidth);
-  if (remainingForPost < 0) {
-    throw new ApiError('promptText is too long to render', 400, ['prompt_too_long']);
+  let preRendered = pre;
+  let indexWidth = params.font.widthOfTextAtSize(params.indexText, fontSize);
+  let targetWidth = params.font.widthOfTextAtSize(target, fontSize);
+  const targetRequiredWidth = indexWidth + targetWidth;
+
+  if (targetRequiredWidth > params.textMaxWidth) {
+    fontSize = (fontSize * params.textMaxWidth) / targetRequiredWidth;
+    indexWidth = params.font.widthOfTextAtSize(params.indexText, fontSize);
+    targetWidth = params.font.widthOfTextAtSize(target, fontSize);
   }
+
+  const preMaxWidth = params.textMaxWidth - indexWidth - targetWidth;
+  if (params.font.widthOfTextAtSize(pre, fontSize) > preMaxWidth) {
+    preRendered = fitTextWithLeadingEllipsis(pre, preMaxWidth, params.font, fontSize);
+  }
+
+  const prefixWidth = indexWidth + params.font.widthOfTextAtSize(preRendered, fontSize);
+  const remainingForPost = params.textMaxWidth - (prefixWidth + targetWidth);
   let postRendered = post;
   let truncated = false;
 
@@ -284,7 +318,7 @@ const drawPromptWithUnderline = (params: {
     }
   }
 
-  params.page.drawText(params.indexText + pre, {
+  params.page.drawText(params.indexText + preRendered, {
     x: params.x,
     y: params.y,
     size: fontSize,

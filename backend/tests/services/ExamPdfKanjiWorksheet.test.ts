@@ -68,4 +68,38 @@ describe('ExamPdfService (KANJI worksheet) smoke', () => {
     const doc = await PDFDocument.load(pdf);
     expect(doc.getPageCount()).toBe(1);
   });
+
+  it('generates PDF when long prompt prefix must be truncated before the underline', async () => {
+    const longPrefix = 'この文章は下線の前に長い説明が続き、本文の状況を詳しく説明しているため、';
+    const promptText = `${longPrefix}けいせいが不利なまま試合が進む。`;
+    const review: ExamDetail = {
+      examId: 't3',
+      subject: '1',
+      mode: 'KANJI',
+      createdDate: '2026-02-14',
+      status: 'IN_PROGRESS',
+      pdf: { url: '/api/exam/t3/pdf', downloadUrl: '/api/exam/t3/pdf?download=1' },
+      count: 1,
+      results: [],
+      items: [
+        {
+          id: 'item-1',
+          itemId: 'item-1',
+          examId: 't3',
+          targetType: 'KANJI',
+          targetId: 'w-1',
+          questionText: promptText,
+          answerText: '形成',
+          readingHiragana: 'けいせい',
+          underlineSpec: { type: 'promptSpan', start: longPrefix.length, length: 4 },
+        },
+      ],
+    };
+
+    const pdf = await ExamPdfService.generatePdfBuffer(review);
+    expect(pdf.length).toBeGreaterThan(100);
+
+    const doc = await PDFDocument.load(pdf);
+    expect(doc.getPageCount()).toBe(1);
+  });
 });
