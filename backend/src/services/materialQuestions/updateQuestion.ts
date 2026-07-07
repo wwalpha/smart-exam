@@ -29,6 +29,7 @@ export const createUpdateQuestion = (repositories: Repositories): MaterialQuesti
       ...(typeof updates.canonicalKey === 'string'
         ? { canonicalKey: updates.canonicalKey, number: toSortNumber(updates.canonicalKey) }
         : {}),
+      ...(typeof updates.correctAnswer === 'string' ? { correctAnswer: updates.correctAnswer.trim() } : {}),
     });
 
     if (!next) return null;

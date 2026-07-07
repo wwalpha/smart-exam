@@ -8,6 +8,7 @@ export const CreateQuestionBodySchema = z.object({
   canonicalKey: z.string().min(1),
   subject: SubjectIdSchema,
   tags: z.array(z.string().min(1)).optional(),
+  correctAnswer: z.string().trim().optional(),
 });
 
 /** CreateQuestionsBulkBodySchema validates bulk input shape. */
@@ -20,6 +21,7 @@ export const UpdateQuestionBodySchema = z.object({
   canonicalKey: z.string().min(1).optional(),
   subject: SubjectIdSchema.optional(),
   tags: z.array(z.string().min(1)).optional(),
+  correctAnswer: z.string().trim().optional(),
 });
 
 /** SetMaterialChoicesBodySchema validates input shape. */

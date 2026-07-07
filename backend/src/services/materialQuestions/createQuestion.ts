@@ -24,6 +24,7 @@ export const createCreateQuestion = (repositories: Repositories): MaterialQuesti
     const id = createUuid();
 
     // DB保存用に、canonicalKey から並び順番号を計算して保持する。
+    const correctAnswer = data.correctAnswer?.trim() || undefined;
     const dbItem: MaterialQuestionsTable = {
       questionId: id,
       materialId: data.materialId,
@@ -31,6 +32,7 @@ export const createCreateQuestion = (repositories: Repositories): MaterialQuesti
       number: toSortNumber(data.canonicalKey),
       canonicalKey: data.canonicalKey,
       choice: 'CORRECT',
+      ...(correctAnswer ? { correctAnswer } : {}),
     };
 
     // 設問作成と教材側の設問数更新を行う。
@@ -45,7 +47,7 @@ export const createCreateQuestion = (repositories: Repositories): MaterialQuesti
       materialId: data.materialId,
       tags: data.tags,
       choice: 'CORRECT',
-      correctAnswer: '',
+      correctAnswer,
     };
   };
 };

@@ -85,7 +85,7 @@ describe('question handler', () => {
       params: { materialId: 'mat1' },
       body: {
         items: [
-          { canonicalKey: '1-1', subject: '4' },
+          { canonicalKey: '1-1', subject: '4', correctAnswer: 'イ' },
           { canonicalKey: '1-2', subject: '4' },
         ],
       },
@@ -100,7 +100,7 @@ describe('question handler', () => {
     expect(services.materialQuestions.createQuestionsBulk).toHaveBeenCalledWith({
       materialId: 'mat1',
       items: [
-        { canonicalKey: '1-1', subject: '4' },
+        { canonicalKey: '1-1', subject: '4', correctAnswer: 'イ' },
         { canonicalKey: '1-2', subject: '4' },
       ],
     });

@@ -35,14 +35,18 @@ export const createCreateQuestionsBulk = (
       return await toApiQuestions(await repositories.materialQuestions.listByMaterialId(materialId));
     }
 
-    const dbItems: MaterialQuestionsTable[] = items.map((item) => ({
-      questionId: createUuid(),
-      materialId,
-      subjectId: material.subjectId,
-      number: toSortNumber(item.canonicalKey),
-      canonicalKey: item.canonicalKey,
-      choice: 'CORRECT',
-    }));
+    const dbItems: MaterialQuestionsTable[] = items.map((item) => {
+      const correctAnswer = item.correctAnswer?.trim() || undefined;
+      return {
+        questionId: createUuid(),
+        materialId,
+        subjectId: material.subjectId,
+        number: toSortNumber(item.canonicalKey),
+        canonicalKey: item.canonicalKey,
+        choice: 'CORRECT',
+        ...(correctAnswer ? { correctAnswer } : {}),
+      };
+    });
 
     await repositories.materialQuestions.bulkCreate(dbItems);
     await repositories.materials.incrementQuestionCount(materialId, dbItems.length);

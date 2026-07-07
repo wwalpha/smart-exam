@@ -23,6 +23,7 @@ export const QuestionManagementPage = () => {
     setIsBulkDialogOpen,
     bulkInput,
     setBulkInput,
+    bulkValidationError,
     submitBulk,
     remove,
     setChoice,
@@ -79,15 +80,19 @@ export const QuestionManagementPage = () => {
                 <DialogTitle>問題追加（一括）</DialogTitle>
               </DialogHeader>
               <div className="space-y-2">
-                <Label>問題番号 *</Label>
+                <Label>問題番号 / 答え *</Label>
                 <Textarea
                   value={bulkInput}
                   onChange={(e) => setBulkInput(e.target.value)}
                   disabled={isBusy || !!material?.isCompleted}
-                  placeholder={'例:\n1-1\n1-2\n2-1'}
+                  placeholder={'例:\n1-1: イ\n1-2-できごと: ベビーブーム\n1-2-記号: イ'}
                   rows={8}
+                  aria-invalid={!!bulkValidationError}
                 />
-                <p className="text-xs text-muted-foreground">改行/スペース/カンマ区切りで複数入力できます</p>
+                {bulkValidationError ? <p className="text-xs text-destructive">{bulkValidationError}</p> : null}
+                <p className="text-xs text-muted-foreground">
+                  1行1問。`問題番号: 答え` 形式で入力できます。答えなしの場合は問題番号のみも可。
+                </p>
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button
@@ -121,6 +126,7 @@ export const QuestionManagementPage = () => {
               <TableRow>
                 <TableHead className="w-[100px] text-center">削除</TableHead>
                 <TableHead>問題番号</TableHead>
+                <TableHead>答え</TableHead>
                 <TableHead>状態</TableHead>
                 <TableHead className="w-[300px]" />
               </TableRow>
@@ -140,6 +146,7 @@ export const QuestionManagementPage = () => {
                     </Button>
                   </TableCell>
                   <TableCell className="py-2">{q.canonicalKey}</TableCell>
+                  <TableCell className="py-2">{String(q.correctAnswer ?? '').trim() || '-'}</TableCell>
                   <TableCell className="py-2">
                     {(() => {
                       const draft = draftByQuestionId[q.id];
@@ -227,7 +234,7 @@ export const QuestionManagementPage = () => {
               ))}
               {questions.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     問題が登録されていません
                   </TableCell>
                 </TableRow>

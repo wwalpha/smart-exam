@@ -56,7 +56,7 @@ export interface MaterialQuestionsTable {
   canonicalKey: string;
   /** 正誤選択（未選択の場合はundefined） */
   choice?: 'CORRECT' | 'INCORRECT';
-  /** 不正解時に入力する正解値 */
+  /** 登録済みの正答 */
   correctAnswer?: string;
 }
 

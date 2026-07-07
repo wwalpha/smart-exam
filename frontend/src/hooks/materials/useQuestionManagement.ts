@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useWordTestStore } from '@/stores';
 import { useConfirm } from '@/components/common/useConfirm';
 import { compareQuestionNumber } from '@/utils/questionNumber';
-import { normalizeQuestionNumber } from '@/utils/questionNumber';
+import { parseQuestionBulkInput } from '@/utils/questionBulkInput';
 
 type DraftChoice = {
   choice: 'CORRECT' | 'INCORRECT';
@@ -35,6 +35,7 @@ export const useQuestionManagement = () => {
 
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [bulkInput, setBulkInput] = useState('');
+  const [bulkValidationError, setBulkValidationError] = useState<string | null>(null);
   const [draftByQuestionId, setDraftByQuestionId] = useState<Record<string, DraftChoice>>({});
   const { confirm, ConfirmDialog } = useConfirm();
 
@@ -99,22 +100,34 @@ export const useQuestionManagement = () => {
     if (!id || !detail) return;
     if (detail.isCompleted) return;
 
-    const normalized = bulkInput
-      .split(/[\s,]+/)
-      .map((s) => normalizeQuestionNumber(s))
-      .filter((s): s is string => typeof s === 'string');
+    const parsed = parseQuestionBulkInput(bulkInput);
+    if (!parsed.ok) {
+      setBulkValidationError(parsed.error);
+      return;
+    }
 
-    const unique = Array.from(new Set(normalized)).sort(compareQuestionNumber);
     // 入力が空（または無効な値のみ）の場合は何もしない
-    if (unique.length === 0) return;
+    if (parsed.items.length === 0) return;
 
     await createQuestionsBulk(
       id,
-      unique.map((canonicalKey) => ({ canonicalKey, subject: detail.subject })),
+      parsed.items.map((item) => ({
+        canonicalKey: item.canonicalKey,
+        subject: detail.subject,
+        correctAnswer: item.correctAnswer,
+      })),
     );
 
     setBulkInput('');
+    setBulkValidationError(null);
     setIsBulkDialogOpen(false);
+  };
+
+  const updateBulkInput = (value: string) => {
+    setBulkInput(value);
+    if (bulkValidationError) {
+      setBulkValidationError(null);
+    }
   };
 
   const remove = async (questionId: string) => {
@@ -191,7 +204,8 @@ export const useQuestionManagement = () => {
     isBulkDialogOpen,
     setIsBulkDialogOpen,
     bulkInput,
-    setBulkInput,
+    setBulkInput: updateBulkInput,
+    bulkValidationError,
     submitBulk,
     remove,
     setChoice,

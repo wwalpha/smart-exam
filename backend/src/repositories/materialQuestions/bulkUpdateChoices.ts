@@ -25,21 +25,27 @@ export const bulkUpdateChoices = async (items: BulkChoiceItem[]): Promise<void> 
 
   for (const chunk of chunks) {
     await dbHelper.transactWrite({
-      TransactItems: chunk.map((item) => ({
-        Update: {
-          TableName: TABLE_NAME,
-          Key: { questionId: item.questionId },
-          UpdateExpression: 'SET #choice = :choice, #correctAnswer = :correctAnswer',
-          ExpressionAttributeNames: {
-            '#choice': 'choice',
-            '#correctAnswer': 'correctAnswer',
+      TransactItems: chunk.map((item) => {
+        const correctAnswer = typeof item.correctAnswer === 'string' ? item.correctAnswer.trim() : undefined;
+        const shouldUpdateCorrectAnswer = typeof correctAnswer === 'string';
+        return {
+          Update: {
+            TableName: TABLE_NAME,
+            Key: { questionId: item.questionId },
+            UpdateExpression: shouldUpdateCorrectAnswer
+              ? 'SET #choice = :choice, #correctAnswer = :correctAnswer'
+              : 'SET #choice = :choice',
+            ExpressionAttributeNames: {
+              '#choice': 'choice',
+              ...(shouldUpdateCorrectAnswer ? { '#correctAnswer': 'correctAnswer' } : {}),
+            },
+            ExpressionAttributeValues: {
+              ':choice': item.isCorrect ? 'CORRECT' : 'INCORRECT',
+              ...(shouldUpdateCorrectAnswer ? { ':correctAnswer': correctAnswer } : {}),
+            },
           },
-          ExpressionAttributeValues: {
-            ':choice': item.isCorrect ? 'CORRECT' : 'INCORRECT',
-            ':correctAnswer': item.isCorrect ? '' : String(item.correctAnswer ?? '').trim(),
-          },
-        },
-      })),
+        };
+      }),
     });
   }
 };

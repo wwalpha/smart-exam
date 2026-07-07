@@ -273,7 +273,7 @@ export type Question = {
   reviewCandidate?: QuestionReviewCandidateSummary;
   /** 正誤選択（画面入力値） */
   choice?: 'CORRECT' | 'INCORRECT';
-  /** 不正解時に入力する正解値 */
+  /** 問題の答え */
   correctAnswer?: string;
 };
 
@@ -285,6 +285,8 @@ export type CreateQuestionRequest = {
   subject: SubjectId;
   /** タグ */
   tags?: string[];
+  /** 登録済みの正答 */
+  correctAnswer?: string;
 };
 
 /** 問題作成レスポンス */
