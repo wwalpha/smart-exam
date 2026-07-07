@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,6 +27,12 @@ export const QuestionManagementPage = () => {
     bulkValidationError,
     submitBulk,
     remove,
+    selectedQuestionIds,
+    toggleQuestionSelection,
+    toggleSelectAllQuestions,
+    removeSelected,
+    isAllQuestionsSelected,
+    isSomeQuestionsSelected,
     setChoice,
     setCorrectAnswer,
     saveChoices,
@@ -119,11 +126,45 @@ export const QuestionManagementPage = () => {
         </div>
       </div>
 
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm text-muted-foreground">全{questions.length}件</div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={toggleSelectAllQuestions}
+            disabled={isBusy || !!material?.isCompleted || questions.length === 0}
+          >
+            一括選択
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            onClick={() => void removeSelected()}
+            disabled={isBusy || !!material?.isCompleted || questions.length === 0 || selectedQuestionIds.size === 0}
+          >
+            選択削除 ({selectedQuestionIds.size})
+          </Button>
+        </div>
+      </div>
+
       <Card className="w-full">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12 px-2">
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={isAllQuestionsSelected ? true : isSomeQuestionsSelected ? 'indeterminate' : false}
+                      onCheckedChange={toggleSelectAllQuestions}
+                      disabled={isBusy || !!material?.isCompleted || questions.length === 0}
+                      aria-label="表示中の問題を一括選択"
+                    />
+                  </div>
+                </TableHead>
                 <TableHead className="w-[100px] text-center">削除</TableHead>
                 <TableHead>問題番号</TableHead>
                 <TableHead>答え</TableHead>
@@ -134,6 +175,16 @@ export const QuestionManagementPage = () => {
             <TableBody>
               {questions.map((q) => (
                 <TableRow key={q.id} className="h-10">
+                  <TableCell className="w-12 px-2 py-2">
+                    <div className="flex items-center justify-center">
+                      <Checkbox
+                        checked={selectedQuestionIds.has(q.id)}
+                        onCheckedChange={(checked) => toggleQuestionSelection(q.id, checked === true)}
+                        disabled={isBusy || !!material?.isCompleted}
+                        aria-label={`${q.canonicalKey}を選択`}
+                      />
+                    </div>
+                  </TableCell>
                   <TableCell className="py-2 text-center">
                     <Button
                       variant="destructive"
@@ -234,7 +285,7 @@ export const QuestionManagementPage = () => {
               ))}
               {questions.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     問題が登録されていません
                   </TableCell>
                 </TableRow>

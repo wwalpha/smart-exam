@@ -37,6 +37,7 @@ export const useQuestionManagement = () => {
   const [bulkInput, setBulkInput] = useState('');
   const [bulkValidationError, setBulkValidationError] = useState<string | null>(null);
   const [draftByQuestionId, setDraftByQuestionId] = useState<Record<string, DraftChoice>>({});
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState<Set<string>>(() => new Set());
   const { confirm, ConfirmDialog } = useConfirm();
 
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
@@ -76,6 +77,15 @@ export const useQuestionManagement = () => {
     return Object.keys(validationErrorByQuestionId).length > 0;
   }, [validationErrorByQuestionId]);
 
+  const isAllQuestionsSelected = useMemo(() => {
+    return sortedQuestions.length > 0 && sortedQuestions.every((question) => selectedQuestionIds.has(question.id));
+  }, [selectedQuestionIds, sortedQuestions]);
+
+  const isSomeQuestionsSelected = useMemo(() => {
+    const selectedVisibleQuestionCount = sortedQuestions.filter((question) => selectedQuestionIds.has(question.id)).length;
+    return selectedVisibleQuestionCount > 0 && selectedVisibleQuestionCount < sortedQuestions.length;
+  }, [selectedQuestionIds, sortedQuestions]);
+
   useEffect(() => {
     // 画面の対象IDが変わったら、関連データをまとめて再取得する
     if (id) {
@@ -93,6 +103,15 @@ export const useQuestionManagement = () => {
 
   useEffect(() => {
     setDraftByQuestionId(buildDraftFromQuestions(sortedQuestions));
+  }, [sortedQuestions]);
+
+  useEffect(() => {
+    const visibleQuestionIds = new Set(sortedQuestions.map((question) => question.id));
+    setSelectedQuestionIds((prev) => {
+      const next = new Set(Array.from(prev).filter((questionId) => visibleQuestionIds.has(questionId)));
+      if (next.size === prev.size) return prev;
+      return next;
+    });
   }, [sortedQuestions]);
 
   const submitBulk = async () => {
@@ -135,7 +154,57 @@ export const useQuestionManagement = () => {
     if (await confirm('本当に削除しますか？', { variant: 'destructive' })) {
       if (!id) return;
       await deleteQuestion(id, questionId);
+      setSelectedQuestionIds((prev) => {
+        if (!prev.has(questionId)) return prev;
+        const next = new Set(prev);
+        next.delete(questionId);
+        return next;
+      });
       if (id) fetchQuestions(id);
+    }
+  };
+
+  const toggleQuestionSelection = (questionId: string, selected?: boolean) => {
+    setSelectedQuestionIds((prev) => {
+      const next = new Set(prev);
+      const shouldSelect = selected ?? !next.has(questionId);
+      if (shouldSelect) next.add(questionId);
+      else next.delete(questionId);
+      return next;
+    });
+  };
+
+  const clearQuestionSelection = () => {
+    setSelectedQuestionIds(new Set());
+  };
+
+  const toggleSelectAllQuestions = () => {
+    setSelectedQuestionIds((prev) => {
+      const next = new Set(prev);
+      const visibleQuestionIds = sortedQuestions.map((question) => question.id);
+      const shouldClear = visibleQuestionIds.length > 0 && visibleQuestionIds.every((questionId) => next.has(questionId));
+      if (shouldClear) {
+        for (const questionId of visibleQuestionIds) next.delete(questionId);
+        return next;
+      }
+      for (const questionId of visibleQuestionIds) next.add(questionId);
+      return next;
+    });
+  };
+
+  const removeSelected = async () => {
+    if (!id || detail?.isCompleted || sortedQuestions.length === 0 || selectedQuestionIds.size === 0) return;
+    const questionIds = sortedQuestions
+      .map((question) => question.id)
+      .filter((questionId) => selectedQuestionIds.has(questionId));
+    if (questionIds.length === 0) return;
+
+    if (await confirm(`選択した ${questionIds.length} 件の問題を削除しますか？`, { variant: 'destructive' })) {
+      for (const questionId of questionIds) {
+        await deleteQuestion(id, questionId);
+      }
+      clearQuestionSelection();
+      await fetchQuestions(id);
     }
   };
 
@@ -208,6 +277,13 @@ export const useQuestionManagement = () => {
     bulkValidationError,
     submitBulk,
     remove,
+    selectedQuestionIds,
+    toggleQuestionSelection,
+    toggleSelectAllQuestions,
+    clearQuestionSelection,
+    removeSelected,
+    isAllQuestionsSelected,
+    isSomeQuestionsSelected,
     setChoice,
     setCorrectAnswer,
     saveChoices,
