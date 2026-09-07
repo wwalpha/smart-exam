@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { PDFDocument } from 'pdf-lib';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { SUPPORTED_PROTOCOL_VERSIONS } from '@modelcontextprotocol/sdk/types.js';
@@ -110,7 +111,9 @@ describe('SDK Streamable HTTP with isolated AWS HTTP fixtures', () => {
     expect(url.searchParams.has('X-Amz-Signature')).toBe(true);
     const downloaded = await fetch(url);
     expect(downloaded.status).toBe(200);
-    expect(Buffer.from(await downloaded.arrayBuffer())).toEqual(pdf);
+    const bytes = Buffer.from(await downloaded.arrayBuffer());
+    expect(bytes).toEqual(pdf);
+    expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
     expect(fixture.calls).toContain('GetObject');
     expect(fixture.calls).not.toContain('WRITE');
   });
@@ -367,6 +370,48 @@ describe('SDK Streamable HTTP with isolated AWS HTTP fixtures', () => {
       expect((await handle(input, fixtureConfig, fixture.repo)).statusCode).toBe(405);
     }
   });
+  it('pages lifecycle beyond 500 and scans all candidates before deriving state', async () => {
+    fixture.rows.EXAM_HISTORIES = Array.from({ length: 507 }, (_, n) => ({
+      ...fixture.rows.EXAM_HISTORIES[0],
+      id: `h${n}`,
+      closedAt: `2026-01-01T00:00:${n}`,
+    }));
+    fixture.controls.byteLimit = 2000;
+    const history = await all('get_target_learning_history', {
+      mode: 'MATERIAL',
+      targetId: 'q0',
+      view: 'LIFECYCLE',
+      pageSize: 100,
+    });
+    expect(history.map((row) => (row.record as Row).id)).toEqual(
+      fixture.rows.EXAM_HISTORIES.map((row) => row.id),
+    );
+    const active = { ...fixture.rows.EXAM_CANDIDATES[0] };
+    fixture.rows.EXAM_CANDIDATES = [
+      ...Array.from({ length: 507 }, (_, n) => ({
+        ...active,
+        id: `closed${n}`,
+        candidateKey: `closed${n}`,
+        closedAt: '2026-01-01',
+      })),
+      active,
+    ];
+    delete active.correctCount;
+    expect(
+      (await call('get_target_learning_history', { mode: 'MATERIAL', targetId: 'q0', view: 'REVIEW_STATE' }))
+        .data,
+    ).toMatchObject({ state: 'LOCKED', correctCount: null });
+  });
+
+  it('lets the SDK reject malformed JSON and unsupported protocol headers', async () => {
+    const badJson = event({});
+    badJson.body = '{';
+    expect((await handle(badJson, fixtureConfig, fixture.repo)).statusCode).toBe(400);
+    const unsupported = event({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
+    unsupported.headers['mcp-protocol-version'] = '2026-07-28';
+    expect((await handle(unsupported, fixtureConfig, fixture.repo)).statusCode).toBe(400);
+  });
+
   it('requires authorization in every environment and rejects wrong scope/audience/client/use/user/origin/expiry', async () => {
     const request = { jsonrpc: '2.0', id: 1, method: 'tools/list' };
     const missing = event(request);

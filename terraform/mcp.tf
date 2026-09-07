@@ -45,11 +45,11 @@ resource "aws_cognito_user_pool_client" "mcp" {
   allowed_oauth_scopes                 = ["openid", "${aws_cognito_resource_server.mcp.identifier}/read"]
   callback_urls                        = var.mcp_callback_urls
   supported_identity_providers         = ["COGNITO"]
-  explicit_auth_flows                   = ["ALLOW_REFRESH_TOKEN_AUTH"]
-  prevent_user_existence_errors         = "ENABLED"
-  access_token_validity                 = 15
-  id_token_validity                     = 15
-  refresh_token_validity                = 7
+  explicit_auth_flows                 = ["ALLOW_REFRESH_TOKEN_AUTH"]
+  prevent_user_existence_errors       = "ENABLED"
+  access_token_validity               = 15
+  id_token_validity                   = 15
+  refresh_token_validity              = 7
   token_validity_units {
     access_token  = "minutes"
     id_token      = "minutes"
@@ -74,8 +74,8 @@ resource "aws_iam_role" "mcp" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
-      Action = "sts:AssumeRole"
+      Effect    = "Allow"
+      Action    = "sts:AssumeRole"
       Principal = { Service = "lambda.amazonaws.com" }
     }]
   })
@@ -100,9 +100,9 @@ resource "aws_iam_role_policy" "mcp" {
         Resource = ["${aws_s3_bucket.files.arn}/materials/*", "${aws_s3_bucket.files.arn}/exams/*"]
       },
       {
-        Effect   = "Allow"
-        Action   = ["s3:ListBucket"]
-        Resource = [aws_s3_bucket.files.arn]
+        Effect    = "Allow"
+        Action    = ["s3:ListBucket"]
+        Resource  = [aws_s3_bucket.files.arn]
         Condition = { StringLike = { "s3:prefix" = ["materials/*", "exams/*"] } }
       },
       {
@@ -131,13 +131,13 @@ resource "aws_cloudwatch_log_group" "mcp" {
 # MCP mcp.
 # ----------------------------------------------------------------------------------------------
 resource "aws_lambda_function" "mcp" {
-  function_name = "${var.project_name}_mcp"
-  role          = aws_iam_role.mcp.arn
-  runtime       = "nodejs22.x"
-  handler       = "mcp.handler"
-  filename      = "${path.module}/../backend/mcp.zip"
-  timeout       = 25
-  memory_size   = 512
+  function_name                  = "${var.project_name}_mcp"
+  role                           = aws_iam_role.mcp.arn
+  runtime                        = "nodejs22.x"
+  handler                        = "mcp.handler"
+  filename                       = "${path.module}/../backend/mcp.zip"
+  timeout                        = 25
+  memory_size                    = 512
   reserved_concurrent_executions = 2
   lifecycle {
     ignore_changes = [filename, source_code_hash]
@@ -206,7 +206,7 @@ resource "aws_apigatewayv2_route" "mcp" {
 # MCP mcp_public.
 # ----------------------------------------------------------------------------------------------
 resource "aws_apigatewayv2_route" "mcp_public" {
-  for_each = toset(["GET /.well-known/oauth-protected-resource/mcp/v1", "GET /mcp/v1", "DELETE /mcp/v1"])
+  for_each           = toset(["GET /.well-known/oauth-protected-resource/mcp/v1", "GET /mcp/v1", "DELETE /mcp/v1"])
   api_id             = aws_apigatewayv2_api.http.id
   route_key          = each.value
   target             = "integrations/${aws_apigatewayv2_integration.mcp.id}"

@@ -87,7 +87,7 @@ variable "mcp_build_id" {
 variable "mcp_allowed_subjects" {
   description = "Optional approved Cognito subs; MCP_READERS membership also grants access."
   type        = list(string)
-  default = []
+  default     = []
 }
 
 # ----------------------------------------------------------------------------------------------
@@ -96,5 +96,5 @@ variable "mcp_allowed_subjects" {
 variable "mcp_allowed_origins" {
   description = "Explicit browser Origin allowlist. Empty allows authenticated clients without Origin only."
   type        = list(string)
-  default = []
+  default     = []
 }
