@@ -61,10 +61,11 @@ variable "alarm_notification_emails" {
 # Exact pre-registered OAuth callbacks; no guessed URLs or wildcards.
 # ----------------------------------------------------------------------------------------------
 variable "mcp_callback_urls" {
-  description = "Exact pre-registered OAuth callbacks; no guessed URLs or wildcards."
+  description = "Exact pre-registered OAuth callbacks. Empty disables MCP OAuth for initial deployment."
   type        = list(string)
+  default     = []
   validation {
-    condition     = length(var.mcp_callback_urls) > 0 && alltrue([for url in var.mcp_callback_urls : can(regex("^(https://[^/]+/|http://localhost:[0-9]+/)", url)) && length(regexall("[*#]", url)) == 0])
+    condition     = alltrue([for url in var.mcp_callback_urls : can(regex("^(https://[^/]+/|http://localhost:[0-9]+/)", url)) && length(regexall("[*#]", url)) == 0])
     error_message = "Provide exact HTTPS or localhost OAuth callback URLs."
   }
 }

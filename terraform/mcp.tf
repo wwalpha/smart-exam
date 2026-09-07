@@ -1,7 +1,8 @@
 locals {
-  mcp_endpoint = "${local.deploy_environment == "prod" ? "https://api.smartexam.aws-handson.com" : aws_apigatewayv2_api.http.api_endpoint}/mcp/v1"
-  mcp_issuer   = "https://cognito-idp.${var.region}.amazonaws.com/${aws_cognito_user_pool.auth.id}"
-  mcp_tables = [
+  mcp_oauth_enabled = length(var.mcp_callback_urls) > 0
+  mcp_endpoint      = "${local.deploy_environment == "prod" ? "https://api.smartexam.aws-handson.com" : aws_apigatewayv2_api.http.api_endpoint}/mcp/v1"
+  mcp_issuer        = "https://cognito-idp.${var.region}.amazonaws.com/${aws_cognito_user_pool.auth.id}"
+  mcp_tables        = [
     aws_dynamodb_table.materials.arn,
     aws_dynamodb_table.material_questions.arn,
     aws_dynamodb_table.kanji.arn,
@@ -40,9 +41,9 @@ resource "aws_cognito_user_pool_client" "mcp" {
   name                                 = "${var.project_name}_mcp_client"
   user_pool_id                         = aws_cognito_user_pool.auth.id
   generate_secret                      = false
-  allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                  = ["code"]
-  allowed_oauth_scopes                 = ["openid", "${aws_cognito_resource_server.mcp.identifier}/read"]
+  allowed_oauth_flows_user_pool_client = local.mcp_oauth_enabled
+  allowed_oauth_flows                  = local.mcp_oauth_enabled ? ["code"] : []
+  allowed_oauth_scopes                 = local.mcp_oauth_enabled ? ["openid", "${aws_cognito_resource_server.mcp.identifier}/read"] : []
   callback_urls                        = var.mcp_callback_urls
   supported_identity_providers         = ["COGNITO"]
   explicit_auth_flows                  = ["ALLOW_REFRESH_TOKEN_AUTH"]

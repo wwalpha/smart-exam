@@ -30,7 +30,7 @@ jobs:
     env:
       TF_VAR_deploy_environment: ${{ vars.DEPLOY_ENV != '' && vars.DEPLOY_ENV || 'dev' }}
       TF_VAR_cognito_domain_prefix: ${{ vars.COGNITO_DOMAIN_PREFIX }}
-      TF_VAR_mcp_callback_urls: ${{ vars.MCP_CALLBACK_URLS }}
+      TF_VAR_mcp_callback_urls: ${{ vars.MCP_CALLBACK_URLS || '[]' }}
       TF_VAR_mcp_allowed_subjects: ${{ vars.MCP_ALLOWED_SUBJECTS || '[]' }}
       TF_VAR_mcp_allowed_origins: ${{ vars.MCP_ALLOWED_ORIGINS || '[]' }}
       TF_VAR_mcp_build_id: ${{ github.sha }}
@@ -51,10 +51,6 @@ jobs:
         with:
           name: mcp-${{ github.sha }}
           path: backend
-
-      - name: Require exact MCP callback configuration
-        run: |
-          test -n "$TF_VAR_mcp_callback_urls" || { echo 'Set MCP_CALLBACK_URLS to the exact JSON callback URL list in this GitHub Environment.'; exit 1; }
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -93,6 +89,10 @@ jobs:
       - name: Enable managed login for the dedicated MCP client
         working-directory: ./terraform
         run: |
+          if [ "$(terraform output -raw mcp_oauth_enabled)" != "true" ]; then
+            echo "MCP infrastructure deployed; OAuth is disabled until MCP_CALLBACK_URLS is configured." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           export MCP_USER_POOL_ID="$(terraform output -raw cognito_user_pool_id)"
           export MCP_CLIENT_ID="$(terraform output -raw mcp_client_id)"
           python3 ../.github/scripts/mcp-branding.py
