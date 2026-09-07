@@ -48,9 +48,13 @@ jobs:
       - uses: hashicorp/setup-terraform@v4
       - name: Terraform formatting check
         working-directory: terraform
-        run: terraform fmt -check -diff
+        run: terraform fmt -check -diff -recursive
       - name: Terraform init and validate (no state)
         working-directory: terraform
         run: |
           terraform init -backend=false -input=false
           terraform validate
+
+      - name: MCP OAuth bootstrap regression (mock providers, no AWS)
+        working-directory: terraform
+        run: terraform test -filter=tests/mcp-oauth.tftest.hcl

@@ -181,3 +181,11 @@ output "mcp_issuer" {
   description = "MCP mcp_issuer."
   value       = local.mcp_issuer
 }
+
+# ----------------------------------------------------------------------------------------------
+# Whether MCP OAuth is enabled with registered callbacks.
+# ----------------------------------------------------------------------------------------------
+output "mcp_oauth_enabled" {
+  description = "Whether MCP OAuth is enabled with registered callbacks."
+  value       = local.mcp_oauth_enabled
+}

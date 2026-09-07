@@ -53,7 +53,7 @@ fileRefを復号して親レコード・許可prefix・object存在・ETag/Versi
 
 各Environmentに次を設定する。
 
-- **MCP_CALLBACK_URLS（必須Variable）**: Cognitoに事前登録する完全なcallback URLのJSON配列。値が未提供ならplan/apply前に停止する。推測値・wildcardを使わない。
+- **MCP_CALLBACK_URLS（OAuth有効化時に必要なVariable）**: Cognitoに事前登録する完全なcallback URLのJSON配列。stagingでは未設定または `[]` の場合はMCP専用クライアントのOAuthを無効にして先行デプロイする。endpoint/client IDの取得後、実際のcallbackを登録して再デプロイするとOAuthとmanaged loginを有効にする。productionの既存必須チェックは維持する。推測値・wildcardを使わない。
 - MCP_ALLOWED_SUBJECTS（任意Variable）: 明示的に承認したCognito subのJSON配列。既定 `[]`。または専用MCP_READERSグループへの所属で許可する。既存利用者を自動で所属させない。
 - MCP_ALLOWED_ORIGINS（任意Variable）: 許可するOriginのJSON配列。既定 `[]` ではOriginなしの認証済みCLIを許可し、Origin付きは拒否する。既存API全体のCORSは変更しない。
 - MCP_SMOKE_ACCESS_TOKEN（任意Secret）: 既存の安全な試験手段で取得した短命MCP access tokenが利用できる場合のみ。資格情報を変更・再発行して用意しない。
@@ -82,7 +82,7 @@ Lambda直接invokeは隔離したtrusted contextを渡す試験であり、OAuth
 - 507件、byte境界、空ページ+cursor、不正/条件流用cursor、出力サイズ、採点不一致、親/master欠落、孤立結果、未確定、訂正hash、未生成PDFの書込ゼロ、認可拒否、ログ非漏洩を検査する。
 - 元commit `89e2e8d105b6877ea45bfa3f13b9124a57733030` でも全backend suiteは7失敗/46成功/2skip。PDF controllerテストの旧buffer期待値は今回の関連回帰として現行downloadUrl契約へ修正。その他6件（漢字生成/import fixture、候補終了履歴の旧期待値）は今回範囲外で保持する。
 - 全backend lintの既存5違反（漢字/問題生成のprefer-const、漢字削除の未使用変数、旧テストany）は未修正。CIのlint/testは上記変更範囲を明示して実行する。
-- AWSデプロイ/認証済みHTTPSは別途run結果を記録する。callback URL未設定はデプロイblockであり、7 Tools実装や隔離試験のblockではない。
+- AWSデプロイ/認証済みHTTPSは別途run結果を記録する。callback URL未設定でも先行デプロイと隔離試験を行う。OAuthログインはcallback登録・再デプロイ後に検証する。
 
 ## 接続用の非秘密outputs
 
@@ -107,4 +107,4 @@ API作成clientはbrandingを自動付与されず、未設定ではログイン
 - [staging Deploy run 34103014151](https://github.com/wwalpha/smart-exam/actions/runs/34103014151): checks成功後、`Require exact MCP callback configuration`で停止。`staging.MCP_CALLBACK_URLS`が空だった。AWS credentials設定・state backend init・plan・apply・Lambda更新・AWS smokeは未実行。
 - したがってAWS反映なし。MCP endpoint/client IDの実outputs、Cognito branding、IAM実環境simulation、認証済みHTTPSは未検証。scopeだけはContract上の `smart-exam-mcp/read` と確定している。
 
-完全なcallback URLが提示され、stagingのMCP_CALLBACK_URLSに設定された後に、同じ正規Deploy workflowを再実行する。利用許可は明示sub allowlistまたはMCP_READERS所属で別途確認する。既存資格情報の変更・認証bypass・本番release作成は行っていない。
+修正後はMCP_CALLBACK_URLS未設定でも同じ正規Deploy workflowを再実行できる。完全なcallback URLが確定したらstagingのMCP_CALLBACK_URLSに設定し、再デプロイしてOAuthを有効にする。利用許可は明示sub allowlistまたはMCP_READERS所属で別途確認する。既存資格情報の変更・認証bypass・本番release作成は行っていない。
