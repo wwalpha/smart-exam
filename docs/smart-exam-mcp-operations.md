@@ -96,3 +96,15 @@ Lambda直接invokeは隔離したtrusted contextを渡す試験であり、OAuth
 
 
 API作成clientはbrandingを自動付与されず、未設定ではログイン画面を利用できない（[AWS CreateUserPoolClient](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateUserPoolClient.html)、[CreateManagedLoginBranding](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateManagedLoginBranding.html)）。Actions roleには当該User Poolの `cognito-idp:DescribeManagedLoginBrandingByClient` / `cognito-idp:CreateManagedLoginBranding` も必要。MCP実行roleへは付与しない。
+
+## 実施記録（2026-09-07）
+
+サーバー実装commit: `fc91dad0e6639875f03610c6d2c087d5a56641fa`、branch: `codex/read-only-mcp`。
+
+- ローカル: `test:mcp` 59件成功、plan guard/branding運用試験6件成功、typecheck・変更範囲lint・build/package成功。
+- 全backendの最終確認: 79成功・既存6失敗・既存2skip。変更前との比較と失敗範囲は上記参照。
+- [MCP Checks run 34102920345](https://github.com/wwalpha/smart-exam/actions/runs/34102920345): 成功。固定install、同試験、artifact内build ID、Terraform fmt/init（backendなし）/validateまで確認。
+- [staging Deploy run 34103014151](https://github.com/wwalpha/smart-exam/actions/runs/34103014151): checks成功後、`Require exact MCP callback configuration`で停止。`staging.MCP_CALLBACK_URLS`が空だった。AWS credentials設定・state backend init・plan・apply・Lambda更新・AWS smokeは未実行。
+- したがってAWS反映なし。MCP endpoint/client IDの実outputs、Cognito branding、IAM実環境simulation、認証済みHTTPSは未検証。scopeだけはContract上の `smart-exam-mcp/read` と確定している。
+
+完全なcallback URLが提示され、stagingのMCP_CALLBACK_URLSに設定された後に、同じ正規Deploy workflowを再実行する。利用許可は明示sub allowlistまたはMCP_READERS所属で別途確認する。既存資格情報の変更・認証bypass・本番release作成は行っていない。
