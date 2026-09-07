@@ -31,3 +31,13 @@ await build({
   ],
   external: [],
 });
+
+// MCPはWeb/PDFのartifactと別ディレクトリに固定する。
+await build({
+  entryPoints: [path.join(backendRoot, 'src/mcp/handler.ts')],
+  outfile: path.join(backendRoot, 'dist-mcp', 'mcp.js'),
+  bundle: true, platform: 'node', format: 'cjs', target: ['node22'],
+  sourcemap: false, logLevel: 'info',
+  define: { 'process.env.MCP_BUILD_ID': JSON.stringify(process.env.MCP_BUILD_ID || 'local-uncommitted') },
+  plugins: [TsconfigPathsPlugin({ tsconfig: path.join(backendRoot, 'tsconfig.json') })],
+});

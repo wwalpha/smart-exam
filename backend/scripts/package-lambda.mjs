@@ -107,3 +107,8 @@ await fs.writeFile(
 // - handlers/bedrock.handler => handlers/bedrock.js
 
 console.log(`Packaged ${fileList.size} files into ${path.relative(backendRoot, outDir)}/`);
+
+const mcpDir = path.join(backendRoot, 'lambda-mcp');
+await fs.mkdir(mcpDir, { recursive: true });
+await fs.copyFile(path.join(backendRoot, 'dist-mcp', 'mcp.js'), path.join(mcpDir, 'mcp.js'));
+await fs.writeFile(path.join(mcpDir, 'package.json'), JSON.stringify({ private: true, type: 'commonjs' }) + '\n');

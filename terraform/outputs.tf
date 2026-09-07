@@ -133,3 +133,51 @@ output "lambda_alarm_sns_topic_arn" {
   description = "SNS topic ARN used by Lambda error CloudWatch alarms."
   value       = aws_sns_topic.lambda_alarms.arn
 }
+
+# ----------------------------------------------------------------------------------------------
+# MCP mcp_endpoint.
+# ----------------------------------------------------------------------------------------------
+output "mcp_endpoint" {
+  description = "MCP mcp_endpoint."
+  value       = local.mcp_endpoint
+}
+
+# ----------------------------------------------------------------------------------------------
+# MCP mcp_discovery_url.
+# ----------------------------------------------------------------------------------------------
+output "mcp_discovery_url" {
+  description = "MCP mcp_discovery_url."
+  value       = "${trimsuffix(local.mcp_endpoint, "/mcp/v1")}/.well-known/oauth-protected-resource/mcp/v1"
+}
+
+# ----------------------------------------------------------------------------------------------
+# MCP mcp_client_id.
+# ----------------------------------------------------------------------------------------------
+output "mcp_client_id" {
+  description = "MCP mcp_client_id."
+  value       = aws_cognito_user_pool_client.mcp.id
+}
+
+# ----------------------------------------------------------------------------------------------
+# MCP mcp_scope.
+# ----------------------------------------------------------------------------------------------
+output "mcp_scope" {
+  description = "MCP mcp_scope."
+  value       = "smart-exam-mcp/read"
+}
+
+# ----------------------------------------------------------------------------------------------
+# MCP mcp_lambda_function_name.
+# ----------------------------------------------------------------------------------------------
+output "mcp_lambda_function_name" {
+  description = "MCP mcp_lambda_function_name."
+  value       = aws_lambda_function.mcp.function_name
+}
+
+# ----------------------------------------------------------------------------------------------
+# MCP mcp_issuer.
+# ----------------------------------------------------------------------------------------------
+output "mcp_issuer" {
+  description = "MCP mcp_issuer."
+  value       = local.mcp_issuer
+}

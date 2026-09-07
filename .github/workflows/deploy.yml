@@ -1,10 +1,15 @@
 name: Deploy
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
       - main
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 permissions:
   id-token: write
@@ -15,12 +20,20 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  checks:
+    uses: ./.github/workflows/mcp-check.yml
+
   terraform:
+    needs: checks
     runs-on: ubuntu-latest
     environment: ${{ vars.DEPLOY_ENV == 'prod' && 'production' || 'staging' }}
     env:
       TF_VAR_deploy_environment: ${{ vars.DEPLOY_ENV != '' && vars.DEPLOY_ENV || 'dev' }}
       TF_VAR_cognito_domain_prefix: ${{ vars.COGNITO_DOMAIN_PREFIX }}
+      TF_VAR_mcp_callback_urls: ${{ vars.MCP_CALLBACK_URLS }}
+      TF_VAR_mcp_allowed_subjects: ${{ vars.MCP_ALLOWED_SUBJECTS || '[]' }}
+      TF_VAR_mcp_allowed_origins: ${{ vars.MCP_ALLOWED_ORIGINS || '[]' }}
+      TF_VAR_mcp_build_id: ${{ github.sha }}
     outputs:
       http_api_endpoint: ${{ steps.outputs.outputs.http_api_endpoint }}
       cognito_user_pool_id: ${{ steps.outputs.outputs.cognito_user_pool_id }}
@@ -33,6 +46,15 @@ jobs:
       lambda_function_name: ${{ steps.outputs.outputs.lambda_function_name }}
     steps:
       - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: mcp-${{ github.sha }}
+          path: backend
+
+      - name: Require exact MCP callback configuration
+        run: |
+          test -n "$TF_VAR_mcp_callback_urls" || { echo 'Set MCP_CALLBACK_URLS to the exact JSON callback URL list in this GitHub Environment.'; exit 1; }
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -50,9 +72,33 @@ jobs:
             -backend-config="key=${{ vars.TERRAFORM_BACKEND_KEY }}" \
             -backend-config="region=${{ vars.TERRAFORM_BACKEND_REGION }}"
 
-      - name: Terraform Apply
+      - name: Terraform check, validate and saved plan
         working-directory: ./terraform
-        run: terraform apply -auto-approve
+        run: |
+          terraform fmt -check
+          terraform validate
+          terraform plan -input=false -out=mcp.tfplan
+          terraform show -json mcp.tfplan | python3 ../.github/scripts/check-mcp-plan.py
+
+      - name: Apply the inspected plan from this run
+        working-directory: ./terraform
+        run: terraform apply -input=false -auto-approve mcp.tfplan
+
+      - name: Deploy MCP artifact from the same commit and wait
+        working-directory: ./terraform
+        run: |
+          aws --no-cli-pager lambda update-function-code --function-name "$(terraform output -raw mcp_lambda_function_name)" --zip-file fileb://../backend/mcp.zip > /dev/null
+          aws --no-cli-pager lambda wait function-updated-v2 --function-name "$(terraform output -raw mcp_lambda_function_name)"
+
+      - name: MCP post-deployment smoke
+        working-directory: ./terraform
+        env:
+          MCP_BUILD_ID: ${{ github.sha }}
+          MCP_SMOKE_ACCESS_TOKEN: ${{ secrets.MCP_SMOKE_ACCESS_TOKEN }}
+        run: |
+          export MCP_ENDPOINT="$(terraform output -raw mcp_endpoint)"
+          export MCP_LAMBDA="$(terraform output -raw mcp_lambda_function_name)"
+          python3 ../.github/scripts/mcp-smoke.py
 
       - name: Get Terraform Outputs
         id: outputs

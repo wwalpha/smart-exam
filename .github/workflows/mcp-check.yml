@@ -1,0 +1,54 @@
+name: MCP Checks
+
+on:
+  workflow_call:
+  push:
+    branches: ['codex/read-only-mcp']
+  pull_request:
+    paths: ['backend/**', 'packages/**', 'terraform/**', '.github/**', 'yarn.lock']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack prepare yarn@4.12.0 --activate
+          yarn install --immutable
+      - name: Schema, types, lint and regression tests
+        run: |
+          yarn workspace @smart-exam/api-types build
+          yarn workspace smart-exam-backend typecheck
+          yarn workspace smart-exam-backend lint:mcp
+          yarn workspace smart-exam-backend test:mcp
+          python3 .github/scripts/test-mcp-plan.py
+      - name: Build and package distinct Lambda artifacts
+        env:
+          MCP_BUILD_ID: ${{ github.sha }}
+        run: |
+          yarn workspace smart-exam-backend build:lambda
+          yarn workspace smart-exam-backend package:lambda
+          (cd backend/lambda-mcp && zip -q -9 -r ../mcp.zip .)
+          test "$(unzip -Z1 backend/mcp.zip | sort | tr '\n' ' ')" = 'mcp.js package.json '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mcp-${{ github.sha }}
+          path: backend/mcp.zip
+          retention-days: 7
+      - uses: hashicorp/setup-terraform@v4
+      - name: Terraform formatting check
+        working-directory: terraform
+        run: terraform fmt -check -diff
+      - name: Terraform init and validate (no state)
+        working-directory: terraform
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
