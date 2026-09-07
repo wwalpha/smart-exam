@@ -40,7 +40,7 @@ jobs:
           node -e "if (require('./backend/lambda-mcp/mcp.js').configFromEnvironment().serverVersion !== process.env.MCP_BUILD_ID) process.exit(1)"
           (cd backend/lambda-mcp && zip -q -9 -r ../mcp.zip .)
           test "$(unzip -Z1 backend/mcp.zip | sort | tr '\n' ' ')" = 'mcp.js package.json '
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: mcp-${{ github.sha }}
           path: backend/mcp.zip
