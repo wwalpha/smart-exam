@@ -2,7 +2,7 @@ locals {
   mcp_oauth_enabled = length(var.mcp_callback_urls) > 0
   mcp_endpoint      = "${local.deploy_environment == "prod" ? "https://api.smartexam.aws-handson.com" : aws_apigatewayv2_api.http.api_endpoint}/mcp/v1"
   mcp_issuer        = "https://cognito-idp.${var.region}.amazonaws.com/${aws_cognito_user_pool.auth.id}"
-  mcp_tables        = [
+  mcp_tables = [
     aws_dynamodb_table.materials.arn,
     aws_dynamodb_table.material_questions.arn,
     aws_dynamodb_table.kanji.arn,
