@@ -70,7 +70,8 @@ MCPは全環境でJWT必須。Gatewayで署名・issuer・resource audience・sc
 4. Actions内でTerraform fmt check/init/validate。デプロイjobは元の環境backendをinitし、saved planを検査して同じplanだけをapply。
 5. plan guardは削除/再作成とMCP以外の変更を拒否する。既存stageの変更はMCP POSTルートのrate2/burst5の追加だけ許可する。plan/stateをartifactとしてuploadしない。
 6. 同じrunのMCP artifactを専用Lambdaへupdateし、function-updated-v2完了を待つ。
-7. metadataと未認証HTTPS拒否、Lambda context/build、IAM write-denial policy simulationを実施する。既存tokenがあるときだけ認証済みHTTPSを試験する。
+7. API作成したMCP client専用のmanaged-login brandingが未作成ならActions内のCognito APIで既定styleを一度作成する（既存styleは維持）。既存AWS provider 5.xに対応resourceがないため、provider全体の更新は避ける。このstyleはTerraform state外でCognito clientに付随して管理する。
+8. metadataと未認証HTTPS拒否、Lambda context/build、IAM write-denial policy simulationを実施する。既存tokenがあるときだけ認証済みHTTPSを試験する。
 
 Lambda直接invokeは隔離したtrusted contextを渡す試験であり、OAuth/JWT authorizerを通った試験ではない。IAM simulationは業務データに書き込まず拒否判定を調べるもので、実際のwrite API実行ではない。どちらも認証済みHTTPS成功と取り違えない。
 
@@ -92,3 +93,6 @@ Lambda直接invokeは隔離したtrusted contextを渡す試験であり、OAuth
 専用IAMは読取と専用log書込のみAllowし、業務書込・Bedrock・他Lambda invokeを明示Denyする。fileRef/cursorは暗号化と用途bindingを行い、毎回認可する。署名/本文のログ出力、生成Service参照、元REST認証設定の書換えを行っていないことを確認する。
 
 性能はpageSizeと20秒予算で制限する。master/親/PDFのHEADを伴うページでは複数readが発生する。大きな試験のSUMMARY/孤立結果診断およびREVIEW_STATEは全関連rowを確認するため、予算超過時はUPSTREAM_UNAVAILABLEとして再取得を要求する。全件確認できていない状態を「問題なし」「候補なし」として成功させない。
+
+
+API作成clientはbrandingを自動付与されず、未設定ではログイン画面を利用できない（[AWS CreateUserPoolClient](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateUserPoolClient.html)、[CreateManagedLoginBranding](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateManagedLoginBranding.html)）。Actions roleには当該User Poolの `cognito-idp:DescribeManagedLoginBrandingByClient` / `cognito-idp:CreateManagedLoginBranding` も必要。MCP実行roleへは付与しない。

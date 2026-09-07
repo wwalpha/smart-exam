@@ -30,12 +30,14 @@ jobs:
           yarn workspace smart-exam-backend lint:mcp
           yarn workspace smart-exam-backend test:mcp
           python3 .github/scripts/test-mcp-plan.py
+          python3 .github/scripts/test-mcp-branding.py
       - name: Build and package distinct Lambda artifacts
         env:
           MCP_BUILD_ID: ${{ github.sha }}
         run: |
           yarn workspace smart-exam-backend build:lambda
           yarn workspace smart-exam-backend package:lambda
+          node -e "if (require('./backend/lambda-mcp/mcp.js').configFromEnvironment().serverVersion !== process.env.MCP_BUILD_ID) process.exit(1)"
           (cd backend/lambda-mcp && zip -q -9 -r ../mcp.zip .)
           test "$(unzip -Z1 backend/mcp.zip | sort | tr '\n' ' ')" = 'mcp.js package.json '
       - uses: actions/upload-artifact@v4

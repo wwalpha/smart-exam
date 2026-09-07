@@ -90,6 +90,13 @@ jobs:
           aws --no-cli-pager lambda update-function-code --function-name "$(terraform output -raw mcp_lambda_function_name)" --zip-file fileb://../backend/mcp.zip > /dev/null
           aws --no-cli-pager lambda wait function-updated-v2 --function-name "$(terraform output -raw mcp_lambda_function_name)"
 
+      - name: Enable managed login for the dedicated MCP client
+        working-directory: ./terraform
+        run: |
+          export MCP_USER_POOL_ID="$(terraform output -raw cognito_user_pool_id)"
+          export MCP_CLIENT_ID="$(terraform output -raw mcp_client_id)"
+          python3 ../.github/scripts/mcp-branding.py
+
       - name: MCP post-deployment smoke
         working-directory: ./terraform
         env:

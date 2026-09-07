@@ -45,11 +45,11 @@ resource "aws_cognito_user_pool_client" "mcp" {
   allowed_oauth_scopes                 = ["openid", "${aws_cognito_resource_server.mcp.identifier}/read"]
   callback_urls                        = var.mcp_callback_urls
   supported_identity_providers         = ["COGNITO"]
-  explicit_auth_flows                 = ["ALLOW_REFRESH_TOKEN_AUTH"]
-  prevent_user_existence_errors       = "ENABLED"
-  access_token_validity               = 15
-  id_token_validity                   = 15
-  refresh_token_validity              = 7
+  explicit_auth_flows                  = ["ALLOW_REFRESH_TOKEN_AUTH"]
+  prevent_user_existence_errors        = "ENABLED"
+  access_token_validity                = 15
+  id_token_validity                    = 15
+  refresh_token_validity               = 7
   token_validity_units {
     access_token  = "minutes"
     id_token      = "minutes"

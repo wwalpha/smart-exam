@@ -160,6 +160,8 @@ Cognitoはresourceパラメーターによってaccess tokenのaudを指定resou
 
 通常Web用tokenをMCPへ渡して済ませる方式、およびMCP bearer tokenを別audienceのREST APIへ転送する方式は採用しない。
 
+API経由で新規clientを作る場合はmanaged-login brandingの適用も必要（[AWS API仕様](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateUserPoolClient.html)）。ActionsでMCP専用clientだけに既定styleを初期化する。既存Web/mobile clientやdomain設定は変更しない。
+
 ### 5.2 単一家庭・単一生徒の利用範囲
 
 Smart Examの学習データは、今回の分析対象である単一生徒のデータとして扱う。複数家庭・複数生徒の混在検査、対象生徒の選択、家庭・生徒ごとの所有権モデルや検索filterは作らない。tenantId / householdId / studentId / learnerId等は、Tool入力・業務データ・run保存構造へ追加しない。
