@@ -53,7 +53,7 @@ fileRefを復号して親レコード・許可prefix・object存在・ETag/Versi
 
 各Environmentに次を設定する。
 
-- **MCP_CALLBACK_URLS（OAuth有効化時に必要なVariable）**: Cognitoに事前登録する完全なcallback URLのJSON配列。stagingでは未設定または `[]` の場合はMCP専用クライアントのOAuthを無効にして先行デプロイする。endpoint/client IDの取得後、実際のcallbackを登録して再デプロイするとOAuthとmanaged loginを有効にする。productionの既存必須チェックは維持する。推測値・wildcardを使わない。
+- **MCP_CALLBACK_URLS（OAuth有効化時に必要なVariable）**: Cognitoに事前登録する完全なcallback URLのJSON配列。staging/prodともに未設定または `[]` の場合はMCP専用クライアントのOAuthを無効にして先行デプロイする。endpoint/client IDの取得後、実際のcallbackを登録して再デプロイするとOAuthとmanaged loginを有効にする。prodのVariableはGitHub Environment `prod` に設定する。callbackは接続先URLに依存するため、stagingの値をprodへ流用しない。推測値・wildcardを使わない。
 - MCP_ALLOWED_SUBJECTS（任意Variable）: 明示的に承認したCognito subのJSON配列。既定 `[]`。または専用MCP_READERSグループへの所属で許可する。既存利用者を自動で所属させない。
 - MCP_ALLOWED_ORIGINS（任意Variable）: 許可するOriginのJSON配列。既定 `[]` ではOriginなしの認証済みCLIを許可し、Origin付きは拒否する。既存API全体のCORSは変更しない。
 - MCP_SMOKE_ACCESS_TOKEN（任意Secret）: 既存の安全な試験手段で取得した短命MCP access tokenが利用できる場合のみ。資格情報を変更・再発行して用意しない。

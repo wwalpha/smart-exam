@@ -23,6 +23,27 @@ run "bootstrap_without_callback" {
   }
 }
 
+run "production_bootstrap_without_callback" {
+  command = plan
+  variables {
+    deploy_environment = "prod"
+    region             = "us-east-1"
+  }
+  plan_options {
+    target = [aws_cognito_user_pool_client.mcp]
+  }
+  assert {
+    condition = (
+      !aws_cognito_user_pool_client.mcp.allowed_oauth_flows_user_pool_client &&
+      length(aws_cognito_user_pool_client.mcp.callback_urls) == 0 &&
+      length(aws_cognito_user_pool_client.mcp.allowed_oauth_flows) == 0 &&
+      length(aws_cognito_user_pool_client.mcp.allowed_oauth_scopes) == 0 &&
+      aws_cognito_user_pool_client.mcp.explicit_auth_flows == toset(["ALLOW_REFRESH_TOKEN_AUTH"])
+    )
+    error_message = "Initial deployment must disable OAuth without enabling password authentication."
+  }
+}
+
 run "enable_with_exact_callback" {
   command = plan
   plan_options {
