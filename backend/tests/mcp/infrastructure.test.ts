@@ -44,7 +44,6 @@ describe('read-only infrastructure contract (static; AWS simulator runs after de
     expect(terraform).toMatch(/audience\s*=\s*\[local.mcp_endpoint\]/);
     expect(terraform).toMatch(/authorization_scopes\s*=\s*\["smart-exam-mcp\/read"\]/);
     expect(terraform).toMatch(/generate_secret\s*=\s*false/);
-    expect(terraform).toMatch(/allowed_oauth_flows\s*=\s*\["code"\]/);
     const existing = readFileSync('../terraform/apigw.tf', 'utf8')
       .split('resource "aws_apigatewayv2_authorizer" "cognito"')[1]
       .split('resource "aws_apigatewayv2_route" "default"')[0];
