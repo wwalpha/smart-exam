@@ -56,3 +56,45 @@ variable "alarm_notification_emails" {
   type        = list(string)
   default     = []
 }
+
+# ----------------------------------------------------------------------------------------------
+# Exact pre-registered OAuth callbacks; no guessed URLs or wildcards.
+# ----------------------------------------------------------------------------------------------
+variable "mcp_callback_urls" {
+  description = "Exact pre-registered OAuth callbacks; no guessed URLs or wildcards."
+  type        = list(string)
+  validation {
+    condition     = length(var.mcp_callback_urls) > 0 && alltrue([for url in var.mcp_callback_urls : can(regex("^(https://[^/]+/|http://localhost:[0-9]+/)", url)) && length(regexall("[*#]", url)) == 0])
+    error_message = "Provide exact HTTPS or localhost OAuth callback URLs."
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# Commit SHA of the MCP artifact built in this Actions run.
+# ----------------------------------------------------------------------------------------------
+variable "mcp_build_id" {
+  description = "Commit SHA of the MCP artifact built in this Actions run."
+  type        = string
+  validation {
+    condition     = can(regex("^[a-f0-9]{40}$", var.mcp_build_id))
+    error_message = "mcp_build_id must be the full commit SHA."
+  }
+}
+
+# ----------------------------------------------------------------------------------------------
+# Optional approved Cognito subs; MCP_READERS membership also grants access.
+# ----------------------------------------------------------------------------------------------
+variable "mcp_allowed_subjects" {
+  description = "Optional approved Cognito subs; MCP_READERS membership also grants access."
+  type        = list(string)
+  default     = []
+}
+
+# ----------------------------------------------------------------------------------------------
+# Explicit browser Origin allowlist. Empty allows authenticated clients without Origin only.
+# ----------------------------------------------------------------------------------------------
+variable "mcp_allowed_origins" {
+  description = "Explicit browser Origin allowlist. Empty allows authenticated clients without Origin only."
+  type        = list(string)
+  default     = []
+}

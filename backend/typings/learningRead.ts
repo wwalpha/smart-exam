@@ -1,0 +1,30 @@
+import type { z } from 'zod';
+import type { inputs, observation, quality, sourceRef } from '../src/mcp/schema';
+import type { LearningRepository } from '../src/repositories/learningRead';
+export type ToolName = keyof typeof inputs;
+export type Input = { [K in ToolName]: z.infer<(typeof inputs)[K]> }[ToolName];
+export type Row = Record<string, unknown>;
+export type Key = Record<string, string | number>;
+export type Quality = z.infer<typeof quality>;
+export type Ref = z.infer<typeof sourceRef>;
+export type Observation = z.infer<typeof observation>;
+export type ReadConfig = {
+  environment: string;
+  serverVersion: string;
+  endpoint: string;
+  issuer: string;
+  clientId: string;
+  scope: string;
+  allowedSubjects: string[];
+  allowedOrigins: string[];
+  referenceSecret: string;
+};
+export type ReadContext = {
+  repo: LearningRepository;
+  config: ReadConfig;
+  requestId: string;
+  observedAt: string;
+  deadline: number;
+  quality: Quality;
+};
+export type Position = { key?: Key; phase?: string; offset?: number; after?: string; s3Token?: string };

@@ -13,7 +13,9 @@
     "test:integration": "DDB_LOCAL_INTEGRATION=1 vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint:mcp": "eslint src/mcp src/services/learningRead src/repositories/learningRead src/middlewares/rejectMcpToken.ts src/app/createApp.ts tests/mcp tests/middlewares/rejectMcpToken.test.ts scripts/build-lambda.mjs scripts/package-lambda.mjs",
+    "test:mcp": "vitest run tests/mcp tests/middlewares tests/handlers tests/services/MaterialListFiles.test.ts tests/services/ExamGetDetailMaterialFallback.test.ts tests/lib/dateUtils.test.ts"
   },
   "dependencies": {
     "@alphax/dynamodb": "^1.2.16",
@@ -22,6 +24,7 @@
     "@aws-sdk/client-s3": "^3.956.0",
     "@aws-sdk/lib-dynamodb": "^3.0.0",
     "@aws-sdk/s3-request-presigner": "^3.956.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
     "@pdf-lib/fontkit": "^1.1.1",
     "@smart-exam/api-types": "workspace:*",
     "@vendia/serverless-express": "^4.12.6",
@@ -35,6 +38,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@aws-sdk/util-dynamodb": "3.962.0",
     "@esbuild-plugins/tsconfig-paths": "^0.1.2",
     "@eslint/js": "^9.39.2",
     "@types/aws-lambda": "^8.10.158",

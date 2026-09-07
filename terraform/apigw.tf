@@ -84,6 +84,12 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.http.id
   name        = "$default"
   auto_deploy = true
+
+  route_settings {
+    route_key              = aws_apigatewayv2_route.mcp.route_key
+    throttling_rate_limit  = 2
+    throttling_burst_limit = 5
+  }
 }
 
 # ----------------------------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+import { rejectMcpToken } from '@/middlewares/rejectMcpToken';
 import cors from 'cors';
 import express from 'express';
 import { z } from 'zod';
@@ -25,6 +26,7 @@ export const createApp = (): express.Express => {
 
   const app = express();
   app.use(cors());
+  app.use(rejectMcpToken);
   app.use(express.json());
 
   // アプリケーションの稼働状態を確認するヘルスチェックAPI
