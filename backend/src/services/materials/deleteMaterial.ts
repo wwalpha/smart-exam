@@ -7,17 +7,6 @@ export const createDeleteMaterial = async (repositories: Repositories, materialI
 
   const materialQuestions = await repositories.materialQuestions.listByMaterialId(materialId);
 
-  // 教材削除時は、復習候補と問題もまとめて削除する（孤児候補や復習テストへの混入を防ぐため）
-  await Promise.all(
-    materialQuestions.map(async (question) => {
-      await repositories.examCandidates.deleteOpenCandidatesByTargetId({
-        subject: question.subjectId,
-        targetId: question.questionId,
-      });
-      await repositories.materialQuestions.delete(question.questionId);
-    }),
-  );
-
   if (materialQuestions.length > 0) {
     const deletedQuestionIds = new Set(materialQuestions.map((question) => question.questionId));
     const exam = await repositories.exams.scanAll();
@@ -42,24 +31,16 @@ export const createDeleteMaterial = async (repositories: Repositories, materialI
           test.results?.some((result) => deletedQuestionIds.has(result.id));
         if (!hasAny) return;
 
-        const nextQuestions = (detailsByExamId.get(test.examId) ?? []).filter(
-          (questionId) => !deletedQuestionIds.has(questionId),
-        );
-        const nextResults = test.results
-          ? test.results.filter((result) => !deletedQuestionIds.has(result.id))
-          : undefined;
-
-        await repositories.examDetails.deleteByExamId(test.examId);
-        await repositories.examDetails.putMany(test.examId, nextQuestions, test.mode);
-
-        await repositories.exams.put({
-          ...test,
-          count: nextQuestions.length,
-          results: nextResults,
-        });
+        await repositories.materialReviews.removeMaterialTargets(test.examId, [...deletedQuestionIds], materialId);
       }),
     );
   }
+
+  await Promise.all(materialQuestions.map(async (question) => {
+    await repositories.materialQuestions.delete(question.questionId);
+    const candidates = await repositories.materialReviews.listQuestionCandidates(question.subjectId, question.questionId);
+    await Promise.all(candidates.map((candidate) => repositories.examCandidates.deleteCandidate({ subject: candidate.subject, candidateKey: candidate.candidateKey })));
+  }));
 
   const bucket = ENV.FILES_BUCKET_NAME;
   if (bucket) {

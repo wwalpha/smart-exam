@@ -32,6 +32,7 @@ describe('bulkUpdateChoices', () => {
     expect(update).toEqual({
       TableName: 'material_questions',
       Key: { questionId: 'q1' },
+      ConditionExpression: 'attribute_exists(questionId)',
       UpdateExpression: 'SET #choice = :choice',
       ExpressionAttributeNames: {
         '#choice': 'choice',
@@ -50,6 +51,7 @@ describe('bulkUpdateChoices', () => {
     expect(update).toEqual({
       TableName: 'material_questions',
       Key: { questionId: 'q1' },
+      ConditionExpression: 'attribute_exists(questionId)',
       UpdateExpression: 'SET #choice = :choice, #correctAnswer = :correctAnswer',
       ExpressionAttributeNames: {
         '#choice': 'choice',

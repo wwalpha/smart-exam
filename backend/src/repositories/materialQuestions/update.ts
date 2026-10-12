@@ -40,6 +40,7 @@ export const update = async (
     TableName: TABLE_NAME,
     // 更新対象レコードの主キー
     Key: { questionId },
+    ConditionExpression: 'attribute_exists(questionId)',
     // 動的に組み立てた更新式
     UpdateExpression: updateExp,
     // 更新式で使う属性名プレースホルダ

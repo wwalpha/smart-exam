@@ -1,0 +1,16 @@
+
+ RUN  v2.1.9 /Users/macmini/Documents/projects/smart-exam/backend
+
+ ✓ tests/services/MaterialReviewDynamoDbLocal.test.ts (19 tests) 2664ms
+   ✓ MATERIAL review transactions on DynamoDB Local > rolls back a failed question transaction and safely resumes after a committed question 349ms
+   ✓ MATERIAL review transactions on DynamoDB Local > executes the CLI default dry-run, apply and second apply against local fixtures only 1750ms
+ ✓ tests/services/MaterialReviewMigration.test.ts (7 tests) 8ms
+ ✓ tests/services/MaterialQuestionsBulkCreate.test.ts (1 test) 13ms
+ ✓ tests/repositories/MaterialQuestionsBulkUpdateChoices.test.ts (2 tests) 1ms
+ ✓ tests/lib/materialReviewPolicy.test.ts (3 tests) 2ms
+
+ Test Files  5 passed (5)
+      Tests  32 passed (32)
+   Start at  09:55:44
+   Duration  3.50s (transform 110ms, setup 0ms, collect 317ms, tests 2.69s, environment 0ms, prepare 77ms)
+

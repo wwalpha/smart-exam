@@ -4,6 +4,7 @@ import { ENV } from '@/lib/env';
 import { DateUtils } from '@/lib/dateUtils';
 import type { ExamMode, SubjectId } from '@smart-exam/api-types';
 import type { ExamCandidateTable } from '@/types/db';
+import { putMaterialCandidate } from '@/repositories/materialReviews/candidates';
 
 const TABLE_NAME = ENV.TABLE_EXAM_CANDIDATES;
 
@@ -16,7 +17,7 @@ export const createCandidate = async (params: {
   correctCount: number;
   status: 'OPEN' | 'LOCKED';
   createdAtIso?: string;
-}): Promise<ExamCandidateTable> => {
+}): Promise<ExamCandidateTable | null> => {
   const id = createUuid();
   const createdAt = params.createdAtIso ?? DateUtils.now();
   const candidateKey = `${params.nextTime}#${id}`;
@@ -33,6 +34,8 @@ export const createCandidate = async (params: {
     nextTime: params.nextTime,
     createdAt,
   };
+
+  if (params.mode === 'MATERIAL') return putMaterialCandidate(item);
 
   await dbHelper.put({
     TableName: TABLE_NAME,

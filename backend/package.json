@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "migrate:material-review-v2": "tsx scripts/migrate-material-review-v2.ts",
     "lint:mcp": "eslint src/mcp src/services/learningRead src/repositories/learningRead src/middlewares/rejectMcpToken.ts src/app/createApp.ts tests/mcp tests/middlewares/rejectMcpToken.test.ts scripts/build-lambda.mjs scripts/package-lambda.mjs",
     "test:mcp": "vitest run tests/mcp tests/middlewares tests/handlers tests/services/MaterialListFiles.test.ts tests/services/ExamGetDetailMaterialFallback.test.ts tests/lib/dateUtils.test.ts"
   },

@@ -44,6 +44,11 @@ export interface MaterialTable {
  * 教材明細テーブル
  */
 export interface MaterialQuestionsTable {
+  reviewCount?: number;
+  countedExamIds?: Set<string>;
+  reviewPolicyVersion?: number;
+  /** Atomic pointer preventing duplicate MATERIAL candidates. */
+  reviewCandidateKey?: string;
   /** 問題ID (PK) */
   questionId: string;
   /** 教材ID (GSI1 PK) */
@@ -86,6 +91,9 @@ export interface KanjiTable {
  * テストテーブル
  */
 export interface ExamTable {
+  completionStarted?: boolean;
+  gradingToken?: string;
+  deleting?: boolean;
   /** 試験ID (PK) */
   examId: string;
   /** 科目 */
@@ -110,6 +118,7 @@ export interface ExamTable {
  * 復習テスト詳細テーブル
  */
 export interface ExamDetailTable {
+  reviewProcessed?: boolean;
   /** 試験ID (PK) */
   examId: string;
   /** 明細順序 (SK) */

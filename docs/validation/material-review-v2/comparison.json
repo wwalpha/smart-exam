@@ -1,0 +1,45 @@
+{
+  "baselineCommit": "5e0df59247f87b7100ed1680df37f4e1f90c8b32",
+  "dateJst": "2026-10-12",
+  "results": {
+    "baseline": {
+      "failedCases": [
+        "tests/services/ExamCreateKanjiFallbackOpenCandidates.test.ts > createExam (KANJI) fallback open candidates > does not create questions from OPEN candidates when nextTime is in the future",
+        "tests/services/ExamCreateKanjiFiltersPrintable.test.ts > ExamsService.createExam (KANJI) > filters out non-printable candidates before selecting",
+        "tests/services/ExamCreateKanjiNoCandidates.test.ts > createExam (KANJI) with no candidates > returns an empty exam instead of throwing 400",
+        "tests/repositories/CloseCandidateMovesToHistories.test.ts > closeCandidateIfMatch > moves candidate to exam_histories and deletes from exam_candidates",
+        "tests/repositories/kanjiImportPipeFormat.test.ts > KanjiService.importKanji (single pipe format) > creates kanji questions and persists imported histories",
+        "tests/services/kanji/importKanjiToPdfFlow.test.ts > Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish) > imports verified kanji question and generates worksheet PDF"
+      ],
+      "summary": [
+        "\n Test Files  6 failed | 25 passed | 1 skipped (32)",
+        "      Tests  6 failed | 79 passed | 2 skipped (87)"
+      ]
+    },
+    "current": {
+      "failedCases": [
+        "tests/services/ExamCreateKanjiFallbackOpenCandidates.test.ts > createExam (KANJI) fallback open candidates > does not create questions from OPEN candidates when nextTime is in the future",
+        "tests/services/ExamCreateKanjiFiltersPrintable.test.ts > ExamsService.createExam (KANJI) > filters out non-printable candidates before selecting",
+        "tests/services/ExamCreateKanjiNoCandidates.test.ts > createExam (KANJI) with no candidates > returns an empty exam instead of throwing 400",
+        "tests/repositories/CloseCandidateMovesToHistories.test.ts > closeCandidateIfMatch > moves candidate to exam_histories and deletes from exam_candidates",
+        "tests/repositories/kanjiImportPipeFormat.test.ts > KanjiService.importKanji (single pipe format) > creates kanji questions and persists imported histories",
+        "tests/services/kanji/importKanjiToPdfFlow.test.ts > Kanji QUESTIONS import -> generate -> verify -> PDF (integration-ish) > imports verified kanji question and generates worksheet PDF"
+      ],
+      "summary": [
+        "\n Test Files  6 failed | 27 passed | 2 skipped (35)",
+        "      Tests  6 failed | 89 passed | 21 skipped (116)"
+      ]
+    },
+    "baselineKanjiLocal": {
+      "failedCases": [
+        "tests/services/kanji/kanjiServiceDynamoDbLocal.test.ts > KanjiService with DynamoDB Local > updateKanji で問題文/解答更新時に読み情報を再生成する"
+      ],
+      "summary": [
+        "\n Test Files  1 failed (1)",
+        "      Tests  1 failed | 1 passed (2)"
+      ]
+    }
+  },
+  "newFailuresInDefaultSuite": [],
+  "baselineLocalHarnessNote": "Baseline source unchanged; current local endpoint/schema test harness copied to temporary baseline for real DynamoDB Local comparison."
+}

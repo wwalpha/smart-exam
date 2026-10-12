@@ -12,6 +12,7 @@ export const get = async (examId: string): Promise<ExamTable | null> => {
     // 取得対象テーブル
     TableName: TABLE_NAME,
     // 取得対象レコードの主キー
+    ConsistentRead: true,
     Key: { examId },
   });
   // 見つからない場合は null を返す

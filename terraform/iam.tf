@@ -78,6 +78,16 @@ data "aws_iam_policy_document" "lambda" {
       "${aws_s3_bucket.files.arn}/*",
     ]
   }
+
+  statement {
+    effect  = "Allow"
+    actions = ["dynamodb:ConditionCheckItem"]
+    resources = [
+      aws_dynamodb_table.materials.arn,
+      aws_dynamodb_table.material_questions.arn,
+      aws_dynamodb_table.exam.arn,
+    ]
+  }
 }
 
 # ----------------------------------------------------------------------------------------------

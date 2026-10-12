@@ -12,6 +12,7 @@ export const get = async (questionId: string): Promise<MaterialQuestionsTable | 
     // 取得対象テーブル
     TableName: TABLE_NAME,
     // 取得対象レコードの主キー
+    ConsistentRead: true,
     Key: { questionId },
   });
   // レコードが存在しない場合は null を返す

@@ -55,7 +55,8 @@ const syncExamByDeletedTargets = async (
     await repositories.examDetails.deleteByExamId(test.examId);
     await repositories.examDetails.putMany(test.examId, nextQuestions, test.mode);
 
-    const { pdfS3Key: _pdfS3Key, ...rest } = test;
+    const rest = { ...test };
+    delete rest.pdfS3Key;
     await repositories.exams.put({
       ...rest,
       count: nextQuestions.length,

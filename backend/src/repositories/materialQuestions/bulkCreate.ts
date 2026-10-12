@@ -1,10 +1,6 @@
-import { dbHelper } from '@/lib/aws';
-import { ENV } from '@/lib/env';
-import { MaterialQuestionsTable } from '@/types/db';
-
-const TABLE_NAME = ENV.TABLE_MATERIAL_QUESTIONS;
+import type { MaterialQuestionsTable } from '@/types/db';
+import { create } from './create';
 
 export const bulkCreate = async (items: MaterialQuestionsTable[]): Promise<void> => {
-  if (items.length === 0) return;
-  await dbHelper.bulk(TABLE_NAME, items as unknown as Record<string, unknown>[]);
+  for (const item of items) await create(item);
 };

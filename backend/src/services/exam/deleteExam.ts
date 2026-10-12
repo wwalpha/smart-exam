@@ -4,6 +4,7 @@ import type { Repositories } from '@/repositories/createRepositories';
 export const createDeleteExam = async (repositories: Repositories, examId: string): Promise<boolean> => {
   const existing = await repositories.exams.get(examId);
   if (!existing) return false;
+  if (existing.mode === 'MATERIAL') await repositories.materialReviews.beginDeletion(examId);
 
   const lockedCandidates = await repositories.examCandidates.listLockedCandidatesByExamId({
     subject: existing.subject,

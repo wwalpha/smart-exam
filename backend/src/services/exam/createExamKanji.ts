@@ -94,7 +94,7 @@ export const createKanjiExam = async (deps: CreateExamDeps, req: CreateExamReque
   const createdDate = DateUtils.todayYmd();
 
   // due 候補のみを対象にして、0件ならそのまま終了する。
-  let sourceCandidates = await listDueCandidates(deps, { subject: req.subject, mode: req.mode });
+  const sourceCandidates = await listDueCandidates(deps, { subject: req.subject, mode: req.mode });
   const candidates = await buildKanjiCandidates(deps, sourceCandidates, createdDate);
 
   // dueDate -> 最終解答日 -> targetId の順で安定ソートする。

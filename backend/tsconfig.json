@@ -20,7 +20,8 @@
   },
   "include": [
     "src",
-    "tests"
+    "tests",
+    "scripts/migrate-material-review-v2.ts"
   ],
   "exclude": [
     "dist",

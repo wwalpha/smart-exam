@@ -1,6 +1,7 @@
 import { DateUtils } from '@/lib/dateUtils';
 import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
+import { requireMaterialReviewCount } from '@/lib/materialReviewPolicy';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable, ExamHistoryTable } from '@/types/db';
 
@@ -10,6 +11,22 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
 
   // 冪等性のため、完了済みは成功扱いで即 return する。
   if (test.status === 'COMPLETED') {
+    return true;
+  }
+
+  if (test.mode === 'MATERIAL') {
+    const details = await repositories.examDetails.listByExamId(examId);
+    const questions = await Promise.all(Array.from(new Set(details.map((d) => d.targetId))).map((id) => repositories.materialQuestions.get(id)));
+    for (const question of questions) if (question) requireMaterialReviewCount(question);
+    const frozen = await repositories.materialReviews.beginCompletion(examId);
+    if (frozen.status === 'COMPLETED') return true;
+    for (const targetId of new Set(details.map((d) => d.targetId))) {
+      await repositories.materialReviews.processQuestion(frozen, targetId);
+    }
+    for (const materialId of new Set(questions.filter((q) => q !== null).map((q) => q.materialId))) {
+      await repositories.examCandidates.syncMaterialOpenCandidateCount(materialId);
+    }
+    await repositories.materialReviews.finishCompletion(examId);
     return true;
   }
 

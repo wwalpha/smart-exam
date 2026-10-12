@@ -11,6 +11,8 @@
 - `yarn workspace smart-exam-backend test`
 - `yarn workspace smart-exam-backend test:integration` (Docker が必要 / DynamoDB Local を起動して `src/services` の統合テストも実行)
 - `yarn workspace smart-exam-backend typecheck`
+- `yarn workspace smart-exam-backend migrate:material-review-v2 --dry-run --report /tmp/material-review-v2.json`
+  - [MATERIAL復習5回ルール・移行と復旧手順](../docs/material-review-v2.md) を参照。
 
 ## ローカル起動（開発）
 

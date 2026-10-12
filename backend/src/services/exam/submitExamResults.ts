@@ -14,6 +14,10 @@ export const createSubmitExamResults = async (
   // 採点日が省略された場合は当日を採用する。
   const dateYmd = req.date ? DateUtils.toYmd(req.date) : DateUtils.todayYmd();
   const nextResults = req.results.map((r) => ({ id: r.id, isCorrect: r.isCorrect }));
+  if (test.mode === 'MATERIAL') {
+    await repositories.materialReviews.submitResults(examId, nextResults, dateYmd);
+    return true;
+  }
   await repositories.exams.put({
     ...test,
     submittedDate: dateYmd,

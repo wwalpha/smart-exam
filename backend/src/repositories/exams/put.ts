@@ -13,5 +13,8 @@ export const put = async (item: ExamTable): Promise<void> => {
     TableName: TABLE_NAME,
     // 保存する試験レコード本体
     Item: item,
+    ...(item.mode === 'MATERIAL' ? {
+      ConditionExpression: 'attribute_not_exists(completionStarted) AND attribute_not_exists(gradingToken) AND attribute_not_exists(deleting)',
+    } : {}),
   });
 };

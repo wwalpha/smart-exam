@@ -32,6 +32,7 @@ export const bulkUpdateChoices = async (items: BulkChoiceItem[]): Promise<void> 
           Update: {
             TableName: TABLE_NAME,
             Key: { questionId: item.questionId },
+            ConditionExpression: 'attribute_exists(questionId)',
             UpdateExpression: shouldUpdateCorrectAnswer
               ? 'SET #choice = :choice, #correctAnswer = :correctAnswer'
               : 'SET #choice = :choice',

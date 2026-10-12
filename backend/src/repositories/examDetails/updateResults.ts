@@ -27,6 +27,14 @@ export const updateResults = async (
     };
   });
 
-  await dbHelper.bulk(TABLE_NAME, nextRows as unknown as Record<string, unknown>[]);
+  for (const row of nextRows) {
+    if (typeof row.isCorrect !== 'boolean') continue;
+    await dbHelper.update({
+      TableName: TABLE_NAME, Key: { examId, seq: row.seq },
+      UpdateExpression: 'SET isCorrect = :correct',
+      ConditionExpression: 'attribute_exists(targetId) AND attribute_not_exists(reviewProcessed)',
+      ExpressionAttributeValues: { ':correct': row.isCorrect },
+    });
+  }
   return nextRows;
 };

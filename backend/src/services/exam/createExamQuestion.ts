@@ -3,6 +3,7 @@ import type { CreateExamRequest, Exam, SubjectId } from '@smart-exam/api-types';
 import { ApiError } from '@/lib/apiError';
 import { DateUtils } from '@/lib/dateUtils';
 import { createUuid } from '@/lib/uuid';
+import { requireMaterialReviewCount } from '@/lib/materialReviewPolicy';
 import type { ExamCandidateTable, ExamTable } from '@/types/db';
 
 import type { CandidateListParams, CreateExamDeps, ExamCandidate } from './createExam.types';
@@ -117,6 +118,12 @@ export const createQuestionExam = async (deps: CreateExamDeps, req: CreateExamRe
 
   // due 候補のみを対象にして、0件ならそのまま終了する。
   let sourceCandidates = await listDueCandidates(deps, { subject: req.subject, mode: req.mode });
+  const eligibleCandidates: ExamCandidateTable[] = [];
+  for (const candidate of sourceCandidates) {
+    const question = await deps.repositories.materialQuestions.get(candidate.questionId);
+    if (question && requireMaterialReviewCount(question) < 5) eligibleCandidates.push(candidate);
+  }
+  sourceCandidates = eligibleCandidates;
   let candidates = buildQuestionCandidates(sourceCandidates, createdDate);
   candidates = filterCandidatesByMaterialIds(candidates, materialOrderMap);
 

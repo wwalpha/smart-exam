@@ -1,3 +1,4 @@
+import type { ExamTable } from '@/types/db';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { Repositories } from '@/repositories/createRepositories';
@@ -66,7 +67,7 @@ describe('KanjiService.deleteKanji', () => {
 
     // only t1 is affected
     expect(examsPut).toHaveBeenCalledTimes(1);
-    const putArg = examsPut.mock.calls[0]?.[0] as any;
+    const putArg = examsPut.mock.calls[0]?.[0] as ExamTable;
 
     expect(putArg.examId).toBe('e1');
     expect(putArg.mode).toBe('KANJI');

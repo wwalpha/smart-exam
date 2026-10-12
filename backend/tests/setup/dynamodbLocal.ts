@@ -4,7 +4,7 @@ import { GenericContainer, type StartedTestContainer } from 'testcontainers';
 
 type DynamoLocal = {
   endpoint: string;
-  container: StartedTestContainer;
+  container: StartedTestContainer | null;
   client: DynamoDBClient;
   docClient: DynamoDBDocumentClient;
 };
@@ -14,8 +14,8 @@ let cached: Promise<DynamoLocal> | null = null;
 const ensureEnvForLocal = (endpoint: string) => {
   process.env.AWS_ENDPOINT_URL = endpoint;
   process.env.AWS_DEFAULT_REGION = process.env.AWS_DEFAULT_REGION || 'ap-northeast-1';
-  process.env.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || 'test';
-  process.env.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || 'test';
+  process.env.AWS_ACCESS_KEY_ID = 'test';
+  process.env.AWS_SECRET_ACCESS_KEY = 'test';
 };
 
 const createTables = async (client: DynamoDBClient) => {
@@ -69,25 +69,41 @@ const createTables = async (client: DynamoDBClient) => {
       BillingMode: 'PAY_PER_REQUEST',
       AttributeDefinitions: [
         { AttributeName: 'subject', AttributeType: 'S' },
+        { AttributeName: 'candidateKey', AttributeType: 'S' },
         { AttributeName: 'questionId', AttributeType: 'S' },
-        { AttributeName: 'nextTime', AttributeType: 'S' },
+        { AttributeName: 'createdAt', AttributeType: 'S' },
+        { AttributeName: 'materialId', AttributeType: 'S' },
+        { AttributeName: 'status', AttributeType: 'S' },
       ],
       KeySchema: [
         { AttributeName: 'subject', KeyType: 'HASH' },
-        { AttributeName: 'questionId', KeyType: 'RANGE' },
+        { AttributeName: 'candidateKey', KeyType: 'RANGE' },
       ],
       GlobalSecondaryIndexes: [
-        {
-          IndexName: 'gsi_subject_next_time',
-          KeySchema: [
-            { AttributeName: 'subject', KeyType: 'HASH' },
-            { AttributeName: 'nextTime', KeyType: 'RANGE' },
-          ],
-          Projection: { ProjectionType: 'ALL' },
-        },
+        { IndexName: 'gsi_subject_next_time', KeySchema: [{ AttributeName: 'subject', KeyType: 'HASH' }, { AttributeName: 'candidateKey', KeyType: 'RANGE' }], Projection: { ProjectionType: 'ALL' } },
+        { IndexName: 'gsi_question_id_created_at', KeySchema: [{ AttributeName: 'questionId', KeyType: 'HASH' }, { AttributeName: 'createdAt', KeyType: 'RANGE' }], Projection: { ProjectionType: 'ALL' } },
+        { IndexName: 'gsi_material_id_status', KeySchema: [{ AttributeName: 'materialId', KeyType: 'HASH' }, { AttributeName: 'status', KeyType: 'RANGE' }], Projection: { ProjectionType: 'KEYS_ONLY' } },
       ],
     }),
   );
+
+  await create(new CreateTableCommand({
+    TableName: 'exams', BillingMode: 'PAY_PER_REQUEST',
+    AttributeDefinitions: [{ AttributeName: 'examId', AttributeType: 'S' }],
+    KeySchema: [{ AttributeName: 'examId', KeyType: 'HASH' }],
+  }));
+  await create(new CreateTableCommand({
+    TableName: 'exam_details', BillingMode: 'PAY_PER_REQUEST',
+    AttributeDefinitions: [{ AttributeName: 'examId', AttributeType: 'S' }, { AttributeName: 'seq', AttributeType: 'N' }, { AttributeName: 'targetId', AttributeType: 'S' }],
+    KeySchema: [{ AttributeName: 'examId', KeyType: 'HASH' }, { AttributeName: 'seq', KeyType: 'RANGE' }],
+    GlobalSecondaryIndexes: [{ IndexName: 'gsi_target_id_exam_id', KeySchema: [{ AttributeName: 'targetId', KeyType: 'HASH' }, { AttributeName: 'examId', KeyType: 'RANGE' }], Projection: { ProjectionType: 'ALL' } }],
+  }));
+  await create(new CreateTableCommand({
+    TableName: 'exam_histories', BillingMode: 'PAY_PER_REQUEST',
+    AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, { AttributeName: 'questionId', AttributeType: 'S' }, { AttributeName: 'closedAt', AttributeType: 'S' }],
+    KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+    GlobalSecondaryIndexes: [{ IndexName: 'gsi_question_id_closed_at', KeySchema: [{ AttributeName: 'questionId', KeyType: 'HASH' }, { AttributeName: 'closedAt', KeyType: 'RANGE' }], Projection: { ProjectionType: 'ALL' } }],
+  }));
 
   await create(
     new CreateTableCommand({
@@ -142,9 +158,10 @@ const createTables = async (client: DynamoDBClient) => {
 export const getDynamoDbLocal = async (): Promise<DynamoLocal> => {
   if (!cached) {
     cached = (async () => {
-      const container = await new GenericContainer('amazon/dynamodb-local').withExposedPorts(8000).start();
-
-      const endpoint = `http://${container.getHost()}:${container.getMappedPort(8000)}`;
+      const external = process.env.DDB_LOCAL_ENDPOINT;
+      if (external && !['localhost', '127.0.0.1', '[::1]'].includes(new URL(external).hostname)) throw new Error('DDB_LOCAL_ENDPOINT must be loopback');
+      const container = external ? null : await new GenericContainer('amazon/dynamodb-local').withExposedPorts(8000).start();
+      const endpoint = external ?? `http://${container!.getHost()}:${container!.getMappedPort(8000)}`;
       ensureEnvForLocal(endpoint);
 
       const client = new DynamoDBClient({
@@ -169,6 +186,6 @@ export const getDynamoDbLocal = async (): Promise<DynamoLocal> => {
 export const stopDynamoDbLocal = async (): Promise<void> => {
   if (!cached) return;
   const local = await cached;
-  await local.container.stop();
+  await local.container?.stop();
   cached = null;
 };

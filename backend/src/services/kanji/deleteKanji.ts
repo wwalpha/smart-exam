@@ -22,7 +22,8 @@ const syncExamByDeletedTarget = async (
   await repositories.examDetails.putMany(exam.examId, nextTargetIds, exam.mode);
 
   // 不整合を避けるため既存PDFキーは引き継がず更新する
-  const { pdfS3Key: _pdfS3Key, ...rest } = exam;
+  const rest = { ...exam };
+  delete rest.pdfS3Key;
   await repositories.exams.put({
     ...rest,
     count: nextTargetIds.length,

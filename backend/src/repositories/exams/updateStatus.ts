@@ -16,9 +16,10 @@ export const updateStatus = async (examId: string, status: ExamTable['status']):
     // status 属性を新しい値へ更新する
     UpdateExpression: 'SET #status = :status',
     // 更新式で使う属性名のプレースホルダ
-    ExpressionAttributeNames: { '#status': 'status' },
+    ConditionExpression: '#mode <> :material OR (attribute_not_exists(completionStarted) AND attribute_not_exists(gradingToken) AND attribute_not_exists(deleting) AND #status = :progress AND :status = :progress)',
+    ExpressionAttributeNames: { '#status': 'status', '#mode': 'mode' },
     // 更新式で使う属性値のプレースホルダ
-    ExpressionAttributeValues: { ':status': status },
+    ExpressionAttributeValues: { ':status': status, ':material': 'MATERIAL', ':progress': 'IN_PROGRESS' },
     // 更新後のレコードを返却させる
     ReturnValues: 'ALL_NEW',
   });

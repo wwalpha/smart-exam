@@ -7,6 +7,7 @@ const TABLE_NAME = ENV.TABLE_MATERIALS;
 export const get = async (materialId: string): Promise<MaterialTable | null> => {
   const result = await dbHelper.get<MaterialTable>({
     TableName: TABLE_NAME,
+    ConsistentRead: true,
     Key: { materialId },
   });
   return result?.Item || null;

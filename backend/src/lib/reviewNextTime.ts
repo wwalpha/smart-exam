@@ -15,7 +15,13 @@ export const ReviewNextTime = {
     currentCorrectCount: number;
   }): { nextTime: string; nextCorrectCount: number } => {
     const current = Number.isFinite(params.currentCorrectCount) ? params.currentCorrectCount : 0;
-    const maxStreak = params.mode === 'MATERIAL' ? 2 : 3;
+    if (params.mode === 'MATERIAL') {
+      return {
+        nextTime: DateUtils.addDaysYmd(params.baseDateYmd, params.isCorrect ? 90 : 30),
+        nextCorrectCount: params.isCorrect ? Math.max(0, Math.trunc(current)) + 1 : 0,
+      };
+    }
+    const maxStreak = 3;
     const currentClamped = Math.max(0, Math.min(maxStreak, Math.trunc(current)));
 
     if (params.isCorrect) {
@@ -24,22 +30,12 @@ export const ReviewNextTime = {
         return { nextTime: EXCLUDED_NEXT_TIME, nextCorrectCount };
       }
 
-      if (params.mode === 'KANJI') {
-        const addDays = nextCorrectCount === 1 ? 30 : 90;
-        return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, addDays), nextCorrectCount };
-      }
-
-      // MATERIAL
-      return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 90), nextCorrectCount };
+      const addDays = nextCorrectCount === 1 ? 30 : 90;
+      return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, addDays), nextCorrectCount };
     }
 
     // incorrect
     const nextCorrectCount = 0;
-    if (params.mode === 'KANJI') {
-      return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 7), nextCorrectCount };
-    }
-
-    // MATERIAL
-    return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 30), nextCorrectCount };
+    return { nextTime: DateUtils.addDaysYmd(params.baseDateYmd, 7), nextCorrectCount };
   },
 };
