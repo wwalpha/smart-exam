@@ -20,7 +20,7 @@ export const ReviewNextTime = {
 
     if (params.isCorrect) {
       const nextCorrectCount = Math.min(maxStreak, currentClamped + 1);
-      if (nextCorrectCount >= maxStreak) {
+      if (params.mode === 'KANJI' && nextCorrectCount >= maxStreak) {
         return { nextTime: EXCLUDED_NEXT_TIME, nextCorrectCount };
       }
 

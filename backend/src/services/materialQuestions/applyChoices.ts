@@ -25,6 +25,12 @@ export const createApplyChoices = (repositories: Repositories): MaterialQuestion
         // 正解扱いの設問は復習候補を作らない。
         if (question.choice !== 'INCORRECT') return;
 
+        const count = await repositories.examDetails.countCompletedMaterialReviews({
+          questionId: question.questionId,
+          threshold: 5,
+        });
+        if (count >= 5) return;
+
         // 不正解として次回出題日時を計算する。
         const computed = ReviewNextTime.compute({
           mode: 'MATERIAL',

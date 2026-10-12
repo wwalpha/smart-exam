@@ -3,8 +3,9 @@ import { listExamIdsByTargetId } from './listExamIdsByTargetId';
 import { listByExamId } from './listByExamId';
 import { putMany } from './putMany';
 import { updateResults } from './updateResults';
+import { countCompletedMaterialReviews } from './countCompletedMaterialReviews';
 
-export { putMany, listByExamId, listExamIdsByTargetId, deleteByExamId, updateResults };
+export { putMany, listByExamId, listExamIdsByTargetId, deleteByExamId, updateResults, countCompletedMaterialReviews };
 
 export const ExamDetailsRepository = {
   putMany,
@@ -12,4 +13,5 @@ export const ExamDetailsRepository = {
   listExamIdsByTargetId,
   deleteByExamId,
   updateResults,
+  countCompletedMaterialReviews,
 };

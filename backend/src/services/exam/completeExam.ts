@@ -3,6 +3,7 @@ import { ReviewNextTime } from '@/lib/reviewNextTime';
 import { createUuid } from '@/lib/uuid';
 import type { Repositories } from '@/repositories/createRepositories';
 import type { ExamCandidateTable, ExamHistoryTable } from '@/types/db';
+import { resolveMaterialReviewResult } from '@/repositories/examDetails/countCompletedMaterialReviews';
 
 export const createCompleteExam = async (repositories: Repositories, examId: string): Promise<boolean> => {
   const test = await repositories.exams.get(examId);
@@ -25,6 +26,20 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
     subject: test.subject,
     examId,
   });
+
+  // 全対象の履歴判定を候補削除前に済ませ、照会失敗時は候補を維持する。
+  const excludedQuestionIds = new Set<string>();
+  if (test.mode === 'MATERIAL') {
+    for (const candidate of lockedCandidates) {
+      if (typeof resolveMaterialReviewResult(test, details, candidate.questionId) !== 'boolean') continue;
+      const count = await repositories.examDetails.countCompletedMaterialReviews({
+        questionId: candidate.questionId,
+        threshold: 4,
+        excludeExamId: examId,
+      });
+      if (count >= 4) excludedQuestionIds.add(candidate.questionId);
+    }
+  }
 
   const dateYmd = test.submittedDate ?? DateUtils.todayYmd();
   const closedAt = DateUtils.now();
@@ -69,8 +84,8 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
           currentCorrectCount: baseCandidate.correctCount,
         });
 
-        // 3回連続正解で EXCLUDED になる場合は候補テーブルに残さず履歴テーブルへ保存する。
-        if (computed.nextTime === ReviewNextTime.EXCLUDED_NEXT_TIME) {
+        // MATERIALは今回で累計5回、KANJIは3回連続正解で除外する。
+        if (excludedQuestionIds.has(candidate.questionId) || computed.nextTime === ReviewNextTime.EXCLUDED_NEXT_TIME) {
           const excludedId = createUuid();
           const excludedHistory: ExamHistoryTable = {
             id: excludedId,
@@ -79,7 +94,7 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
             mode: test.mode,
             status: 'EXCLUDED',
             correctCount: computed.nextCorrectCount,
-            nextTime: computed.nextTime,
+            nextTime: ReviewNextTime.EXCLUDED_NEXT_TIME,
             closedAt,
           };
           await repositories.examHistories.putHistory(excludedHistory);
