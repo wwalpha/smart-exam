@@ -39,6 +39,7 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
     material: {
       list: [],
       total: 0,
+      appliedSearch: null,
       openCandidateList: [],
       openCandidateTotal: 0,
       detail: null,
@@ -48,6 +49,12 @@ export const createMaterialSlice: StateCreator<MaterialSlice, [], [], MaterialSl
         isLoading: false,
         error: null,
       },
+    },
+
+    setMaterialListSearch: (values) => {
+      updateMaterial({
+        appliedSearch: values ? { ...values } : null,
+      });
     },
 
     fetchMaterials: async (params) => {

@@ -1,3 +1,14 @@
+import type { WordTestSubject } from '@typings/wordtest';
+
+export type MaterialListSearchValues = {
+  subject: 'ALL' | WordTestSubject;
+  status: 'ALL' | 'IN_PROGRESS' | 'COMPLETED';
+  grade: string;
+  provider: string;
+  date: string;
+  q: string;
+};
+
 export type MaterialSet = {
   id: string;
   name: string;

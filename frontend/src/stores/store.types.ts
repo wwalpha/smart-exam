@@ -31,6 +31,7 @@ import type {
   SearchExamsRequest,
   ListOpenCandidateMaterialsRequest,
 } from '@smart-exam/api-types';
+import type { MaterialListSearchValues } from '@typings/material';
 
 /**
  * API 呼び出しの状態（読込中/エラー）
@@ -70,6 +71,7 @@ export type KanjiGroupState = {
 export type MaterialState = {
   list: Material[];
   total: number;
+  appliedSearch: MaterialListSearchValues | null;
   openCandidateList: OpenCandidateMaterial[];
   openCandidateTotal: number;
   detail: Material | null;
@@ -138,6 +140,7 @@ export type ExamSlice = {
 export type MaterialSlice = {
   material: MaterialState;
   fetchMaterials: (params?: Record<string, unknown>) => Promise<void>;
+  setMaterialListSearch: (values: MaterialListSearchValues | null) => void;
   fetchOpenCandidateMaterials: (params: ListOpenCandidateMaterialsRequest) => Promise<void>;
   resetMaterialDetail: () => void;
   createMaterial: (request: CreateMaterialRequest) => Promise<CreateMaterialResponse>;
