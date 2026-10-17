@@ -168,6 +168,15 @@ export const MaterialSetCreatePage = () => {
                     />
                     <span>{SUBJECT_LABEL[SUBJECT.society]}</span>
                   </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={subjects.includes(SUBJECT.japanese)}
+                      onCheckedChange={(checked) =>
+                        toggleSubject(SUBJECT.japanese, Boolean(checked))
+                      }
+                    />
+                    <span>{SUBJECT_LABEL[SUBJECT.japanese]}</span>
+                  </label>
                 </div>
                 {errors.subject?.message ? (
                   <p className="text-sm text-destructive">{String(errors.subject.message)}</p>

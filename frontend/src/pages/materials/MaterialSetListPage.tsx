@@ -72,6 +72,9 @@ export const MaterialSetListPage = () => {
                     <SelectItem value={SUBJECT.math}>{SUBJECT_LABEL[SUBJECT.math]}</SelectItem>
                     <SelectItem value={SUBJECT.science}>{SUBJECT_LABEL[SUBJECT.science]}</SelectItem>
                     <SelectItem value={SUBJECT.society}>{SUBJECT_LABEL[SUBJECT.society]}</SelectItem>
+                    <SelectItem value={SUBJECT.japanese}>
+                      {SUBJECT_LABEL[SUBJECT.japanese]}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
