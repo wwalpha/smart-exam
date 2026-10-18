@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatYmdSlash } from '@/utils/date';
 import { useReviewQuestionGrading } from '@/hooks/review';
+import { getReviewMaterialGroupKey, compareReviewMaterialDateDesc } from '@/utils/reviewMaterialDisplay';
 
 export const ExamQuestionGradingPage = () => {
   const { review, isInitialLoading, isSaving, error, basePath, fields, watch, setValue, setAllCorrect, submit, id } =
@@ -55,7 +56,7 @@ export const ExamQuestionGradingPage = () => {
                 const provider = e.item?.provider ?? '';
                 const materialDate = e.item?.materialDate ?? '';
                 const materialName = e.item?.materialName ?? '';
-                const key = [grade, provider, materialDate, materialName].join('||');
+                const key = getReviewMaterialGroupKey(e.item);
 
                 const existing = byKey.get(key);
                 if (existing) {
@@ -74,6 +75,8 @@ export const ExamQuestionGradingPage = () => {
                 byKey.set(key, created);
                 blocks.push(created);
               }
+
+              if (review.mode === 'MATERIAL') blocks.sort(compareReviewMaterialDateDesc);
 
               return (
                 <div className="space-y-3">

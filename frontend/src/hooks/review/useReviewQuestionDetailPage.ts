@@ -4,6 +4,7 @@ import type { Material, MaterialFile, SubjectId } from '@smart-exam/api-types';
 import { getMaterialFileDownloadUrl } from '@/services/materialApi';
 import * as MATERIAL_API from '@/services/materialApi';
 import { compareQuestionNumber } from '@/utils/questionNumber';
+import { getReviewMaterialGroupKey, compareReviewMaterialDateDesc } from '@/utils/reviewMaterialDisplay';
 import { useReviewQuestionDetail } from './useReviewQuestionDetail';
 
 type PdfAvailability = {
@@ -129,12 +130,11 @@ export const useReviewQuestionDetailPage = () => {
     const byKey = new Map<string, (typeof result)[number]>();
 
     for (const item of entries) {
-      const materialId = item.materialId ?? '';
       const grade = item.grade ?? '';
       const provider = item.provider ?? '';
       const materialDate = item.materialDate ?? '';
       const materialName = item.materialName ?? '';
-      const key = [materialId, grade, provider, materialDate, materialName].join('||');
+      const key = getReviewMaterialGroupKey(item);
 
       const existing = byKey.get(key);
       if (existing) {
@@ -155,7 +155,7 @@ export const useReviewQuestionDetailPage = () => {
       result.push(created);
     }
 
-    return result;
+    return review.mode === 'MATERIAL' ? result.sort(compareReviewMaterialDateDesc) : result;
   }, [review, sortedItems]);
 
   const [pdfAvailability, setPdfAvailability] = useState<Record<string, PdfAvailability>>({});
