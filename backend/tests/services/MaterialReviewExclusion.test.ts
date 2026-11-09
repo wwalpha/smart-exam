@@ -7,6 +7,7 @@ import { createApplyChoices } from '@/services/materialQuestions/applyChoices';
 const fixture = (params: {
   pastCount?: number;
   isCorrect?: boolean;
+  pastHasAnyCorrect?: boolean;
   mode?: ExamTable['mode'];
   correctCount?: number;
   status?: ExamTable['status'];
@@ -27,7 +28,7 @@ const fixture = (params: {
     exams: { get: vi.fn().mockResolvedValue(test), put: vi.fn() },
     examDetails: {
       listByExamId: vi.fn().mockResolvedValue(details),
-      countCompletedMaterialReviews: vi.fn().mockResolvedValue(params.pastCount ?? 0),
+      countCompletedMaterialReviews: vi.fn().mockResolvedValue({ completedCountUpTo3: params.pastCount ?? 0, hasAnyCorrect: params.pastHasAnyCorrect ?? false }),
     },
     examCandidates: {
       listLockedCandidatesByExamId: vi.fn().mockResolvedValue([candidate]),
@@ -46,15 +47,17 @@ const fixture = (params: {
 
 describe('MATERIAL completeExam', () => {
   it.each([
-    [0, true, 0, '2026-04-01'],
-    [0, false, 0, '2026-01-31'],
-    [3, true, 2, '2026-04-01'],
-    [3, false, 0, '2026-01-31'],
-  ])('requeues past %s plus current %s with streak %s', async (pastCount, isCorrect, correctCount, nextTime) => {
-    const { repos, repositories, candidate } = fixture({ pastCount, isCorrect, correctCount });
+    [0, false, false, 0, '2026-01-31'],
+    [0, true, false, 0, '2026-04-01'],
+    [1, false, true, 0, '2026-01-31'],
+    [1, true, false, 0, '2026-04-01'],
+    [2, false, false, 0, '2026-01-31'],
+    [3, false, false, 0, '2026-01-31'],
+  ])('requeues past %s current %s with prior correct %s', async (pastCount, isCorrect, pastHasAnyCorrect, correctCount, nextTime) => {
+    const { repos, repositories, candidate } = fixture({ pastCount, isCorrect, pastHasAnyCorrect, correctCount });
     expect(await createCompleteExam(repositories, 'current')).toBe(true);
     expect(repos.examDetails.countCompletedMaterialReviews).toHaveBeenCalledWith({
-      questionId: 'q1', threshold: 4, excludeExamId: 'current',
+      questionId: 'q1', excludeExamId: 'current',
     });
     expect(repos.examHistories.putHistory).toHaveBeenCalledOnce();
     expect(repos.examHistories.putHistory).toHaveBeenCalledWith(expect.objectContaining({
@@ -68,9 +71,9 @@ describe('MATERIAL completeExam', () => {
     expect(repos.examCandidates.syncMaterialOpenCandidateCount).toHaveBeenCalledWith('m1');
   });
 
-  it.each([[4, true], [4, false], [5, true], [5, false]])(
-    'excludes past %s plus current %s regardless of correctness', async (pastCount, isCorrect) => {
-      const { repos, repositories, candidate } = fixture({ pastCount, isCorrect });
+  it.each([[2, true, false], [2, false, true], [2, true, true], [3, true, false], [3, false, true]])(
+    'excludes past %s plus current %s with prior correct %s', async (pastCount, isCorrect, pastHasAnyCorrect) => {
+      const { repos, repositories, candidate } = fixture({ pastCount, isCorrect, pastHasAnyCorrect });
       await createCompleteExam(repositories, 'current');
       expect(repos.examCandidates.createCandidate).not.toHaveBeenCalled();
       expect(repos.examHistories.putHistory.mock.calls.map(([history]) => history.status)).toEqual(['CLOSED', 'EXCLUDED']);
@@ -92,7 +95,7 @@ describe('MATERIAL completeExam', () => {
   );
 
   it('uses the current exam result when detail correctness is absent', async () => {
-    const { repos, repositories, test } = fixture({ pastCount: 4 });
+    const { repos, repositories, test } = fixture({ pastCount: 2, pastHasAnyCorrect: true });
     test.results = [{ id: 'q1', isCorrect: false }];
     await createCompleteExam(repositories, 'current');
     expect(repos.examDetails.countCompletedMaterialReviews).toHaveBeenCalledOnce();
@@ -115,7 +118,7 @@ describe('MATERIAL completeExam', () => {
       candidate, { ...candidate, id: 'c2', questionId: 'q2', candidateKey: '2026-01-01#c2' },
     ]);
     details.push({ examId: 'current', seq: 1, targetId: 'q2', targetType: 'MATERIAL', isCorrect: false });
-    repos.examDetails.countCompletedMaterialReviews.mockResolvedValueOnce(0).mockRejectedValueOnce(new Error('read failed'));
+    repos.examDetails.countCompletedMaterialReviews.mockResolvedValueOnce({ completedCountUpTo3: 0, hasAnyCorrect: false }).mockRejectedValueOnce(new Error('read failed'));
     await expect(createCompleteExam(repositories, 'current')).rejects.toThrow('read failed');
     expect(repos.examCandidates.deleteCandidate).not.toHaveBeenCalled();
     expect(repos.examCandidates.createCandidate).not.toHaveBeenCalled();
@@ -162,15 +165,15 @@ describe('MATERIAL applyChoices', () => {
       { questionId: 'q1', materialId: 'm1', subjectId: '1', choice: 'INCORRECT' },
       { questionId: 'q2', materialId: 'm1', subjectId: '1', choice: 'INCORRECT' },
     ]);
-    let finishHistory!: (count: number) => void;
-    repos.examDetails.countCompletedMaterialReviews.mockReturnValue(new Promise<number>((resolve) => {
+    let finishHistory!: (history: { completedCountUpTo3: number; hasAnyCorrect: boolean }) => void;
+    repos.examDetails.countCompletedMaterialReviews.mockReturnValue(new Promise<{ completedCountUpTo3: number; hasAnyCorrect: boolean }>((resolve) => {
       finishHistory = resolve;
     }));
     const applying = createApplyChoices(repositories)({ materialId: 'm1', baseDateYmd: '2026-01-01' });
     await vi.waitFor(() => expect(repos.examDetails.countCompletedMaterialReviews).toHaveBeenCalledTimes(2));
     expect(repos.examCandidates.createCandidate).not.toHaveBeenCalled();
     expect(repos.examCandidates.syncMaterialOpenCandidateCount).not.toHaveBeenCalled();
-    finishHistory(0);
+    finishHistory({ completedCountUpTo3: 0, hasAnyCorrect: false });
     await applying;
     expect(repos.examCandidates.createCandidate).toHaveBeenCalledTimes(2);
     expect(repos.examCandidates.syncMaterialOpenCandidateCount).toHaveBeenCalledOnce();
@@ -178,13 +181,13 @@ describe('MATERIAL applyChoices', () => {
       .toBeLessThan(repos.examCandidates.syncMaterialOpenCandidateCount.mock.invocationCallOrder[0]);
   });
 
-  it.each([[0, true], [4, true], [5, false], [6, false]])(
-    'past count %s permits registration %s without counting the initial grading', async (pastCount, registers) => {
-      const { repos, repositories } = fixture({ pastCount });
+  it.each([[0, false, true], [2, true, true], [3, false, true], [3, true, false]])(
+    'past count %s and prior correct %s permits registration %s', async (pastCount, pastHasAnyCorrect, registers) => {
+      const { repos, repositories } = fixture({ pastCount, pastHasAnyCorrect });
       await createApplyChoices(repositories)({ materialId: 'm1', baseDateYmd: '2026-01-01' });
       expect(repos.examDetails.countCompletedMaterialReviews).toHaveBeenCalledOnce();
       expect(repos.examDetails.countCompletedMaterialReviews).toHaveBeenCalledWith({
-        questionId: 'q1', threshold: 5,
+        questionId: 'q1',
       });
       expect(repos.examCandidates.createCandidate).toHaveBeenCalledTimes(registers ? 1 : 0);
       if (registers) expect(repos.examCandidates.createCandidate).toHaveBeenCalledWith(expect.objectContaining({
@@ -204,6 +207,20 @@ describe('MATERIAL applyChoices', () => {
     await createApplyChoices(repositories)({ materialId: 'm1', baseDateYmd: '2026-01-01' });
     expect(repos.examDetails.countCompletedMaterialReviews).not.toHaveBeenCalled();
     expect(repos.examCandidates.createCandidate).not.toHaveBeenCalled();
+  });
+
+  it('does not register any question when another history lookup fails', async () => {
+    const { repos, repositories } = fixture();
+    repos.materialQuestions.listByMaterialId.mockResolvedValue([
+      { questionId: 'q1', materialId: 'm1', subjectId: '1', choice: 'INCORRECT' },
+      { questionId: 'q2', materialId: 'm1', subjectId: '1', choice: 'INCORRECT' },
+    ]);
+    repos.examDetails.countCompletedMaterialReviews
+      .mockResolvedValueOnce({ completedCountUpTo3: 0, hasAnyCorrect: false })
+      .mockRejectedValueOnce(new Error('read failed'));
+    await expect(createApplyChoices(repositories)({ materialId: 'm1', baseDateYmd: '2026-01-01' })).rejects.toThrow('read failed');
+    expect(repos.examCandidates.createCandidate).not.toHaveBeenCalled();
+    expect(repos.examCandidates.syncMaterialOpenCandidateCount).not.toHaveBeenCalled();
   });
 
   it('does not register a candidate when history lookup fails', async () => {

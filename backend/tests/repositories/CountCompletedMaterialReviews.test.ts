@@ -15,8 +15,8 @@ const exam = (examId: string, overrides: Partial<ExamTable> = {}): ExamTable => 
 const detail = (examId: string, isCorrect?: boolean, targetId = 'q1'): ExamDetailTable => ({
   examId, seq: 0, targetType: 'MATERIAL', targetId, isCorrect,
 });
-const count = (threshold = 5, excludeExamId?: string) => countCompletedMaterialReviews({
-  questionId: 'q1', threshold, excludeExamId,
+const count = (excludeExamId?: string) => countCompletedMaterialReviews({
+  questionId: 'q1', excludeExamId,
 });
 
 describe('countCompletedMaterialReviews', () => {
@@ -33,7 +33,7 @@ describe('countCompletedMaterialReviews', () => {
     send.mockResolvedValue({ Items: [{ examId: 'e1' }, { examId: 'e2' }] });
     query.mockResolvedValueOnce({ Items: [detail('e1', true)] })
       .mockResolvedValueOnce({ Items: [detail('e2', false)] });
-    expect(await count()).toBe(2);
+    expect(await count()).toEqual({ completedCountUpTo3: 2, hasAnyCorrect: true });
     expect(get.mock.calls.every(([input]) => input.ConsistentRead === true)).toBe(true);
     expect(query.mock.calls.every(([input]) => input.ConsistentRead === true)).toBe(true);
     expect(send.mock.calls[0][0].input).toEqual(expect.objectContaining({
@@ -52,13 +52,13 @@ describe('countCompletedMaterialReviews', () => {
   ])('does not count %s', async (_name, item, details) => {
     get.mockResolvedValue({ Item: item });
     query.mockResolvedValue({ Items: details });
-    expect(await count()).toBe(0);
+    expect(await count()).toEqual({ completedCountUpTo3: 0, hasAnyCorrect: false });
   });
 
   it('falls back to exams.results when detail correctness is missing', async () => {
     get.mockResolvedValue({ Item: exam('e1', { results: [{ id: 'q1', isCorrect: false }] }) });
     query.mockResolvedValue({ Items: [detail('e1')] });
-    expect(await count()).toBe(1);
+    expect(await count()).toEqual({ completedCountUpTo3: 1, hasAnyCorrect: false });
   });
 
   it.each([
@@ -80,7 +80,7 @@ describe('countCompletedMaterialReviews', () => {
         ...detail(ExpressionAttributeValues[':examId'], true), seq: 1,
       }],
     }));
-    expect(await count(5, 'current')).toBe(2);
+    expect(await count('current')).toEqual({ completedCountUpTo3: 2, hasAnyCorrect: true });
     expect(get).toHaveBeenCalledTimes(2);
     expect(send.mock.calls[1][0].input.ExclusiveStartKey).toEqual(cursor);
   });
@@ -97,21 +97,39 @@ describe('countCompletedMaterialReviews', () => {
     get.mockImplementation(async ({ Key }) => ({
       Item: exam(Key.examId, { mode: Key.examId === 'e500' ? 'MATERIAL' : 'KANJI' }),
     }));
-    expect(await count(1)).toBe(1);
+    expect(await count()).toEqual({ completedCountUpTo3: 1, hasAnyCorrect: true });
     expect(send).toHaveBeenCalledTimes(21);
     expect(get).toHaveBeenCalledTimes(501);
     expect(query).toHaveBeenCalledTimes(1);
   });
 
-  it.each([4, 5])('stops reading when the threshold %s is reached', async (threshold) => {
+  it('stops after three completed reviews once a correct answer is found', async () => {
     send.mockResolvedValue({
       Items: Array.from({ length: 25 }, (_, i) => ({ examId: `e${i}` })),
       LastEvaluatedKey: { examId: 'next' },
     });
-    expect(await count(threshold)).toBe(threshold);
+    expect(await count()).toEqual({ completedCountUpTo3: 3, hasAnyCorrect: true });
     expect(send).toHaveBeenCalledTimes(1);
-    expect(get).toHaveBeenCalledTimes(threshold);
-    expect(query).toHaveBeenCalledTimes(threshold);
+    expect(get).toHaveBeenCalledTimes(3);
+  });
+
+  it('continues through all pages after three incorrect answers to find a later correct answer', async () => {
+    send.mockResolvedValueOnce({ Items: ['e1', 'e2', 'e3', 'e4'].map((examId) => ({ examId })), LastEvaluatedKey: { examId: 'e4' } })
+      .mockResolvedValueOnce({ Items: [{ examId: 'e5' }] });
+    query.mockImplementation(async ({ ExpressionAttributeValues }) => ({
+      Items: [detail(ExpressionAttributeValues[':examId'], ExpressionAttributeValues[':examId'] === 'e5')],
+    }));
+    expect(await count()).toEqual({ completedCountUpTo3: 3, hasAnyCorrect: true });
+    expect(get).toHaveBeenCalledTimes(5);
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it('scans all incorrect histories without imposing a limit', async () => {
+    send.mockResolvedValueOnce({ Items: ['e1', 'e2', 'e3'].map((examId) => ({ examId })), LastEvaluatedKey: { examId: 'e3' } })
+      .mockResolvedValueOnce({ Items: ['e4', 'e5', 'e6'].map((examId) => ({ examId })) });
+    query.mockImplementation(async ({ ExpressionAttributeValues }) => ({ Items: [detail(ExpressionAttributeValues[':examId'], false)] }));
+    expect(await count()).toEqual({ completedCountUpTo3: 3, hasAnyCorrect: false });
+    expect(get).toHaveBeenCalledTimes(6);
   });
 
   it.each([['index', send], ['exam', get], ['detail', query]] as const)('propagates %s read errors', async (_source, mock) => {

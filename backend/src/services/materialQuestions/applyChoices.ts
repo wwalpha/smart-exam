@@ -20,16 +20,17 @@ export const createApplyChoices = (repositories: Repositories): MaterialQuestion
     // 教材配下の設問を取得して選択結果を反映する。
     const questions = await repositories.materialQuestions.listByMaterialId(params.materialId);
 
-    await Promise.all(
-      questions.map(async (question) => {
-        // 正解扱いの設問は復習候補を作らない。
-        if (question.choice !== 'INCORRECT') return;
+    const incorrectQuestions = questions.filter((question) => question.choice === 'INCORRECT');
+    const histories = await Promise.all(
+      incorrectQuestions.map((question) => repositories.examDetails.countCompletedMaterialReviews({
+        questionId: question.questionId,
+      })),
+    );
 
-        const count = await repositories.examDetails.countCompletedMaterialReviews({
-          questionId: question.questionId,
-          threshold: 5,
-        });
-        if (count >= 5) return;
+    await Promise.all(
+      incorrectQuestions.map(async (question, index) => {
+        const { completedCountUpTo3, hasAnyCorrect } = histories[index];
+        if (completedCountUpTo3 >= 3 && hasAnyCorrect) return;
 
         // 不正解として次回出題日時を計算する。
         const computed = ReviewNextTime.compute({

@@ -31,13 +31,13 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
   const excludedQuestionIds = new Set<string>();
   if (test.mode === 'MATERIAL') {
     for (const candidate of lockedCandidates) {
-      if (typeof resolveMaterialReviewResult(test, details, candidate.questionId) !== 'boolean') continue;
-      const count = await repositories.examDetails.countCompletedMaterialReviews({
+      const isCorrect = resolveMaterialReviewResult(test, details, candidate.questionId);
+      if (typeof isCorrect !== 'boolean') continue;
+      const { completedCountUpTo3, hasAnyCorrect } = await repositories.examDetails.countCompletedMaterialReviews({
         questionId: candidate.questionId,
-        threshold: 4,
         excludeExamId: examId,
       });
-      if (count >= 4) excludedQuestionIds.add(candidate.questionId);
+      if (completedCountUpTo3 >= 2 && (hasAnyCorrect || isCorrect)) excludedQuestionIds.add(candidate.questionId);
     }
   }
 
@@ -84,7 +84,7 @@ export const createCompleteExam = async (repositories: Repositories, examId: str
           currentCorrectCount: baseCandidate.correctCount,
         });
 
-        // MATERIALは今回で累計5回、KANJIは3回連続正解で除外する。
+        // MATERIALは復習履歴、KANJIは3回連続正解で除外する。
         if (excludedQuestionIds.has(candidate.questionId) || computed.nextTime === ReviewNextTime.EXCLUDED_NEXT_TIME) {
           const excludedId = createUuid();
           const excludedHistory: ExamHistoryTable = {

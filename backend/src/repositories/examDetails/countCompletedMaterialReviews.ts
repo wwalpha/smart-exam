@@ -24,10 +24,10 @@ export const resolveMaterialReviewResult = (
 
 export const countCompletedMaterialReviews = async (params: {
   questionId: string;
-  threshold: number;
   excludeExamId?: string;
-}): Promise<number> => {
-  let count = 0;
+}): Promise<{ completedCountUpTo3: number; hasAnyCorrect: boolean }> => {
+  let completedCountUpTo3 = 0;
+  let hasAnyCorrect = false;
   for await (const examId of iterateExamIdsByTargetId(params.questionId)) {
     if (examId === params.excludeExamId) continue;
     const result = await dbHelper.get<ExamTable>({
@@ -41,9 +41,11 @@ export const countCompletedMaterialReviews = async (params: {
     // GSIの採点結果は遅延し得るため、明細本体を強整合で確認する。
     const details = await listByExamId(examId);
     if (!details.some((detail) => detail.targetId === params.questionId)) continue;
-    if (typeof resolveMaterialReviewResult(exam, details, params.questionId) !== 'boolean') continue;
-    count += 1;
-    if (count >= params.threshold) break;
+    const isCorrect = resolveMaterialReviewResult(exam, details, params.questionId);
+    if (typeof isCorrect !== 'boolean') continue;
+    completedCountUpTo3 = Math.min(3, completedCountUpTo3 + 1);
+    hasAnyCorrect ||= isCorrect;
+    if (completedCountUpTo3 >= 3 && hasAnyCorrect) break;
   }
-  return count;
+  return { completedCountUpTo3, hasAnyCorrect };
 };
