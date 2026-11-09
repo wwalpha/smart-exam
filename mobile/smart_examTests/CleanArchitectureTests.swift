@@ -504,6 +504,24 @@ final class CleanArchitectureTests: XCTestCase {
         XCTAssertNil(viewModel.state.errorMessage)
     }
 
+    func testMaterialGroupsSortNewestDateFirst() throws {
+        let data = #"""
+        [
+          {"id":"old","materialId":"old","materialDate":"2025-04-01"},
+          {"id":"missing","materialId":"missing"},
+          {"id":"new-b","materialId":"new-b","materialName":"B","materialDate":"2026-04-01"},
+          {"id":"new-a","materialId":"new-a","materialName":"A","materialDate":"2026-04-01"},
+          {"id":"blank","materialId":"blank","materialDate":" "}
+        ]
+        """#.data(using: .utf8)!
+        let items = try JSONDecoder().decode([ExamItem].self, from: data)
+
+        XCTAssertEqual(
+            ExamDetailView.materialGroups(from: items).map(\.materialId),
+            ["new-a", "new-b", "old", "blank", "missing"]
+        )
+    }
+
     func testExamMapperMapsListAndDetailDTOs() {
         let examDTO = ExamDTO(
             examId: "exam-1",

@@ -105,7 +105,7 @@ struct ExamDetailView: View {
 
     private func materialQuestionList(_ detail: ExamDetail) -> some View {
         VStack(spacing: 24) {
-            ForEach(materialGroups(from: detail.items)) { group in
+            ForEach(Self.materialGroups(from: detail.items)) { group in
                 MaterialQuestionCard(
                     group: group,
                     palette: detailPalette,
@@ -147,7 +147,7 @@ struct ExamDetailView: View {
         }
     }
 
-    private func materialGroups(from items: [ExamItem]) -> [MaterialQuestionGroup] {
+    static func materialGroups(from items: [ExamItem]) -> [MaterialQuestionGroup] {
         let groupedItems = Dictionary(grouping: items) { item in
             [
                 item.materialId,
@@ -175,7 +175,9 @@ struct ExamDetailView: View {
             )
         }
         .sorted { lhs, rhs in
-            lhs.sortTitle < rhs.sortTitle
+            let lhsDate = lhs.materialDate?.nilIfBlank ?? ""
+            let rhsDate = rhs.materialDate?.nilIfBlank ?? ""
+            return lhsDate == rhsDate ? lhs.sortTitle < rhs.sortTitle : lhsDate > rhsDate
         }
     }
 
@@ -260,7 +262,7 @@ private struct PDFButtonLabel: View {
     }
 }
 
-private struct MaterialQuestionGroup: Identifiable {
+struct MaterialQuestionGroup: Identifiable {
     let id: String
     let materialId: String?
     let grade: String?
