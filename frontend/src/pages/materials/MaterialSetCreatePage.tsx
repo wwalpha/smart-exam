@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,11 +7,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useMaterialCreate } from '@/hooks/materials';
 import { SUBJECT, SUBJECT_LABEL } from '@/lib/Consts';
-import { MATERIAL_NAME_OPTIONS_BY_PROVIDER, MATERIAL_PROVIDER_OPTIONS } from '@/lib/materialConsts';
+import {
+  MATERIAL_NAME_OPTIONS_BY_PROVIDER,
+  MATERIAL_PROVIDER,
+  MATERIAL_PROVIDER_OPTIONS,
+  OTHER_MATERIAL_NAME_OPTION,
+} from '@/lib/materialConsts';
 import type { WordTestSubject } from '@typings/wordtest';
 
 export const MaterialSetCreatePage = () => {
   const { form, submit, isSubmitting } = useMaterialCreate();
+  const [selectedNameOption, setSelectedNameOption] = useState('');
   const {
     register,
     setValue,
@@ -21,6 +28,7 @@ export const MaterialSetCreatePage = () => {
   const provider = watch('provider');
   const subjects = watch('subject') ?? [];
   const nameOptions = provider ? MATERIAL_NAME_OPTIONS_BY_PROVIDER[provider as keyof typeof MATERIAL_NAME_OPTIONS_BY_PROVIDER] : null;
+  const showManualName = provider === MATERIAL_PROVIDER.sapix && selectedNameOption === OTHER_MATERIAL_NAME_OPTION;
 
   const toggleSubject = (subject: WordTestSubject, checked: boolean) => {
     const current = watch('subject') ?? [];
@@ -61,6 +69,7 @@ export const MaterialSetCreatePage = () => {
                   onValueChange={(v) => {
                     setValue('provider', v, { shouldValidate: true });
                     // 教材種別に依存するため、教材名は選択し直させる
+                    setSelectedNameOption('');
                     setValue('name', '', { shouldValidate: true });
                   }}>
                   <SelectTrigger
@@ -83,14 +92,24 @@ export const MaterialSetCreatePage = () => {
 
               <div className="space-y-2">
                 <Label>教材名 *</Label>
-                <input type="hidden" {...register('name', { required: '必須です' })} />
+                <input
+                  type="hidden"
+                  {...register('name', {
+                    required: '必須です',
+                    validate: (value) => value !== OTHER_MATERIAL_NAME_OPTION || '「その他」以外の教材名を入力してください',
+                  })}
+                />
                 <Select
                   disabled={!provider}
-                  onValueChange={(v) => setValue('name', v, { shouldValidate: true })}
+                  value={selectedNameOption}
+                  onValueChange={(v) => {
+                    setSelectedNameOption(v);
+                    setValue('name', v === OTHER_MATERIAL_NAME_OPTION ? '' : v, { shouldValidate: true });
+                  }}
                 >
                   <SelectTrigger
-                    aria-invalid={!!errors.name}
-                    className={errors.name ? 'border-destructive focus:ring-destructive' : undefined}>
+                    aria-invalid={!showManualName && !!errors.name}
+                    className={!showManualName && errors.name ? 'border-destructive focus:ring-destructive' : undefined}>
                     <SelectValue placeholder={provider ? '選択してください' : '先に教材種別を選択してください'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -101,8 +120,21 @@ export const MaterialSetCreatePage = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {showManualName && (
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-material-name">教材名（手動入力）*</Label>
+                    <Input
+                      id="manual-material-name"
+                      placeholder="教材名を入力してください"
+                      onChange={(event) => setValue('name', event.target.value.trim(), { shouldValidate: true })}
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? 'material-name-error' : undefined}
+                      className={errors.name ? 'border-destructive focus-visible:ring-destructive' : undefined}
+                    />
+                  </div>
+                )}
                 {errors.name?.message ? (
-                  <p className="text-sm text-destructive">{String(errors.name.message)}</p>
+                  <p id="material-name-error" className="text-sm text-destructive">{String(errors.name.message)}</p>
                 ) : null}
               </div>
 

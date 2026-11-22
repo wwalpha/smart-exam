@@ -7,8 +7,17 @@ export const MATERIAL_PROVIDER_OPTIONS = [MATERIAL_PROVIDER.sapix, MATERIAL_PROV
 
 export type MaterialProvider = (typeof MATERIAL_PROVIDER_OPTIONS)[number];
 
+export const OTHER_MATERIAL_NAME_OPTION = 'その他';
+
 export const MATERIAL_NAME_OPTIONS_BY_PROVIDER: Record<MaterialProvider, readonly string[]> = {
-  [MATERIAL_PROVIDER.sapix]: ['マンスリーテスト', '組分テスト', '復習テスト', '実力診断テスト', 'デイリーサポート'] as const,
+  [MATERIAL_PROVIDER.sapix]: [
+    'マンスリーテスト',
+    '組分テスト',
+    '復習テスト',
+    '実力診断テスト',
+    'デイリーサポート',
+    OTHER_MATERIAL_NAME_OPTION,
+  ] as const,
   [MATERIAL_PROVIDER.yotsuyaOtsuka]: ['組分テスト', '週テスト'] as const,
 };
 
